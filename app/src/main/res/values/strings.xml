@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">UnderLX</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="update_topology_progress">Updating network map %d%%</string>
+    <string name="update_topology_cancel_action">Cancel</string>
+    <string name="update_topology_success">Network map updated</string>
+    <string name="update_topology_failure">Error updating network map</string>
+</resources>

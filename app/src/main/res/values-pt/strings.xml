@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UnderLX</string>
+    <string name="action_settings">Definições</string>
+    <string name="navigation_drawer_close"></string>
+    <string name="update_topology_cancel_action">Cancelar</string>
+    <string name="update_topology_failure">Erro ao actualizar mapa de rede</string>
+    <string name="update_topology_progress">A actualizar mapa de rede %d%%</string>
+    <string name="update_topology_success">Mapa de rede actualizado</string>
+</resources>
