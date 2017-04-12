@@ -1,5 +1,7 @@
 package im.tny.segvault.disturbances;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,8 +23,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Collection;
+
+import im.tny.segvault.subway.Network;
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        AboutFragment.OnFragmentInteractionListener {
 
     LocationService locService;
     boolean locBound = false;
@@ -45,6 +52,7 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -125,19 +133,21 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
+        switch (id) {
+            case R.id.nav_about:
+                // Create new fragment and transaction
+                Fragment newFragment = new AboutFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack
+                transaction.replace(R.id.main_fragment_container, newFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                break;
+            default:
+                Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -205,4 +215,14 @@ public class MainActivity extends AppCompatActivity
             }
         }
     };
+
+    @Override
+    public void setActionBarTitle(String title) {
+        setTitle(title);
+    }
+
+    @Override
+    public Collection<Network> getNetworks() {
+        return locService.getNetworks();
+    }
 }

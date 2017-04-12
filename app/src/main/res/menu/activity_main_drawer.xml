@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single"
+        android:id="@+id/main_group">
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
@@ -15,9 +16,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Slideshow" />
         <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="@string/nav_settings" />
     </group>
 
     <item android:title="Communicate">
@@ -32,5 +33,15 @@
                 android:title="Send" />
         </menu>
     </item>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/meta_group">
+        <item
+            android:id="@+id/nav_help"
+            android:title="@string/nav_help_feedback" />
+        <item
+            android:id="@+id/nav_about"
+            android:title="@string/nav_about" />
+    </group>
 
 </menu>

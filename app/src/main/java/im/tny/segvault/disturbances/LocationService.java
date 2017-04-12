@@ -14,6 +14,7 @@ import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -151,6 +152,12 @@ public class LocationService extends Service {
     public void checkForTopologyUpdates() {
         currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
         currentCheckTopologyUpdatesTask.execute(true);
+    }
+
+    public Collection<Network> getNetworks() {
+        synchronized (lock) {
+            return networks.values();
+        }
     }
 
     @Override
