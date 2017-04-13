@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -62,6 +63,15 @@ public class AboutFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
+        ImageView segvaultLogo = (ImageView)view.findViewById(R.id.segvault_logo_view);
+        segvaultLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.developer_website)));
+                startActivity(browserIntent);
+            }
+        });
+
         networksLayout = (LinearLayout) view.findViewById(R.id.about_networks);
         if (mListener != null) {
             for (Network n : mListener.getNetworks()) {
@@ -72,7 +82,6 @@ public class AboutFragment extends Fragment {
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.hide();
-
 
         TextView versionView = (TextView) view.findViewById(R.id.about_version);
         versionView.setText(String.format(getResources().getString(R.string.frag_about_version), BuildConfig.VERSION_NAME));
@@ -154,6 +163,10 @@ public class AboutFragment extends Fragment {
         void setActionBarTitle(String title);
 
         Collection<Network> getNetworks();
+    }
+
+    private void segvaultLogoClick() {
+
     }
 
     /**** Method for Setting the Height of the ListView dynamically.
