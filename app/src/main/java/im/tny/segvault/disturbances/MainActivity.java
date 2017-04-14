@@ -54,6 +54,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getLastNonConfigurationInstance() != null) {
+            // have the service connection survive through activity configuration changes
+            // (e.g. screen orientation changes)
+            mConnection = (LocServiceConnection) getLastCustomNonConfigurationInstance();
+            locService = mConnection.getBinder().getService();
+            locBound = true;
+        } else if (!locBound) {
+            startService(new Intent(this, LocationService.class));
+            getApplicationContext().bindService(new Intent(getApplicationContext(), LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
+        }
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,6 +100,7 @@ public class MainActivity extends AppCompatActivity
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(LocationService.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -98,9 +110,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        startService(new Intent(this, LocationService.class));
-        // Bind to LocalService
-        bindService(new Intent(this, LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
@@ -110,16 +119,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        // Unbind from the service
-        if (locBound) {
-            unbindService(mConnection);
-            locBound = false;
-        }
     }
 
     @Override
     protected void onDestroy() {
         bm.unregisterReceiver(mBroadcastReceiver);
+
+        // Unbind from the service
+        if (locBound && isFinishing()) {
+            getApplicationContext().unbindService(mConnection);
+            locBound = false;
+        }
         super.onDestroy();
     }
 
@@ -147,8 +157,15 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_start_scanning) {
+            if (locBound) {
+                locService.startScanning();
+            }
+            return true;
+        } else if (id == R.id.action_stop_scanning) {
+            if (locBound) {
+                locService.stopScanning();
+            }
             return true;
         }
 
@@ -198,13 +215,16 @@ public class MainActivity extends AppCompatActivity
     /**
      * Defines callbacks for service binding, passed to bindService()
      */
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private LocServiceConnection mConnection = new LocServiceConnection();
+
+    class LocServiceConnection implements ServiceConnection {
+        LocationService.LocalBinder binder;
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+            binder = (LocationService.LocalBinder) service;
             locService = binder.getService();
             locBound = true;
             Intent intent = new Intent(ACTION_LOCATION_SERVICE_BOUND);
@@ -215,45 +235,70 @@ public class MainActivity extends AppCompatActivity
         public void onServiceDisconnected(ComponentName arg0) {
             locBound = false;
         }
-    };
+
+        public LocationService.LocalBinder getBinder() {
+            return binder;
+        }
+    }
+
+    ;
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        // have the service connection survive through activity configuration changes
+        // (e.g. screen orientation changes)
+        return mConnection;
+    }
 
     private Snackbar topologyUpdateSnackbar = null;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS)) {
-                final int progress = intent.getIntExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
-                final String msg = String.format(getString(R.string.update_topology_progress), progress);
-                if (topologyUpdateSnackbar == null) {
-                    topologyUpdateSnackbar = Snackbar.make(findViewById(R.id.fab), msg, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.update_topology_cancel_action, new View.OnClickListener() {
+            switch (intent.getAction()) {
+                case LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
+                    final int progress = intent.getIntExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
+                    final String msg = String.format(getString(R.string.update_topology_progress), progress);
+                    if (topologyUpdateSnackbar == null) {
+                        topologyUpdateSnackbar = Snackbar.make(findViewById(R.id.fab), msg, Snackbar.LENGTH_INDEFINITE)
+                                .setAction(R.string.update_topology_cancel_action, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if (locBound) {
+                                            locService.cancelTopologyUpdate();
+                                        }
+                                    }
+                                });
+                    } else {
+                        topologyUpdateSnackbar.setText(msg);
+                        topologyUpdateSnackbar.show();
+                    }
+                    break;
+                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    final boolean success = intent.getBooleanExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_FINISHED, false);
+                    if (topologyUpdateSnackbar != null) {
+                        topologyUpdateSnackbar.setAction("", null);
+                        topologyUpdateSnackbar.setDuration(Snackbar.LENGTH_LONG);
+                        if (success) {
+                            topologyUpdateSnackbar.setText(R.string.update_topology_success);
+                        } else {
+                            topologyUpdateSnackbar.setText(R.string.update_topology_failure);
+                        }
+                        topologyUpdateSnackbar.show();
+                        topologyUpdateSnackbar = null;
+                    }
+                    break;
+                case LocationService.ACTION_TOPOLOGY_UPDATE_AVAILABLE:
+                    Snackbar.make(findViewById(R.id.fab), R.string.update_topology_available, 10000)
+                            .setAction(R.string.update_topology_update_action, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     if (locBound) {
-                                        locService.cancelTopologyUpdate();
+                                        locService.updateTopology();
                                     }
                                 }
-                            });
-                    topologyUpdateSnackbar.show();
-                } else {
-                    topologyUpdateSnackbar.setText(msg);
-                    topologyUpdateSnackbar.show();
-                }
-            } else if (intent.getAction().equals(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED)) {
-                final boolean success = intent.getBooleanExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_FINISHED, false);
-                if (topologyUpdateSnackbar != null) {
-                    if (success) {
-                        topologyUpdateSnackbar.setAction("", null);
-                        topologyUpdateSnackbar.setText(R.string.update_topology_success);
-                        topologyUpdateSnackbar.show();
-                    } else {
-                        topologyUpdateSnackbar.setAction("", null);
-                        topologyUpdateSnackbar.setText(R.string.update_topology_failure);
-                        topologyUpdateSnackbar.show();
-                    }
-                    topologyUpdateSnackbar = null;
-                }
+                            }).show();
+                    break;
             }
         }
     };

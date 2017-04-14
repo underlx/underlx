@@ -5,7 +5,7 @@
 <resources>
     <string name="app_name">&appname;</string>
     <string name="action_settings">Definições</string>
-    <string name="navigation_drawer_close"></string>
+    <string name="navigation_drawer_close">Fechar painel de navegação</string>
     <string name="update_topology_cancel_action">Cancelar</string>
     <string name="update_topology_failure">Erro ao actualizar mapa de rede</string>
     <string name="update_topology_progress">A actualizar mapa de rede %d%%</string>
@@ -35,4 +35,9 @@
     <string name="frag_about_aosp_legal">Este software contém código derivado de código desenvolvido pelo The Android Open Source Project</string>
     <string name="frag_lines_updated">Actualizado %s</string>
     <string name="frag_lines_duration">desde há %d min</string>
+    <string name="update_topology_available">Actualização do mapa de rede disponível</string>
+    <string name="update_topology_update_action">Actualizar</string>
+    <string name="navigation_drawer_open">Abrir painel de navegação</string>
+    <string name="hello_blank_fragment">Olá fragmento vazio</string>
+    <string name="frag_lines_error_updating">Erro ao actualizar estado das linhas</string>
 </resources>

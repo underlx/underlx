@@ -1,5 +1,8 @@
 package im.tny.segvault.disturbances;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,17 +38,32 @@ public class MyLineRecyclerViewAdapter extends RecyclerView.Adapter<MyLineRecycl
         return new ViewHolder(view);
     }
 
+    private int darkerColor(int color) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] *= 0.6f; // value component
+        return Color.HSVToColor(hsv);
+    }
+
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mView.setBackgroundColor(holder.mItem.color);
         holder.mNameView.setText(holder.mItem.name);
         if(holder.mItem.down) {
+            GradientDrawable gd = new GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    new int[] {holder.mItem.color, darkerColor(holder.mItem.color)});
+            if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                holder.mView.setBackgroundDrawable(gd);
+            } else {
+                holder.mView.setBackground(gd);
+            }
             long downMinutes = (((new Date()).getTime()/60000) - (holder.mItem.downSince.getTime()/60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
             holder.mStatusView.setImageResource(R.drawable.ic_warning_white);
         } else {
+            holder.mView.setBackgroundColor(holder.mItem.color);
             holder.mStatusDescView.setVisibility(View.GONE);
             holder.mStatusView.setImageResource(R.drawable.ic_done_white);
         }

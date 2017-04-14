@@ -106,6 +106,12 @@ public class AboutFragment extends Fragment {
         mpack.put("url", "https://github.com/msgpack/msgpack-java/");
         data.add(mpack);
 
+        Map<String, String> ajob = new HashMap<>(3);
+        ajob.put("name", "Android-Job");
+        ajob.put("license", "© Evernote Corporation - Apache License 2.0");
+        ajob.put("url", "https://evernote.github.io/android-job/");
+        data.add(ajob);
+
         Map<String, String> aosp = new HashMap<>(2);
         aosp.put("name", "AOSP");
         aosp.put("license", getString(R.string.frag_about_aosp_legal));

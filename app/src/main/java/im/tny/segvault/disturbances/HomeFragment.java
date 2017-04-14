@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
@@ -74,6 +75,9 @@ public class HomeFragment extends Fragment {
             mListener.setActionBarTitle(getString(R.string.app_name));
             mListener.checkNavigationDrawerItem(R.id.nav_home);
         }
+
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        fab.show();
 
         Fragment newFragment = LineFragment.newInstance(1);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
