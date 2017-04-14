@@ -1,5 +1,9 @@
 package im.tny.segvault.disturbances;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
@@ -22,17 +26,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Station;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        AboutFragment.OnFragmentInteractionListener {
+        HomeFragment.OnFragmentInteractionListener,
+        AboutFragment.OnFragmentInteractionListener,
+        LineFragment.OnListFragmentInteractionListener {
 
     LocationService locService;
     boolean locBound = false;
+
+    NavigationView navigationView;
+
+    LocalBroadcastManager bm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +62,12 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                //        .setAction("Action", null).show();
                 if (locBound) {
-                    locService.updateTopology();
+                    TextView t = (TextView) findViewById(R.id.debug_info);
+                    t.setText(locService.dumpDebugInfo());
                 }
             }
         });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -60,15 +75,25 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // show home fragment
+        if (savedInstanceState == null) {
+            Fragment newFragment = HomeFragment.newInstance();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.main_fragment_container, newFragment);
+            transaction.commit();
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
+
+    public static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 10001;
 
     @Override
     protected void onStart() {
@@ -76,6 +101,10 @@ public class MainActivity extends AppCompatActivity
         startService(new Intent(this, LocationService.class));
         // Bind to LocalService
         bindService(new Intent(this, LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
+        }
     }
 
     @Override
@@ -90,7 +119,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
         bm.unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
@@ -127,27 +155,39 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        Class fragmentClass = null;
         switch (id) {
+            case R.id.nav_home:
+                fragmentClass = HomeFragment.class;
+                break;
             case R.id.nav_about:
-                // Create new fragment and transaction
-                Fragment newFragment = new AboutFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack
-                transaction.replace(R.id.main_fragment_container, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                fragmentClass = AboutFragment.class;
                 break;
             default:
                 Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
                 break;
+        }
+
+        if (fragmentClass != null) {
+            // Create new fragment and transaction
+            Fragment newFragment = null;
+            try {
+                newFragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack
+            transaction.replace(R.id.main_fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -167,6 +207,8 @@ public class MainActivity extends AppCompatActivity
             LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
             locService = binder.getService();
             locBound = true;
+            Intent intent = new Intent(ACTION_LOCATION_SERVICE_BOUND);
+            bm.sendBroadcast(intent);
         }
 
         @Override
@@ -222,7 +264,39 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void checkNavigationDrawerItem(int id) {
+        MenuItem item = navigationView.getMenu().findItem(id);
+        if (item != null) {
+            item.setChecked(true);
+        }
+    }
+
+    @Override
     public Collection<Network> getNetworks() {
         return locService.getNetworks();
     }
+
+    @Override
+    public void updateNetworks(String... network_ids) {
+        if (locBound) {
+            locService.updateTopology(network_ids);
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(MyLineRecyclerViewAdapter.LineItem item) {
+
+    }
+
+    @Override
+    public LocationService getLocationService() {
+        return locService;
+    }
+
+    public static final String ACTION_LOCATION_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.locservicebound";
 }

@@ -26,4 +26,9 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:layout_marginLeft="16dp"
         android:text="@string/dataset_info_authors" />
+    <Button
+        android:id="@+id/dataset_update_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dataset_info_update"/>
 </merge>

@@ -1,12 +1,15 @@
 package im.tny.segvault.disturbances;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -59,11 +62,12 @@ public class AboutFragment extends Fragment {
                              Bundle savedInstanceState) {
         if (mListener != null) {
             mListener.setActionBarTitle(getString(R.string.frag_about_title));
+            mListener.checkNavigationDrawerItem(R.id.nav_about);
         }
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
-        ImageView segvaultLogo = (ImageView)view.findViewById(R.id.segvault_logo_view);
+        ImageView segvaultLogo = (ImageView) view.findViewById(R.id.segvault_logo_view);
         segvaultLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,12 +77,7 @@ public class AboutFragment extends Fragment {
         });
 
         networksLayout = (LinearLayout) view.findViewById(R.id.about_networks);
-        if (mListener != null) {
-            for (Network n : mListener.getNetworks()) {
-                DatasetInfoView d = new DatasetInfoView(getContext(), n);
-                networksLayout.addView(d);
-            }
-        }
+        refreshDatasetInfo();
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.hide();
@@ -109,7 +108,7 @@ public class AboutFragment extends Fragment {
 
         Map<String, String> aosp = new HashMap<>(2);
         aosp.put("name", "AOSP");
-        aosp.put("license", "This software contains code derived from code developed by The Android Open Source Project");
+        aosp.put("license", getString(R.string.frag_about_aosp_legal));
         data.add(aosp);
 
         SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
@@ -122,7 +121,7 @@ public class AboutFragment extends Fragment {
         thirdPartyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                String url = ((Map<String, String>)parent.getItemAtPosition(position)).get("url");
+                String url = ((Map<String, String>) parent.getItemAtPosition(position)).get("url");
                 if (url != null) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(browserIntent);
@@ -139,6 +138,11 @@ public class AboutFragment extends Fragment {
             }
         });
         setListViewHeightBasedOnChildren(thirdPartyList);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
+        bm.registerReceiver(mBroadcastReceiver, filter);
         return view;
     }
 
@@ -159,14 +163,26 @@ public class AboutFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
-        void setActionBarTitle(String title);
-
+    public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
         Collection<Network> getNetworks();
+
+        void updateNetworks(String... network_ids);
     }
 
-    private void segvaultLogoClick() {
+    public void updateNetworks(String... network_ids) {
+        if (mListener != null) {
+            mListener.updateNetworks(network_ids);
+        }
+    }
 
+    private void refreshDatasetInfo() {
+        if (mListener != null) {
+            networksLayout.removeAllViews();
+            for (Network n : mListener.getNetworks()) {
+                DatasetInfoView d = new DatasetInfoView(getContext(), n, this);
+                networksLayout.addView(d);
+            }
+        }
     }
 
     /**** Method for Setting the Height of the ListView dynamically.
@@ -193,4 +209,15 @@ public class AboutFragment extends Fragment {
         listView.setLayoutParams(params);
         listView.requestLayout();
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    refreshDatasetInfo();
+                    break;
+            }
+        }
+    };
 }

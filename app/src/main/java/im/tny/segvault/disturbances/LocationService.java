@@ -1,8 +1,10 @@
 package im.tny.segvault.disturbances;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
@@ -34,7 +36,7 @@ import im.tny.segvault.subway.Zone;
 
 public class LocationService extends Service {
     private API api;
-    private WiFiChecker wfc = new WiFiChecker();
+    private WiFiChecker wfc;
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
@@ -72,7 +74,9 @@ public class LocationService extends Service {
 
     @Override
     public void onCreate() {
-        api = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+        api = API.getInstance();
+        wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
+        wfc.setScanInterval(10000);
     }
 
     @Override
@@ -80,12 +84,12 @@ public class LocationService extends Service {
         synchronized (LocationService.this.lock) {
             try {
                 Network net = TopologyCache.loadNetwork(this, "pt-ml");
-                for (Line l : net.getLines()) {
+                /*for (Line l : net.getLines()) {
                     Log.d("UpdateTopologyTask", "Line: " + l.getName());
                     for (Station s : l.vertexSet()) {
                         Log.d("UpdateTopologyTask", s.toString());
                     }
-                }
+                }*/
                 Log.d("UpdateTopologyTask", "INTERCHANGES");
                 for (Connection c : net.edgeSet()) {
                     if (c instanceof Transfer) {
@@ -98,7 +102,7 @@ public class LocationService extends Service {
                         }
                     }
                 }
-                Log.d("UpdateTopologyTask", "SHORTEST PATH");
+                /*Log.d("UpdateTopologyTask", "SHORTEST PATH");
                 AStarShortestPath as = new AStarShortestPath(net);
                 GraphPath gp = as.getShortestPath(net.getStation("pt-ml-ap").get(0), net.getStation("pt-ml-sp").get(0), new AStarAdmissibleHeuristic<Station>() {
                     @Override
@@ -117,7 +121,7 @@ public class LocationService extends Service {
                                 c.getSource().getName(), c.getSource().getLines().get(0).getName(),
                                 c.getTarget().getName(), c.getTarget().getLines().get(0).getName()));
                     }
-                }
+                }*/
 
                 putNetwork(net);
 
@@ -134,6 +138,7 @@ public class LocationService extends Service {
             }
         }
         checkForTopologyUpdates();
+        wfc.startScanning();
         return Service.START_STICKY;
     }
 
@@ -141,6 +146,12 @@ public class LocationService extends Service {
         cancelTopologyUpdate();
         currentUpdateTopologyTask = new UpdateTopologyTask();
         currentUpdateTopologyTask.execute("pt-ml");
+    }
+
+    public void updateTopology(String... network_ids) {
+        cancelTopologyUpdate();
+        currentUpdateTopologyTask = new UpdateTopologyTask();
+        currentUpdateTopologyTask.execute(network_ids);
     }
 
     public void cancelTopologyUpdate() {
@@ -158,6 +169,22 @@ public class LocationService extends Service {
         synchronized (lock) {
             return networks.values();
         }
+    }
+
+    protected String dumpDebugInfo() {
+        String s = "";
+        for(Network n : getNetworks()) {
+            S2LS loc;
+            synchronized (lock) {
+                loc = locServices.get(n.getId());
+            }
+            s += "Network " + n.getName() + "\n";
+            s += String.format("\tIn network? %b\n\tNear network? %b\n\tPossible stations:\n", loc.inNetwork(), loc.nearNetwork());
+            for(Station station : loc.getLocation().vertexSet()) {
+                s += String.format("\t%s (%s)\n", station.getName(), station.getLines().get(0).getName());
+            }
+        }
+        return s;
     }
 
     @Override
@@ -280,6 +307,15 @@ public class LocationService extends Service {
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
             bm.sendBroadcast(intent);
         }
+
+        @Override
+        protected void onCancelled() {
+            Log.d("UpdateTopologyTask", "onCancelled");
+            currentUpdateTopologyTask = null;
+            Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_CANCELLED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
+            bm.sendBroadcast(intent);
+        }
     }
 
     private CheckTopologyUpdatesTask currentCheckTopologyUpdatesTask = null;
@@ -323,4 +359,5 @@ public class LocationService extends Service {
     public static final String EXTRA_UPDATE_TOPOLOGY_PROGRESS = "im.tny.segvault.disturbances.extra.topology.update.progress";
     public static final String ACTION_UPDATE_TOPOLOGY_FINISHED = "im.tny.segvault.disturbances.action.topology.update.finished";
     public static final String EXTRA_UPDATE_TOPOLOGY_FINISHED = "im.tny.segvault.disturbances.extra.topology.update.finished";
+    public static final String ACTION_UPDATE_TOPOLOGY_CANCELLED = "im.tny.segvault.disturbances.action.topology.update.cancelled";
 }

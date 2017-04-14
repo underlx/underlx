@@ -10,9 +10,12 @@ import org.msgpack.jackson.dataformat.MessagePackFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +26,13 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://192.168.10.106:12000/v1/"), 10000);
+
+    public static API getInstance() {
+        return singleton;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Network {
         public String id;
@@ -77,10 +87,31 @@ public class API {
         public String line;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Status {
+        public String id;
+        public long[] time;
+        public boolean downtime;
+        public String status;
+        public String source;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Disturbance {
+        public String id;
+        public long[] startTime;
+        public long[] endTime;
+        public boolean ended;
+        public String description;
+        public String network;
+        public String line;
+        public List<Status> statuses;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
-    public API(URI endpoint, int timeoutMs) {
+    private API(URI endpoint, int timeoutMs) {
         this.endpoint = endpoint;
         this.timeoutMs = timeoutMs;
     }
@@ -89,9 +120,10 @@ public class API {
 
     private InputStream getRequest(URI uri) throws APIException {
         try {
-            HttpURLConnection h = (HttpURLConnection)uri.toURL().openConnection();
+            HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
 
             h.setConnectTimeout(timeoutMs);
+            h.setReadTimeout(timeoutMs);
             h.setRequestProperty("Accept", "application/msgpack");
             h.setRequestMethod("GET");
             h.setDoInput(true);
@@ -120,7 +152,8 @@ public class API {
 
     public List<Network> getNetworks() throws APIException {
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("networks")), new TypeReference<List<Network>>(){});
+            return mapper.readValue(getRequest(endpoint.resolve("networks")), new TypeReference<List<Network>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
@@ -156,7 +189,8 @@ public class API {
 
     public List<Connection> getConnections() throws APIException {
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("connections")), new TypeReference<List<Connection>>(){});
+            return mapper.readValue(getRequest(endpoint.resolve("connections")), new TypeReference<List<Connection>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
@@ -168,7 +202,8 @@ public class API {
 
     public List<Transfer> getTransfers() throws APIException {
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("transfers")), new TypeReference<List<Transfer>>(){});
+            return mapper.readValue(getRequest(endpoint.resolve("transfers")), new TypeReference<List<Transfer>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
@@ -192,7 +227,8 @@ public class API {
 
     public List<DatasetInfo> getDatasetInfos() throws APIException {
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("datasets")), new TypeReference<List<DatasetInfo>>(){});
+            return mapper.readValue(getRequest(endpoint.resolve("datasets")), new TypeReference<List<DatasetInfo>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
@@ -205,6 +241,36 @@ public class API {
     public DatasetInfo getDatasetInfo(String id) throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("datasets/" + id)), DatasetInfo.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Disturbance> getDisturbances() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("disturbances?omitduplicatestatus=true")), new TypeReference<List<Disturbance>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Disturbance> getDisturbancesSince(Date since) throws APIException {
+        try {
+            String url = String.format("disturbances?omitduplicatestatus=true&start=%s",
+                    URLEncoder.encode(
+                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(since)
+                                    .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2"), "utf-8"));
+            return mapper.readValue(getRequest(endpoint.resolve(url)), new TypeReference<List<Disturbance>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
