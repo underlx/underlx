@@ -1,5 +1,7 @@
 package im.tny.segvault.disturbances;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,12 +11,14 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobRequest;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.AStarShortestPath;
@@ -99,9 +103,9 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         loadNetworks();
-        if (intent != null && intent.hasExtra(EXTRA_LOCATION_SERVICE_START_ACTION)) {
-            switch (intent.getStringExtra(EXTRA_LOCATION_SERVICE_START_ACTION)) {
-                case EXTRA_LOCATION_SERVICE_START_ACTION_CHECK_UPDATES:
+        if (intent != null && intent.getAction() != null) {
+            switch (intent.getAction()) {
+                case ACTION_CHECK_TOPOLOGY_UPDATES:
                     Log.d("LocationService", "onStartCommand CheckUpdates");
                     if(new Date().getTime() - creationDate.getTime() < TimeUnit.SECONDS.toMillis(10)) {
                         // service started less than 10 seconds ago, no need to check again
@@ -110,8 +114,18 @@ public class LocationService extends Service {
                     checkForTopologyUpdates(true);
                     Log.d("LocationService", "onStartCommand updates checked");
                     break;
+                case ACTION_DISTURBANCE_NOTIFICATION:
+                    final String network = intent.getStringExtra(EXTRA_DISTURBANCE_NETWORK);
+                    final String line = intent.getStringExtra(EXTRA_DISTURBANCE_LINE);
+                    final String id = intent.getStringExtra(EXTRA_DISTURBANCE_ID);
+                    final String status = intent.getStringExtra(EXTRA_DISTURBANCE_STATUS);
+                    final boolean downtime = intent.getBooleanExtra(EXTRA_DISTURBANCE_DOWNTIME, false);
+                    handleDisturbanceNotification(network, line, id, status, downtime);
+                    break;
             }
         }
+
+        FirebaseMessaging.getInstance().subscribeToTopic("disturbances");
 
         UpdateTopologyJob.schedule();
         return Service.START_STICKY;
@@ -423,8 +437,7 @@ public class LocationService extends Service {
 
     public static final String ACTION_TOPOLOGY_UPDATE_AVAILABLE = "im.tny.segvault.disturbances.action.topology.update.available";
 
-    public static final String EXTRA_LOCATION_SERVICE_START_ACTION = "im.tny.segvault.disturbances.extra.locationService.startAction";
-    public static final String EXTRA_LOCATION_SERVICE_START_ACTION_CHECK_UPDATES = "checkUpdates";
+    public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
 
     public static class LocationJobCreator implements JobCreator {
 
@@ -445,8 +458,7 @@ public class LocationService extends Service {
         @Override
         @NonNull
         protected Result onRunJob(Params params) {
-            Intent intent = new Intent(getContext(), LocationService.class);
-            intent.putExtra(EXTRA_LOCATION_SERVICE_START_ACTION, EXTRA_LOCATION_SERVICE_START_ACTION_CHECK_UPDATES);
+            Intent intent = new Intent(getContext(), LocationService.class).setAction(ACTION_CHECK_TOPOLOGY_UPDATES);
             getContext().startService(intent);
             return Result.SUCCESS;
         }
@@ -465,5 +477,67 @@ public class LocationService extends Service {
                     .build()
                     .schedule();
         }
+    }
+
+    private static final String ACTION_DISTURBANCE_NOTIFICATION = "im.tny.segvault.disturbances.action.notification.disturbance";
+
+    private static final String EXTRA_DISTURBANCE_NETWORK = "im.tny.segvault.disturbances.extra.notification.disturbance.network";
+    private static final String EXTRA_DISTURBANCE_LINE = "im.tny.segvault.disturbances.extra.notification.disturbance.line";
+    private static final String EXTRA_DISTURBANCE_ID = "im.tny.segvault.disturbances.extra.notification.disturbance.id";
+    private static final String EXTRA_DISTURBANCE_STATUS = "im.tny.segvault.disturbances.extra.notification.disturbance.status";
+    private static final String EXTRA_DISTURBANCE_DOWNTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.downtime";
+
+    public static void showDisturbanceNotification(Context context, String network, String line,
+                                                   String id, String status, boolean downtime) {
+        Intent intent = new Intent(context, LocationService.class);
+        intent.setAction(ACTION_DISTURBANCE_NOTIFICATION);
+        intent.putExtra(EXTRA_DISTURBANCE_NETWORK, network);
+        intent.putExtra(EXTRA_DISTURBANCE_LINE, line);
+        intent.putExtra(EXTRA_DISTURBANCE_ID, id);
+        intent.putExtra(EXTRA_DISTURBANCE_STATUS, status);
+        intent.putExtra(EXTRA_DISTURBANCE_DOWNTIME, downtime);
+        context.startService(intent);
+    }
+
+    private void handleDisturbanceNotification(String network, String line,
+                                               String id, String status, boolean downtime) {
+        Network snetwork;
+        synchronized (lock) {
+            if(!networks.containsKey(network)) {
+                return;
+            }
+            snetwork = networks.get(network);
+        }
+        Line sline = snetwork.getLine(line);
+        if(sline == null) {
+            return;
+        }
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(title);
+        bigTextStyle.bigText(status);
+
+        //Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setStyle(bigTextStyle)
+                .setSmallIcon(R.drawable.ic_disturbance_notif)
+                .setColor(sline.getColor())
+                .setContentTitle(title)
+                .setContentText(status)
+                .setAutoCancel(true)
+                //.setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(id.hashCode(), notificationBuilder.build());
     }
 }

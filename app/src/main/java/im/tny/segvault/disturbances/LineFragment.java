@@ -193,7 +193,7 @@ public class LineFragment extends Fragment {
                 lines.addAll(n.getLines());
             }
             try {
-                List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000));
+                List<API.Disturbance> disturbances = API.getInstance().getOngoingDisturbances();
                 for (Line l : lines) {
                     boolean foundDisturbance = false;
                     for (API.Disturbance d : disturbances) {

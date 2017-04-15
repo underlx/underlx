@@ -84,9 +84,18 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // show home fragment
         if (savedInstanceState == null) {
-            Fragment newFragment = HomeFragment.newInstance();
+            // show initial fragment
+            Class fragmentClass = HomeFragment.class;
+            if(getIntent() != null) {
+                fragmentClass = getFragmentClass(getIntent().getIntExtra(EXTRA_INITIAL_FRAGMENT, R.id.nav_home));
+            }
+            Fragment newFragment = null;
+            try {
+                newFragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.main_fragment_container, newFragment);
             transaction.commit();
@@ -167,26 +176,23 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private Class getFragmentClass(int id) {
+        switch (id) {
+            case R.id.nav_home:
+                return HomeFragment.class;
+            case R.id.nav_about:
+                return AboutFragment.class;
+            case R.id.nav_disturbances:
+                return DisturbanceFragment.class;
+            default:
+                return null;
+        }
+    }
+
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        Class fragmentClass = null;
-        switch (id) {
-            case R.id.nav_home:
-                fragmentClass = HomeFragment.class;
-                break;
-            case R.id.nav_about:
-                fragmentClass = AboutFragment.class;
-                break;
-            case R.id.nav_disturbances:
-                fragmentClass = DisturbanceFragment.class;
-                break;
-            default:
-                Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
-                break;
-        }
+        Class fragmentClass = getFragmentClass(item.getItemId());
 
         if (fragmentClass != null) {
             // Create new fragment and transaction
@@ -203,6 +209,8 @@ public class MainActivity extends AppCompatActivity
             transaction.replace(R.id.main_fragment_container, newFragment);
             transaction.addToBackStack(null);
             transaction.commit();
+        } else {
+            Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -238,8 +246,6 @@ public class MainActivity extends AppCompatActivity
             return binder;
         }
     }
-
-    ;
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
@@ -349,4 +355,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static final String ACTION_LOCATION_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.locservicebound";
+
+    public static final String EXTRA_INITIAL_FRAGMENT = "im.tny.segvault.disturbances.extra.MainActivity.initialfragment";
 }

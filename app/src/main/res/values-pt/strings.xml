@@ -43,4 +43,5 @@
     <string name="frag_disturbances_title">Perturbações</string>
     <string name="frag_disturbance_ongoing">Por resolver</string>
     <string name="frag_disturbance_line">Linha %s</string>
+    <string name="notif_disturbance_title">Linha %s</string>
 </resources>

@@ -26,8 +26,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://192.168.10.106:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://192.168.10.106:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -253,6 +253,19 @@ public class API {
     public List<Disturbance> getDisturbances() throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("disturbances?omitduplicatestatus=true")), new TypeReference<List<Disturbance>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Disturbance> getOngoingDisturbances() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("disturbances?omitduplicatestatus=true&filter=ongoing")), new TypeReference<List<Disturbance>>() {
             });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
