@@ -20,11 +20,6 @@ import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobRequest;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.AStarShortestPath;
-import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
-
-import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +40,7 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Zone;
 
-public class LocationService extends Service {
+public class MainService extends Service {
     private API api;
     private WiFiChecker wfc;
 
@@ -63,13 +58,13 @@ public class LocationService extends Service {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        LocationService getService() {
-            // Return this instance of LocationService so clients can call public methods
-            return LocationService.this;
+        MainService getService() {
+            // Return this instance of MainService so clients can call public methods
+            return MainService.this;
         }
     }
 
-    public LocationService() {
+    public MainService() {
 
     }
 
@@ -106,13 +101,13 @@ public class LocationService extends Service {
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_TOPOLOGY_UPDATES:
-                    Log.d("LocationService", "onStartCommand CheckUpdates");
+                    Log.d("MainService", "onStartCommand CheckUpdates");
                     if(new Date().getTime() - creationDate.getTime() < TimeUnit.SECONDS.toMillis(10)) {
                         // service started less than 10 seconds ago, no need to check again
                         break;
                     }
                     checkForTopologyUpdates(true);
-                    Log.d("LocationService", "onStartCommand updates checked");
+                    Log.d("MainService", "onStartCommand updates checked");
                     break;
                 case ACTION_DISTURBANCE_NOTIFICATION:
                     final String network = intent.getStringExtra(EXTRA_DISTURBANCE_NETWORK);
@@ -132,7 +127,7 @@ public class LocationService extends Service {
     }
 
     private void loadNetworks() {
-        synchronized (LocationService.this.lock) {
+        synchronized (MainService.this.lock) {
             try {
                 Network net = TopologyCache.loadNetwork(this, "pt-ml");
                 /*for (Line l : net.getLines()) {
@@ -347,7 +342,7 @@ public class LocationService extends Service {
                     net.setDatasetAuthors(info.authors);
                     net.setDatasetVersion(info.version);
                     putNetwork(net);
-                    TopologyCache.saveNetwork(LocationService.this, net);
+                    TopologyCache.saveNetwork(MainService.this, net);
                     if (isCancelled()) break;
                 }
             } catch (APIException e) {
@@ -361,7 +356,7 @@ public class LocationService extends Service {
         protected void onProgressUpdate(Integer... progress) {
             Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_PROGRESS);
             intent.putExtra(EXTRA_UPDATE_TOPOLOGY_PROGRESS, progress[0]);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }
 
@@ -370,7 +365,7 @@ public class LocationService extends Service {
             currentUpdateTopologyTask = null;
             Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_FINISHED);
             intent.putExtra(EXTRA_UPDATE_TOPOLOGY_FINISHED, result);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }
 
@@ -379,7 +374,7 @@ public class LocationService extends Service {
             Log.d("UpdateTopologyTask", "onCancelled");
             currentUpdateTopologyTask = null;
             Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_CANCELLED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }
     }
@@ -392,7 +387,7 @@ public class LocationService extends Service {
 
         protected Boolean doInBackground(Boolean... autoUpdate) {
             this.autoUpdate = autoUpdate[0];
-            Log.d("LocationService", "CheckTopologyUpdatesTask");
+            Log.d("MainService", "CheckTopologyUpdatesTask");
             try {
                 synchronized (lock) {
                     for (API.DatasetInfo di : api.getDatasetInfos()) {
@@ -421,7 +416,7 @@ public class LocationService extends Service {
                     updateTopology();
                 } else {
                     Intent intent = new Intent(ACTION_TOPOLOGY_UPDATE_AVAILABLE);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(LocationService.this);
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
                     bm.sendBroadcast(intent);
                 }
             }
@@ -458,7 +453,7 @@ public class LocationService extends Service {
         @Override
         @NonNull
         protected Result onRunJob(Params params) {
-            Intent intent = new Intent(getContext(), LocationService.class).setAction(ACTION_CHECK_TOPOLOGY_UPDATES);
+            Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_CHECK_TOPOLOGY_UPDATES);
             getContext().startService(intent);
             return Result.SUCCESS;
         }
@@ -489,7 +484,7 @@ public class LocationService extends Service {
 
     public static void showDisturbanceNotification(Context context, String network, String line,
                                                    String id, String status, boolean downtime) {
-        Intent intent = new Intent(context, LocationService.class);
+        Intent intent = new Intent(context, MainService.class);
         intent.setAction(ACTION_DISTURBANCE_NOTIFICATION);
         intent.putExtra(EXTRA_DISTURBANCE_NETWORK, network);
         intent.putExtra(EXTRA_DISTURBANCE_LINE, line);

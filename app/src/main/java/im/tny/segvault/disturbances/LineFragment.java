@@ -94,7 +94,7 @@ public class LineFragment extends Fragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
         if (mListener != null && mListener.getLocationService() != null) {
@@ -259,7 +259,7 @@ public class LineFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item);
 
-        LocationService getLocationService();
+        MainService getLocationService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -267,7 +267,7 @@ public class LineFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
-                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     new UpdateDataTask().execute(context);
                     break;
             }

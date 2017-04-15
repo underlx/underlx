@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity
         LineFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener {
 
-    LocationService locService;
+    MainService locService;
     boolean locBound = false;
 
     NavigationView navigationView;
@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity
             locService = mConnection.getBinder().getService();
             locBound = true;
         } else if (!locBound) {
-            startService(new Intent(this, LocationService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
+            startService(new Intent(this, MainService.class));
+            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
         }
 
         setContentView(R.layout.activity_main);
@@ -102,9 +102,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(LocationService.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -224,13 +224,13 @@ public class MainActivity extends AppCompatActivity
     private LocServiceConnection mConnection = new LocServiceConnection();
 
     class LocServiceConnection implements ServiceConnection {
-        LocationService.LocalBinder binder;
+        MainService.LocalBinder binder;
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (LocationService.LocalBinder) service;
+            binder = (MainService.LocalBinder) service;
             locService = binder.getService();
             locBound = true;
             Intent intent = new Intent(ACTION_LOCATION_SERVICE_BOUND);
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity
             locBound = false;
         }
 
-        public LocationService.LocalBinder getBinder() {
+        public MainService.LocalBinder getBinder() {
             return binder;
         }
     }
@@ -260,8 +260,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
-                    final int progress = intent.getIntExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
+                case MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
+                    final int progress = intent.getIntExtra(MainService.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
                     final String msg = String.format(getString(R.string.update_topology_progress), progress);
                     if (topologyUpdateSnackbar == null) {
                         topologyUpdateSnackbar = Snackbar.make(findViewById(R.id.fab), msg, Snackbar.LENGTH_INDEFINITE)
@@ -280,8 +280,8 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                     break;
-                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    final boolean success = intent.getBooleanExtra(LocationService.EXTRA_UPDATE_TOPOLOGY_FINISHED, false);
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    final boolean success = intent.getBooleanExtra(MainService.EXTRA_UPDATE_TOPOLOGY_FINISHED, false);
                     if (topologyUpdateSnackbar != null) {
                         topologyUpdateSnackbar.setAction("", null);
                         topologyUpdateSnackbar.setDuration(Snackbar.LENGTH_LONG);
@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity
                         topologyUpdateSnackbar = null;
                     }
                     break;
-                case LocationService.ACTION_TOPOLOGY_UPDATE_AVAILABLE:
+                case MainService.ACTION_TOPOLOGY_UPDATE_AVAILABLE:
                     Snackbar.make(findViewById(R.id.fab), R.string.update_topology_available, 10000)
                             .setAction(R.string.update_topology_update_action, new View.OnClickListener() {
                                 @Override
@@ -350,7 +350,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public LocationService getLocationService() {
+    public MainService getLocationService() {
         return locService;
     }
 

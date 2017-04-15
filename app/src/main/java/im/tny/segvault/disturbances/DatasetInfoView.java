@@ -1,18 +1,10 @@
 package im.tny.segvault.disturbances;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +12,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 
 public class DatasetInfoView extends LinearLayout {
@@ -89,9 +80,9 @@ public class DatasetInfoView extends LinearLayout {
         });
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_CANCELLED);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(containingFragment.getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -105,11 +96,11 @@ public class DatasetInfoView extends LinearLayout {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case LocationService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
+                case MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
                     updateButton.setEnabled(false);
                     break;
-                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                case LocationService.ACTION_UPDATE_TOPOLOGY_CANCELLED:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED:
                     updateButton.setEnabled(true);
                     break;
             }

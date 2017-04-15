@@ -10,6 +10,6 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        JobManager.create(this).addJobCreator(new LocationService.LocationJobCreator());
+        JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());
     }
 }

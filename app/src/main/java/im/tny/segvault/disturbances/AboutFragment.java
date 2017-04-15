@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -146,7 +145,7 @@ public class AboutFragment extends Fragment {
         setListViewHeightBasedOnChildren(thirdPartyList);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
         return view;
@@ -220,7 +219,7 @@ public class AboutFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refreshDatasetInfo();
                     break;
             }

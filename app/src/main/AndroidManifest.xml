@@ -30,7 +30,7 @@
         </activity>
 
         <service
-            android:name=".LocationService"
+            android:name=".MainService"
             android:enabled="true"
             android:exported="true" />
         <service android:name=".FCMService">

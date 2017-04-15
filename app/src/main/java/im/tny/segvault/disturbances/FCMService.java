@@ -1,11 +1,5 @@
 package im.tny.segvault.disturbances;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -32,7 +26,7 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        LocationService.showDisturbanceNotification(getApplicationContext(),
+        MainService.showDisturbanceNotification(getApplicationContext(),
                 data.get("network"), data.get("line"), data.get("disturbance"), data.get("status"),
                 data.get("downtime").equals("true"));
     }
