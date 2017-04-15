@@ -38,9 +38,12 @@
     <string name="frag_lines_line_status">Line status</string>
     <string name="frag_lines_error_updating">Failed to update line status</string>
     <string name="frag_lines_updated">Updated %s</string>
+    <string name="frag_lines_duration">for %d minutes</string>
+    <string name="frag_disturbances_title">Disturbances</string>
+    <string name="frag_disturbance_ongoing">Ongoing</string>
+    <string name="frag_disturbance_line">%s line</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="developer_website" translatable="false">http://segvault.tny.im</string>
-    <string name="frag_lines_duration">for %d minutes</string>
 </resources>

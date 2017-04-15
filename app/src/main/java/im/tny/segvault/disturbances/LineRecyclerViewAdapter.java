@@ -21,12 +21,12 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link LineItem} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class MyLineRecyclerViewAdapter extends RecyclerView.Adapter<MyLineRecyclerViewAdapter.ViewHolder> {
+public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerViewAdapter.ViewHolder> {
 
     private final List<LineItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyLineRecyclerViewAdapter(OnListFragmentInteractionListener listener, List<LineItem> values) {
+    public LineRecyclerViewAdapter(List<LineItem> values, OnListFragmentInteractionListener listener) {
         mValues = values;
         mListener = listener;
     }

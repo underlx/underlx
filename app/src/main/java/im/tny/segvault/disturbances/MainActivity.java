@@ -28,21 +28,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         HomeFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
-        LineFragment.OnListFragmentInteractionListener {
+        LineFragment.OnListFragmentInteractionListener,
+        DisturbanceFragment.OnListFragmentInteractionListener {
 
     LocationService locService;
     boolean locBound = false;
@@ -185,6 +180,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_about:
                 fragmentClass = AboutFragment.class;
                 break;
+            case R.id.nav_disturbances:
+                fragmentClass = DisturbanceFragment.class;
+                break;
             default:
                 Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
                 break;
@@ -271,7 +269,9 @@ public class MainActivity extends AppCompatActivity
                                 });
                     } else {
                         topologyUpdateSnackbar.setText(msg);
-                        topologyUpdateSnackbar.show();
+                        if (!topologyUpdateSnackbar.isShown()) {
+                            topologyUpdateSnackbar.show();
+                        }
                     }
                     break;
                 case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
@@ -334,7 +334,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(MyLineRecyclerViewAdapter.LineItem item) {
+    public void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(DisturbanceRecyclerViewAdapter.DisturbanceItem item) {
 
     }
 

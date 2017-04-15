@@ -40,4 +40,7 @@
     <string name="navigation_drawer_open">Abrir painel de navegação</string>
     <string name="hello_blank_fragment">Olá fragmento vazio</string>
     <string name="frag_lines_error_updating">Erro ao actualizar estado das linhas</string>
+    <string name="frag_disturbances_title">Perturbações</string>
+    <string name="frag_disturbance_ongoing">Por resolver</string>
+    <string name="frag_disturbance_line">Linha %s</string>
 </resources>

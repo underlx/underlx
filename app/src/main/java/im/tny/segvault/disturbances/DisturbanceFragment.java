@@ -6,30 +6,31 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.subway.Line;
@@ -41,24 +42,28 @@ import im.tny.segvault.subway.Network;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class LineFragment extends Fragment {
+public class DisturbanceFragment extends Fragment {
 
+    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
+    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
     private RecyclerView recyclerView = null;
     private ProgressBar progressBar = null;
-    private TextView updateInformationView = null;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public LineFragment() {
+    public DisturbanceFragment() {
     }
 
-    public static LineFragment newInstance(int columnCount) {
-        LineFragment fragment = new LineFragment();
+    // TODO: Customize parameter initialization
+    @SuppressWarnings("unused")
+    public static DisturbanceFragment newInstance(int columnCount) {
+        DisturbanceFragment fragment = new DisturbanceFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -77,7 +82,14 @@ public class LineFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_line_list, container, false);
+        if (mListener != null) {
+            mListener.setActionBarTitle(getString(R.string.frag_disturbances_title));
+            mListener.checkNavigationDrawerItem(R.id.nav_disturbances);
+        }
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        fab.hide();
+
+        View view = inflater.inflate(R.layout.fragment_disturbance_list, container, false);
 
         // Set the adapter
         Context context = view.getContext();
@@ -87,10 +99,10 @@ public class LineFragment extends Fragment {
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
+
         recyclerView.setVisibility(View.GONE);
         progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);
         progressBar.setVisibility(View.VISIBLE);
-        updateInformationView = (TextView) view.findViewById(R.id.update_information);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
@@ -98,7 +110,7 @@ public class LineFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
         if (mListener != null && mListener.getLocationService() != null) {
-            new UpdateDataTask().execute(context);
+            new DisturbanceFragment.UpdateDataTask().execute(context);
         }
         return view;
     }
@@ -121,57 +133,9 @@ public class LineFragment extends Fragment {
         mListener = null;
     }
 
-    private final String CACHE_FILENAME = "LineFragmentCache";
-
-    private static class CachedInfo implements Serializable {
-        public List<LineRecyclerViewAdapter.LineItem> items;
-        public Date updated;
-    }
-
-    private void cacheLineItems(Context context, CachedInfo info) {
-        try {
-            FileOutputStream fos = new FileOutputStream(new File(context.getCacheDir(), CACHE_FILENAME));
-            ObjectOutputStream os = new ObjectOutputStream(fos);
-            os.writeObject(info);
-            os.close();
-            fos.close();
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
-            e.printStackTrace();
-        }
-    }
-
-    private CachedInfo readLineItemsCache(Context context) {
-        CachedInfo info = null;
-        try {
-            FileInputStream fis = new FileInputStream(new File(context.getCacheDir(), CACHE_FILENAME));
-            ObjectInputStream is = new ObjectInputStream(fis);
-            info = (CachedInfo) is.readObject();
-            is.close();
-            fis.close();
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
-            e.printStackTrace();
-        }
-        return info;
-    }
-
-    private void showCachedItems(Context context) {
-        CachedInfo info = readLineItemsCache(context);
-        if (info != null) {
-            recyclerView.setAdapter(new LineRecyclerViewAdapter(info.items, mListener));
-            recyclerView.invalidate();
-            recyclerView.setVisibility(View.VISIBLE);
-            updateInformationView.setText(String.format(getString(R.string.frag_lines_updated),
-                    DateUtils.getRelativeTimeSpanString(context, info.updated.getTime(), true)));
-        }
-    }
-
     private class UpdateDataTask extends AsyncTask<Context, Integer, Boolean> {
         private Context context;
-        private List<LineRecyclerViewAdapter.LineItem> items = new ArrayList<>();
+        private List<DisturbanceRecyclerViewAdapter.DisturbanceItem> items = new ArrayList<>();
 
         @Override
         protected void onPreExecute() {
@@ -192,30 +156,21 @@ public class LineFragment extends Fragment {
             for (Network n : mListener.getLocationService().getNetworks()) {
                 lines.addAll(n.getLines());
             }
+            Collection<Network> networks = mListener.getLocationService().getNetworks();
             try {
-                List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000));
-                for (Line l : lines) {
-                    boolean foundDisturbance = false;
-                    for (API.Disturbance d : disturbances) {
-                        if (d.line.equals(l.getId()) && !d.ended) {
-                            foundDisturbance = true;
-                            items.add(new LineRecyclerViewAdapter.LineItem(l, new Date(d.startTime[0] * 1000)));
-                            break;
-                        }
-                    }
-                    if (!foundDisturbance) {
-                        items.add(new LineRecyclerViewAdapter.LineItem(l));
-                    }
+                List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(14)));
+                for (API.Disturbance d : disturbances) {
+                    items.add(new DisturbanceRecyclerViewAdapter.DisturbanceItem(d, networks));
                 }
             } catch (APIException e) {
                 return false;
             }
-            Collections.sort(items, new Comparator<LineRecyclerViewAdapter.LineItem>() {
+            Collections.sort(items, Collections.<DisturbanceRecyclerViewAdapter.DisturbanceItem>reverseOrder(new Comparator<DisturbanceRecyclerViewAdapter.DisturbanceItem>() {
                 @Override
-                public int compare(LineRecyclerViewAdapter.LineItem lineItem, LineRecyclerViewAdapter.LineItem t1) {
-                    return lineItem.name.compareTo(t1.name);
+                public int compare(DisturbanceRecyclerViewAdapter.DisturbanceItem disturbanceItem, DisturbanceRecyclerViewAdapter.DisturbanceItem t1) {
+                    return Long.valueOf(disturbanceItem.startTime.getTime()).compareTo(Long.valueOf(t1.startTime.getTime()));
                 }
-            });
+            }));
             return true;
         }
 
@@ -229,18 +184,11 @@ public class LineFragment extends Fragment {
                 return;
             }
             if (result && recyclerView != null && mListener != null) {
-                recyclerView.setAdapter(new LineRecyclerViewAdapter(items, mListener));
+                recyclerView.setAdapter(new DisturbanceRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
                 recyclerView.setVisibility(View.VISIBLE);
-                updateInformationView.setText(String.format(getString(R.string.frag_lines_updated),
-                        DateUtils.getRelativeTimeSpanString(this.context, (new Date()).getTime(), true)));
-                CachedInfo info = new CachedInfo();
-                info.items = items;
-                info.updated = new Date();
-                cacheLineItems(context, info);
             } else {
-                updateInformationView.setText(R.string.frag_lines_error_updating);
-                showCachedItems(context);
+                /*updateInformationView.setText(R.string.frag_lines_error_updating);*/
             }
             progressBar.setVisibility(View.GONE);
         }
@@ -256,8 +204,8 @@ public class LineFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item);
+    public interface OnListFragmentInteractionListener extends OnTopFragmentInteractionListener {
+        void onListFragmentInteraction(DisturbanceRecyclerViewAdapter.DisturbanceItem item);
 
         LocationService getLocationService();
     }
@@ -268,7 +216,7 @@ public class LineFragment extends Fragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case LocationService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    new UpdateDataTask().execute(context);
+                    new DisturbanceFragment.UpdateDataTask().execute(context);
                     break;
             }
         }
