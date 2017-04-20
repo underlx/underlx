@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,14 +34,19 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     }
 
     @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
         if (mListener != null) {
             mListener.setActionBarTitle(getString(R.string.frag_notif_title));
             mListener.checkNavigationDrawerItem(R.id.nav_notif);
         }
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.hide();
+        return view;
+    }
 
+    @Override
+    public void onCreatePreferences(Bundle bundle, String s) {
         getPreferenceManager().setDefaultPackages(new String[]{"im.tny.segvault.disturbances."});
 
         getPreferenceManager().setSharedPreferencesName("settings");
