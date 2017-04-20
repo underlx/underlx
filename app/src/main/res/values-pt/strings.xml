@@ -44,4 +44,11 @@
     <string name="frag_disturbance_ongoing">Por resolver</string>
     <string name="frag_disturbance_line">Linha %s</string>
     <string name="notif_disturbance_title">Linha %s</string>
+    <string name="frag_notif_title">Notificações</string>
+    <string name="frag_notif_summary_no_lines">Não serão mostradas notificações</string>
+    <string name="frag_notif_alert_title">Definições de alerta</string>
+    <string name="frag_notif_filter_title">Notificações a mostrar</string>
+    <string name="frag_notif_lines">Linhas</string>
+    <string name="frag_notif_ringtone">Toque de notificação</string>
+    <string name="frag_notif_vibrate">Vibrar</string>
 </resources>

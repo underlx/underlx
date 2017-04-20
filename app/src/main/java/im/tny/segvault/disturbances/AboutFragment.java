@@ -111,6 +111,12 @@ public class AboutFragment extends Fragment {
         ajob.put("url", "https://evernote.github.io/android-job/");
         data.add(ajob);
 
+        Map<String, String> mpref = new HashMap<>(3);
+        mpref.put("name", "MaterialPreference");
+        mpref.put("license", "© RikkaW - Apache License 2.0");
+        mpref.put("url", "https://github.com/RikkaW/MaterialPreference");
+        data.add(mpref);
+
         Map<String, String> aosp = new HashMap<>(2);
         aosp.put("name", "AOSP");
         aosp.put("license", getString(R.string.frag_about_aosp_legal));

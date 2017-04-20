@@ -42,9 +42,23 @@
     <string name="frag_disturbances_title">Disturbances</string>
     <string name="frag_disturbance_ongoing">Ongoing</string>
     <string name="frag_disturbance_line">%s line</string>
+    <string name="frag_notif_title">Notifications</string>
+    <string name="frag_notif_filter_title">Notifications to show</string>
+    <string name="frag_notif_lines">Lines</string>
+    <string name="frag_notif_summary_no_lines">Not showing notifications</string>
+    <string name="frag_notif_alert_title">Alert settings</string>
+    <string name="frag_notif_ringtone">Ringtone</string>
+    <string name="frag_notif_vibrate">Vibrate</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="developer_website" translatable="false">http://segvault.tny.im</string>
     <string name="notif_disturbance_title">%s line</string>
+
+    <string-array name="default_notif_lines" translatable="false">
+        <item>pt-ml-amarela</item>
+        <item>pt-ml-azul</item>
+        <item>pt-ml-verde</item>
+        <item>pt-ml-vermelha</item>
+    </string-array>
 </resources>

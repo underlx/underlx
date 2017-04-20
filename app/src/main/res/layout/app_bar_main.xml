@@ -22,12 +22,14 @@
 
     <!--- <include layout="@layout/content_main" /> -->
 
-    <FrameLayout
+    <android.support.v4.widget.NestedScrollView
         android:id="@+id/main_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="im.tny.segvault.disturbances.MainActivity"></FrameLayout>
+        tools:context="im.tny.segvault.disturbances.MainActivity"></android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

@@ -5,11 +5,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
@@ -83,6 +87,7 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         creationDate = new Date();
+        PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.settings, false);
         api = API.getInstance();
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
         wfc.setScanInterval(10000);
@@ -496,6 +501,13 @@ public class MainService extends Service {
 
     private void handleDisturbanceNotification(String network, String line,
                                                String id, String status, boolean downtime) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        Set<String> linePref = sharedPref.getStringSet("line_selection", null);
+        if(linePref != null && !linePref.contains(line)) {
+            // notifications disabled for this line
+            return;
+        }
+
         Network snetwork;
         synchronized (lock) {
             if(!networks.containsKey(network)) {
@@ -519,7 +531,6 @@ public class MainService extends Service {
         bigTextStyle.setBigContentTitle(title);
         bigTextStyle.bigText(status);
 
-        //Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
                 .setSmallIcon(R.drawable.ic_disturbance_notif)
@@ -527,8 +538,14 @@ public class MainService extends Service {
                 .setContentTitle(title)
                 .setContentText(status)
                 .setAutoCancel(true)
-                //.setSound(defaultSoundUri)
+                .setSound(Uri.parse(sharedPref.getString("pref_notifs_ringtone", "content://settings/system/notification_sound")))
                 .setContentIntent(pendingIntent);
+
+        if (sharedPref.getBoolean("pref_notifs_vibrate", false)) {
+            notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
+        } else {
+            notificationBuilder.setVibrate(new long[]{0l});
+        }
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/frag_notif_filter_title">
+        <MultiSelectListPreference
+            android:defaultValue="@array/default_notif_lines"
+            android:key="pref_notifs_lines"
+            android:title="@string/frag_notif_lines" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/frag_notif_alert_title">
+        <RingtonePreference
+            android:defaultValue="content://settings/system/notification_sound"
+            android:key="pref_notifs_ringtone"
+            android:ringtoneType="notification"
+            android:summary="%s"
+            android:title="@string/frag_notif_ringtone"
+            app:summaryNone="None">
+
+        </RingtonePreference>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_notifs_vibrate"
+            android:title="@string/frag_notif_vibrate" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -37,7 +37,8 @@ public class MainActivity extends AppCompatActivity
         HomeFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
-        DisturbanceFragment.OnListFragmentInteractionListener {
+        DisturbanceFragment.OnListFragmentInteractionListener,
+        NotifPreferenceFragment.OnFragmentInteractionListener {
 
     MainService locService;
     boolean locBound = false;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             // show initial fragment
             Class fragmentClass = HomeFragment.class;
-            if(getIntent() != null) {
+            if (getIntent() != null) {
                 fragmentClass = getFragmentClass(getIntent().getIntExtra(EXTRA_INITIAL_FRAGMENT, R.id.nav_home));
             }
             Fragment newFragment = null;
@@ -184,6 +185,8 @@ public class MainActivity extends AppCompatActivity
                 return AboutFragment.class;
             case R.id.nav_disturbances:
                 return DisturbanceFragment.class;
+            case R.id.nav_notif:
+                return NotifPreferenceFragment.class;
             default:
                 return null;
         }

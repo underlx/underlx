@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 android {
@@ -11,8 +15,8 @@ android {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 4
-        versionName '0.3'
+        versionCode 5
+        versionName '0.4'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -39,6 +43,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
     compile 'org.msgpack:jackson-dataformat-msgpack:0.8.12'
     compile 'com.evernote:android-job:1.1.9'
+    compile 'com.github.rikkaw:MaterialPreference:v1.4.4'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
