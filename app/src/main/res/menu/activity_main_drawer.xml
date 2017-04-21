@@ -13,7 +13,7 @@
     <group android:id="@+id/status_group" android:checkableBehavior="single">
         <item android:id="@+id/nav_disturbances" android:icon="@drawable/ic_menu_announcement"
             android:title="@string/nav_disturbances" />
-        <item android:id="@+id/nav_infrastructure" android:icon="@drawable/ic_menu_accessible"
+        <item android:id="@+id/nav_infrastructure" android:icon="@drawable/ic_menu_escalator"
             android:title="@string/nav_infrastructure" />
     </group>
 

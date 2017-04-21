@@ -28,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import im.tny.segvault.subway.Network;
@@ -35,6 +36,7 @@ import im.tny.segvault.subway.Network;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         HomeFragment.OnFragmentInteractionListener,
+        MapFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
@@ -181,6 +183,8 @@ public class MainActivity extends AppCompatActivity
         switch (id) {
             case R.id.nav_home:
                 return HomeFragment.class;
+            case R.id.nav_map:
+                return MapFragment.class;
             case R.id.nav_about:
                 return AboutFragment.class;
             case R.id.nav_disturbances:
@@ -327,7 +331,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public Collection<Network> getNetworks() {
-        return locService.getNetworks();
+        if (locBound) {
+            return locService.getNetworks();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     @Override

@@ -224,6 +224,12 @@ public class MainService extends Service {
         }
     }
 
+    public Network getNetwork(String id) {
+        synchronized (lock) {
+            return networks.get(id);
+        }
+    }
+
     // DEBUG:
     protected String dumpDebugInfo() {
         String s = "";

@@ -37,10 +37,7 @@ import im.tny.segvault.subway.Network;
  * interface.
  */
 public class DisturbanceFragment extends Fragment {
-
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -54,7 +51,6 @@ public class DisturbanceFragment extends Fragment {
     public DisturbanceFragment() {
     }
 
-    // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static DisturbanceFragment newInstance(int columnCount) {
         DisturbanceFragment fragment = new DisturbanceFragment();
@@ -93,6 +89,9 @@ public class DisturbanceFragment extends Fragment {
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
+
+        // fix scroll fling. less than ideal, but apparently there's still no other solution
+        recyclerView.setNestedScrollingEnabled(false);
 
         recyclerView.setVisibility(View.GONE);
         progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);

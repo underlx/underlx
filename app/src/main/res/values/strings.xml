@@ -39,13 +39,15 @@
     <string name="frag_lines_error_updating">Failed to update line status</string>
     <string name="frag_lines_updated">Updated %s</string>
     <string name="frag_lines_duration">for %d minutes</string>
+    <string name="frag_map_title">Map</string>
     <string name="frag_disturbances_title">Disturbances</string>
     <string name="frag_disturbance_ongoing">Ongoing</string>
     <string name="frag_disturbance_line">%s line</string>
     <string name="frag_notif_title">Notifications</string>
-    <string name="frag_notif_filter_title">Notifications to show</string>
+    <string name="frag_notif_filter_title">Disturbance notifications</string>
     <string name="frag_notif_lines">Lines</string>
-    <string name="frag_notif_summary_no_lines">Not showing notifications</string>
+    <string name="frag_notif_summary_lines">Showing notifications for lines: %s</string>
+    <string name="frag_notif_summary_no_lines">Disturbance notifications disabled</string>
     <string name="frag_notif_alert_title">Alert settings</string>
     <string name="frag_notif_ringtone">Ringtone</string>
     <string name="frag_notif_vibrate">Vibrate</string>

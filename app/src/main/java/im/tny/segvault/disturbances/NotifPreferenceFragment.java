@@ -1,9 +1,13 @@
 package im.tny.segvault.disturbances;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +46,12 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         }
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.hide();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(view.getContext());
+        bm.registerReceiver(mBroadcastReceiver, filter);
         return view;
     }
 
@@ -54,14 +64,20 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
 
         setPreferencesFromResource(R.xml.settings, null);
 
+        updateLinesPreference();
+    }
+
+    private void updateLinesPreference() {
+        Log.d("updateLinesPreference", "enter");
         MultiSelectListPreference linesPreference;
         linesPreference = (MultiSelectListPreference) findPreference("pref_notifs_lines");
 
         List<CharSequence> lineNames = new ArrayList<>();
         List<CharSequence> lineIDs = new ArrayList<>();
         List<Line> lines = new LinkedList<>();
-        if (mListener != null) {
-            for (Network n : mListener.getNetworks()) {
+        if (mListener != null && mListener.getLocationService() != null) {
+            for (Network n : mListener.getLocationService().getNetworks()) {
+                Log.d("updateLinesPreference", "addAll");
                 lines.addAll(n.getLines());
             }
             Collections.sort(lines, new Comparator<Line>() {
@@ -97,9 +113,9 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         Collections.sort(sortedValues);
 
         if (!values.isEmpty()) {
-            preference.setSummary(
-                    getSelectedEntries(sortedValues, preference)
-                            .toString());
+            CharSequence summary = getSelectedEntries(sortedValues, preference).toString();
+            summary = summary.subSequence(1, summary.length() - 1);
+            preference.setSummary(String.format(getString(R.string.frag_notif_summary_lines), summary));
         } else {
             preference.setSummary(getString(R.string.frag_notif_summary_no_lines));
         }
@@ -109,7 +125,9 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         List<CharSequence> labels = new ArrayList<>();
         for (String value : values) {
             int index = multilistPreference.findIndexOfValue(value);
-            labels.add(multilistPreference.getEntries()[index]);
+            if(index >= 0) {
+                labels.add(multilistPreference.getEntries()[index]);
+            }
         }
         return labels;
     }
@@ -132,6 +150,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         super.onResume();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
+        updateLinesPreference();
     }
 
     @Override
@@ -157,6 +176,18 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     }
 
     public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
-        Collection<Network> getNetworks();
+        MainService getLocationService();
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    updateLinesPreference();
+                    break;
+            }
+        }
+    };
 }
