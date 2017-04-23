@@ -20,12 +20,13 @@ import java.util.Set;
  */
 
 public class Network extends SimpleDirectedWeightedGraph<Station, Connection> implements INameable, IIDable {
-    public Network(String id, String name) {
+    public Network(String id, String name, int usualCarCount) {
         /*super(new ConnectionFactory());
         ((ConnectionFactory)this.getEdgeFactory()).setNetwork(this);*/
         super(Connection.class);
         setId(id);
         setName(name);
+        setUsualCarCount(usualCarCount);
     }
 
     private String name;
@@ -72,9 +73,14 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
         this.datasetAuthors = datasetAuthors;
     }
 
+    private int usualCarCount;
+
     public int getUsualCarCount() {
-        // TODO: do not hardcode
-        return 6;
+        return usualCarCount;
+    }
+
+    public void setUsualCarCount(int usualCarCount) {
+        this.usualCarCount = usualCarCount;
     }
 
     private Map<String, Line> lines = new HashMap<>();

@@ -264,11 +264,11 @@ public class MainService extends Service {
                     int station_count = n.stations.size();
                     int cur_station = 0;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
-                    Network net = new Network(n.id, n.name);
+                    Network net = new Network(n.id, n.name, n.typCars);
                     for (String lineid : n.lines) {
                         Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);
-                        Line line = new Line(net, new HashSet<Station>(), l.id, l.name);
+                        Line line = new Line(net, new HashSet<Station>(), l.id, l.name, l.typCars);
                         line.setColor(Color.parseColor("#" + l.color));
                         for (String sid : l.stations) {
                             Log.d("UpdateTopologyTask", "  Station: " + sid);

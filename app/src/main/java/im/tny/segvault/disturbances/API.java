@@ -37,6 +37,7 @@ public class API {
     static public class Network {
         public String id;
         public String name;
+        public int typCars;
         public List<String> lines;
         public List<String> stations;
     }
@@ -47,6 +48,7 @@ public class API {
         public String name;
         public String color;
         public String network;
+        public int typCars;
         public List<String> stations;
     }
 

@@ -8,10 +8,11 @@ import java.util.Set;
  */
 
 public class Line extends Zone implements INameable, IColorable, IIDable, Comparable<Line> {
-    public Line(Network network, Set<Station> stations, String id, String name) {
+    public Line(Network network, Set<Station> stations, String id, String name, int usualCarCount) {
         super(network, stations);
         setId(id);
         setName(name);
+        setUsualCarCount(usualCarCount);
     }
 
     private int color;
@@ -101,12 +102,14 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         }
     }
 
-    public int getCarCount() {
-        // TODO do not hardcode
-        if (getId().equals("pt-ml-verde")) {
-            return 3;
-        }
-        return 6;
+    private int usualCarCount;
+
+    public int getUsualCarCount() {
+        return usualCarCount;
+    }
+
+    public void setUsualCarCount(int usualCarCount) {
+        this.usualCarCount = usualCarCount;
     }
 
     @Override

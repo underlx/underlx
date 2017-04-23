@@ -194,7 +194,7 @@ public class RouteFragment extends Fragment {
                                                 c.getSource().getLines().get(0).getName())
                                         : "")));
 
-                if (c.getSource().getLines().get(0).getCarCount() < network.getUsualCarCount()) {
+                if (c.getSource().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
                     TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
                     carsWarningView.setVisibility(View.VISIBLE);
                 }
@@ -224,7 +224,7 @@ public class RouteFragment extends Fragment {
                                 c.getTarget().getLines().get(0).getName(),
                                 c2.getTarget().getLines().get(0).getDirectionForConnection(c2).getName())));
 
-                if (c.getTarget().getLines().get(0).getCarCount() < network.getUsualCarCount()) {
+                if (c.getTarget().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
                     TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
                     carsWarningView.setVisibility(View.VISIBLE);
                 }
@@ -240,8 +240,8 @@ public class RouteFragment extends Fragment {
                     String.format(getString(R.string.frag_route_step_already_there),
                             originPicker.getSelection().getName())));
 
-            if (originPicker.getSelection().getLines().get(0).getCarCount() < network.getUsualCarCount() ||
-                    destinationPicker.getSelection().getLines().get(0).getCarCount() < network.getUsualCarCount()) {
+            if (originPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount() ||
+                    destinationPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
                 TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
                 carsWarningView.setVisibility(View.VISIBLE);
             }
