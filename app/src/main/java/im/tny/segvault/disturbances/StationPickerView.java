@@ -153,7 +153,7 @@ public class StationPickerView extends LinearLayout {
     }
 
     private void showHideClearButton() {
-        if(textView.getEditableText().length() > 0 && textView.isFocused()) {
+        if (textView.getEditableText().length() > 0 && textView.isFocused()) {
             clearButton.setVisibility(VISIBLE);
         } else {
             clearButton.setVisibility(GONE);
@@ -205,7 +205,7 @@ public class StationPickerView extends LinearLayout {
                             .normalize(station.getName(), Normalizer.Form.NFD)
                             .replaceAll("[^\\p{ASCII}]", "").toLowerCase();
                     int indexOf = norm.indexOf(filterPattern);
-                    if(indexOf >= 0) {
+                    if (indexOf >= 0) {
                         filteredList.add(station);
                         distances.put(station, -1000.0 + indexOf);
                         continue;
@@ -233,7 +233,7 @@ public class StationPickerView extends LinearLayout {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            if(results.values != null) {
+            if (results.values != null) {
                 adapter.filteredStations = (ArrayList<Station>) results.values;
                 adapter.notifyDataSetChanged();
             }

@@ -1,10 +1,14 @@
 package im.tny.segvault.disturbances;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,55 +100,63 @@ public class RouteFragment extends Fragment {
             }
         });
 
-        if (mListener != null) {
+        originPicker = (StationPickerView) view.findViewById(R.id.origin_picker);
+        destinationPicker = (StationPickerView) view.findViewById(R.id.destination_picker);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
+        bm.registerReceiver(mBroadcastReceiver, filter);
+
+        if (mListener != null && mListener.getLocationService() != null) {
             network = mListener.getLocationService().getNetwork("pt-ml");
-            if (network == null) {
-                // TODO deal with the fact that the network map might not be loaded yet
+            // the network map might not be loaded yet
+            if (network != null) {
+                populatePickers(network);
             }
-            List<Station> stations = new ArrayList<>(network.vertexSet());
-
-            LinearLayout pickersLayout = (LinearLayout) view.findViewById(R.id.layout_pickers);
-
-            originPicker = (StationPickerView) view.findViewById(R.id.origin_picker);
-            originPicker.setStations(stations);
-            originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
-                @Override
-                public void onStationSelected(Station station) {
-                    destinationPicker.focusOnEntry();
-                    tryPlanRoute();
-                }
-            });
-            originPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
-                @Override
-                public void onSelectionLost() {
-                    hideRoute();
-                }
-            });
-
-            destinationPicker = (StationPickerView) view.findViewById(R.id.destination_picker);
-            destinationPicker.setStations(stations);
-            destinationPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
-                @Override
-                public void onStationSelected(Station station) {
-                    tryPlanRoute();
-                    destinationPicker.clearFocus();
-                    // Check if no view has focus:
-                    View view = getActivity().getCurrentFocus();
-                    if (view != null) {
-                        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    }
-                }
-            });
-            destinationPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
-                @Override
-                public void onSelectionLost() {
-                    hideRoute();
-                }
-            });
         }
-
         return view;
+    }
+
+    private void populatePickers(Network network) {
+        List<Station> stations = new ArrayList<>(network.vertexSet());
+
+        originPicker.setStations(stations);
+        originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
+            @Override
+            public void onStationSelected(Station station) {
+                destinationPicker.focusOnEntry();
+                tryPlanRoute();
+            }
+        });
+        originPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
+            @Override
+            public void onSelectionLost() {
+                hideRoute();
+            }
+        });
+
+        destinationPicker.setStations(stations);
+        destinationPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
+            @Override
+            public void onStationSelected(Station station) {
+                tryPlanRoute();
+                destinationPicker.clearFocus();
+                // Check if no view has focus:
+                View view = getActivity().getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        });
+        destinationPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
+            @Override
+            public void onSelectionLost() {
+                hideRoute();
+            }
+        });
     }
 
     private void tryPlanRoute() {
@@ -305,4 +317,22 @@ public class RouteFragment extends Fragment {
     public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
         MainService getLocationService();
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    if(mListener != null) {
+                        network = mListener.getLocationService().getNetwork("pt-ml");
+                        // the network map might not be loaded yet
+                        if (network != null) {
+                            populatePickers(network);
+                        }
+                    }
+                    break;
+            }
+        }
+    };
 }
