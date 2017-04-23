@@ -44,6 +44,7 @@ dependencies {
     compile 'org.msgpack:jackson-dataformat-msgpack:0.8.12'
     compile 'com.evernote:android-job:1.1.9'
     compile 'com.github.rikkaw:MaterialPreference:v1.4.4'
+    compile 'info.debatty:java-string-similarity:0.23'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

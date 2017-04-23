@@ -36,6 +36,7 @@ import im.tny.segvault.subway.Network;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         HomeFragment.OnFragmentInteractionListener,
+        RouteFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
@@ -183,6 +184,8 @@ public class MainActivity extends AppCompatActivity
         switch (id) {
             case R.id.nav_home:
                 return HomeFragment.class;
+            case R.id.nav_plan_route:
+                return RouteFragment.class;
             case R.id.nav_map:
                 return MapFragment.class;
             case R.id.nav_about:

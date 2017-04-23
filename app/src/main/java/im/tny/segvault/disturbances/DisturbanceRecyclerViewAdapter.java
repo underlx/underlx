@@ -1,6 +1,10 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -9,6 +13,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,9 +54,18 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mLineNameView.setText(String.format(holder.mView.getContext().getString(R.string.frag_disturbance_line), mValues.get(position).lineName));
-        holder.mLineNameView.setTextColor(mValues.get(position).lineColor);
-        holder.mDateView.setText(DateUtils.formatDateTime(holder.mView.getContext(), mValues.get(position).startTime.getTime(), DateUtils.FORMAT_SHOW_DATE));
+        holder.mLineNameView.setText(String.format(holder.mView.getContext().getString(R.string.frag_disturbance_line), holder.mItem.lineName));
+        holder.mLineNameView.setTextColor(holder.mItem.lineColor);
+        holder.mDateView.setText(DateUtils.formatDateTime(holder.mView.getContext(), holder.mItem.startTime.getTime(), DateUtils.FORMAT_SHOW_DATE));
+
+        Drawable drawable = ContextCompat.getDrawable(holder.mView.getContext(), Util.getDrawableResourceIdForLineId(holder.mItem.lineId));
+        drawable.setColorFilter(holder.mItem.lineColor, PorterDuff.Mode.SRC_ATOP);
+
+        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            holder.iconLayout.setBackgroundDrawable(drawable);
+        } else {
+            holder.iconLayout.setBackground(drawable);
+        }
 
         if(mValues.get(position).ended) {
             holder.mOngoingView.setVisibility(View.GONE);
@@ -87,6 +101,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final TextView mLineNameView;
         public final TextView mDateView;
         public final TextView mOngoingView;
+        public final FrameLayout iconLayout;
         public DisturbanceItem mItem;
 
         public ViewHolder(View view) {
@@ -96,6 +111,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             mLineNameView = (TextView) view.findViewById(R.id.line_name_view);
             mDateView = (TextView) view.findViewById(R.id.date_view);
             mOngoingView = (TextView) view.findViewById(R.id.ongoing_view);
+            iconLayout = (FrameLayout) view.findViewById(R.id.frame_icon);
         }
 
         @Override

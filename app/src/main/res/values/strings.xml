@@ -51,11 +51,22 @@
     <string name="frag_notif_alert_title">Alert settings</string>
     <string name="frag_notif_ringtone">Ringtone</string>
     <string name="frag_notif_vibrate">Vibrate</string>
+    <string name="frag_route_title">Plan route</string>
+    <string name="frag_route_origin_station">Starting station</string>
+    <string name="frag_route_destination_station">Destination station</string>
+    <string name="frag_route_instructions">Pick a starting point and a destination to see the recommended route.</string>
+    <string name="frag_route_step_enter_network"><![CDATA[From <b>%1$s</b>, catch a train in direction <font color=\'black\'><big>%2$s</big></font> %3$s]]></string>
+    <string name="frag_route_step_enter_network_line"><![CDATA[(<font color=\'#%1$06x\'>%2$s</font> line)]]></string>
+    <string name="frag_route_step_exit_network"><![CDATA[Leave the train at station <font color=\'black\'><big>%1$s</big></font>]]></string>
+    <string name="frag_route_step_change_line"><![CDATA[At station <font color=\'black\'><big>%1$s</big></font>,<br>change to the <font color=\'#%2$06x\'><big>%3$s</big></font> line<br>and catch a train in direction <font color=\'black\'><big>%4$s</big></font>]]></string>
+    <string name="frag_route_step_already_there"><![CDATA[At station <b>%1$s</b>, take a deep breath and look around.]]></string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="developer_website" translatable="false">http://segvault.tny.im</string>
     <string name="notif_disturbance_title">%s line</string>
+    <string name="frag_route_short_cars_warning">In this line, trains are shorter. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
+    <string name="frag_route_station_short_cars_warning">In this station, some lines run shorter trains. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

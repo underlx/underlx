@@ -72,6 +72,11 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
         this.datasetAuthors = datasetAuthors;
     }
 
+    public int getUsualCarCount() {
+        // TODO: do not hardcode
+        return 6;
+    }
+
     private Map<String, Line> lines = new HashMap<>();
 
     public Collection<Line> getLines() {

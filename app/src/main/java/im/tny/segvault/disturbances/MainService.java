@@ -23,6 +23,7 @@ import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobRequest;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -230,6 +231,16 @@ public class MainService extends Service {
         }
     }
 
+    public List<Station> getAllStations() {
+        List<Station> stations = new ArrayList<>();
+        synchronized (lock) {
+            for(Network n : networks.values()) {
+                stations.addAll(n.vertexSet());
+            }
+        }
+        return stations;
+    }
+
     // DEBUG:
     protected String dumpDebugInfo() {
         String s = "";
@@ -320,6 +331,11 @@ public class MainService extends Service {
                         }
                         if (from != null && to != null) {
                             Connection newConnection = net.addEdge(from, to);
+                            for(Line l : from.getLines()) {
+                                if(to.getLines().contains(l)) {
+                                    l.addEdge(from, to);
+                                }
+                            }
                             net.setEdgeWeight(newConnection, c.typS + 1); // TODO remove constant
                         }
                     }

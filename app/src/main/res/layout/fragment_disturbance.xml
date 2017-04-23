@@ -20,11 +20,24 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <FrameLayout
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="@dimen/text_margin"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/frame_icon"
+                android:layout_gravity="center_vertical">
+            </FrameLayout>
+
             <TextView
                 android:id="@+id/line_name_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/text_margin"
+                android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginTop="@dimen/text_margin"
+                android:layout_marginBottom="@dimen/text_margin"
+                android:layout_marginLeft="10dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <View

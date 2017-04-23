@@ -117,6 +117,18 @@ public class AboutFragment extends Fragment {
         mpref.put("url", "https://github.com/RikkaW/MaterialPreference");
         data.add(mpref);
 
+        Map<String, String> jss = new HashMap<>(3);
+        jss.put("name", "java-string-similarity");
+        jss.put("license", "© Thibault Debatty - MIT License");
+        jss.put("url", "https://github.com/tdebatty/java-string-similarity");
+        data.add(jss);
+
+        Map<String, String> licon = new HashMap<>(3);
+        licon.put("name", "Line icons");
+        licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
+        licon.put("url", "https://commons.wikimedia.org/wiki/File:MetroLisboa-linha-amarela.svg");
+        data.add(licon);
+
         Map<String, String> aosp = new HashMap<>(2);
         aosp.put("name", "AOSP");
         aosp.put("license", getString(R.string.frag_about_aosp_legal));
