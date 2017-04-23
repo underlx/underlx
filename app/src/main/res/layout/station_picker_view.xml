@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_station"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
 
         <im.tny.segvault.disturbances.InstantAutoComplete
             android:id="@+id/text_station"
@@ -14,7 +16,21 @@
             android:layout_height="wrap_content"
             android:hint="Destination station"
             android:inputType="text|textNoSuggestions"
-            android:maxLines="1" />
+            android:maxLines="1">
+
+        </im.tny.segvault.disturbances.InstantAutoComplete>
+
 
     </android.support.design.widget.TextInputLayout>
+
+    <ImageButton
+        android:id="@+id/button_clear"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="bottom"
+        android:src="@drawable/ic_clear_black_24dp"
+        android:visibility="gone"/>
+
 </LinearLayout>

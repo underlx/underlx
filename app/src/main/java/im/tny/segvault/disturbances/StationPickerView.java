@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,6 +42,7 @@ import info.debatty.java.stringsimilarity.experimental.Sift4;
 
 public class StationPickerView extends LinearLayout {
     private InstantAutoComplete textView;
+    private ImageButton clearButton;
     private AutoCompleteStationsAdapter adapter;
     private OnStationSelectedListener onStationSelectedListener = null;
     private OnSelectionLostListener onSelectionLostListener = null;
@@ -103,6 +105,7 @@ public class StationPickerView extends LinearLayout {
         inflater.inflate(R.layout.station_picker_view, this);
 
         textView = (InstantAutoComplete) findViewById(R.id.text_station);
+        clearButton = (ImageButton) findViewById(R.id.button_clear);
 
         textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -112,6 +115,13 @@ public class StationPickerView extends LinearLayout {
                 if (onStationSelectedListener != null) {
                     onStationSelectedListener.onStationSelected(selection);
                 }
+            }
+        });
+        clearButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                textView.setText("");
+                focusOnEntry();
             }
         });
         textView.addTextChangedListener(new TextWatcher() {
@@ -131,8 +141,23 @@ public class StationPickerView extends LinearLayout {
                 if (onSelectionLostListener != null) {
                     onSelectionLostListener.onSelectionLost();
                 }
+                showHideClearButton();
             }
         });
+        textView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                showHideClearButton();
+            }
+        });
+    }
+
+    private void showHideClearButton() {
+        if(textView.getEditableText().length() > 0 && textView.isFocused()) {
+            clearButton.setVisibility(VISIBLE);
+        } else {
+            clearButton.setVisibility(GONE);
+        }
     }
 
     @Override

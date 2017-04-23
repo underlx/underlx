@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -112,6 +113,7 @@ public class RouteFragment extends Fragment {
             originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
                 @Override
                 public void onStationSelected(Station station) {
+                    destinationPicker.focusOnEntry();
                     tryPlanRoute();
                 }
             });
@@ -128,6 +130,13 @@ public class RouteFragment extends Fragment {
                 @Override
                 public void onStationSelected(Station station) {
                     tryPlanRoute();
+                    destinationPicker.clearFocus();
+                    // Check if no view has focus:
+                    View view = getActivity().getCurrentFocus();
+                    if (view != null) {
+                        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
                 }
             });
             destinationPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
