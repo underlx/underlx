@@ -154,26 +154,6 @@ public class MainService extends Service {
                         }
                     }
                 }
-                /*Log.d("UpdateTopologyTask", "SHORTEST PATH");
-                AStarShortestPath as = new AStarShortestPath(net);
-                GraphPath gp = as.getShortestPath(net.getStation("pt-ml-ap").get(0), net.getStation("pt-ml-sp").get(0), new AStarAdmissibleHeuristic<Station>() {
-                    @Override
-                    public double getCostEstimate(Station sourceVertex, Station targetVertex) {
-                        return 0;
-                    }
-                });
-                List<Connection> el = gp.getEdgeList();
-                for(Connection c : el) {
-                    if(c instanceof Transfer) {
-                        Log.d("UpdateTopologyTask", String.format("%s: Line change %s -> %s",
-                                c.getSource().getName(), c.getSource().getLines().get(0).getName(),
-                                c.getTarget().getLines().get(0).getName()));
-                    } else {
-                        Log.d("UpdateTopologyTask", String.format("%s (%s) -> %s (%s)",
-                                c.getSource().getName(), c.getSource().getLines().get(0).getName(),
-                                c.getTarget().getName(), c.getTarget().getLines().get(0).getName()));
-                    }
-                }*/
 
                 putNetwork(net);
 
