@@ -504,7 +504,7 @@ public class MainService extends Service {
     private void handleDisturbanceNotification(String network, String line,
                                                String id, String status, boolean downtime) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        Set<String> linePref = sharedPref.getStringSet("line_selection", null);
+        Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
         if(linePref != null && !linePref.contains(line)) {
             // notifications disabled for this line
             return;
