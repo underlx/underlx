@@ -4,15 +4,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -146,7 +151,7 @@ public class RouteFragment extends Fragment {
                 // Check if no view has focus:
                 View view = getActivity().getCurrentFocus();
                 if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
             }
@@ -195,20 +200,40 @@ public class RouteFragment extends Fragment {
             if (isFirst) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_enter_network, layoutRoute, false);
 
-                TextView descriptionView = (TextView) view.findViewById(R.id.description_view);
-                descriptionView.setText(Util.fromHtml(
-                        String.format(getString(R.string.frag_route_step_enter_network),
-                                c.getSource().getName(),
-                                c.getTarget().getLines().get(0).getDirectionForConnection(c).getName(),
-                                network.outDegreeOf(c.getSource()) > 2 ?
-                                        String.format(getString(R.string.frag_route_step_enter_network_line),
-                                                c.getSource().getLines().get(0).getColor() & 0x00FFFFFF,
-                                                c.getSource().getLines().get(0).getName())
-                                        : "")));
+                int lineColor = c.getSource().getLines().get(0).getColor();
+                FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
+                lineStripeLayout.setBackgroundColor(lineColor);
+
+                TextView stationView = (TextView) view.findViewById(R.id.station_view);
+                stationView.setText(c.getSource().getName());
+
+                if (c.getSource().hasTransferEdge(network)) {
+                    Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(c.getSource().getLines().get(0).getId()));
+                    drawable.setColorFilter(lineColor, PorterDuff.Mode.SRC_ATOP);
+
+                    FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
+                    if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                        iconFrame.setBackgroundDrawable(drawable);
+                    } else {
+                        iconFrame.setBackground(drawable);
+                    }
+
+                    TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
+                    lineView.setText(String.format(getString(R.string.frag_route_line_name), c.getSource().getLines().get(0).getName()));
+                    lineView.setTextColor(lineColor);
+
+                    LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                    lineLayout.setVisibility(View.VISIBLE);
+                }
+
+                TextView directionView = (TextView) view.findViewById(R.id.direction_view);
+                directionView.setText(Util.fromHtml(
+                        String.format(getString(R.string.frag_route_direction),
+                                c.getTarget().getLines().get(0).getDirectionForConnection(c).getName())));
 
                 if (c.getSource().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
-                    TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
-                    carsWarningView.setVisibility(View.VISIBLE);
+                    LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
+                    carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
                 layoutRoute.addView(view);
@@ -218,27 +243,55 @@ public class RouteFragment extends Fragment {
             if (i == el.size() - 1) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
 
-                TextView descriptionView = (TextView) view.findViewById(R.id.description_view);
-                descriptionView.setText(Util.fromHtml(
-                        String.format(getString(R.string.frag_route_step_exit_network),
-                                c.getTarget().getName())));
+                int lineColor = c.getTarget().getLines().get(0).getColor();
+                FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
+                lineStripeLayout.setBackgroundColor(lineColor);
+
+                TextView stationView = (TextView) view.findViewById(R.id.station_view);
+                stationView.setText(c.getTarget().getName());
+
                 layoutRoute.addView(view);
             } else if (c instanceof Transfer) {
                 Connection c2 = el.get(i + 1);
 
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
-                TextView descriptionView = (TextView) view.findViewById(R.id.description_view);
-                descriptionView.setText(Util.fromHtml(
-                        String.format(getString(R.string.frag_route_step_change_line),
-                                c.getSource().getName(),
-                                c.getTarget().getLines().get(0).getColor() & 0x00FFFFFF,
-                                c.getTarget().getLines().get(0).getName(),
+                int prevLineColor = c.getSource().getLines().get(0).getColor();
+                FrameLayout prevLineStripeLayout = (FrameLayout) view.findViewById(R.id.prev_line_stripe_layout);
+                prevLineStripeLayout.setBackgroundColor(prevLineColor);
+
+                int nextLineColor = c.getTarget().getLines().get(0).getColor();
+                FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
+                nextLineStripeLayout.setBackgroundColor(nextLineColor);
+
+                TextView stationView = (TextView) view.findViewById(R.id.station_view);
+                stationView.setText(c.getSource().getName());
+
+                Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(c.getTarget().getLines().get(0).getId()));
+                drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
+
+                FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
+                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    iconFrame.setBackgroundDrawable(drawable);
+                } else {
+                    iconFrame.setBackground(drawable);
+                }
+
+                TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
+                lineView.setText(String.format(getString(R.string.frag_route_line_name), c.getTarget().getLines().get(0).getName()));
+                lineView.setTextColor(nextLineColor);
+
+                LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                lineLayout.setVisibility(View.VISIBLE);
+
+                TextView directionView = (TextView) view.findViewById(R.id.direction_view);
+                directionView.setText(Util.fromHtml(
+                        String.format(getString(R.string.frag_route_direction),
                                 c2.getTarget().getLines().get(0).getDirectionForConnection(c2).getName())));
 
                 if (c.getTarget().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
-                    TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
-                    carsWarningView.setVisibility(View.VISIBLE);
+                    LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
+                    carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
                 layoutRoute.addView(view);
@@ -247,15 +300,13 @@ public class RouteFragment extends Fragment {
         if (layoutRoute.getChildCount() == 0) {
             View view = getActivity().getLayoutInflater().inflate(R.layout.step_already_there, layoutRoute, false);
 
-            TextView descriptionView = (TextView) view.findViewById(R.id.description_view);
-            descriptionView.setText(Util.fromHtml(
-                    String.format(getString(R.string.frag_route_step_already_there),
-                            originPicker.getSelection().getName())));
+            TextView stationView = (TextView) view.findViewById(R.id.station_view);
+            stationView.setText(originPicker.getSelection().getName());
 
             if (originPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount() ||
                     destinationPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
-                TextView carsWarningView = (TextView) view.findViewById(R.id.cars_warning_view);
-                carsWarningView.setVisibility(View.VISIBLE);
+                LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
+                carsWarningLayout.setVisibility(View.VISIBLE);
             }
 
             layoutRoute.addView(view);
@@ -324,7 +375,7 @@ public class RouteFragment extends Fragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    if(mListener != null) {
+                    if (mListener != null) {
                         network = mListener.getLocationService().getNetwork("pt-ml");
                         // the network map might not be loaded yet
                         if (network != null) {

@@ -56,12 +56,9 @@
     <string name="frag_route_origin_station">Estação de origem</string>
     <string name="frag_route_instructions">Escolha um ponto de partida e um destino para ver o caminho recomendado.</string>
     <string name="frag_route_title">Planear viagem</string>
-    <string name="frag_route_step_enter_network"><![CDATA[Na estação <b>%1$s</b>, apanhe um comboio no sentido <font color=\'black\'><big>%2$s</big></font> %3$s]]></string>
-    <string name="frag_route_step_enter_network_line"><![CDATA[(linha <font color=\'#%1$06x\'>%2$s</font>)]]></string>
-    <string name="frag_route_step_exit_network"><![CDATA[Saia do comboio na estação <font color=\'black\'><big>%1$s</big></font>]]></string>
-    <string name="frag_route_step_change_line"><![CDATA[Na estação <font color=\'black\'><big>%1$s</big></font>,<br>mude para a linha <font color=\'#%2$06x\'><big>%3$s</big></font><br>e apanhe um comboio no sentido <font color=\'black\'><big>%4$s</big></font>]]></string>
-    <string name="frag_route_step_already_there"><![CDATA[Na estação <b>%1$s</b>, respire fundo e olhe em volta.]]></string>
-    <string name="frag_map_title">Mapa</string>
+    <string name="frag_route_line_name">Linha %s</string>
+    <string name="frag_route_direction"><![CDATA[Sentido <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_short_cars_warning">Nesta linha, os comboios são mais curtos. Procure os ecrãs numa das pontas da plataforma e use a metade desse lado.</string>
     <string name="frag_route_station_short_cars_warning">Nesta estação, algumas linhas têm comboios mais curtos. Procure os ecrãs numa das pontas da plataforma e use a metade desse lado.</string>
+    <string name="frag_map_title">Mapa</string>
 </resources>
