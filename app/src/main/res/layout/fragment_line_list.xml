@@ -22,19 +22,25 @@
         tools:context="im.tny.segvault.disturbances.LineFragment"
         tools:listitem="@layout/fragment_line" />
 
-    <ProgressBar
-        android:id="@+id/loading_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"></ProgressBar>
-
-    <TextView
-        android:id="@+id/update_information"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/text_margin"
         android:layout_marginRight="@dimen/text_margin"
-        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <ProgressBar
+            android:id="@+id/loading_indicator"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="5dp" />
+
+        <TextView
+            android:id="@+id/update_information"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+    </LinearLayout>
 </LinearLayout>

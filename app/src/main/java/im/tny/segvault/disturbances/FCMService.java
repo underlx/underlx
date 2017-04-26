@@ -26,9 +26,9 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        MainService.showDisturbanceNotification(getApplicationContext(),
+        MainService.startForNotification(getApplicationContext(),
                 data.get("network"), data.get("line"), data.get("disturbance"), data.get("status"),
-                data.get("downtime").equals("true"));
+                data.get("downtime").equals("true"), remoteMessage.getSentTime());
     }
 
 
