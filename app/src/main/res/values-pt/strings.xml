@@ -59,6 +59,7 @@
     <string name="frag_route_line_name">Linha %s</string>
     <string name="frag_route_direction"><![CDATA[Sentido <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_short_cars_warning">Nesta linha, os comboios são mais curtos. Procure os ecrãs numa das pontas da plataforma e use a metade desse lado.</string>
+    <string name="frag_route_disturbances_warning">Perturbações na circulação. O tempo de espera pode ser superior ao normal.</string>
     <string name="frag_route_station_short_cars_warning">Nesta estação, algumas linhas têm comboios mais curtos. Procure os ecrãs numa das pontas da plataforma e use a metade desse lado.</string>
     <string name="frag_map_title">Mapa</string>
 </resources>

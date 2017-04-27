@@ -80,6 +80,29 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <LinearLayout
+            android:id="@+id/disturbances_warning_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/ic_error_black_24dp"
+                android:tint="@color/colorError" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/frag_route_disturbances_warning"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textColor="@color/colorError" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/cars_warning_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

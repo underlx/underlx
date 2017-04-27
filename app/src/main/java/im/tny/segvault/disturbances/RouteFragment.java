@@ -28,8 +28,10 @@ import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Transfer;
@@ -200,7 +202,9 @@ public class RouteFragment extends Fragment {
             if (isFirst) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_enter_network, layoutRoute, false);
 
-                int lineColor = c.getSource().getLines().get(0).getColor();
+                Line line = c.getSource().getLines().get(0);
+
+                int lineColor = line.getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
@@ -208,7 +212,7 @@ public class RouteFragment extends Fragment {
                 stationView.setText(c.getSource().getName());
 
                 if (c.getSource().hasTransferEdge(network)) {
-                    Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(c.getSource().getLines().get(0).getId()));
+                    Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(line.getId()));
                     drawable.setColorFilter(lineColor, PorterDuff.Mode.SRC_ATOP);
 
                     FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
@@ -219,7 +223,7 @@ public class RouteFragment extends Fragment {
                     }
 
                     TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
-                    lineView.setText(String.format(getString(R.string.frag_route_line_name), c.getSource().getLines().get(0).getName()));
+                    lineView.setText(String.format(getString(R.string.frag_route_line_name), line.getName()));
                     lineView.setTextColor(lineColor);
 
                     LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
@@ -231,9 +235,18 @@ public class RouteFragment extends Fragment {
                         String.format(getString(R.string.frag_route_direction),
                                 c.getTarget().getLines().get(0).getDirectionForConnection(c).getName())));
 
-                if (c.getSource().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
+                if (line.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
                     carsWarningLayout.setVisibility(View.VISIBLE);
+                }
+
+                if (mListener != null && mListener.getLocationService() != null) {
+                    Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
+                    if(statuses.get(line.getId()) != null &&
+                            statuses.get(line.getId()).down) {
+                        LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                        disturbancesWarningLayout.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 layoutRoute.addView(view);
@@ -254,20 +267,22 @@ public class RouteFragment extends Fragment {
             } else if (c instanceof Transfer) {
                 Connection c2 = el.get(i + 1);
 
+                Line targetLine = c.getTarget().getLines().get(0);
+
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
                 int prevLineColor = c.getSource().getLines().get(0).getColor();
                 FrameLayout prevLineStripeLayout = (FrameLayout) view.findViewById(R.id.prev_line_stripe_layout);
                 prevLineStripeLayout.setBackgroundColor(prevLineColor);
 
-                int nextLineColor = c.getTarget().getLines().get(0).getColor();
+                int nextLineColor = targetLine.getColor();
                 FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
 
                 TextView stationView = (TextView) view.findViewById(R.id.station_view);
                 stationView.setText(c.getSource().getName());
 
-                Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(c.getTarget().getLines().get(0).getId()));
+                Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(targetLine.getId()));
                 drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
 
                 FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
@@ -278,7 +293,7 @@ public class RouteFragment extends Fragment {
                 }
 
                 TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
-                lineView.setText(String.format(getString(R.string.frag_route_line_name), c.getTarget().getLines().get(0).getName()));
+                lineView.setText(String.format(getString(R.string.frag_route_line_name), targetLine.getName()));
                 lineView.setTextColor(nextLineColor);
 
                 LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
@@ -289,9 +304,18 @@ public class RouteFragment extends Fragment {
                         String.format(getString(R.string.frag_route_direction),
                                 c2.getTarget().getLines().get(0).getDirectionForConnection(c2).getName())));
 
-                if (c.getTarget().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
+                if (targetLine.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
                     carsWarningLayout.setVisibility(View.VISIBLE);
+                }
+
+                if (mListener != null && mListener.getLocationService() != null) {
+                    Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
+                    if(statuses.get(targetLine.getId()) != null &&
+                            statuses.get(targetLine.getId()).down) {
+                        LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                        disturbancesWarningLayout.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 layoutRoute.addView(view);
