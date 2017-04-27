@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -59,10 +58,10 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     public void onCreatePreferences(Bundle bundle, String s) {
         getPreferenceManager().setDefaultPackages(new String[]{"im.tny.segvault.disturbances."});
 
-        getPreferenceManager().setSharedPreferencesName("settings");
+        getPreferenceManager().setSharedPreferencesName("notifsettings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 
-        setPreferencesFromResource(R.xml.settings, null);
+        setPreferencesFromResource(R.xml.notif_settings, null);
 
         updateLinesPreference();
     }

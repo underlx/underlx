@@ -16,9 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.View;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
@@ -33,8 +31,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,7 +98,7 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         creationDate = new Date();
-        PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.settings, false);
+        PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
         wfc.setScanInterval(10000);
@@ -686,7 +682,7 @@ public class MainService extends Service {
                                                String id, String status, boolean downtime,
                                                long msgtime) {
         Log.d("MainService", "handleDisturbanceNotification");
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
 
         Map<String, LineStatus> statuses = getLineStatus();
