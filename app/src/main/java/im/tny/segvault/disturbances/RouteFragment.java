@@ -256,7 +256,7 @@ public class RouteFragment extends Fragment {
             if (i == el.size() - 1) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
 
-                int lineColor = c.getTarget().getLines().get(0).getColor();
+                int lineColor = c.getSource().getLines().get(0).getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
