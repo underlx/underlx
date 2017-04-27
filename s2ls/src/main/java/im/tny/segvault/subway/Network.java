@@ -123,17 +123,25 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
     public List<Station> getStation(String id) {
         return stations.get(id);
     }
-/*
-    private Map<String, Object> metaMap = new HashMap<>();
 
-    public Object getMeta(String key) {
-        return metaMap.get(key);
+    private transient IEdgeWeighter edgeWeighter = null;
+
+    public void setEdgeWeighter(IEdgeWeighter edgeWeighter) {
+        this.edgeWeighter = edgeWeighter;
     }
 
-    public Object putMeta(String key, Object object) {
-        return metaMap.put(key, object);
+    @Override
+    public double getEdgeWeight(Connection connection) {
+        if(edgeWeighter == null) {
+            return super.getEdgeWeight(connection);
+        } else {
+            return edgeWeighter.getEdgeWeight(this, connection);
+        }
     }
-    */
+
+    public double getDefaultEdgeWeight(Connection connection) {
+        return super.getEdgeWeight(connection);
+    }
 
     @Override
     public String toString() {

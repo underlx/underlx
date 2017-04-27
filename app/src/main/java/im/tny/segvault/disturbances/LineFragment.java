@@ -123,6 +123,9 @@ public class LineFragment extends Fragment {
         Date mostRecentUpdate = new Date();
         int count = 0;
         for (MainService.LineStatus s : mListener.getLocationService().getLineStatus().values()) {
+            if(s.line == null) {
+                continue;
+            }
             if(s.down) {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince));
             } else {

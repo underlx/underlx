@@ -59,6 +59,7 @@ import im.tny.segvault.subway.Zone;
 public class MainService extends Service {
     private API api;
     private WiFiChecker wfc;
+    private ConnectionWeighter cweighter = new ConnectionWeighter(this);
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
@@ -87,6 +88,7 @@ public class MainService extends Service {
 
     private void putNetwork(Network net) {
         synchronized (lock) {
+            net.setEdgeWeighter(cweighter);
             networks.put("pt-ml", net);
             S2LS loc = new S2LS(net);
             locServices.put("pt-ml", loc);
@@ -374,6 +376,18 @@ public class MainService extends Service {
             statuses.putAll(lineStatuses);
         }
         return statuses;
+    }
+
+    public LineStatus getLineStatus(String id) {
+        synchronized (lock) {
+            if (lineStatuses.isEmpty()) {
+                lineStatuses = readLineStatus();
+                if(lineStatuses == null) {
+                    lineStatuses = new HashMap<>();
+                }
+            }
+            return lineStatuses.get(id);
+        }
     }
 
     public void updateLineStatus() {
