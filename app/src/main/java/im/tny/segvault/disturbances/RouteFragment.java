@@ -173,12 +173,21 @@ public class RouteFragment extends Fragment {
         }
 
         AStarShortestPath as = new AStarShortestPath(network);
-        GraphPath gp = as.getShortestPath(originPicker.getSelection(), destinationPicker.getSelection(), new AStarAdmissibleHeuristic<Station>() {
+        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Station>() {
             @Override
             public double getCostEstimate(Station sourceVertex, Station targetVertex) {
                 return 0;
             }
-        });
+        };
+        Station source = originPicker.getSelection();
+        // hackish "annotations" for the connection weighter
+        source.putMeta("is_route_source", true);
+        Station target = destinationPicker.getSelection();
+        target.putMeta("is_route_target", true);
+
+        GraphPath gp = as.getShortestPath(source, target, heuristic);
+        source.putMeta("is_route_source", null);
+        target.putMeta("is_route_target", null);
         showRoute(gp);
     }
 
@@ -242,7 +251,7 @@ public class RouteFragment extends Fragment {
 
                 if (mListener != null && mListener.getLocationService() != null) {
                     Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
-                    if(statuses.get(line.getId()) != null &&
+                    if (statuses.get(line.getId()) != null &&
                             statuses.get(line.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
                         disturbancesWarningLayout.setVisibility(View.VISIBLE);
@@ -311,7 +320,7 @@ public class RouteFragment extends Fragment {
 
                 if (mListener != null && mListener.getLocationService() != null) {
                     Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
-                    if(statuses.get(targetLine.getId()) != null &&
+                    if (statuses.get(targetLine.getId()) != null &&
                             statuses.get(targetLine.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
                         disturbancesWarningLayout.setVisibility(View.VISIBLE);

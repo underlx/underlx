@@ -69,6 +69,9 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
     }
 
     public Object putMeta(String key, Object object) {
+        if(object == null) {
+            return metaMap.remove(key);
+        }
         return metaMap.put(key, object);
     }
 
