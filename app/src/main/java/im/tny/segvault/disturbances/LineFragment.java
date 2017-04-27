@@ -181,12 +181,14 @@ public class LineFragment extends Fragment {
                     // fallthrough
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                     if(!requestedStatusUpdate && mListener != null) {
-                            mListener.getLocationService().updateLineStatus();
-                            requestedStatusUpdate = true;
+                        mListener.getLocationService().updateLineStatus();
+                        requestedStatusUpdate = true;
                     }
-                    // fallthrough
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     redraw(context);
+                    break;
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    mListener.getLocationService().updateLineStatus();
+                    requestedStatusUpdate = true;
                     break;
             }
         }
