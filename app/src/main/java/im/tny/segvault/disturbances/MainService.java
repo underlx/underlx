@@ -365,7 +365,7 @@ public class MainService extends Service {
         synchronized (lock) {
             if (lineStatuses.isEmpty()) {
                 lineStatuses = readLineStatus();
-                if(lineStatuses == null) {
+                if (lineStatuses == null) {
                     lineStatuses = new HashMap<>();
                 }
             }
@@ -378,7 +378,7 @@ public class MainService extends Service {
         synchronized (lock) {
             if (lineStatuses.isEmpty()) {
                 lineStatuses = readLineStatus();
-                if(lineStatuses == null) {
+                if (lineStatuses == null) {
                     lineStatuses = new HashMap<>();
                 }
             }
@@ -443,7 +443,8 @@ public class MainService extends Service {
                         for (String sid : l.stations) {
                             Log.d("UpdateTopologyTask", "  Station: " + sid);
                             API.Station s = api.getStation(sid);
-                            Station station = new Station(s.id, s.name);
+                            Station station = new Station(s.id, s.name,
+                                    new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
                             line.addVertex(station);
                             station.addLine(line);
 
@@ -686,10 +687,10 @@ public class MainService extends Service {
         Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
 
         Map<String, LineStatus> statuses = getLineStatus();
-        if(statuses.containsKey(line)) {
+        if (statuses.containsKey(line)) {
             LineStatus s = statuses.get(line);
             synchronized (lock) {
-                if(downtime) {
+                if (downtime) {
                     lineStatuses.put(line, new LineStatus(s.line, new Date(msgtime)));
                 } else {
                     lineStatuses.put(line, new LineStatus(s.line));

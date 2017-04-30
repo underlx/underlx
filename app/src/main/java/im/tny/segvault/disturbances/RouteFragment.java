@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -217,8 +218,7 @@ public class RouteFragment extends Fragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                TextView stationView = (TextView) view.findViewById(R.id.station_view);
-                stationView.setText(c.getSource().getName());
+                populateStationView(c.getSource(), view);
 
                 if (c.getSource().hasTransferEdge(network)) {
                     Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(line.getId()));
@@ -269,8 +269,7 @@ public class RouteFragment extends Fragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                TextView stationView = (TextView) view.findViewById(R.id.station_view);
-                stationView.setText(c.getTarget().getName());
+                populateStationView(c.getTarget(), view);
 
                 layoutRoute.addView(view);
             } else if (c instanceof Transfer) {
@@ -288,8 +287,7 @@ public class RouteFragment extends Fragment {
                 FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
 
-                TextView stationView = (TextView) view.findViewById(R.id.station_view);
-                stationView.setText(c.getSource().getName());
+                populateStationView(c.getSource(), view);
 
                 Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(targetLine.getId()));
                 drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
@@ -333,8 +331,7 @@ public class RouteFragment extends Fragment {
         if (layoutRoute.getChildCount() == 0) {
             View view = getActivity().getLayoutInflater().inflate(R.layout.step_already_there, layoutRoute, false);
 
-            TextView stationView = (TextView) view.findViewById(R.id.station_view);
-            stationView.setText(originPicker.getSelection().getName());
+            populateStationView(originPicker.getSelection(), view);
 
             if (originPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount() ||
                     destinationPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
@@ -348,6 +345,43 @@ public class RouteFragment extends Fragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
+    }
+
+    private void populateStationView(Station station, View view) {
+        TextView stationView = (TextView) view.findViewById(R.id.station_view);
+        stationView.setText(station.getName());
+
+        View separatorView = (View) view.findViewById(R.id.feature_separator_view);
+
+        ImageView liftView = (ImageView) view.findViewById(R.id.feature_lift_view);
+        if (station.getFeatures().lift) {
+            liftView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView busView = (ImageView) view.findViewById(R.id.feature_bus_view);
+        if (station.getFeatures().bus) {
+            busView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView boatView = (ImageView) view.findViewById(R.id.feature_boat_view);
+        if (station.getFeatures().boat) {
+            boatView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView trainView = (ImageView) view.findViewById(R.id.feature_train_view);
+        if (station.getFeatures().train) {
+            trainView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView airportView = (ImageView) view.findViewById(R.id.feature_airport_view);
+        if (station.getFeatures().airport) {
+            airportView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

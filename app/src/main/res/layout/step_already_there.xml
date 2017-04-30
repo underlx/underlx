@@ -37,12 +37,7 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/station_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        <include layout="@layout/station_include" />
 
         <LinearLayout
             android:id="@+id/cars_warning_layout"

@@ -57,8 +57,18 @@ public class API {
         public String id;
         public String name;
         public String network;
+        public StationFeatures features;
         public List<String> lines;
         public List<WiFiAP> wiFiAPs;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class StationFeatures {
+        public boolean lift;
+        public boolean bus;
+        public boolean boat;
+        public boolean train;
+        public boolean airport;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

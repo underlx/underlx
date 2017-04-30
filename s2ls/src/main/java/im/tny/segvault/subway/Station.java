@@ -16,9 +16,10 @@ import java.util.Set;
 public class Station implements INameable, IIDable, Comparable<Station>, Serializable {
     private int rand;
 
-    public Station(String id, String name) {
+    public Station(String id, String name, Features features) {
         setId(id);
         setName(name);
+        setFeatures(features);
         this.lines = new ArrayList<>();
         this.rand = new Random().nextInt(10000);
     }
@@ -92,4 +93,32 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
         }
         return false;
     }
+
+    static public class Features implements Serializable {
+        public boolean lift;
+        public boolean bus;
+        public boolean boat;
+        public boolean train;
+        public boolean airport;
+
+        public Features(boolean lift, boolean bus, boolean boat, boolean train, boolean airport) {
+            this.lift = lift;
+            this.bus = bus;
+            this.boat = boat;
+            this.train = train;
+            this.airport = airport;
+        }
+    }
+
+    private Features features;
+
+    public Features getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(Features features) {
+        this.features = features;
+    }
+
+
 }
