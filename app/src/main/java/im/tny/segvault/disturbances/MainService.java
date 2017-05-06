@@ -269,6 +269,13 @@ public class MainService extends Service {
     private class UpdateLineStatusTask extends AsyncTask<Void, Integer, Boolean> {
         private HashMap<String, LineStatus> statuses = new HashMap<>();
 
+        @Override
+        protected void onPreExecute() {
+            Intent intent = new Intent(ACTION_LINE_STATUS_UPDATE_STARTED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        }
+
         protected Boolean doInBackground(Void... v) {
             if (!Connectivity.isConnected(MainService.this)) {
                 return false;
@@ -612,6 +619,8 @@ public class MainService extends Service {
     public static final String ACTION_UPDATE_TOPOLOGY_CANCELLED = "im.tny.segvault.disturbances.action.topology.update.cancelled";
 
     public static final String ACTION_TOPOLOGY_UPDATE_AVAILABLE = "im.tny.segvault.disturbances.action.topology.update.available";
+
+    public static final String ACTION_LINE_STATUS_UPDATE_STARTED = "im.tny.segvault.disturbances.action.linestatus.update.started";
     public static final String ACTION_LINE_STATUS_UPDATE_SUCCESS = "im.tny.segvault.disturbances.action.linestatus.update.success";
     public static final String ACTION_LINE_STATUS_UPDATE_FAILED = "im.tny.segvault.disturbances.action.linestatus.update.failure";
 

@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
+import android.icu.util.TimeUnit;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -11,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.text.style.TtsSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +87,7 @@ public class LineFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_STARTED);
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_FAILED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
@@ -151,6 +155,14 @@ public class LineFragment extends Fragment {
         recyclerView.setAdapter(new LineRecyclerViewAdapter(items, mListener));
         recyclerView.invalidate();
         recyclerView.setVisibility(View.VISIBLE);
+
+        if(new Date().getTime() - mostRecentUpdate.getTime() > java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
+            recyclerView.setAlpha(0.6f);
+            updateInformationView.setTypeface(null, Typeface.BOLD);
+        } else {
+            recyclerView.setAlpha(1f);
+            updateInformationView.setTypeface(null, Typeface.NORMAL);
+        }
         updateInformationView.setText(String.format(getString(R.string.frag_lines_updated),
                 DateUtils.getRelativeTimeSpanString(context, mostRecentUpdate.getTime(), true)));
     }
@@ -177,6 +189,9 @@ public class LineFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
+                case MainService.ACTION_LINE_STATUS_UPDATE_STARTED:
+                    progressBar.setVisibility(View.VISIBLE);
+                    break;
                 case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                 case MainService.ACTION_LINE_STATUS_UPDATE_FAILED:
                     if (mListener != null) {

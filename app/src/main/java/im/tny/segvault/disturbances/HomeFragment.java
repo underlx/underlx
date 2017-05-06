@@ -84,10 +84,12 @@ public class HomeFragment extends TopFragment {
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Fragment newFragment = LineFragment.newInstance(1);
-                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                transaction.replace(R.id.line_status_card, newFragment);
-                transaction.commit();
+                if(mListener != null) {
+                    MainService m = mListener.getMainService();
+                    if (m != null) {
+                        m.updateLineStatus();
+                    }
+                }
             }
         });
 
