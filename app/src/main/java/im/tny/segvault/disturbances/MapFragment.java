@@ -1,9 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,13 +12,11 @@ import android.webkit.WebView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import im.tny.segvault.subway.Connection;
-import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 
 
@@ -32,7 +28,7 @@ import im.tny.segvault.subway.Station;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
 
     public MapFragment() {
@@ -64,12 +60,7 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (mListener != null) {
-            mListener.setActionBarTitle(getString(R.string.frag_map_title));
-            mListener.checkNavigationDrawerItem(R.id.nav_map);
-        }
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        fab.hide();
+        setUpActivity(getString(R.string.frag_map_title), R.id.nav_map, false, false);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
@@ -142,12 +133,12 @@ public class MapFragment extends Fragment {
             MapGraph g = new MapGraph();
             g.stations = new ArrayList<>();
             g.connections = new ArrayList<>();
-            for(Station s : mListener.getLocationService().getNetwork(network).vertexSet()) {
+            for(Station s : mListener.getMainService().getNetwork(network).vertexSet()) {
                 g.stations.add(new MapStation(s.getId(), s.getName(), s.getLines().get(0).getId()));
             }
 
             List<MapStation> connections = new ArrayList<>();
-            for(Connection c : mListener.getLocationService().getNetwork(network).edgeSet()) {
+            for(Connection c : mListener.getMainService().getNetwork(network).edgeSet()) {
                 String line = "";
                 if(c.getSource().getLines().containsAll(c.getTarget().getLines())) {
                     line = c.getSource().getLines().get(0).getId();
@@ -174,7 +165,7 @@ public class MapFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
-        MainService getLocationService();
+    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
+        MainService getMainService();
     }
 }

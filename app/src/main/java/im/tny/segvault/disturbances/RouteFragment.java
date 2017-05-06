@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -46,7 +45,7 @@ import im.tny.segvault.subway.Transfer;
  * Use the {@link RouteFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RouteFragment extends Fragment {
+public class RouteFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
 
     public RouteFragment() {
@@ -86,12 +85,8 @@ public class RouteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (mListener != null) {
-            mListener.setActionBarTitle(getString(R.string.frag_route_title));
-            mListener.checkNavigationDrawerItem(R.id.nav_plan_route);
-        }
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        fab.hide();
+        setUpActivity(getString(R.string.frag_route_title), R.id.nav_plan_route, false, false);
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_route, container, false);
 
@@ -117,8 +112,8 @@ public class RouteFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        if (mListener != null && mListener.getLocationService() != null) {
-            network = mListener.getLocationService().getNetwork("pt-ml");
+        if (mListener != null && mListener.getMainService() != null) {
+            network = mListener.getMainService().getNetwork("pt-ml");
             // the network map might not be loaded yet
             if (network != null) {
                 populatePickers(network);
@@ -249,8 +244,8 @@ public class RouteFragment extends Fragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                if (mListener != null && mListener.getLocationService() != null) {
-                    Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
+                if (mListener != null && mListener.getMainService() != null) {
+                    Map<String, MainService.LineStatus> statuses = mListener.getMainService().getLineStatus();
                     if (statuses.get(line.getId()) != null &&
                             statuses.get(line.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
@@ -316,8 +311,8 @@ public class RouteFragment extends Fragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                if (mListener != null && mListener.getLocationService() != null) {
-                    Map<String, MainService.LineStatus> statuses = mListener.getLocationService().getLineStatus();
+                if (mListener != null && mListener.getMainService() != null) {
+                    Map<String, MainService.LineStatus> statuses = mListener.getMainService().getLineStatus();
                     if (statuses.get(targetLine.getId()) != null &&
                             statuses.get(targetLine.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
@@ -432,8 +427,7 @@ public class RouteFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
-        MainService getLocationService();
+    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -443,7 +437,7 @@ public class RouteFragment extends Fragment {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
-                        network = mListener.getLocationService().getNetwork("pt-ml");
+                        network = mListener.getMainService().getNetwork("pt-ml");
                         // the network map might not be loaded yet
                         if (network != null) {
                             populatePickers(network);

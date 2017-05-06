@@ -88,8 +88,8 @@ public class LineFragment extends Fragment {
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_FAILED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
-        if (mListener != null && mListener.getLocationService() != null) {
-            mListener.getLocationService().updateLineStatus();
+        if (mListener != null && mListener.getMainService() != null) {
+            mListener.getMainService().updateLineStatus();
             requestedStatusUpdate = true;
         }
         redraw(context);
@@ -115,28 +115,28 @@ public class LineFragment extends Fragment {
     }
 
     private void redraw(Context context) {
-        if(mListener == null || mListener.getLocationService() == null) {
+        if (mListener == null || mListener.getMainService() == null) {
             return;
         }
         List<LineRecyclerViewAdapter.LineItem> items = new ArrayList<>();
 
         Date mostRecentUpdate = new Date();
         int count = 0;
-        for (MainService.LineStatus s : mListener.getLocationService().getLineStatus().values()) {
-            if(s.line == null) {
+        for (MainService.LineStatus s : mListener.getMainService().getLineStatus().values()) {
+            if (s.line == null) {
                 continue;
             }
-            if(s.down) {
+            if (s.down) {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince));
             } else {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line));
             }
-            if(s.updated.getTime() < mostRecentUpdate.getTime()) {
+            if (s.updated.getTime() < mostRecentUpdate.getTime()) {
                 mostRecentUpdate = s.updated;
             }
             count++;
         }
-        if(count == 0) {
+        if (count == 0) {
             // no lines. probably still loading
             return;
         }
@@ -168,7 +168,9 @@ public class LineFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item);
 
-        MainService getLocationService();
+        void onFinishedRefreshing();
+
+        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -177,17 +179,20 @@ public class LineFragment extends Fragment {
             switch (intent.getAction()) {
                 case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                 case MainService.ACTION_LINE_STATUS_UPDATE_FAILED:
+                    if (mListener != null) {
+                        mListener.onFinishedRefreshing();
+                    }
                     progressBar.setVisibility(View.GONE);
                     // fallthrough
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
-                    if(!requestedStatusUpdate && mListener != null) {
-                        mListener.getLocationService().updateLineStatus();
+                    if (!requestedStatusUpdate && mListener != null) {
+                        mListener.getMainService().updateLineStatus();
                         requestedStatusUpdate = true;
                     }
                     redraw(context);
                     break;
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    mListener.getLocationService().updateLineStatus();
+                    mListener.getMainService().updateLineStatus();
                     requestedStatusUpdate = true;
                     break;
             }

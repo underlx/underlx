@@ -22,14 +22,20 @@
 
     <!--- <include layout="@layout/content_main" /> -->
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/main_fragment_container"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="im.tny.segvault.disturbances.MainActivity"></android.support.v4.widget.NestedScrollView>
+        tools:context="im.tny.segvault.disturbances.MainActivity">
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/main_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="vertical"></android.support.v4.widget.NestedScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

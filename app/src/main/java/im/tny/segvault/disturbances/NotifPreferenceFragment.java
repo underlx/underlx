@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,9 +27,6 @@ import rikka.materialpreference.MultiSelectListPreference;
 import rikka.materialpreference.Preference;
 import rikka.materialpreference.PreferenceFragment;
 
-/**
- * PreferenceFragment example include set DropDownPreference entries programmatically
- */
 public class NotifPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
 
@@ -39,12 +37,14 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
+        getActivity().setTitle(getString(R.string.frag_notif_title));
         if (mListener != null) {
-            mListener.setActionBarTitle(getString(R.string.frag_notif_title));
             mListener.checkNavigationDrawerItem(R.id.nav_notif);
         }
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.hide();
+        SwipeRefreshLayout srl = (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
+        srl.setEnabled(false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
@@ -74,8 +74,8 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         List<CharSequence> lineNames = new ArrayList<>();
         List<CharSequence> lineIDs = new ArrayList<>();
         List<Line> lines = new LinkedList<>();
-        if (mListener != null && mListener.getLocationService() != null) {
-            for (Network n : mListener.getLocationService().getNetworks()) {
+        if (mListener != null && mListener.getMainService() != null) {
+            for (Network n : mListener.getMainService().getNetworks()) {
                 Log.d("updateLinesPreference", "addAll");
                 lines.addAll(n.getLines());
             }
@@ -174,8 +174,8 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
-        MainService getLocationService();
+    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
+        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

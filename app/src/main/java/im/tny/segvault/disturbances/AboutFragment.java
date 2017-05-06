@@ -30,7 +30,7 @@ import java.util.Map;
 
 import im.tny.segvault.subway.Network;
 
-public class AboutFragment extends Fragment {
+public class AboutFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
     private LinearLayout networksLayout;
 
@@ -59,10 +59,7 @@ public class AboutFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (mListener != null) {
-            mListener.setActionBarTitle(getString(R.string.frag_about_title));
-            mListener.checkNavigationDrawerItem(R.id.nav_about);
-        }
+        setUpActivity(getString(R.string.frag_about_title), R.id.nav_about, false, false);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
@@ -77,9 +74,6 @@ public class AboutFragment extends Fragment {
 
         networksLayout = (LinearLayout) view.findViewById(R.id.about_networks);
         refreshDatasetInfo();
-
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        fab.hide();
 
         TextView versionView = (TextView) view.findViewById(R.id.about_version);
         versionView.setText(String.format(getResources().getString(R.string.frag_about_version), BuildConfig.VERSION_NAME));
@@ -186,7 +180,7 @@ public class AboutFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener extends OnTopFragmentInteractionListener {
+    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
         Collection<Network> getNetworks();
 
         void updateNetworks(String... network_ids);

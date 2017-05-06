@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -67,17 +68,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (locBound) {
-                    TextView t = (TextView) findViewById(R.id.debug_info);
-                    t.setText(locService.dumpDebugInfo());
-                }
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -320,11 +310,6 @@ public class MainActivity extends AppCompatActivity
     };
 
     @Override
-    public void setActionBarTitle(String title) {
-        setTitle(title);
-    }
-
-    @Override
     public void checkNavigationDrawerItem(int id) {
         MenuItem item = navigationView.getMenu().findItem(id);
         if (item != null) {
@@ -349,13 +334,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item) {
 
     }
 
     @Override
-    public void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item) {
-
+    public void onFinishedRefreshing() {
+        SwipeRefreshLayout srl = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        srl.setRefreshing(false);
     }
 
     @Override
@@ -364,7 +350,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public MainService getLocationService() {
+    public MainService getMainService() {
         return locService;
     }
 
