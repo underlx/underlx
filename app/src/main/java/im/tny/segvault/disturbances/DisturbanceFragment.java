@@ -102,13 +102,13 @@ public class DisturbanceFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         if (mListener != null && mListener.getMainService() != null) {
-            new DisturbanceFragment.UpdateDataTask().execute(context);
+            new DisturbanceFragment.UpdateDataTask().execute();
         }
 
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new DisturbanceFragment.UpdateDataTask().execute(getContext());
+                new DisturbanceFragment.UpdateDataTask().execute();
             }
         });
         return view;
@@ -124,7 +124,7 @@ public class DisturbanceFragment extends TopFragment {
         int id = item.getItemId();
 
         if (id == R.id.menu_refresh) {
-            new DisturbanceFragment.UpdateDataTask().execute(getContext());
+            new DisturbanceFragment.UpdateDataTask().execute();
             return true;
         }
 
@@ -150,8 +150,7 @@ public class DisturbanceFragment extends TopFragment {
 
     private boolean initialRefresh = true;
 
-    private class UpdateDataTask extends AsyncTask<Context, Integer, Boolean> {
-        private Context context;
+    private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
         private List<DisturbanceRecyclerViewAdapter.DisturbanceItem> items = new ArrayList<>();
 
         @Override
@@ -160,9 +159,8 @@ public class DisturbanceFragment extends TopFragment {
             getSwipeRefreshLayout().setRefreshing(true);
         }
 
-        protected Boolean doInBackground(Context... context) {
-            this.context = context[0];
-            if (!Connectivity.isConnected(this.context)) {
+        protected Boolean doInBackground(Void... v) {
+            if (!Connectivity.isConnected(getContext())) {
                 return false;
             }
             if (mListener == null || mListener.getMainService() == null) {
@@ -208,7 +206,17 @@ public class DisturbanceFragment extends TopFragment {
             }
             getSwipeRefreshLayout().setRefreshing(false);
             if(!initialRefresh) {
-                Snackbar.make(getFloatingActionButton(), R.string.frag_disturbance_updated, Snackbar.LENGTH_SHORT).show();
+                if(result) {
+                    Snackbar.make(getFloatingActionButton(), R.string.frag_disturbance_updated, Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(getFloatingActionButton(), R.string.error_no_connection, Snackbar.LENGTH_SHORT)
+                            .setAction(getString(R.string.error_no_connection_action_retry), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    new DisturbanceFragment.UpdateDataTask().execute();
+                                }
+                            }).show();
+                }
             } else {
                 initialRefresh = false;
             }
@@ -237,7 +245,7 @@ public class DisturbanceFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    new DisturbanceFragment.UpdateDataTask().execute(context);
+                    new DisturbanceFragment.UpdateDataTask().execute();
                     break;
             }
         }

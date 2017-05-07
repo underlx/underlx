@@ -73,6 +73,8 @@
     <string name="frag_disturbance_menu_refresh">Refresh</string>
     <string name="frag_disturbance_updated">Disturbance list updated</string>
     <string name="frag_home_menu_refresh">Refresh</string>
+    <string name="error_no_connection">No connection</string>
+    <string name="error_no_connection_action_retry">Retry</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

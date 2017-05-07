@@ -67,4 +67,9 @@
     <string name="notif_route_direction">Sentido %s</string>
     <string name="notif_route_next_station">Próxima estação: %s</string>
     <string name="notif_route_waiting">A aguardar pelo comboio...</string>
+    <string name="frag_disturbance_menu_refresh">Actualizar</string>
+    <string name="frag_home_menu_refresh">Actualizar</string>
+    <string name="frag_disturbance_updated">Perturbações actualizadas</string>
+    <string name="error_no_connection">Sem ligação</string>
+    <string name="error_no_connection_action_retry">Repetir</string>
 </resources>
