@@ -26,8 +26,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://192.168.10.106:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://192.168.10.106:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;

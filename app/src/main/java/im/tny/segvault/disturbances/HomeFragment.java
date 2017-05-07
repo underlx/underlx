@@ -31,6 +31,8 @@ public class HomeFragment extends TopFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private TextView debugInfoView;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -68,14 +70,15 @@ public class HomeFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        debugInfoView = (TextView) view.findViewById(R.id.debug_info);
+
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
                     MainService m = mListener.getMainService();
                     if (m != null) {
-                        TextView t = (TextView) view.findViewById(R.id.debug_info);
-                        t.setText(m.dumpDebugInfo());
+                        debugInfoView.setText(m.dumpDebugInfo());
                     }
                 }
             }

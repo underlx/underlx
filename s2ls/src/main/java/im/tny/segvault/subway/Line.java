@@ -102,6 +102,19 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         }
     }
 
+    public Station getStationAfter(Connection c) {
+        if (!edgeSet().contains(c)) {
+            return null;
+        }
+
+        for (Connection outedge : outgoingEdgesOf(c.getTarget())) {
+            if (outedge.getTarget() != c.getSource()) {
+                return outedge.getTarget();
+            }
+        }
+        return null;
+    }
+
     private int usualCarCount;
 
     public int getUsualCarCount() {

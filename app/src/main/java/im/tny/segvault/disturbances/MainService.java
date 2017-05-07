@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -42,7 +44,9 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
+import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.S2LS;
+import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -54,8 +58,8 @@ import im.tny.segvault.subway.Zone;
 
 public class MainService extends Service {
     private API api;
-    private WiFiChecker wfc;
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
+    private WiFiChecker wfc;
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
@@ -66,6 +70,8 @@ public class MainService extends Service {
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
+
+    private Handler stateTickHandler = null;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -86,9 +92,10 @@ public class MainService extends Service {
         synchronized (lock) {
             net.setEdgeWeighter(cweighter);
             networks.put("pt-ml", net);
-            S2LS loc = new S2LS(net);
+            S2LS loc = new S2LS(net, new S2SLChangeListener());
             locServices.put("pt-ml", loc);
-            WiFiLocator wl = new WiFiLocator(wfc);
+            WiFiLocator wl = new WiFiLocator(net);
+            wfc.setLocatorForNetwork(net, wl);
             loc.addNetworkDetector(wl);
             loc.addProximityDetector(wl);
             loc.addLocator(wl);
@@ -98,6 +105,7 @@ public class MainService extends Service {
     @Override
     public void onCreate() {
         creationDate = new Date();
+        stateTickHandler = new Handler();
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
@@ -406,9 +414,18 @@ public class MainService extends Service {
                 loc = locServices.get(n.getId());
             }
             s += "Network " + n.getName() + "\n";
-            s += String.format("\tIn network? %b\n\tNear network? %b\n\tPossible stations:\n", loc.inNetwork(), loc.nearNetwork());
-            for (Station station : loc.getLocation().vertexSet()) {
-                s += String.format("\t%s (%s)\n", station.getName(), station.getLines().get(0).getName());
+            s += "State machine: " + loc.getState().getType().toString() + "\n";
+            s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
+            if(loc.getState() instanceof InNetworkState) {
+                InNetworkState ins = (InNetworkState) loc.getState();
+                s += "\tPossible stations:\n";
+                for (Station station : loc.getLocation().vertexSet()) {
+                    s += String.format("\t\t%s (%s)\n", station.getName(), station.getLines().get(0).getName());
+                }
+                s += "\tPath:\n";
+                for (Connection c : ins.getPath().getEdgeList()) {
+                    s += String.format("\t\t%s -> %s\n", c.getSource().toString(), c.getTarget().toString());
+                }
             }
         }
         return s;
@@ -759,5 +776,81 @@ public class MainService extends Service {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(id.hashCode(), notificationBuilder.build());
+    }
+
+    private Notification buildRouteNotification(InNetworkState state) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        Station curStation = state.getPath().getEndVertex();
+        String title = curStation.getName();
+        String status = "Waiting for train...";
+        if(state.getPath().getEdgeList().size() > 0) {
+            Connection latest = state.getPath().getEdgeList().get(state.getPath().getEdgeList().size() - 1);
+            Station direction = curStation.getDirectionForConnection(latest);
+            if(direction != null) {
+                status = String.format("Direction %s", direction.getName());
+                Station next = curStation.getStationAfter(latest);
+                if(next != null) {
+                    status += String.format("\n" + "Next station: %s", next.getName());
+                }
+            }
+        }
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(curStation.getName());
+        bigTextStyle.bigText(status);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setStyle(bigTextStyle)
+                .setSmallIcon(R.drawable.ic_disturbance_notif)
+                .setColor(curStation.getLines().get(0).getColor())
+                .setContentTitle(title)
+                .setContentText(status)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true);
+
+        return notificationBuilder.build();
+    }
+
+    private static final int ROUTE_NOTIFICATION_ID = -100;
+
+    public class S2SLChangeListener implements S2LS.OnChangeListener {
+        @Override
+        public void onStateChanged(S2LS loc, S2LS.StateType state) {
+            Log.d("onStateChanged", state.toString());
+
+            if(loc.getState().getPreferredTickIntervalMillis() == 0) {
+                stateTickHandler.removeCallbacksAndMessages(null);
+            } else {
+                doTick(loc.getState());
+            }
+
+            if(loc.getState() instanceof InNetworkState) {
+                final InNetworkState ins = (InNetworkState) loc.getState();
+                ins.addLocationChangedListener(new InNetworkState.OnLocationChangedListener() {
+                    @Override
+                    public void onLocationChanged(InNetworkState state) {
+                        Log.d("onLocationChanged", "Location changed");
+                        startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(ins));
+                    }
+                });
+            } else {
+                stopForeground(true);
+            }
+        }
+
+        private void doTick(final State state) {
+            stateTickHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    state.tick();
+                    doTick(state);
+                }
+            }, state.getPreferredTickIntervalMillis());
+        }
     }
 }

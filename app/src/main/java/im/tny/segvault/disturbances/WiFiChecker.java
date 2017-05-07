@@ -9,26 +9,24 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.s2ls.wifi.BSSID;
-import im.tny.segvault.s2ls.wifi.IBSSIDChecker;
+import im.tny.segvault.s2ls.wifi.WiFiLocator;
+import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 
 /**
  * Created by gabriel on 4/12/17.
  */
 
-class WiFiChecker implements IBSSIDChecker {
+class WiFiChecker {
     private static final String STATION_META_WIFICHECKER_KEY = "WiFiChecker";
 
-    private List<BSSID> bssids = new ArrayList<>();
+    private Map<String, WiFiLocator> locators = new HashMap<>();
     private int scanInterval = 30000;
     private WifiManager wifiMan;
     private final Handler handler = new Handler();
@@ -65,15 +63,16 @@ class WiFiChecker implements IBSSIDChecker {
         doScan();
     }
 
-    @Override
-    public boolean checkBSSIDs(Station station) {
-        List<BSSID> currentBSSIDs = getCurrentBSSIDs();
-        Object o = station.getMeta(STATION_META_WIFICHECKER_KEY);
-        if (o == null || !(o instanceof List)) {
-            return false;
+    // this method is for debugging only, meant to be called in an expression evaluator in a debugger
+    public void updateBSSIDsDebug(String listString) {
+        String[] ids = listString.split(",");
+        List<BSSID> bssids = new ArrayList<>();
+        for (String id : ids) {
+            bssids.add(new BSSID(id));
         }
-        List<BSSID> stationBSSID = (List<BSSID>) o;
-        return !Collections.disjoint(stationBSSID, currentBSSIDs);
+        for(WiFiLocator w : locators.values()) {
+            w.updateCurrentBSSIDs(bssids);
+        }
     }
 
     public static void addBSSIDforStation(Station station, BSSID bssid) {
@@ -88,8 +87,8 @@ class WiFiChecker implements IBSSIDChecker {
         station.putMeta(STATION_META_WIFICHECKER_KEY, stationBSSID);
     }
 
-    private List<BSSID> getCurrentBSSIDs() {
-        return bssids;
+    public void setLocatorForNetwork(Network network, WiFiLocator locator) {
+        locators.put(network.getId(), locator);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -102,7 +101,9 @@ class WiFiChecker implements IBSSIDChecker {
                 bssids.add(new BSSID(s.BSSID));
                 Log.d("WiFiChecker", s.BSSID);
             }
-            WiFiChecker.this.bssids = bssids;
+            for(WiFiLocator w : locators.values()) {
+                w.updateCurrentBSSIDs(bssids);
+            }
         }
     };
 }

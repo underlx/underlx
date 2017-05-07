@@ -2,6 +2,9 @@ package im.tny.segvault.subway;
 
 import android.util.Pair;
 
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.AStarShortestPath;
+import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
@@ -132,7 +135,7 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
 
     @Override
     public double getEdgeWeight(Connection connection) {
-        if(edgeWeighter == null) {
+        if (edgeWeighter == null) {
             return super.getEdgeWeight(connection);
         } else {
             return edgeWeighter.getEdgeWeight(this, connection);
@@ -141,6 +144,18 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
 
     public double getDefaultEdgeWeight(Connection connection) {
         return super.getEdgeWeight(connection);
+    }
+
+    public GraphPath<Station, Connection> getAnyPathBetween(Station source, Station target) {
+        AStarShortestPath as = new AStarShortestPath(this);
+        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Station>() {
+            @Override
+            public double getCostEstimate(Station sourceVertex, Station targetVertex) {
+                return 0;
+            }
+        };
+
+        return as.getShortestPath(source, target, heuristic);
     }
 
     @Override

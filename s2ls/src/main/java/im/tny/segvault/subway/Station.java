@@ -70,7 +70,7 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
     }
 
     public Object putMeta(String key, Object object) {
-        if(object == null) {
+        if (object == null) {
             return metaMap.remove(key);
         }
         return metaMap.put(key, object);
@@ -86,12 +86,28 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
     }
 
     public boolean hasTransferEdge(Network n) {
-        for(Connection c : n.outgoingEdgesOf(this)) {
-            if(c instanceof Transfer) {
+        for (Connection c : n.outgoingEdgesOf(this)) {
+            if (c instanceof Transfer) {
                 return true;
             }
         }
         return false;
+    }
+
+    public Station getDirectionForConnection(Connection c) {
+        for (Line l : getLines()) {
+            Station d = l.getDirectionForConnection(c);
+            if (d != null) return d;
+        }
+        return null;
+    }
+
+    public Station getStationAfter(Connection c) {
+        for (Line l : getLines()) {
+            Station d = l.getStationAfter(c);
+            if (d != null) return d;
+        }
+        return null;
     }
 
     static public class Features implements Serializable {

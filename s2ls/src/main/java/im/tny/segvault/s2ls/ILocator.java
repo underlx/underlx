@@ -8,6 +8,6 @@ import im.tny.segvault.subway.Zone;
  */
 
 public interface ILocator {
-    public void initialize(Network network);
+    public void setListener(OnStatusChangeListener listener);
     public Zone getLocation(Network network);
 }

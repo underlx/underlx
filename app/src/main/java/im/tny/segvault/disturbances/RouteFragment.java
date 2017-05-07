@@ -237,7 +237,7 @@ public class RouteFragment extends TopFragment {
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
-                                c.getTarget().getLines().get(0).getDirectionForConnection(c).getName())));
+                                c.getTarget().getDirectionForConnection(c).getName())));
 
                 if (line.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
@@ -304,7 +304,7 @@ public class RouteFragment extends TopFragment {
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
-                                c2.getTarget().getLines().get(0).getDirectionForConnection(c2).getName())));
+                                c2.getTarget().getDirectionForConnection(c2).getName())));
 
                 if (targetLine.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);

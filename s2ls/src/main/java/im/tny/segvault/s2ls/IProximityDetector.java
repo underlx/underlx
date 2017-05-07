@@ -7,6 +7,6 @@ import im.tny.segvault.subway.Network;
  */
 
 public interface IProximityDetector {
-    public void initialize(Network network);
+    public void setListener(OnStatusChangeListener listener);
     public boolean nearNetwork(Network network);
 }
