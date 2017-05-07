@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -27,9 +28,10 @@ class WiFiChecker {
     private static final String STATION_META_WIFICHECKER_KEY = "WiFiChecker";
 
     private Map<String, WiFiLocator> locators = new HashMap<>();
-    private int scanInterval = 30000;
-    private WifiManager wifiMan;
+    private long scanInterval = 30000;
+    private final WifiManager wifiMan;
     private final Handler handler = new Handler();
+    private boolean isScanning;
 
     public WiFiChecker(Context context, WifiManager manager) {
         wifiMan = manager;
@@ -37,11 +39,12 @@ class WiFiChecker {
                 WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
-    public void setScanInterval(int scanInterval) {
+    public void setScanInterval(long scanInterval) {
         this.scanInterval = scanInterval;
     }
 
     private void doScan() {
+        isScanning = true;
         wifiMan.startScan();
         handler.postDelayed(new Runnable() {
             @Override
@@ -52,15 +55,39 @@ class WiFiChecker {
     }
 
     public void stopScanning() {
+        isScanning = false;
         handler.removeCallbacksAndMessages(null);
     }
 
     public void startScanning() {
-        if (wifiMan.isWifiEnabled() == false) {
+        boolean enabled = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            enabled = wifiMan.isScanAlwaysAvailable();
+        }
+        if (wifiMan.isWifiEnabled() == false && !enabled) {
             wifiMan.setWifiEnabled(true);
         }
         stopScanning();
         doScan();
+    }
+
+    public void startScanningIfWiFiEnabled() {
+        boolean enabled = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            enabled = wifiMan.isScanAlwaysAvailable();
+        }
+        if (wifiMan.isWifiEnabled() || enabled) {
+            stopScanning();
+            doScan();
+        }
+    }
+
+    public boolean isScanning() {
+        return isScanning;
+    }
+
+    public long getScanInterval() {
+        return scanInterval;
     }
 
     // this method is for debugging only, meant to be called in an expression evaluator in a debugger

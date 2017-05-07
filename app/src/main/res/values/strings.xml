@@ -66,6 +66,10 @@
     <string name="frag_route_station_short_cars_warning">In this station, some lines run shorter trains. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
     <string name="frag_route_line_name">%s line</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
+    <string name="notif_route_left_station">Left station...</string>
+    <string name="notif_route_direction">Direction %s</string>
+    <string name="notif_route_next_station">Next station: %s</string>
+    <string name="notif_route_waiting">Waiting for train...</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

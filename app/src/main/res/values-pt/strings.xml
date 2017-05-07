@@ -63,4 +63,8 @@
     <string name="frag_route_station_short_cars_warning">Nesta estação, algumas linhas têm comboios mais curtos. Procure os ecrãs numa das pontas da plataforma e use a metade desse lado.</string>
     <string name="frag_map_title">Mapa</string>
     <string name="frag_disturbances_empty">Informação não disponível</string>
+    <string name="notif_route_left_station">Deixou a estação...</string>
+    <string name="notif_route_direction">Sentido %s</string>
+    <string name="notif_route_next_station">Próxima estação: %s</string>
+    <string name="notif_route_waiting">A aguardar pelo comboio...</string>
 </resources>

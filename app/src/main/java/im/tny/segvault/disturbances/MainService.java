@@ -45,6 +45,8 @@ import java.util.concurrent.TimeUnit;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.s2ls.InNetworkState;
+import im.tny.segvault.s2ls.NearNetworkState;
+import im.tny.segvault.s2ls.OffNetworkState;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
@@ -409,7 +411,8 @@ public class MainService extends Service {
 
     // DEBUG:
     protected String dumpDebugInfo() {
-        String s = "Service created on " + creationDate.toString() + "\n";
+        String s = "Service created on " + creationDate.toString();
+        s += (wfc.isScanning() ? String.format(". WFC scanning every %d s", wfc.getScanInterval() / 1000) : ". WFC not scanning") + "\n";
         for (Network n : getNetworks()) {
             S2LS loc;
             synchronized (lock) {
@@ -788,19 +791,19 @@ public class MainService extends Service {
 
         Station curStation = state.getPath().getEndVertex();
         String title = curStation.getName();
-        String status = "Waiting for train...";
+        String status = getString(R.string.notif_route_waiting);
         if (state.getPath().getEdgeList().size() > 0) {
             Connection latest = state.getPath().getEdgeList().get(state.getPath().getEdgeList().size() - 1);
             Station direction = curStation.getDirectionForConnection(latest);
             Station next = curStation.getStationAfter(latest);
             if (direction != null && next != null) {
-                status = String.format("Next station: %s" + "\n", next.getName());
-                status += String.format("Direction %s", direction.getName());
+                status = String.format(getString(R.string.notif_route_next_station) + "\n", next.getName());
+                status += String.format(getString(R.string.notif_route_direction), direction.getName());
             } else if (state.getLocation().vertexSet().size() == 0) {
-                status = "Left station...";
+                status = getString(R.string.notif_route_left_station);
             }
         } else if (state.getLocation().vertexSet().size() == 0) {
-            status = "Left station...";
+            status = getString(R.string.notif_route_left_station);
         }
 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
@@ -834,6 +837,8 @@ public class MainService extends Service {
             }
 
             if (loc.getState() instanceof InNetworkState) {
+                wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
+                wfc.startScanning();
                 final InNetworkState ins = (InNetworkState) loc.getState();
                 ins.addLocationChangedListener(new InNetworkState.OnLocationChangedListener() {
                     @Override
@@ -842,7 +847,14 @@ public class MainService extends Service {
                         startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(ins));
                     }
                 });
-            } else {
+            } else if (loc.getState() instanceof NearNetworkState) {
+                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(4));
+                wfc.startScanningIfWiFiEnabled();
+                stopForeground(true);
+            } else if (loc.getState() instanceof OffNetworkState) {
+                // wfc.stopScanning(); // TODO only enable this when there are locators besides WiFi
+                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(4));
+                wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             }
         }
