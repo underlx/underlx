@@ -84,7 +84,7 @@ public class InNetworkState extends State {
         if (path == null) {
             path = new Path(getS2LS().getNetwork(), stations[0], stations[stations.length - 1], new LinkedList<Connection>(), 0);
         } else {
-            path.setEndVertex(stations[stations.length - 1]);
+            path.setEndVertex(stations[stations.length - 1], false);
         }
         for (OnLocationChangedListener l : listeners) {
             l.onLocationChanged(this);
@@ -93,14 +93,25 @@ public class InNetworkState extends State {
 
     @Override
     public void onLeftStations(ILocator locator, Station... stations) {
-
+        for (Station station : stations) {
+            current.removeVertex(station);
+            for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(station)) {
+                if (c instanceof Transfer && current.containsVertex(c.getTarget()) && path != null) {
+                    path.setEndVertex(c.getTarget(), true);
+                    break;
+                }
+            }
+        }
+        for (OnLocationChangedListener l : listeners) {
+            l.onLocationChanged(this);
+        }
     }
 
     @Override
     public void tick() {
         if (mightHaveLeft) {
             ticksSinceLeft++;
-            if (ticksSinceLeft >= TICKS_UNTIL_LEFT) {
+            if (ticksSinceLeft >= TICKS_UNTIL_LEFT && !getS2LS().detectInNetwork()) {
                 if (getS2LS().detectNearNetwork()) {
                     setState(new NearNetworkState(getS2LS()));
                 } else {
@@ -160,17 +171,18 @@ public class InNetworkState extends State {
             return endVertex;
         }
 
-        public void setEndVertex(Station vertex) {
+        public void setEndVertex(Station vertex, boolean addLastTransfer) {
             List<Connection> cs = graph.getAnyPathBetween(endVertex, vertex).getEdgeList();
             int size = cs.size();
             for (int i = 0; i < size; i++) {
                 // if unsure between two stations (e.g. pt-ml-cg double-station on pt-ml network)
                 // then do not put a transfer as the last step (i.e. assume user will keep going on
                 // the same line)
-                if (i == size - 1 && cs.get(i) instanceof Transfer) {
+                if (i == size - 1 && cs.get(i) instanceof Transfer && !addLastTransfer) {
                     Transfer t = (Transfer) cs.get(i);
                     if (current.containsVertex(t.getSource()) && current.containsVertex(t.getTarget())) {
-                        break;
+                        this.endVertex = t.getSource();
+                        return;
                     }
                 }
                 edgeList.add(cs.get(i));

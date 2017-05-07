@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity
                 newFragment = (Fragment) fragmentClass.newInstance();
             } catch (Exception e) {
                 e.printStackTrace();
+                newFragment = HomeFragment.newInstance();
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.main_fragment_container, newFragment);

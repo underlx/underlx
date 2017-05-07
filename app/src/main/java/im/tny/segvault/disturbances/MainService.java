@@ -121,7 +121,9 @@ public class MainService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        loadNetworks();
+        if (networks.size() == 0) {
+            loadNetworks();
+        }
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_TOPOLOGY_UPDATES:
@@ -152,7 +154,7 @@ public class MainService extends Service {
     }
 
     private void loadNetworks() {
-        synchronized (MainService.this.lock) {
+        synchronized (lock) {
             try {
                 Network net = TopologyCache.loadNetwork(this, "pt-ml");
                 /*for (Line l : net.getLines()) {
@@ -407,7 +409,7 @@ public class MainService extends Service {
 
     // DEBUG:
     protected String dumpDebugInfo() {
-        String s = "";
+        String s = "Service created on " + creationDate.toString() + "\n";
         for (Network n : getNetworks()) {
             S2LS loc;
             synchronized (lock) {
@@ -416,7 +418,7 @@ public class MainService extends Service {
             s += "Network " + n.getName() + "\n";
             s += "State machine: " + loc.getState().getType().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
-            if(loc.getState() instanceof InNetworkState) {
+            if (loc.getState() instanceof InNetworkState) {
                 InNetworkState ins = (InNetworkState) loc.getState();
                 s += "\tPossible stations:\n";
                 for (Station station : loc.getLocation().vertexSet()) {
@@ -748,7 +750,7 @@ public class MainService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
 
@@ -780,23 +782,25 @@ public class MainService extends Service {
 
     private Notification buildRouteNotification(InNetworkState state) {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
+        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_home);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         Station curStation = state.getPath().getEndVertex();
         String title = curStation.getName();
         String status = "Waiting for train...";
-        if(state.getPath().getEdgeList().size() > 0) {
+        if (state.getPath().getEdgeList().size() > 0) {
             Connection latest = state.getPath().getEdgeList().get(state.getPath().getEdgeList().size() - 1);
             Station direction = curStation.getDirectionForConnection(latest);
-            if(direction != null) {
-                status = String.format("Direction %s", direction.getName());
-                Station next = curStation.getStationAfter(latest);
-                if(next != null) {
-                    status += String.format("\n" + "Next station: %s", next.getName());
-                }
+            Station next = curStation.getStationAfter(latest);
+            if (direction != null && next != null) {
+                status = String.format("Next station: %s" + "\n", next.getName());
+                status += String.format("Direction %s", direction.getName());
+            } else if (state.getLocation().vertexSet().size() == 0) {
+                status = "Left station...";
             }
+        } else if (state.getLocation().vertexSet().size() == 0) {
+            status = "Left station...";
         }
 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
@@ -805,11 +809,11 @@ public class MainService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
-                .setSmallIcon(R.drawable.ic_disturbance_notif)
+                .setSmallIcon(R.drawable.ic_menu_directions_subway)
                 .setColor(curStation.getLines().get(0).getColor())
                 .setContentTitle(title)
-                .setContentText(status)
-                .setAutoCancel(true)
+                .setContentText(status.replace("\n", " | "))
+                .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true);
 
@@ -823,13 +827,13 @@ public class MainService extends Service {
         public void onStateChanged(S2LS loc, S2LS.StateType state) {
             Log.d("onStateChanged", state.toString());
 
-            if(loc.getState().getPreferredTickIntervalMillis() == 0) {
+            if (loc.getState().getPreferredTickIntervalMillis() == 0) {
                 stateTickHandler.removeCallbacksAndMessages(null);
             } else {
                 doTick(loc.getState());
             }
 
-            if(loc.getState() instanceof InNetworkState) {
+            if (loc.getState() instanceof InNetworkState) {
                 final InNetworkState ins = (InNetworkState) loc.getState();
                 ins.addLocationChangedListener(new InNetworkState.OnLocationChangedListener() {
                     @Override
