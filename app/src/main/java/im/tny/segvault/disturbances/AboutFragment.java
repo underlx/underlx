@@ -76,7 +76,8 @@ public class AboutFragment extends TopFragment {
         refreshDatasetInfo();
 
         TextView versionView = (TextView) view.findViewById(R.id.about_version);
-        versionView.setText(String.format(getResources().getString(R.string.frag_about_version), BuildConfig.VERSION_NAME));
+        versionView.setText(String.format(getResources().getString(R.string.frag_about_version),
+                String.format("%s #%d", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)));
 
         ListView thirdPartyList = (ListView) view.findViewById(R.id.about_thirdparty);
 
