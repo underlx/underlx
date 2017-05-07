@@ -70,6 +70,9 @@
     <string name="notif_route_direction">Direction %s</string>
     <string name="notif_route_next_station">Next station: %s</string>
     <string name="notif_route_waiting">Waiting for train...</string>
+    <string name="frag_disturbance_menu_refresh">Refresh</string>
+    <string name="frag_disturbance_updated">Disturbance list updated</string>
+    <string name="frag_home_menu_refresh">Refresh</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

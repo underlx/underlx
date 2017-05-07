@@ -437,6 +437,7 @@ public class MainService extends Service {
     }
 
     protected void startScanning() {
+        wfc.setScanInterval(10000);
         wfc.startScanning();
     }
 

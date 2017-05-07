@@ -6,6 +6,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -66,6 +69,7 @@ public class HomeFragment extends TopFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.app_name), R.id.nav_home, true, true);
+        setHasOptionsMenu(true);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
@@ -87,12 +91,7 @@ public class HomeFragment extends TopFragment {
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(mListener != null) {
-                    MainService m = mListener.getMainService();
-                    if (m != null) {
-                        m.updateLineStatus();
-                    }
-                }
+                refreshLineStatus();
             }
         });
 
@@ -102,6 +101,23 @@ public class HomeFragment extends TopFragment {
         transaction.replace(R.id.line_status_card, newFragment);
         transaction.commit();
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.home, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_refresh) {
+            refreshLineStatus();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -119,6 +135,15 @@ public class HomeFragment extends TopFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private void refreshLineStatus() {
+        if (mListener != null) {
+            MainService m = mListener.getMainService();
+            if (m != null) {
+                m.updateLineStatus();
+            }
+        }
     }
 
     /**

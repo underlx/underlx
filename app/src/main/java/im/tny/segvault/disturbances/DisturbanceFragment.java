@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -72,6 +76,7 @@ public class DisturbanceFragment extends TopFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.frag_disturbances_title), R.id.nav_disturbances, false, true);
+        setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_disturbance_list, container, false);
 
@@ -109,6 +114,22 @@ public class DisturbanceFragment extends TopFragment {
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.disturbance_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_refresh) {
+            new DisturbanceFragment.UpdateDataTask().execute(getContext());
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -126,6 +147,8 @@ public class DisturbanceFragment extends TopFragment {
         super.onDetach();
         mListener = null;
     }
+
+    private boolean initialRefresh = true;
 
     private class UpdateDataTask extends AsyncTask<Context, Integer, Boolean> {
         private Context context;
@@ -184,6 +207,11 @@ public class DisturbanceFragment extends TopFragment {
                 emptyView.setVisibility(View.VISIBLE);
             }
             getSwipeRefreshLayout().setRefreshing(false);
+            if(!initialRefresh) {
+                Snackbar.make(getFloatingActionButton(), R.string.frag_disturbance_updated, Snackbar.LENGTH_SHORT).show();
+            } else {
+                initialRefresh = false;
+            }
         }
     }
 
