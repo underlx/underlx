@@ -4,9 +4,12 @@ import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -86,6 +89,9 @@ public class InNetworkState extends State {
         } else {
             path.setEndVertex(stations[stations.length - 1], false);
         }
+        for (Station station : stations) {
+            path.setEnterTime(station, new Date());
+        }
         for (OnLocationChangedListener l : listeners) {
             l.onLocationChanged(this);
         }
@@ -95,10 +101,13 @@ public class InNetworkState extends State {
     public void onLeftStations(ILocator locator, Station... stations) {
         for (Station station : stations) {
             current.removeVertex(station);
-            for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(station)) {
-                if (c instanceof Transfer && current.containsVertex(c.getTarget()) && path != null) {
-                    path.setEndVertex(c.getTarget(), true);
-                    break;
+            if(path != null) {
+                path.setLeaveTime(station, new Date());
+                for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(station)) {
+                    if (c instanceof Transfer && current.containsVertex(c.getTarget())) {
+                        path.setEndVertex(c.getTarget(), true);
+                        break;
+                    }
                 }
             }
         }
@@ -136,6 +145,9 @@ public class InNetworkState extends State {
         private Network graph;
 
         private List<Connection> edgeList;
+
+        private Map<Station, Date> enterTimes = new HashMap<>();
+        private Map<Station, Date> leaveTimes = new HashMap<>();
 
         private Station startVertex;
 
@@ -198,6 +210,19 @@ public class InNetworkState extends State {
         @Override
         public double getWeight() {
             return weight;
+        }
+
+        public Date getEnterTime(Station s) {
+            return enterTimes.get(s);
+        }
+        public void setEnterTime(Station s, Date d) {
+            enterTimes.put(s, d);
+        }
+        public Date getLeaveTime(Station s) {
+            return leaveTimes.get(s);
+        }
+        public void setLeaveTime(Station s, Date d) {
+            leaveTimes.put(s, d);
         }
     }
 }

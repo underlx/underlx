@@ -40,10 +40,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
+import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
 import im.tny.segvault.s2ls.OffNetworkState;
@@ -57,6 +61,8 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Zone;
+import io.realm.Realm;
+import io.realm.RealmList;
 
 public class MainService extends Service {
     private API api;
@@ -92,10 +98,23 @@ public class MainService extends Service {
 
     private void putNetwork(Network net) {
         synchronized (lock) {
+            // create Realm stations for the network if they don't exist already
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            for (Station s : net.vertexSet()) {
+                if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
+                    RStation rs = new RStation();
+                    rs.setStation(s);
+                    rs.setNetwork(net.getId());
+                    realm.copyToRealm(rs);
+                }
+            }
+            realm.commitTransaction();
+
             net.setEdgeWeighter(cweighter);
-            networks.put("pt-ml", net);
+            networks.put(net.getId(), net);
             S2LS loc = new S2LS(net, new S2SLChangeListener());
-            locServices.put("pt-ml", loc);
+            locServices.put(net.getId(), loc);
             WiFiLocator wl = new WiFiLocator(net);
             wfc.setLocatorForNetwork(net, wl);
             loc.addNetworkDetector(wl);
@@ -831,9 +850,8 @@ public class MainService extends Service {
         public void onStateChanged(S2LS loc, S2LS.StateType state) {
             Log.d("onStateChanged", state.toString());
 
-            if (loc.getState().getPreferredTickIntervalMillis() == 0) {
-                stateTickHandler.removeCallbacksAndMessages(null);
-            } else {
+            stateTickHandler.removeCallbacksAndMessages(null);
+            if (loc.getState().getPreferredTickIntervalMillis() != 0) {
                 doTick(loc.getState());
             }
 
@@ -860,12 +878,65 @@ public class MainService extends Service {
             }
         }
 
+        @Override
+        public void onTripEnded(S2LS s2ls, InNetworkState.Path path) {
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            RealmList<StationUse> uses = new RealmList<>();
+            if (path.getEdgeList().size() == 0) {
+                StationUse use = new StationUse();
+                use.setType(StationUse.UseType.VISIT);
+                use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getId()).findFirst());
+                use.setEntryDate(path.getEnterTime(path.getStartVertex()));
+                use.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
+                uses.add(realm.copyToRealm(use));
+            } else {
+                StationUse startUse = new StationUse();
+                startUse.setType(StationUse.UseType.NETWORK_ENTRY);
+                startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getId()).findFirst());
+                startUse.setEntryDate(path.getEnterTime(path.getStartVertex()));
+                startUse.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
+                uses.add(realm.copyToRealm(startUse));
+
+                int size = path.getEdgeList().size();
+                for (int i = 1; i < size; i++) {
+                    Connection c = path.getEdgeList().get(i);
+                    StationUse use = new StationUse();
+                    if (c instanceof Transfer) {
+                        if (i == size - 1) break;
+                        use.setType(StationUse.UseType.INTERCHANGE);
+                        use.setSourceLine(c.getSource().getLines().get(0).getId());
+                        use.setTargetLine(c.getTarget().getLines().get(0).getId());
+                        i++; // skip next station as then we'd have duplicate uses for the same station ID
+                    } else {
+                        use.setType(StationUse.UseType.GONE_THROUGH);
+                    }
+                    use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getId()).findFirst());
+                    use.setEntryDate(path.getEnterTime(c.getSource()));
+                    use.setLeaveDate(path.getLeaveTime(c.getSource()));
+                    uses.add(realm.copyToRealm(use));
+                }
+
+                StationUse endUse = new StationUse();
+                endUse.setType(StationUse.UseType.NETWORK_EXIT);
+                endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getId()).findFirst());
+                endUse.setEntryDate(path.getEnterTime(path.getEndVertex()));
+                endUse.setLeaveDate(path.getLeaveTime(path.getEndVertex()));
+                uses.add(realm.copyToRealm(endUse));
+            }
+            Trip trip = new Trip();
+            trip.setId(UUID.randomUUID().toString());
+            trip.setPath(uses);
+            realm.copyToRealm(trip);
+            realm.commitTransaction();
+        }
+
         private void doTick(final State state) {
             stateTickHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    state.tick();
                     doTick(state);
+                    state.tick();
                 }
             }, state.getPreferredTickIntervalMillis());
         }

@@ -126,6 +126,11 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     protected void setState(State state) {
+        if(this.state != null && this.state.getType() == StateType.IN_NETWORK && state.getType() != StateType.IN_NETWORK) {
+            if(listener != null && this.state instanceof InNetworkState) {
+                listener.onTripEnded(this, ((InNetworkState) this.state).getPath());
+            }
+        }
         this.state = state;
         if(listener != null) {
             listener.onStateChanged(this, state.getType());
@@ -138,5 +143,6 @@ public class S2LS implements OnStatusChangeListener {
 
     public interface OnChangeListener {
         void onStateChanged(S2LS s2ls, StateType state);
+        void onTripEnded(S2LS s2ls, InNetworkState.Path path);
     }
 }
