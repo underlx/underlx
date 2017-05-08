@@ -433,6 +433,9 @@ public class RouteFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if(getActivity() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:

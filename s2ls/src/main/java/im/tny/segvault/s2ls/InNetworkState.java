@@ -197,6 +197,14 @@ public class InNetworkState extends State {
                         return;
                     }
                 }
+                if (i > 0) {
+                    if(getEnterTime(cs.get(i).getSource()) == null) {
+                        setEnterTime(cs.get(i).getSource(), new Date());
+                    }
+                    if(getLeaveTime(cs.get(i).getSource()) == null) {
+                        setLeaveTime(cs.get(i).getSource(), new Date());
+                    }
+                }
                 edgeList.add(cs.get(i));
             }
             this.endVertex = vertex;

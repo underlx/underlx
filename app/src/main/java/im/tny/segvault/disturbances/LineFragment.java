@@ -188,6 +188,9 @@ public class LineFragment extends Fragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if(getActivity() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MainService.ACTION_LINE_STATUS_UPDATE_STARTED:
                     progressBar.setVisibility(View.VISIBLE);

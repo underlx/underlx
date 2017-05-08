@@ -245,7 +245,9 @@ public class DisturbanceFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    new DisturbanceFragment.UpdateDataTask().execute();
+                    if(getActivity() != null) {
+                        new DisturbanceFragment.UpdateDataTask().execute();
+                    }
                     break;
             }
         }

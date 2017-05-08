@@ -15,6 +15,8 @@ public class Trip extends RealmObject {
 
     private RealmList<StationUse> path;
 
+    private boolean synced;
+
     public String getId() {
         return id;
     }
@@ -29,5 +31,13 @@ public class Trip extends RealmObject {
 
     public void setPath(RealmList<StationUse> path) {
         this.path = path;
+    }
+
+    public boolean isSynced() {
+        return synced;
+    }
+
+    public void setSynced(boolean synced) {
+        this.synced = synced;
     }
 }
