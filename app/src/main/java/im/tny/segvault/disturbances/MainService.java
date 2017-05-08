@@ -883,12 +883,23 @@ public class MainService extends Service {
             Realm realm = Realm.getDefaultInstance();
             realm.beginTransaction();
             RealmList<StationUse> uses = new RealmList<>();
-            if (path.getEdgeList().size() == 0) {
+            int size = path.getEdgeList().size();
+            if (size == 0) {
                 StationUse use = new StationUse();
                 use.setType(StationUse.UseType.VISIT);
                 use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getId()).findFirst());
                 use.setEntryDate(path.getEnterTime(path.getStartVertex()));
                 use.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
+                uses.add(realm.copyToRealm(use));
+            } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
+                Connection c = path.getEdgeList().get(0);
+                StationUse use = new StationUse();
+                use.setType(StationUse.UseType.VISIT);
+                use.setSourceLine(c.getSource().getLines().get(0).getId());
+                use.setTargetLine(c.getTarget().getLines().get(0).getId());
+                use.setEntryDate(path.getEnterTime(c.getSource()));
+                use.setLeaveDate(path.getLeaveTime(c.getTarget()));
+                use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getId()).findFirst());
                 uses.add(realm.copyToRealm(use));
             } else {
                 StationUse startUse = new StationUse();
@@ -898,7 +909,6 @@ public class MainService extends Service {
                 startUse.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
                 uses.add(realm.copyToRealm(startUse));
 
-                int size = path.getEdgeList().size();
                 for (int i = 1; i < size; i++) {
                     Connection c = path.getEdgeList().get(i);
                     StationUse use = new StationUse();
@@ -907,13 +917,15 @@ public class MainService extends Service {
                         use.setType(StationUse.UseType.INTERCHANGE);
                         use.setSourceLine(c.getSource().getLines().get(0).getId());
                         use.setTargetLine(c.getTarget().getLines().get(0).getId());
+                        use.setEntryDate(path.getEnterTime(c.getSource()));
+                        use.setLeaveDate(path.getLeaveTime(c.getTarget()));
                         i++; // skip next station as then we'd have duplicate uses for the same station ID
                     } else {
                         use.setType(StationUse.UseType.GONE_THROUGH);
+                        use.setEntryDate(path.getEnterTime(c.getSource()));
+                        use.setLeaveDate(path.getLeaveTime(c.getSource()));
                     }
                     use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getId()).findFirst());
-                    use.setEntryDate(path.getEnterTime(c.getSource()));
-                    use.setLeaveDate(path.getLeaveTime(c.getSource()));
                     uses.add(realm.copyToRealm(use));
                 }
 
