@@ -39,7 +39,8 @@ public class MainActivity extends AppCompatActivity
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
-        NotifPreferenceFragment.OnFragmentInteractionListener {
+        NotifPreferenceFragment.OnFragmentInteractionListener,
+        TripHistoryFragment.OnListFragmentInteractionListener {
 
     MainService locService;
     boolean locBound = false;
@@ -146,28 +147,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.action_start_scanning) {
-            if (locBound) {
-                locService.startScanning();
-            }
-            return true;
-        } else if (id == R.id.action_stop_scanning) {
-            if (locBound) {
-                locService.stopScanning();
-            }
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     private Class getFragmentClass(int id) {
         switch (id) {
             case R.id.nav_home:
@@ -182,9 +161,38 @@ public class MainActivity extends AppCompatActivity
                 return DisturbanceFragment.class;
             case R.id.nav_notif:
                 return NotifPreferenceFragment.class;
+            case R.id.menu_trip_history:
+                return TripHistoryFragment.class;
             default:
                 return null;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Action bar menu item selected
+        Class fragmentClass = getFragmentClass(item.getItemId());
+
+        if (fragmentClass != null) {
+            // Create new fragment and transaction
+            Fragment newFragment = null;
+            try {
+                newFragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack
+            transaction.replace(R.id.main_fragment_container, newFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else {
+            Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -312,6 +320,11 @@ public class MainActivity extends AppCompatActivity
         MenuItem item = navigationView.getMenu().findItem(id);
         if (item != null) {
             item.setChecked(true);
+        } else {
+            int size = navigationView.getMenu().size();
+            for (int i = 0; i < size; i++) {
+                navigationView.getMenu().getItem(i).setChecked(false);
+            }
         }
     }
 
@@ -344,6 +357,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(DisturbanceRecyclerViewAdapter.DisturbanceItem item) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item) {
 
     }
 

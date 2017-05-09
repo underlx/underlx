@@ -72,4 +72,7 @@
     <string name="frag_disturbance_updated">Perturbações actualizadas</string>
     <string name="error_no_connection">Sem ligação</string>
     <string name="error_no_connection_action_retry">Repetir</string>
+    <string name="frag_trip_history_title">Histórico de viagens</string>
+    <string name="main_activity_menu_trip_history">Histórico de viagens</string>
+    <string name="frag_trip_history_empty">Sem viagens</string>
 </resources>

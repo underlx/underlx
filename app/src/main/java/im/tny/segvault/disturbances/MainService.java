@@ -132,7 +132,6 @@ public class MainService extends Service {
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
         wfc.setScanInterval(10000);
         checkForTopologyUpdates();
-        //wfc.startScanning();
     }
 
     @Override
@@ -453,15 +452,6 @@ public class MainService extends Service {
             }
         }
         return s;
-    }
-
-    protected void startScanning() {
-        wfc.setScanInterval(10000);
-        wfc.startScanning();
-    }
-
-    protected void stopScanning() {
-        wfc.stopScanning();
     }
 
     // END OF DEBUG
@@ -867,12 +857,12 @@ public class MainService extends Service {
                     }
                 });
             } else if (loc.getState() instanceof NearNetworkState) {
-                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(4));
+                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             } else if (loc.getState() instanceof OffNetworkState) {
                 // wfc.stopScanning(); // TODO only enable this when there are locators besides WiFi
-                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(4));
+                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             }
@@ -909,7 +899,12 @@ public class MainService extends Service {
                 startUse.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
                 uses.add(realm.copyToRealm(startUse));
 
-                for (int i = 1; i < size; i++) {
+                int i = 1;
+                if(path.getEdgeList().get(0) instanceof Transfer) {
+                    i = 2;
+                }
+
+                for (; i < size; i++) {
                     Connection c = path.getEdgeList().get(i);
                     StationUse use = new StationUse();
                     if (c instanceof Transfer) {

@@ -23,7 +23,7 @@ import im.tny.segvault.subway.Zone;
  */
 
 public class InNetworkState extends State {
-    private final static int TICKS_UNTIL_LEFT = 8; // assuming a tick occurs more or less every 30 seconds
+    private final static int TICKS_UNTIL_LEFT = 6; // assuming a tick occurs more or less every 30 seconds
     private Zone current = new Zone(getS2LS().getNetwork(), new HashSet<Station>());
 
     private Path path = null;

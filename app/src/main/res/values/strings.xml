@@ -75,6 +75,9 @@
     <string name="frag_home_menu_refresh">Refresh</string>
     <string name="error_no_connection">No connection</string>
     <string name="error_no_connection_action_retry">Retry</string>
+    <string name="main_activity_menu_trip_history">Trip history</string>
+    <string name="frag_trip_history_title">Trip history</string>
+    <string name="frag_trip_history_empty">No trips yet</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

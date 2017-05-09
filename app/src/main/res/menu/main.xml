@@ -2,14 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_start_scanning"
+        android:id="@+id/menu_trip_history"
         android:orderInCategory="100"
-        android:title="Start scanning"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_stop_scanning"
-        android:orderInCategory="200"
-        android:title="Stop scanning"
+        android:title="@string/main_activity_menu_trip_history"
         app:showAsAction="never" />
 </menu>
