@@ -3,7 +3,9 @@ package im.tny.segvault.disturbances;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by gabriel on 4/15/17.
@@ -23,6 +25,11 @@ public class FCMService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         if(!data.containsKey("network") || !data.containsKey("line") || !data.containsKey("disturbance")
                 || !data.containsKey("status") || !data.containsKey("downtime")) {
+            return;
+        }
+
+        if(new Date().getTime() - remoteMessage.getSentTime() > TimeUnit.HOURS.toMillis(5)) {
+            // discard messages that have been sent more than 5 hours ago
             return;
         }
 
