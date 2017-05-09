@@ -86,8 +86,7 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         }
 
         Set<Station> visited = new HashSet<>();
-        while (true) {
-            visited.add(c.getSource());
+        while (visited.add(c.getSource())) {
             Station curStation = c.getTarget();
             if (outDegreeOf(curStation) == 1) {
                 // it's an end station
@@ -100,6 +99,8 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
                 }
             }
         }
+        // circular line
+        return c.getTarget();
     }
 
     public Station getStationAfter(Connection c) {
