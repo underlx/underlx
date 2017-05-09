@@ -118,6 +118,12 @@ public class AboutFragment extends TopFragment {
         jss.put("url", "https://github.com/tdebatty/java-string-similarity");
         data.add(jss);
 
+        Map<String, String> realm = new HashMap<>(3);
+        realm.put("name", "Realm Java");
+        realm.put("license", "© Realm Inc - Apache License 2.0");
+        realm.put("url", "https://realm.io/products/realm-mobile-database/");
+        data.add(realm);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
