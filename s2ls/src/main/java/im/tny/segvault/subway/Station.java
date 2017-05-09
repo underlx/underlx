@@ -85,6 +85,16 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
         return idcomp;
     }
 
+    public List<Connection> getTransferEdges(Network n) {
+        List<Connection> tedges = new ArrayList<>();
+        for (Connection c : n.outgoingEdgesOf(this)) {
+            if (c instanceof Transfer) {
+                tedges.add(c);
+            }
+        }
+        return tedges;
+    }
+
     public boolean hasTransferEdge(Network n) {
         for (Connection c : n.outgoingEdgesOf(this)) {
             if (c instanceof Transfer) {

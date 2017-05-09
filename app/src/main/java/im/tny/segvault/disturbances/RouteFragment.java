@@ -175,15 +175,47 @@ public class RouteFragment extends TopFragment {
                 return 0;
             }
         };
-        Station source = originPicker.getSelection();
-        // hackish "annotations" for the connection weighter
-        source.putMeta("is_route_source", true);
-        Station target = destinationPicker.getSelection();
-        target.putMeta("is_route_target", true);
 
-        GraphPath gp = as.getShortestPath(source, target, heuristic);
-        source.putMeta("is_route_source", null);
-        target.putMeta("is_route_target", null);
+        // given that we want to treat stations with transfers as a single station,
+        // consider all the possibilities and choose the one with the shortest path:
+
+        List<GraphPath> paths = new ArrayList<>();
+
+        Station source = originPicker.getSelection();
+        Station target = destinationPicker.getSelection();
+
+        List<Station> possibleSources = new ArrayList<>();
+        possibleSources.add(source);
+
+        List<Station> possibleTargets = new ArrayList<>();
+        possibleTargets.add(target);
+
+        for (Connection tc : source.getTransferEdges(network)) {
+            possibleSources.add(tc.getTarget());
+        }
+
+        for (Connection tc : target.getTransferEdges(network)) {
+            possibleTargets.add(tc.getTarget());
+        }
+
+        for (Station pSource : possibleSources) {
+            for (Station pTarget : possibleTargets) {
+                // hackish "annotations" for the connection weighter
+                pSource.putMeta("is_route_source", true);
+                pTarget.putMeta("is_route_target", true);
+
+                paths.add(as.getShortestPath(pSource, pTarget, heuristic));
+                pSource.putMeta("is_route_source", null);
+                pTarget.putMeta("is_route_target", null);
+            }
+        }
+
+        GraphPath gp = null;
+        for (GraphPath p : paths) {
+            if (gp == null || p.getWeight() < gp.getWeight()) {
+                gp = p;
+            }
+        }
         showRoute(gp);
     }
 
@@ -433,7 +465,7 @@ public class RouteFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(getActivity() == null) {
+            if (getActivity() == null) {
                 return;
             }
             switch (intent.getAction()) {
