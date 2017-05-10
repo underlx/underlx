@@ -75,4 +75,17 @@
     <string name="frag_trip_history_title">Histórico de viagens</string>
     <string name="main_activity_menu_trip_history">Histórico de viagens</string>
     <string name="frag_trip_history_empty">Sem viagens</string>
+    <string name="frag_station_connections">Correspondências</string>
+    <string name="frag_station_bus">Autocarros</string>
+    <string name="frag_station_boat">Barcos</string>
+    <string name="frag_station_train">Comboios</string>
+    <string name="frag_station_airport">Aeroporto</string>
+    <string name="frag_station_accessibility">Acessibilidades</string>
+    <string name="frag_station_lift">Elevador</string>
+    <string name="frag_station_statistics">Estatísticas</string>
+    <string name="frag_station_stats_intro">Nesta estação...</string>
+    <string name="frag_station_stats_entry">Entrou na rede %d vezes</string>
+    <string name="frag_station_stats_exit">Saiu da rede %d vezes</string>
+    <string name="frag_station_stats_gone_through">Atravessou %d vezes</string>
+    <string name="frag_station_stats_transfer">Mudou de linha %d vezes</string>
 </resources>

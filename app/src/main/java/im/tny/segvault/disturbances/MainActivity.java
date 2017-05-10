@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity
         LineFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
-        TripHistoryFragment.OnListFragmentInteractionListener {
+        TripHistoryFragment.OnListFragmentInteractionListener,
+        StationFragment.OnFragmentInteractionListener {
 
     MainService locService;
     boolean locBound = false;
@@ -78,16 +79,12 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState == null) {
             // show initial fragment
-            Class fragmentClass = HomeFragment.class;
-            if (getIntent() != null) {
-                fragmentClass = getFragmentClass(getIntent().getIntExtra(EXTRA_INITIAL_FRAGMENT, R.id.nav_home));
-            }
             Fragment newFragment = null;
-            try {
-                newFragment = (Fragment) fragmentClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-                newFragment = HomeFragment.newInstance();
+            if (getIntent() != null) {
+                newFragment = getNewFragment(getIntent().getIntExtra(EXTRA_INITIAL_FRAGMENT, R.id.nav_home));
+            }
+            if (newFragment == null) {
+                newFragment = new HomeFragment();
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.main_fragment_container, newFragment);
@@ -147,40 +144,38 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private Class getFragmentClass(int id) {
-        switch (id) {
-            case R.id.nav_home:
-                return HomeFragment.class;
-            case R.id.nav_plan_route:
-                return RouteFragment.class;
-            case R.id.nav_map:
-                return MapFragment.class;
-            case R.id.nav_about:
-                return AboutFragment.class;
-            case R.id.nav_disturbances:
-                return DisturbanceFragment.class;
-            case R.id.nav_notif:
-                return NotifPreferenceFragment.class;
-            case R.id.menu_trip_history:
-                return TripHistoryFragment.class;
-            default:
-                return null;
+    private Fragment getNewFragment(int id) {
+        try {
+            switch (id) {
+                case R.id.nav_home:
+                    return (Fragment) HomeFragment.newInstance();
+                case R.id.nav_plan_route:
+                    return (Fragment) RouteFragment.newInstance("pt-ml");
+                case R.id.nav_map:
+                    return (Fragment) MapFragment.newInstance();
+                case R.id.nav_about:
+                    return (Fragment) AboutFragment.newInstance();
+                case R.id.nav_disturbances:
+                    return (Fragment) DisturbanceFragment.newInstance(1);
+                case R.id.nav_notif:
+                    return (Fragment) NotifPreferenceFragment.newInstance();
+                case R.id.menu_trip_history:
+                    return (Fragment) TripHistoryFragment.newInstance(1);
+                default:
+                    return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Action bar menu item selected
-        Class fragmentClass = getFragmentClass(item.getItemId());
+        Fragment newFragment = getNewFragment(item.getItemId());
 
-        if (fragmentClass != null) {
-            // Create new fragment and transaction
-            Fragment newFragment = null;
-            try {
-                newFragment = (Fragment) fragmentClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (newFragment != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
             // Replace whatever is in the fragment_container view with this fragment,
@@ -198,16 +193,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        Class fragmentClass = getFragmentClass(item.getItemId());
+        Fragment newFragment = getNewFragment(item.getItemId());
 
-        if (fragmentClass != null) {
-            // Create new fragment and transaction
-            Fragment newFragment = null;
-            try {
-                newFragment = (Fragment) fragmentClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (newFragment != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
             // Replace whatever is in the fragment_container view with this fragment,

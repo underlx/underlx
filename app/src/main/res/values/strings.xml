@@ -78,6 +78,19 @@
     <string name="main_activity_menu_trip_history">Trip history</string>
     <string name="frag_trip_history_title">Trip history</string>
     <string name="frag_trip_history_empty">No trips yet</string>
+    <string name="frag_station_connections">Connections</string>
+    <string name="frag_station_bus">Bus</string>
+    <string name="frag_station_boat">Boat</string>
+    <string name="frag_station_train">Train</string>
+    <string name="frag_station_airport">Airport</string>
+    <string name="frag_station_accessibility">Accessibility</string>
+    <string name="frag_station_lift">Lift</string>
+    <string name="frag_station_statistics">Statistics</string>
+    <string name="frag_station_stats_intro">In this station, you...</string>
+    <string name="frag_station_stats_entry">Entered the network %d times</string>
+    <string name="frag_station_stats_exit">Exited the network %d times</string>
+    <string name="frag_station_stats_gone_through">Went through %d times</string>
+    <string name="frag_station_stats_transfer">Changed line %d times</string>
 
     <string-array name="default_notif_lines" translatable="false">
         <item>pt-ml-amarela</item>

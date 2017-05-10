@@ -34,6 +34,13 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         // Required empty public constructor
     }
 
+    public static NotifPreferenceFragment newInstance() {
+        NotifPreferenceFragment fragment = new NotifPreferenceFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);

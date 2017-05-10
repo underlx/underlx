@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -48,6 +50,10 @@ import im.tny.segvault.subway.Transfer;
 public class RouteFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
 
+    private static final String ARG_NETWORK_ID = "networkId";
+
+    private String networkId;
+
     public RouteFragment() {
         // Required empty public constructor
     }
@@ -58,9 +64,10 @@ public class RouteFragment extends TopFragment {
      *
      * @return A new instance of fragment RouteFragment.
      */
-    public static RouteFragment newInstance() {
+    public static RouteFragment newInstance(String networkId) {
         RouteFragment fragment = new RouteFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_NETWORK_ID, networkId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,10 +75,9 @@ public class RouteFragment extends TopFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
+        if (getArguments() != null) {
+            networkId = getArguments().getString(ARG_NETWORK_ID);
+        }
     }
 
     private Network network = null;
@@ -113,7 +119,7 @@ public class RouteFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         if (mListener != null && mListener.getMainService() != null) {
-            network = mListener.getMainService().getNetwork("pt-ml");
+            network = mListener.getMainService().getNetwork(networkId);
             // the network map might not be loaded yet
             if (network != null) {
                 populatePickers(network);
@@ -374,7 +380,7 @@ public class RouteFragment extends TopFragment {
         swapButton.setVisibility(View.VISIBLE);
     }
 
-    private void populateStationView(Station station, View view) {
+    private void populateStationView(final Station station, View view) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
@@ -409,6 +415,19 @@ public class RouteFragment extends TopFragment {
             airportView.setVisibility(View.VISIBLE);
             separatorView.setVisibility(View.VISIBLE);
         }
+
+        LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
+
+        stationLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StationFragment f = StationFragment.newInstance(network.getId(), station.getId());
+                FragmentActivity a = getActivity();
+                if (a != null) {
+                    f.show(a.getSupportFragmentManager(), "station-fragment");
+                }
+            }
+        });
     }
 
     @Override
@@ -472,7 +491,7 @@ public class RouteFragment extends TopFragment {
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
-                        network = mListener.getMainService().getNetwork("pt-ml");
+                        network = mListener.getMainService().getNetwork(networkId);
                         // the network map might not be loaded yet
                         if (network != null) {
                             populatePickers(network);
