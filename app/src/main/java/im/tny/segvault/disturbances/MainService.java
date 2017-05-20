@@ -822,7 +822,7 @@ public class MainService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
-                .setSmallIcon(R.drawable.ic_menu_directions_subway)
+                .setSmallIcon(R.drawable.ic_trip_notif)
                 .setColor(curStation.getLines().get(0).getColor())
                 .setContentTitle(title)
                 .setContentText(status.replace("\n", " | "))
