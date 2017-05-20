@@ -88,4 +88,5 @@
     <string name="frag_station_stats_exit">Saiu da rede %d vezes</string>
     <string name="frag_station_stats_gone_through">Atravessou %d vezes</string>
     <string name="frag_station_stats_transfer">Mudou de linha %d vezes</string>
+    <string name="frag_station_more_information">Mais informação</string>
 </resources>

@@ -98,4 +98,6 @@
         <item>pt-ml-verde</item>
         <item>pt-ml-vermelha</item>
     </string-array>
+    <string name="title_activity_station">StationActivity</string>
+    <string name="frag_station_more_information">More information</string>
 </resources>

@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -88,6 +90,19 @@ public class StationFragment extends BottomSheetDialogFragment {
         stationNameView = (TextView) view.findViewById(R.id.station_name_view);
         lineIconsLayout = (LinearLayout) view.findViewById(R.id.line_icons_layout);
 
+        View.OnClickListener clickDetails = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, stationId);
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, networkId);
+                startActivity(intent);
+                dismiss();
+            }
+        };
+        Button moreInfoButton = (Button) view.findViewById(R.id.more_info_button);
+        moreInfoButton.setOnClickListener(clickDetails);
+        stationNameView.setOnClickListener(clickDetails);
 
         if (mListener == null)
             return view;
@@ -164,29 +179,6 @@ public class StationFragment extends BottomSheetDialogFragment {
             if (station.getFeatures().lift) {
                 liftLayout.setVisibility(View.VISIBLE);
                 accessibilityTitleView.setVisibility(View.VISIBLE);
-            }
-
-            // Statistics
-            Realm realm = Realm.getDefaultInstance();
-            TextView statsEntryCountView = (TextView) view.findViewById(R.id.station_entry_count_view);
-            long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-            statsEntryCountView.setText(String.format(getString(R.string.frag_station_stats_entry), entryCount));
-
-            TextView statsExitCountView = (TextView) view.findViewById(R.id.station_exit_count_view);
-            long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
-            statsExitCountView.setText(String.format(getString(R.string.frag_station_stats_exit), exitCount));
-
-            TextView statsGoneThroughCountView = (TextView) view.findViewById(R.id.station_gone_through_count_view);
-            long goneThroughCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.GONE_THROUGH.name()).count();
-            statsGoneThroughCountView.setText(String.format(getString(R.string.frag_station_stats_gone_through), goneThroughCount));
-
-            TextView statsTransferCountView = (TextView) view.findViewById(R.id.station_transfer_count_view);
-            if(station.hasTransferEdge(net)) {
-                long transferCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-                statsTransferCountView.setText(String.format(getString(R.string.frag_station_stats_transfer), transferCount));
-                statsTransferCountView.setVisibility(View.VISIBLE);
-            } else {
-                statsTransferCountView.setVisibility(View.GONE);
             }
         }
 
