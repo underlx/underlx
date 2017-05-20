@@ -11,6 +11,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +126,13 @@ class WiFiChecker {
             Log.d("WiFiChecker", "onReceive");
             List<ScanResult> wifiList = wifiMan.getScanResults();
             List<BSSID> bssids = new ArrayList<>();
+            // sort by descending signal strength
+            Collections.sort(wifiList, Collections.<ScanResult>reverseOrder(new Comparator<ScanResult>() {
+                @Override
+                public int compare(ScanResult scanResult, ScanResult t1) {
+                    return scanResult.level - t1.level;
+                }
+            }));
             for (ScanResult s : wifiList) {
                 bssids.add(new BSSID(s.BSSID));
                 Log.d("WiFiChecker", s.BSSID);

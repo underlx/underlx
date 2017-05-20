@@ -71,6 +71,24 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
             }
         }
 
+        if (stations.size() > 1) {
+            // assumes currentBSSIDs are sorted by decreasing signal strength
+            for (BSSID b : currentBSSIDs) {
+                for (Station s : stations) {
+                    Object o = s.getMeta(STATION_META_WIFICHECKER_KEY);
+                    if (o == null || !(o instanceof List)) {
+                        continue;
+                    }
+                    List<BSSID> stationBSSID = (List<BSSID>) o;
+                    if (stationBSSID.contains(b)) {
+                        stations.clear();
+                        stations.add(s);
+                        return new Zone(network, stations);
+                    }
+                }
+            }
+        }
+
         return new Zone(network, stations);
     }
 
