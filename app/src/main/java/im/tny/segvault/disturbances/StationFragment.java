@@ -153,7 +153,7 @@ public class StationFragment extends BottomSheetDialogFragment {
             }
 
             LinearLayout airportLayout = (LinearLayout) view.findViewById(R.id.feature_airport_layout);
-            if (station.getFeatures().bus) {
+            if (station.getFeatures().airport) {
                 airportLayout.setVisibility(View.VISIBLE);
                 connectionsTitleView.setVisibility(View.VISIBLE);
             }

@@ -251,7 +251,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                populateStationView(c.getSource(), view);
+                populateStationView(getActivity(), network, c.getSource(), view);
 
                 if (c.getSource().hasTransferEdge(network)) {
                     Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(line.getId()));
@@ -302,7 +302,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                populateStationView(c.getTarget(), view);
+                populateStationView(getActivity(), network, c.getTarget(), view);
 
                 layoutRoute.addView(view);
             } else if (c instanceof Transfer) {
@@ -320,7 +320,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
 
-                populateStationView(c.getSource(), view);
+                populateStationView(getActivity(), network, c.getSource(), view);
 
                 Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(targetLine.getId()));
                 drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
@@ -364,7 +364,7 @@ public class RouteFragment extends TopFragment {
         if (layoutRoute.getChildCount() == 0) {
             View view = getActivity().getLayoutInflater().inflate(R.layout.step_already_there, layoutRoute, false);
 
-            populateStationView(originPicker.getSelection(), view);
+            populateStationView(getActivity(), network, originPicker.getSelection(), view);
 
             if (originPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount() ||
                     destinationPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
@@ -380,7 +380,7 @@ public class RouteFragment extends TopFragment {
         swapButton.setVisibility(View.VISIBLE);
     }
 
-    private void populateStationView(final Station station, View view) {
+    public static void populateStationView(final FragmentActivity activity, final Network network, final Station station, View view) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
@@ -422,9 +422,9 @@ public class RouteFragment extends TopFragment {
             @Override
             public void onClick(View view) {
                 StationFragment f = StationFragment.newInstance(network.getId(), station.getId());
-                FragmentActivity a = getActivity();
-                if (a != null) {
-                    f.show(a.getSupportFragmentManager(), "station-fragment");
+                FragmentActivity a = activity;
+                if (activity != null) {
+                    f.show(activity.getSupportFragmentManager(), "station-fragment");
                 }
             }
         });

@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -41,7 +42,8 @@ public class MainActivity extends AppCompatActivity
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
-        StationFragment.OnFragmentInteractionListener {
+        StationFragment.OnFragmentInteractionListener,
+        TripFragment.OnFragmentInteractionListener {
 
     MainService locService;
     boolean locBound = false;
@@ -183,8 +185,6 @@ public class MainActivity extends AppCompatActivity
             transaction.replace(R.id.main_fragment_container, newFragment);
             transaction.addToBackStack(null);
             transaction.commit();
-        } else {
-            Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -350,7 +350,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item) {
-
+        if(item.isTrip) {
+            StationFragment f = StationFragment.newInstance(item.networkId, item.originId);
+            f.show(getSupportFragmentManager(), "station-fragment");
+        } else {
+            TripFragment f = TripFragment.newInstance(item.networkId, item.id);
+            f.show(getSupportFragmentManager(), "trip-fragment");
+        }
     }
 
     @Override

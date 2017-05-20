@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -102,9 +103,7 @@ public class TripHistoryFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        if (mListener != null && mListener.getMainService() != null) {
-            new TripHistoryFragment.UpdateDataTask().execute();
-        }
+        new TripHistoryFragment.UpdateDataTask().execute();
         return view;
     }
 
@@ -154,8 +153,11 @@ public class TripHistoryFragment extends TopFragment {
             if (!Connectivity.isConnected(getContext())) {
                 return false;
             }
-            if (mListener == null || mListener.getMainService() == null) {
-                return false;
+            while (mListener == null || mListener.getMainService() == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
             Realm realm = Realm.getDefaultInstance();

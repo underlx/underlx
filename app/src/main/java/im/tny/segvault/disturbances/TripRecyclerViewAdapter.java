@@ -149,6 +149,8 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
     public static class TripItem implements Serializable {
         public final String id;
+        public final String networkId;
+        public final String originId;
         public final String originName;
         public final Date originTime;
         public final int originColor;
@@ -168,6 +170,8 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                     break;
                 }
             }
+            this.networkId = network.getId();
+            this.originId = network.getStation(trip.getPath().get(0).getStation().getId()).get(0).getId();
             this.originName = network.getStation(trip.getPath().get(0).getStation().getId()).get(0).getName();
             this.originTime = trip.getPath().get(0).getEntryDate();
             this.originColor = Color.BLACK;
