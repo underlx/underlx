@@ -153,6 +153,8 @@ public class MainActivity extends AppCompatActivity
                     return (Fragment) HomeFragment.newInstance();
                 case R.id.nav_plan_route:
                     return (Fragment) RouteFragment.newInstance("pt-ml");
+                case R.id.nav_trip_history:
+                    return (Fragment) TripHistoryFragment.newInstance(1);
                 case R.id.nav_map:
                     return (Fragment) MapFragment.newInstance();
                 case R.id.nav_about:
@@ -161,8 +163,6 @@ public class MainActivity extends AppCompatActivity
                     return (Fragment) DisturbanceFragment.newInstance(1);
                 case R.id.nav_notif:
                     return (Fragment) NotifPreferenceFragment.newInstance();
-                case R.id.menu_trip_history:
-                    return (Fragment) TripHistoryFragment.newInstance(1);
                 default:
                     return null;
             }

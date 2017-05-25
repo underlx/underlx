@@ -6,6 +6,8 @@
             android:title="@string/nav_home" />
         <item android:id="@+id/nav_plan_route" android:icon="@drawable/ic_menu_directions_subway"
             android:title="@string/nav_plan_route" />
+        <item android:id="@+id/nav_trip_history" android:icon="@drawable/ic_history_black_24dp"
+            android:title="@string/nav_trip_history" />
         <item android:id="@+id/nav_map" android:icon="@drawable/ic_menu_map"
             android:title="@string/nav_map" />
     </group>
