@@ -2,36 +2,25 @@ package im.tny.segvault.subway;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 /**
- * Created by gabriel on 4/5/17.
+ * Created by gabriel on 5/25/17.
  */
 
-public class Station implements INameable, IIDable, Comparable<Station>, Serializable {
-    private int rand;
-
-    public Station(String id, String name, Features features) {
+public class Station extends Zone implements INameable, IIDable, Comparable<Station> {
+    public Station(Network network, Set<Stop> stops, String id, String name, Features features) {
+        super(network, stops);
         setId(id);
         setName(name);
         setFeatures(features);
         this.lines = new ArrayList<>();
-        this.rand = new Random().nextInt(10000);
     }
 
-    private List<Line> lines = null;
-
-    public List<Line> getLines() {
-        return lines;
-    }
-
-    public boolean addLine(Line line) {
-        return lines.add(line);
+    public Station(Network network, String id, String name, Features features) {
+        this(network, new HashSet<Stop>(), id, name, features);
     }
 
     private String name;
@@ -58,66 +47,64 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
         this.id = id;
     }
 
+    private List<Line> lines = null;
+
+    public List<Line> getLines() {
+        return lines;
+    }
+
+    @Override
+    public boolean addVertex(Stop stop) {
+        boolean contained = getBase().addVertex(stop);
+        boolean contained_sub = super.addVertex(stop);
+        if (!lines.contains(stop.getLine())) {
+            lines.add(stop.getLine());
+        }
+        return contained || contained_sub;
+    }
+
+    @Override
+    public Connection addEdge(Stop source, Stop dest) {
+        if (!getBase().containsEdge(source, dest)) {
+            getBase().addEdge(source, dest);
+        }
+        return super.addEdge(source, dest);
+    }
+
+    public Stop getDirectionForConnection(Connection c) {
+        for (Line l : getLines()) {
+            Stop d = l.getDirectionForConnection(c);
+            if (d != null) return d;
+        }
+        return null;
+    }
+
+    public Stop getStationAfter(Connection c) {
+        for (Line l : getLines()) {
+            Stop d = l.getStopAfter(c);
+            if (d != null) return d;
+        }
+        return null;
+    }
+
+    public Set<Stop> getStops() {
+        Set<Stop> stops = new HashSet<>();
+        for (Stop s : getBase().vertexSet()) {
+            if(s.getStation() == this) {
+                stops.add(s);
+            }
+        }
+        return stops;
+    }
+
     @Override
     public String toString() {
-        return String.format("Station: %s %d", getName(), rand);
-    }
-
-    private Map<String, Object> metaMap = new HashMap<>();
-
-    public Object getMeta(String key) {
-        return metaMap.get(key);
-    }
-
-    public Object putMeta(String key, Object object) {
-        if (object == null) {
-            return metaMap.remove(key);
-        }
-        return metaMap.put(key, object);
+        return String.format("Stop: %s", getName());
     }
 
     @Override
     public int compareTo(final Station o) {
-        int idcomp = this.getId().compareTo(o.getId());
-        if (idcomp == 0) {
-            return this.getName().compareTo(o.getName());
-        }
-        return idcomp;
-    }
-
-    public List<Connection> getTransferEdges(Network n) {
-        List<Connection> tedges = new ArrayList<>();
-        for (Connection c : n.outgoingEdgesOf(this)) {
-            if (c instanceof Transfer) {
-                tedges.add(c);
-            }
-        }
-        return tedges;
-    }
-
-    public boolean hasTransferEdge(Network n) {
-        for (Connection c : n.outgoingEdgesOf(this)) {
-            if (c instanceof Transfer) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Station getDirectionForConnection(Connection c) {
-        for (Line l : getLines()) {
-            Station d = l.getDirectionForConnection(c);
-            if (d != null) return d;
-        }
-        return null;
-    }
-
-    public Station getStationAfter(Connection c) {
-        for (Line l : getLines()) {
-            Station d = l.getStationAfter(c);
-            if (d != null) return d;
-        }
-        return null;
+        return this.getId().compareTo(o.getId());
     }
 
     static public class Features implements Serializable {
@@ -145,6 +132,4 @@ public class Station implements INameable, IIDable, Comparable<Station>, Seriali
     public void setFeatures(Features features) {
         this.features = features;
     }
-
-
 }

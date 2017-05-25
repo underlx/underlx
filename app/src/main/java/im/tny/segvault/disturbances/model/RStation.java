@@ -1,7 +1,7 @@
 package im.tny.segvault.disturbances.model;
 
 import im.tny.segvault.subway.Station;
-import io.realm.RealmList;
+import im.tny.segvault.subway.Stop;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
@@ -50,7 +50,7 @@ public class RStation extends RealmObject {
         return station;
     }
 
-    public void setStation(Station station) {
+    public void setStop(Station station) {
         this.station = station;
         this.id = station.getId();
     }

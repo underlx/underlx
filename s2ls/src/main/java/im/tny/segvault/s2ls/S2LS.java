@@ -3,9 +3,8 @@ package im.tny.segvault.s2ls;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
 /**
@@ -112,13 +111,13 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     @Override
-    public void onEnteredStations(ILocator locator, Station... stations) {
-        state.onEnteredStations(locator, stations);
+    public void onEnteredStations(ILocator locator, Stop... stops) {
+        state.onEnteredStations(locator, stops);
     }
 
     @Override
-    public void onLeftStations(ILocator locator, Station... stations) {
-        state.onLeftStations(locator, stations);
+    public void onLeftStations(ILocator locator, Stop... stops) {
+        state.onLeftStations(locator, stops);
     }
 
     public void tick() {

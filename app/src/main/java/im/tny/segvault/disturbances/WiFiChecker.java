@@ -20,14 +20,14 @@ import java.util.Map;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 
 /**
  * Created by gabriel on 4/12/17.
  */
 
 class WiFiChecker {
-    private static final String STATION_META_WIFICHECKER_KEY = "WiFiChecker";
+    private static final String STOP_META_WIFICHECKER_KEY = "WiFiChecker";
 
     private Map<String, WiFiLocator> locators = new HashMap<>();
     private long scanInterval = 30000;
@@ -104,8 +104,8 @@ class WiFiChecker {
         }
     }
 
-    public static void addBSSIDforStation(Station station, BSSID bssid) {
-        Object o = station.getMeta(STATION_META_WIFICHECKER_KEY);
+    public static void addBSSIDforStop(Stop stop, BSSID bssid) {
+        Object o = stop.getMeta(STOP_META_WIFICHECKER_KEY);
         List<BSSID> stationBSSID;
         if (o == null || !(o instanceof List)) {
             stationBSSID = new ArrayList<>();
@@ -113,7 +113,7 @@ class WiFiChecker {
             stationBSSID = (List<BSSID>) o;
         }
         stationBSSID.add(bssid);
-        station.putMeta(STATION_META_WIFICHECKER_KEY, stationBSSID);
+        stop.putMeta(STOP_META_WIFICHECKER_KEY, stationBSSID);
     }
 
     public void setLocatorForNetwork(Network network, WiFiLocator locator) {

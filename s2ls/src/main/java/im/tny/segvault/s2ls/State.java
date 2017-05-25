@@ -1,7 +1,6 @@
 package im.tny.segvault.s2ls;
 
-import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
 /**
@@ -62,12 +61,12 @@ public abstract class State implements OnStatusChangeListener {
     }
 
     @Override
-    public void onEnteredStations(ILocator locator, Station... stations) {
+    public void onEnteredStations(ILocator locator, Stop... stops) {
 
     }
 
     @Override
-    public void onLeftStations(ILocator locator, Station... stations) {
+    public void onLeftStations(ILocator locator, Stop... stops) {
 
     }
 

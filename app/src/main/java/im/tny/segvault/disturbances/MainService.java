@@ -56,10 +56,11 @@ import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -101,10 +102,10 @@ public class MainService extends Service {
             // create Realm stations for the network if they don't exist already
             Realm realm = Realm.getDefaultInstance();
             realm.beginTransaction();
-            for (Station s : net.vertexSet()) {
+            for (Station s : net.getStations()) {
                 if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
                     RStation rs = new RStation();
-                    rs.setStation(s);
+                    rs.setStop(s);
                     rs.setNetwork(net.getId());
                     realm.copyToRealm(rs);
                 }
@@ -179,7 +180,7 @@ public class MainService extends Service {
                 Network net = TopologyCache.loadNetwork(this, "pt-ml");
                 /*for (Line l : net.getLines()) {
                     Log.d("UpdateTopologyTask", "Line: " + l.getName());
-                    for (Station s : l.vertexSet()) {
+                    for (Stop s : l.vertexSet()) {
                         Log.d("UpdateTopologyTask", s.toString());
                     }
                 }*/
@@ -187,7 +188,7 @@ public class MainService extends Service {
                 for (Connection c : net.edgeSet()) {
                     if (c instanceof Transfer) {
                         Log.d("loadNetworks", " INTERCHANGE");
-                        for (Station s : c.getStations()) {
+                        for (Stop s : c.getStops()) {
                             Log.d("loadNetworks", String.format("  %s", s.toString()));
                         }
                         for (Line l : ((Transfer) c).getLines()) {
@@ -202,7 +203,7 @@ public class MainService extends Service {
                 Log.d("loadNetworks", String.format("In network? %b", loc.inNetwork()));
                 Log.d("loadNetworks", String.format("Near network? %b", loc.nearNetwork()));
                 Zone z = loc.getLocation();
-                for (Station s : z.vertexSet()) {
+                for (Stop s : z.vertexSet()) {
                     Log.d("loadNetworks", String.format("May be in station %s", s));
                 }
             } catch (CacheException e) {
@@ -252,14 +253,14 @@ public class MainService extends Service {
         }
     }
 
-    public List<Station> getAllStations() {
-        List<Station> stations = new ArrayList<>();
+    public List<Stop> getAllStations() {
+        List<Stop> stops = new ArrayList<>();
         synchronized (lock) {
             for (Network n : networks.values()) {
-                stations.addAll(n.vertexSet());
+                stops.addAll(n.vertexSet());
             }
         }
-        return stations;
+        return stops;
     }
 
     public List<Line> getAllLines() {
@@ -442,8 +443,8 @@ public class MainService extends Service {
             if (loc.getState() instanceof InNetworkState) {
                 InNetworkState ins = (InNetworkState) loc.getState();
                 s += "\tPossible stations:\n";
-                for (Station station : loc.getLocation().vertexSet()) {
-                    s += String.format("\t\t%s (%s)\n", station.getName(), station.getLines().get(0).getName());
+                for (Stop stop : loc.getLocation().vertexSet()) {
+                    s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getName());
                 }
                 s += "\tPath:\n";
                 for (Connection c : ins.getPath().getEdgeList()) {
@@ -477,21 +478,25 @@ public class MainService extends Service {
                     for (String lineid : n.lines) {
                         Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);
-                        Line line = new Line(net, new HashSet<Station>(), l.id, l.name, l.typCars);
+                        Line line = new Line(net, new HashSet<Stop>(), l.id, l.name, l.typCars);
                         line.setColor(Color.parseColor("#" + l.color));
                         for (String sid : l.stations) {
-                            Log.d("UpdateTopologyTask", "  Station: " + sid);
+                            Log.d("UpdateTopologyTask", "  Stop: " + sid);
                             API.Station s = api.getStation(sid);
-                            Station station = new Station(s.id, s.name,
-                                    new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
-                            line.addVertex(station);
-                            station.addLine(line);
+                            Station station = net.getStation(s.id);
+                            if(station == null) {
+                                station = new Station(net, s.id, s.name,
+                                        new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
+                            }
+                            Stop stop = new Stop(station, line);
+                            line.addVertex(stop);
+                            station.addVertex(stop);
 
                             // WiFi APs
                             for (API.WiFiAP w : s.wiFiAPs) {
                                 // take line affinity into account
                                 if (w.line.equals(line.getId())) {
-                                    WiFiChecker.addBSSIDforStation(station, new BSSID(w.bssid));
+                                    WiFiChecker.addBSSIDforStop(stop, new BSSID(w.bssid));
                                 }
                             }
 
@@ -508,12 +513,12 @@ public class MainService extends Service {
 
                     // Connections are within stations in the same line
                     for (API.Connection c : api.getConnections()) {
-                        List<Station> sFrom = net.getStation(c.from);
-                        List<Station> sTo = net.getStation(c.to);
-                        Station from = null, to = null;
-                        for (Station s : sFrom) {
-                            for (Station s2 : sTo) {
-                                if (s.getLines().containsAll(s2.getLines())) {
+                        Set<Stop> sFrom = net.getStation(c.from).vertexSet();
+                        Set<Stop> sTo = net.getStation(c.to).vertexSet();
+                        Stop from = null, to = null;
+                        for (Stop s : sFrom) {
+                            for (Stop s2 : sTo) {
+                                if (s.getLine().getId().equals(s2.getLine().getId())) {
                                     from = s;
                                     to = s2;
                                 }
@@ -521,11 +526,7 @@ public class MainService extends Service {
                         }
                         if (from != null && to != null) {
                             Connection newConnection = net.addEdge(from, to);
-                            for (Line l : from.getLines()) {
-                                if (to.getLines().contains(l)) {
-                                    l.addEdge(from, to);
-                                }
-                            }
+                            from.getLine().addEdge(from, to);
                             net.setEdgeWeight(newConnection, c.typS + 1); // TODO remove constant
                         }
                     }
@@ -533,25 +534,15 @@ public class MainService extends Service {
                     for (API.Transfer t : api.getTransfers()) {
                         Transfer newTransfer = new Transfer();
                         // find stations with the right IDs for each line
-                        Station from = null;
-                        Station to = null;
-                        for (Station s : net.vertexSet()) {
-                            if (s.getId().equals(t.station)) {
-                                for (Line l : s.getLines()) {
-                                    if (l.getId().equals(t.from)) {
-                                        from = s;
-                                        break;
-                                    }
-                                    if (l.getId().equals(t.to)) {
-                                        to = s;
-                                        break;
-                                    }
+                        Station station = net.getStation(t.station);
+                        for (Stop from : station.vertexSet()) {
+                            for (Stop to : station.vertexSet()) {
+                                if (from.getLine().getId().equals(t.from) && to.getLine().getId().equals(t.to)) {
+                                    net.addEdge(from, to, newTransfer);
+                                    net.setEdgeWeight(newTransfer, t.typS + 3); // TODO remove constant
                                 }
                             }
-                        }
-                        if (from != null && to != null) {
-                            net.addEdge(from, to, newTransfer);
-                            net.setEdgeWeight(newTransfer, t.typS + 3); // TODO remove constant
+
                         }
                     }
 
@@ -799,16 +790,16 @@ public class MainService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Station curStation = state.getPath().getEndVertex();
-        String title = curStation.getName();
+        Stop curStop = state.getPath().getEndVertex();
+        String title = curStop.getStation().getName();
         String status = getString(R.string.notif_route_waiting);
         if (state.getPath().getEdgeList().size() > 0) {
             Connection latest = state.getPath().getEdgeList().get(state.getPath().getEdgeList().size() - 1);
-            Station direction = curStation.getDirectionForConnection(latest);
-            Station next = curStation.getStationAfter(latest);
+            Stop direction = curStop.getLine().getDirectionForConnection(latest);
+            Stop next = curStop.getLine().getStopAfter(latest);
             if (direction != null && next != null) {
-                status = String.format(getString(R.string.notif_route_next_station) + "\n", next.getName());
-                status += String.format(getString(R.string.notif_route_direction), direction.getName());
+                status = String.format(getString(R.string.notif_route_next_station) + "\n", next.getStation().getName());
+                status += String.format(getString(R.string.notif_route_direction), direction.getStation().getName());
             } else if (state.getLocation().vertexSet().size() == 0) {
                 status = getString(R.string.notif_route_left_station);
             }
@@ -817,13 +808,13 @@ public class MainService extends Service {
         }
 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(curStation.getName());
+        bigTextStyle.setBigContentTitle(curStop.getStation().getName());
         bigTextStyle.bigText(status);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
                 .setSmallIcon(R.drawable.ic_trip_notif)
-                .setColor(curStation.getLines().get(0).getColor())
+                .setColor(curStop.getLine().getColor())
                 .setContentTitle(title)
                 .setContentText(status.replace("\n", " | "))
                 .setAutoCancel(false)
@@ -877,7 +868,7 @@ public class MainService extends Service {
             if (size == 0) {
                 StationUse use = new StationUse();
                 use.setType(StationUse.UseType.VISIT);
-                use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getId()).findFirst());
+                use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
                 use.setEntryDate(path.getEnterTime(path.getStartVertex()));
                 use.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
                 uses.add(realm.copyToRealm(use));
@@ -885,16 +876,16 @@ public class MainService extends Service {
                 Connection c = path.getEdgeList().get(0);
                 StationUse use = new StationUse();
                 use.setType(StationUse.UseType.VISIT);
-                use.setSourceLine(c.getSource().getLines().get(0).getId());
-                use.setTargetLine(c.getTarget().getLines().get(0).getId());
+                use.setSourceLine(c.getSource().getLine().getId());
+                use.setTargetLine(c.getTarget().getLine().getId());
                 use.setEntryDate(path.getEnterTime(c.getSource()));
                 use.setLeaveDate(path.getLeaveTime(c.getTarget()));
-                use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getId()).findFirst());
+                use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
                 uses.add(realm.copyToRealm(use));
             } else {
                 StationUse startUse = new StationUse();
                 startUse.setType(StationUse.UseType.NETWORK_ENTRY);
-                startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getId()).findFirst());
+                startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
                 startUse.setEntryDate(path.getEnterTime(path.getStartVertex()));
                 startUse.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
                 uses.add(realm.copyToRealm(startUse));
@@ -910,8 +901,8 @@ public class MainService extends Service {
                     if (c instanceof Transfer) {
                         if (i == size - 1) break;
                         use.setType(StationUse.UseType.INTERCHANGE);
-                        use.setSourceLine(c.getSource().getLines().get(0).getId());
-                        use.setTargetLine(c.getTarget().getLines().get(0).getId());
+                        use.setSourceLine(c.getSource().getLine().getId());
+                        use.setTargetLine(c.getTarget().getLine().getId());
                         use.setEntryDate(path.getEnterTime(c.getSource()));
                         use.setLeaveDate(path.getLeaveTime(c.getTarget()));
                         i++; // skip next station as then we'd have duplicate uses for the same station ID
@@ -920,13 +911,13 @@ public class MainService extends Service {
                         use.setEntryDate(path.getEnterTime(c.getSource()));
                         use.setLeaveDate(path.getLeaveTime(c.getSource()));
                     }
-                    use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getId()).findFirst());
+                    use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
                     uses.add(realm.copyToRealm(use));
                 }
 
                 StationUse endUse = new StationUse();
                 endUse.setType(StationUse.UseType.NETWORK_EXIT);
-                endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getId()).findFirst());
+                endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getStation().getId()).findFirst());
                 endUse.setEntryDate(path.getEnterTime(path.getEndVertex()));
                 endUse.setLeaveDate(path.getLeaveTime(path.getEndVertex()));
                 uses.add(realm.copyToRealm(endUse));

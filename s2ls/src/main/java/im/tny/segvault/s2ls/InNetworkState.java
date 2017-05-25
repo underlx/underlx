@@ -14,7 +14,7 @@ import java.util.Map;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import im.tny.segvault.subway.Zone;
 
@@ -24,7 +24,7 @@ import im.tny.segvault.subway.Zone;
 
 public class InNetworkState extends State {
     private final static int TICKS_UNTIL_LEFT = 6; // assuming a tick occurs more or less every 30 seconds
-    private Zone current = new Zone(getS2LS().getNetwork(), new HashSet<Station>());
+    private Zone current = new Zone(getS2LS().getNetwork(), new HashSet<Stop>());
 
     private Path path = null;
 
@@ -79,18 +79,18 @@ public class InNetworkState extends State {
     }
 
     @Override
-    public void onEnteredStations(ILocator locator, Station... stations) {
-        for (Station station : stations) {
-            current.addVertex(station);
+    public void onEnteredStations(ILocator locator, Stop... stops) {
+        for (Stop stop : stops) {
+            current.addVertex(stop);
         }
         mightHaveLeft = false;
         if (path == null) {
-            path = new Path(getS2LS().getNetwork(), stations[0], stations[stations.length - 1], new LinkedList<Connection>(), 0);
+            path = new Path(getS2LS().getNetwork(), stops[0], stops[stops.length - 1], new LinkedList<Connection>(), 0);
         } else {
-            path.setEndVertex(stations[stations.length - 1], false);
+            path.setEndVertex(stops[stops.length - 1], false);
         }
-        for (Station station : stations) {
-            path.setEnterTime(station, new Date());
+        for (Stop stop : stops) {
+            path.setEnterTime(stop, new Date());
         }
         for (OnLocationChangedListener l : listeners) {
             l.onLocationChanged(this);
@@ -98,12 +98,12 @@ public class InNetworkState extends State {
     }
 
     @Override
-    public void onLeftStations(ILocator locator, Station... stations) {
-        for (Station station : stations) {
-            current.removeVertex(station);
+    public void onLeftStations(ILocator locator, Stop... stops) {
+        for (Stop stop : stops) {
+            current.removeVertex(stop);
             if(path != null) {
-                path.setLeaveTime(station, new Date());
-                for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(station)) {
+                path.setLeaveTime(stop, new Date());
+                for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(stop)) {
                     if (c instanceof Transfer && current.containsVertex(c.getTarget())) {
                         path.setEndVertex(c.getTarget(), true);
                         break;
@@ -140,25 +140,25 @@ public class InNetworkState extends State {
         void onLocationChanged(InNetworkState state);
     }
 
-    public class Path implements GraphPath<Station, Connection> {
+    public class Path implements GraphPath<Stop, Connection> {
 
         private Network graph;
 
         private List<Connection> edgeList;
 
-        private Map<Station, Date> enterTimes = new HashMap<>();
-        private Map<Station, Date> leaveTimes = new HashMap<>();
+        private Map<Stop, Date> enterTimes = new HashMap<>();
+        private Map<Stop, Date> leaveTimes = new HashMap<>();
 
-        private Station startVertex;
+        private Stop startVertex;
 
-        private Station endVertex;
+        private Stop endVertex;
 
         private double weight;
 
         public Path(
                 Network graph,
-                Station startVertex,
-                Station endVertex,
+                Stop startVertex,
+                Stop endVertex,
                 List<Connection> edgeList,
                 double weight) {
             this.graph = graph;
@@ -169,21 +169,21 @@ public class InNetworkState extends State {
         }
 
         @Override
-        public Graph<Station, Connection> getGraph() {
+        public Graph<Stop, Connection> getGraph() {
             return graph;
         }
 
         @Override
-        public Station getStartVertex() {
+        public Stop getStartVertex() {
             return startVertex;
         }
 
         @Override
-        public Station getEndVertex() {
+        public Stop getEndVertex() {
             return endVertex;
         }
 
-        public void setEndVertex(Station vertex, boolean addLastTransfer) {
+        public void setEndVertex(Stop vertex, boolean addLastTransfer) {
             List<Connection> cs = graph.getAnyPathBetween(endVertex, vertex).getEdgeList();
             int size = cs.size();
             for (int i = 0; i < size; i++) {
@@ -220,16 +220,16 @@ public class InNetworkState extends State {
             return weight;
         }
 
-        public Date getEnterTime(Station s) {
+        public Date getEnterTime(Stop s) {
             return enterTimes.get(s);
         }
-        public void setEnterTime(Station s, Date d) {
+        public void setEnterTime(Stop s, Date d) {
             enterTimes.put(s, d);
         }
-        public Date getLeaveTime(Station s) {
+        public Date getLeaveTime(Stop s) {
             return leaveTimes.get(s);
         }
-        public void setLeaveTime(Station s, Date d) {
+        public void setLeaveTime(Stop s, Date d) {
             leaveTimes.put(s, d);
         }
     }

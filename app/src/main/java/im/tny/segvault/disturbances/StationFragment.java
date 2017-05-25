@@ -9,13 +9,11 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -26,15 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.StationUse;
-import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
-import io.realm.Realm;
-import io.realm.RealmQuery;
+import im.tny.segvault.subway.Stop;
 
 /**
  * Created by gabriel on 5/10/17.
@@ -109,16 +103,11 @@ public class StationFragment extends BottomSheetDialogFragment {
         MainService service = mListener.getMainService();
         if (service != null) {
             Network net = service.getNetwork(networkId);
-            Station station = net.getStation(stationId).get(0);
+            Station station = net.getStation(stationId);
 
             stationNameView.setText(station.getName());
 
-            Set<Line> lineset = new HashSet<>(station.getLines());
-
-            for (Connection c : station.getTransferEdges(net)) {
-                lineset.addAll(c.getTarget().getLines());
-            }
-            List<Line> lines = new ArrayList<>(lineset);
+            List<Line> lines = new ArrayList<>(station.getLines());
             Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
                 @Override
                 public int compare(Line l1, Line l2) {

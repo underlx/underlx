@@ -8,8 +8,8 @@ import java.util.Set;
  */
 
 public class Line extends Zone implements INameable, IColorable, IIDable, Comparable<Line> {
-    public Line(Network network, Set<Station> stations, String id, String name, int usualCarCount) {
-        super(network, stations);
+    public Line(Network network, Set<Stop> stops, String id, String name, int usualCarCount) {
+        super(network, stops);
         setId(id);
         setName(name);
         setUsualCarCount(usualCarCount);
@@ -51,14 +51,14 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
     }
 
     @Override
-    public boolean addVertex(Station station) {
-        boolean contained = getBase().addVertex(station);
-        boolean contained_sub = super.addVertex(station);
+    public boolean addVertex(Stop stop) {
+        boolean contained = getBase().addVertex(stop);
+        boolean contained_sub = super.addVertex(stop);
         return contained || contained_sub;
     }
 
     @Override
-    public Connection addEdge(Station source, Station dest) {
+    public Connection addEdge(Stop source, Stop dest) {
         if (!getBase().containsEdge(source, dest)) {
             getBase().addEdge(source, dest);
         }
@@ -70,9 +70,9 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         return String.format("Line: %s with color %s", getName(), String.format("#%06X", 0xFFFFFF & getColor()));
     }
 
-    public Set<Station> getEndStations() {
-        Set<Station> ends = new HashSet<>();
-        for (Station s : vertexSet()) {
+    public Set<Stop> getEndStops() {
+        Set<Stop> ends = new HashSet<>();
+        for (Stop s : vertexSet()) {
             if (outDegreeOf(s) == 1) {
                 ends.add(s);
             }
@@ -80,19 +80,19 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         return ends;
     }
 
-    public Station getDirectionForConnection(Connection c) {
+    public Stop getDirectionForConnection(Connection c) {
         if (!edgeSet().contains(c)) {
             return null;
         }
 
-        Set<Station> visited = new HashSet<>();
+        Set<Stop> visited = new HashSet<>();
         while (visited.add(c.getSource())) {
-            Station curStation = c.getTarget();
-            if (outDegreeOf(curStation) == 1) {
+            Stop curStop = c.getTarget();
+            if (outDegreeOf(curStop) == 1) {
                 // it's an end station
-                return curStation;
+                return curStop;
             }
-            for (Connection outedge : outgoingEdgesOf(curStation)) {
+            for (Connection outedge : outgoingEdgesOf(curStop)) {
                 if (!visited.contains(outedge.getTarget())) {
                     c = outedge;
                     break;
@@ -103,7 +103,7 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         return c.getTarget();
     }
 
-    public Station getStationAfter(Connection c) {
+    public Stop getStopAfter(Connection c) {
         if (!edgeSet().contains(c)) {
             return null;
         }

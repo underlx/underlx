@@ -2,7 +2,7 @@ package im.tny.segvault.s2ls;
 
 import java.util.HashSet;
 
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
 /**
@@ -31,7 +31,7 @@ public class OffNetworkState extends State {
 
     @Override
     public Zone getLocation() {
-        return new Zone(getS2LS().getNetwork(), new HashSet<Station>());
+        return new Zone(getS2LS().getNetwork(), new HashSet<Stop>());
     }
 
     @Override

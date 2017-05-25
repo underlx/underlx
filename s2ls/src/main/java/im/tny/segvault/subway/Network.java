@@ -1,28 +1,21 @@
 package im.tny.segvault.subway;
 
-import android.util.Pair;
-
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by gabriel on 4/5/17.
  */
 
-public class Network extends SimpleDirectedWeightedGraph<Station, Connection> implements INameable, IIDable {
+public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements INameable, IIDable {
     public Network(String id, String name, int usualCarCount) {
         /*super(new ConnectionFactory());
         ((ConnectionFactory)this.getEdgeFactory()).setNetwork(this);*/
@@ -100,31 +93,34 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
         lines.put(line.getId(), line);
     }
 
-    private Map<String, List<Station>> stations = new HashMap<>();
+    private Map<String, Station> stations = new HashMap<>();
 
-    @Override
-    public boolean addVertex(Station station) {
-        List<Station> l = new ArrayList<>();
-        if (stations.get(station.getId()) != null) {
-            l = stations.get(station.getId());
-        }
-        l.add(station);
-        stations.put(station.getId(), l);
-        return super.addVertex(station);
-    }
-
-    @Override
-    public boolean removeVertex(Station station) {
-        List<Station> l = stations.get(station.getId());
-        l.remove(station);
-        if (l.size() == 0) {
-            stations.remove(station.getId());
-        }
-        return super.removeVertex(station);
-    }
-
-    public List<Station> getStation(String id) {
+    public Station getStation(String id) {
         return stations.get(id);
+    }
+
+    public Collection<Station> getStations() {
+        return stations.values();
+    }
+
+    @Override
+    public boolean addVertex(Stop stop) {
+        Station s = stations.get(stop.getStation().getId());
+        if (s == null) {
+            s = stop.getStation();
+            stations.put(stop.getStation().getId(), s);
+        }
+        return super.addVertex(stop);
+    }
+
+    @Override
+    public boolean removeVertex(Stop stop) {
+        Station s = stations.get(stop.getStation().getId());
+        s.removeVertex(stop);
+        if (s.vertexSet().size() == 0) {
+            stations.remove(stop.getStation().getId());
+        }
+        return super.removeVertex(stop);
     }
 
     private transient IEdgeWeighter edgeWeighter = null;
@@ -146,11 +142,11 @@ public class Network extends SimpleDirectedWeightedGraph<Station, Connection> im
         return super.getEdgeWeight(connection);
     }
 
-    public GraphPath<Station, Connection> getAnyPathBetween(Station source, Station target) {
+    public GraphPath<Stop, Connection> getAnyPathBetween(Stop source, Stop target) {
         AStarShortestPath as = new AStarShortestPath(this);
-        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Station>() {
+        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
             @Override
-            public double getCostEstimate(Station sourceVertex, Station targetVertex) {
+            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
                 return 0;
             }
         };

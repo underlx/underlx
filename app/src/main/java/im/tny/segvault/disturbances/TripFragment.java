@@ -1,38 +1,24 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import io.realm.Realm;
 
@@ -105,8 +91,8 @@ public class TripFragment extends BottomSheetDialogFragment {
         Realm realm = Realm.getDefaultInstance();
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
 
-        Station origin = network.getStation(trip.getPath().get(0).getStation().getId()).get(0);
-        Station dest = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId()).get(0);
+        Station origin = network.getStation(trip.getPath().get(0).getStation().getId());
+        Station dest = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId());
 
         originNameView.setText(origin.getName());
         destNameView.setText(dest.getName());
@@ -132,7 +118,7 @@ public class TripFragment extends BottomSheetDialogFragment {
             if (isFirst) {
                 View stepview = inflater.inflate(R.layout.path_station_initial, layoutRoute, false);
 
-                Line line = c.getSource().getLines().get(0);
+                Line line = c.getSource().getLine();
 
                 int lineColor = line.getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
@@ -150,11 +136,11 @@ public class TripFragment extends BottomSheetDialogFragment {
                 curBulletIdx++;
                 isFirst = false;
             } else {
-                Line targetLine = c.getTarget().getLines().get(0);
+                Line targetLine = c.getTarget().getLine();
 
                 View stepview = inflater.inflate(R.layout.path_station_intermediate, layoutRoute, false);
 
-                int prevLineColor = c.getSource().getLines().get(0).getColor();
+                int prevLineColor = c.getSource().getLine().getColor();
                 FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
                 prevLineStripeLayout.setBackgroundColor(prevLineColor);
 
@@ -179,7 +165,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 if (i == el.size() - 1) {
                     stepview = inflater.inflate(R.layout.path_station_final, layoutRoute, false);
 
-                    int lineColor = c.getSource().getLines().get(0).getColor();
+                    int lineColor = c.getSource().getLine().getColor();
                     FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
                     lineStripeLayout.setBackgroundColor(lineColor);
 

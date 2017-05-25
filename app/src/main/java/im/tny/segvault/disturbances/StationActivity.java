@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,8 +11,6 @@ import android.os.IBinder;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -34,6 +31,7 @@ import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 
 public class StationActivity extends AppCompatActivity {
@@ -98,19 +96,14 @@ public class StationActivity extends AppCompatActivity {
             locBound = true;
 
             Network net = locService.getNetwork(networkId);
-            Station station = net.getStation(stationId).get(0);
+            Station station = net.getStation(stationId);
 
             setTitle(station.getName());
             getSupportActionBar().setTitle(station.getName());
             CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
             ctl.setTitle(station.getName());
 
-            Set<Line> lineset = new HashSet<>(station.getLines());
-
-            for (Connection c : station.getTransferEdges(net)) {
-                lineset.addAll(c.getTarget().getLines());
-            }
-            List<Line> lines = new ArrayList<>(lineset);
+            List<Line> lines = new ArrayList<>(station.getLines());
             Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
                 @Override
                 public int compare(Line l1, Line l2) {
@@ -197,7 +190,7 @@ public class StationActivity extends AppCompatActivity {
             statsGoneThroughCountView.setText(String.format(getString(R.string.frag_station_stats_gone_through), goneThroughCount));
 
             TextView statsTransferCountView = (TextView) findViewById(R.id.station_transfer_count_view);
-            if(station.hasTransferEdge(net)) {
+            if(station.getLines().size() > 1) {
                 long transferCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
                 statsTransferCountView.setText(String.format(getString(R.string.frag_station_stats_transfer), transferCount));
                 statsTransferCountView.setVisibility(View.VISIBLE);

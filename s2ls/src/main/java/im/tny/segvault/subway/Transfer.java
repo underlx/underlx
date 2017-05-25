@@ -10,8 +10,8 @@ import java.util.ArrayList;
 public class Transfer extends Connection {
     public Collection<Line> getLines() {
         Collection<Line> l = new ArrayList<>();
-        for(Station station : getStations()) {
-            l.addAll(station.getLines());
+        for(Stop stop : getStops()) {
+            l.add(stop.getLine());
         }
         return l;
     }

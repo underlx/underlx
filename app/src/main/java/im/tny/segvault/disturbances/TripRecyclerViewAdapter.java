@@ -171,26 +171,26 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                 }
             }
             this.networkId = network.getId();
-            this.originId = network.getStation(trip.getPath().get(0).getStation().getId()).get(0).getId();
-            this.originName = network.getStation(trip.getPath().get(0).getStation().getId()).get(0).getName();
+            this.originId = network.getStation(trip.getPath().get(0).getStation().getId()).getId();
+            this.originName = network.getStation(trip.getPath().get(0).getStation().getId()).getName();
             this.originTime = trip.getPath().get(0).getEntryDate();
             this.originColor = Color.BLACK;
 
-            this.destName = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId()).get(0).getName();
+            this.destName = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId()).getName();
             this.destTime = trip.getPath().get(trip.getPath().size() - 1).getLeaveDate();
             this.destColor = Color.BLACK;
 
             this.lineColors = new ArrayList<>();
             List<Connection> path = trip.toConnectionPath(network);
             if (path.size() > 0) {
-                lineColors.add(path.get(0).getSource().getLines().get(0).getColor());
+                lineColors.add(path.get(0).getSource().getLine().getColor());
                 for (Connection c : path) {
                     if (c instanceof Transfer) {
-                        lineColors.add(c.getSource().getLines().get(0).getColor());
-                        lineColors.add(c.getTarget().getLines().get(0).getColor());
+                        lineColors.add(c.getSource().getLine().getColor());
+                        lineColors.add(c.getTarget().getLine().getColor());
                     }
                 }
-                lineColors.add(path.get(path.size() - 1).getTarget().getLines().get(0).getColor());
+                lineColors.add(path.get(path.size() - 1).getTarget().getLine().getColor());
                 isTrip = false;
             } else {
                 isTrip = true;

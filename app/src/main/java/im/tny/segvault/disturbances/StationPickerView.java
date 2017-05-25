@@ -38,6 +38,7 @@ import java.util.Map;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
 
 public class StationPickerView extends LinearLayout {
@@ -200,7 +201,7 @@ public class StationPickerView extends LinearLayout {
                         .normalize(constraint.toString().toLowerCase().trim(), Normalizer.Form.NFD)
                         .replaceAll("[^\\p{ASCII}]", "");
 
-                for (final Station station : originalList) {
+                for (final Station station: originalList) {
                     String norm = Normalizer
                             .normalize(station.getName(), Normalizer.Form.NFD)
                             .replaceAll("[^\\p{ASCII}]", "").toLowerCase();

@@ -11,7 +11,7 @@ import im.tny.segvault.s2ls.ILocator;
 import im.tny.segvault.s2ls.IProximityDetector;
 import im.tny.segvault.s2ls.OnStatusChangeListener;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
 /**
@@ -36,8 +36,8 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
         this.listener = listener;
     }
 
-    private boolean checkBSSIDs(Station station) {
-        Object o = station.getMeta(STATION_META_WIFICHECKER_KEY);
+    private boolean checkBSSIDs(Stop stop) {
+        Object o = stop.getMeta(STATION_META_WIFICHECKER_KEY);
         if (o == null || !(o instanceof List)) {
             return false;
         }
@@ -47,7 +47,7 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
 
     @Override
     public boolean inNetwork(Network network) {
-        for (Station s : network.vertexSet()) {
+        for (Stop s : network.vertexSet()) {
             if (checkBSSIDs(s)) {
                 return true;
             }
@@ -63,33 +63,33 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
 
     @Override
     public Zone getLocation(Network network) {
-        Set<Station> stations = new HashSet<>();
+        Set<Stop> stops = new HashSet<>();
 
-        for (Station s : network.vertexSet()) {
+        for (Stop s : network.vertexSet()) {
             if (checkBSSIDs(s)) {
-                stations.add(s);
+                stops.add(s);
             }
         }
 
-        if (stations.size() > 1) {
+        if (stops.size() > 1) {
             // assumes currentBSSIDs are sorted by decreasing signal strength
             for (BSSID b : currentBSSIDs) {
-                for (Station s : stations) {
+                for (Stop s : stops) {
                     Object o = s.getMeta(STATION_META_WIFICHECKER_KEY);
                     if (o == null || !(o instanceof List)) {
                         continue;
                     }
                     List<BSSID> stationBSSID = (List<BSSID>) o;
                     if (stationBSSID.contains(b)) {
-                        stations.clear();
-                        stations.add(s);
-                        return new Zone(network, stations);
+                        stops.clear();
+                        stops.add(s);
+                        return new Zone(network, stops);
                     }
                 }
             }
         }
 
-        return new Zone(network, stations);
+        return new Zone(network, stops);
     }
 
     public void updateCurrentBSSIDs(List<BSSID> bssids) {
@@ -98,14 +98,14 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
         currentBSSIDs = bssids;
         boolean curInNetwork = inNetwork(network);
         Zone curLocation = getLocation(network);
-        List<Station> stationsLeft = new ArrayList<>();
-        for (Station s : prevLocation.vertexSet()) {
+        List<Stop> stationsLeft = new ArrayList<>();
+        for (Stop s : prevLocation.vertexSet()) {
             if (!curLocation.containsVertex(s)) {
                 stationsLeft.add(s);
             }
         }
         if (stationsLeft.size() > 0) {
-            Station[] stationsLeftArray = new Station[stationsLeft.size()];
+            Stop[] stationsLeftArray = new Stop[stationsLeft.size()];
             listener.onLeftStations(this, stationsLeft.toArray(stationsLeftArray));
         }
         if (curInNetwork != prevInNetwork) {
@@ -115,14 +115,14 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
                 listener.onLeftNetwork(this);
             }
         }
-        List<Station> stationsEntered = new ArrayList<>();
-        for (Station s : curLocation.vertexSet()) {
+        List<Stop> stationsEntered = new ArrayList<>();
+        for (Stop s : curLocation.vertexSet()) {
             if (!prevLocation.containsVertex(s)) {
                 stationsEntered.add(s);
             }
         }
         if (stationsEntered.size() > 0) {
-            Station[] stationsEnteredArray = new Station[stationsEntered.size()];
+            Stop[] stationsEnteredArray = new Stop[stationsEntered.size()];
             listener.onEnteredStations(this, stationsEntered.toArray(stationsEnteredArray));
         }
     }

@@ -58,6 +58,7 @@ public class API {
         public String name;
         public String network;
         public StationFeatures features;
+        public List<String> lobbies;
         public List<String> lines;
         public List<WiFiAP> wiFiAPs;
     }
@@ -69,6 +70,32 @@ public class API {
         public boolean boat;
         public boolean train;
         public boolean airport;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Lobby {
+        public String id;
+        public String name;
+        public String network;
+        public String station;
+        public List<Exit> exits;
+        public List<Schedule> schedules;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Exit {
+        public String id;
+        public float[] worldCoord;
+        public List<String> streets;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Schedule {
+        public boolean holiday;
+        public int day;
+        public boolean open;
+        public String openTime;
+        public String duration;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -190,6 +217,18 @@ public class API {
     public Station getStation(String id) throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("stations/" + id)), Station.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Lobby getLobby(String id) throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("lobbies/" + id)), Lobby.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

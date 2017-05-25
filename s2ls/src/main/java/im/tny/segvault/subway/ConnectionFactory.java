@@ -7,7 +7,7 @@ import org.jgrapht.graph.ClassBasedEdgeFactory;
  * Created by gabriel on 4/5/17.
  */
 
-public class ConnectionFactory extends ClassBasedEdgeFactory<Station, Connection> implements EdgeFactory<Station, Connection> {
+public class ConnectionFactory extends ClassBasedEdgeFactory<Stop, Connection> implements EdgeFactory<Stop, Connection> {
     private Network network;
 
     public ConnectionFactory() {
@@ -19,7 +19,7 @@ public class ConnectionFactory extends ClassBasedEdgeFactory<Station, Connection
     }
 
     @Override
-    public Connection createEdge(Station sourceVertex, Station targetVertex) {
+    public Connection createEdge(Stop sourceVertex, Stop targetVertex) {
         Connection c = super.createEdge(sourceVertex, targetVertex);
         //c.setNetwork(network);
         return c;

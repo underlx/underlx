@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import im.tny.segvault.subway.Connection;
-import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 
 
 /**
@@ -133,17 +133,17 @@ public class MapFragment extends TopFragment {
             MapGraph g = new MapGraph();
             g.stations = new ArrayList<>();
             g.connections = new ArrayList<>();
-            for(Station s : mListener.getMainService().getNetwork(network).vertexSet()) {
-                g.stations.add(new MapStation(s.getId(), s.getName(), s.getLines().get(0).getId()));
+            for(Stop s : mListener.getMainService().getNetwork(network).vertexSet()) {
+                g.stations.add(new MapStation(s.getStation().getId(), s.getStation().getName(), s.getLine().getId()));
             }
 
             List<MapStation> connections = new ArrayList<>();
             for(Connection c : mListener.getMainService().getNetwork(network).edgeSet()) {
                 String line = "";
-                if(c.getSource().getLines().containsAll(c.getTarget().getLines())) {
-                    line = c.getSource().getLines().get(0).getId();
+                if(c.getSource().getLine() == c.getTarget().getLine()) {
+                    line = c.getSource().getLine().getId();
                 }
-                g.connections.add(new MapConnection(c.getSource().getId(), c.getTarget().getId(), line));
+                g.connections.add(new MapConnection(c.getSource().getStation().getId(), c.getTarget().getStation().getId(), line));
             }
 
             try {

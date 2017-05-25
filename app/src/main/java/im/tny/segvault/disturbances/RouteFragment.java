@@ -1,6 +1,5 @@
 package im.tny.segvault.disturbances;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +35,7 @@ import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 
 
@@ -129,7 +129,7 @@ public class RouteFragment extends TopFragment {
     }
 
     private void populatePickers(Network network) {
-        List<Station> stations = new ArrayList<>(network.vertexSet());
+        List<Station> stations = new ArrayList<>(network.getStations());
 
         originPicker.setStations(stations);
         originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
@@ -175,9 +175,9 @@ public class RouteFragment extends TopFragment {
         }
 
         AStarShortestPath as = new AStarShortestPath(network);
-        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Station>() {
+        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
             @Override
-            public double getCostEstimate(Station sourceVertex, Station targetVertex) {
+            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
                 return 0;
             }
         };
@@ -190,22 +190,14 @@ public class RouteFragment extends TopFragment {
         Station source = originPicker.getSelection();
         Station target = destinationPicker.getSelection();
 
-        List<Station> possibleSources = new ArrayList<>();
-        possibleSources.add(source);
+        List<Stop> possibleSources = new ArrayList<>();
+        possibleSources.addAll(source.getStops());
 
-        List<Station> possibleTargets = new ArrayList<>();
-        possibleTargets.add(target);
+        List<Stop> possibleTargets = new ArrayList<>();
+        possibleTargets.addAll(target.getStops());
 
-        for (Connection tc : source.getTransferEdges(network)) {
-            possibleSources.add(tc.getTarget());
-        }
-
-        for (Connection tc : target.getTransferEdges(network)) {
-            possibleTargets.add(tc.getTarget());
-        }
-
-        for (Station pSource : possibleSources) {
-            for (Station pTarget : possibleTargets) {
+        for (Stop pSource : possibleSources) {
+            for (Stop pTarget : possibleTargets) {
                 // hackish "annotations" for the connection weighter
                 pSource.putMeta("is_route_source", true);
                 pTarget.putMeta("is_route_target", true);
@@ -245,7 +237,7 @@ public class RouteFragment extends TopFragment {
             if (isFirst) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_enter_network, layoutRoute, false);
 
-                Line line = c.getSource().getLines().get(0);
+                Line line = c.getSource().getLine();
 
                 int lineColor = line.getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
@@ -275,7 +267,7 @@ public class RouteFragment extends TopFragment {
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
-                                c.getTarget().getDirectionForConnection(c).getName())));
+                                c.getTarget().getLine().getDirectionForConnection(c).getStation().getName())));
 
                 if (line.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
@@ -298,7 +290,7 @@ public class RouteFragment extends TopFragment {
             if (i == el.size() - 1) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
 
-                int lineColor = c.getSource().getLines().get(0).getColor();
+                int lineColor = c.getSource().getLine().getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
@@ -308,11 +300,11 @@ public class RouteFragment extends TopFragment {
             } else if (c instanceof Transfer) {
                 Connection c2 = el.get(i + 1);
 
-                Line targetLine = c.getTarget().getLines().get(0);
+                Line targetLine = c.getTarget().getLine();
 
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
-                int prevLineColor = c.getSource().getLines().get(0).getColor();
+                int prevLineColor = c.getSource().getLine().getColor();
                 FrameLayout prevLineStripeLayout = (FrameLayout) view.findViewById(R.id.prev_line_stripe_layout);
                 prevLineStripeLayout.setBackgroundColor(prevLineColor);
 
@@ -342,7 +334,7 @@ public class RouteFragment extends TopFragment {
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
-                                c2.getTarget().getDirectionForConnection(c2).getName())));
+                                c2.getTarget().getLine().getDirectionForConnection(c2).getStation().getName())));
 
                 if (targetLine.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
@@ -366,11 +358,12 @@ public class RouteFragment extends TopFragment {
 
             populateStationView(getActivity(), network, originPicker.getSelection(), view);
 
-            if (originPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount() ||
-                    destinationPicker.getSelection().getLines().get(0).getUsualCarCount() < network.getUsualCarCount()) {
+            // TODO maybe revive this
+            /*if (originPicker.getSelection().getLine().getUsualCarCount() < network.getUsualCarCount() ||
+                    destinationPicker.getSelection().getLine().getUsualCarCount() < network.getUsualCarCount()) {
                 LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
                 carsWarningLayout.setVisibility(View.VISIBLE);
-            }
+            }*/
 
             layoutRoute.addView(view);
         }
@@ -424,10 +417,14 @@ public class RouteFragment extends TopFragment {
                 StationFragment f = StationFragment.newInstance(network.getId(), station.getId());
                 FragmentActivity a = activity;
                 if (activity != null) {
-                    f.show(activity.getSupportFragmentManager(), "station-fragment");
+                    f.show(activity.getSupportFragmentManager(), "stop-fragment");
                 }
             }
         });
+    }
+
+    public static void populateStationView(final FragmentActivity activity, final Network network, final Stop stop, View view) {
+        populateStationView(activity, network, stop.getStation(), view);
     }
 
     @Override

@@ -10,18 +10,18 @@ import java.util.ArrayList;
  */
 
 public class Connection extends DefaultWeightedEdge {
-    public List<Station> getStations() {
-        List<Station> s = new ArrayList<>();
-        s.add((Station) getSource());
-        s.add((Station) getTarget());
+    public List<Stop> getStops() {
+        List<Stop> s = new ArrayList<>();
+        s.add((Stop) getSource());
+        s.add((Stop) getTarget());
         return s;
     }
 
-    public Station getSource() {
-        return (Station) super.getSource();
+    public Stop getSource() {
+        return (Stop) super.getSource();
     }
 
-    public Station getTarget() {
-        return (Station) super.getTarget();
+    public Stop getTarget() {
+        return (Stop) super.getTarget();
     }
 }
