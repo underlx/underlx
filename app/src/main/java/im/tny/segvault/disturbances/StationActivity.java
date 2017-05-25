@@ -104,12 +104,12 @@ public class StationActivity extends AppCompatActivity {
             ctl.setTitle(station.getName());
 
             List<Line> lines = new ArrayList<>(station.getLines());
-            Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
+            Collections.sort(lines, new Comparator<Line>() {
                 @Override
                 public int compare(Line l1, Line l2) {
                     return l1.getName().compareTo(l2.getName());
                 }
-            }));
+            });
 
             if(lines.size() > 1) {
                 int colors[] = new int[lines.size()*2];

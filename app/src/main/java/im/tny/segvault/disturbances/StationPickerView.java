@@ -2,20 +2,28 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.WorkerThread;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.BitmapCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.AppCompatDrawableManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +43,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Station;
@@ -275,7 +284,15 @@ public class StationPickerView extends LinearLayout {
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item from filtered list.
             Station station = filteredStations.get(position);
-            Line line = station.getLines().get(0);
+            List<Line> lines = new ArrayList<>(station.getLines());
+            Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
+                @Override
+                public int compare(Line l1, Line l2) {
+                    return l1.getName().compareTo(l2.getName());
+                }
+            }));
+
+            Line line = lines.get(0);
 
             int color = line.getColor();
 
@@ -304,9 +321,59 @@ public class StationPickerView extends LinearLayout {
             DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN);
 
             subicon.setImageDrawable(mWrappedDrawable);
+
+            if (station.getLines().size() > 1) {
+                line = lines.get(1);
+
+                color = line.getColor();
+
+                drawable = ContextCompat.getDrawable(getContext(), R.drawable.circle);
+                drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+
+                Bitmap bmp = getBitmapFromVectorDrawable(getContext(), drawable, 2, 1);
+
+                icon = (FrameLayout) convertView.findViewById(R.id.frame_half_circle);
+                icon.setVisibility(VISIBLE);
+                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    icon.setBackgroundDrawable(new BitmapDrawable(getResources(), bmp));
+                } else {
+                    icon.setBackground(new BitmapDrawable(getResources(), bmp));
+                }
+
+                subicon = (ImageView) convertView.findViewById(R.id.image_half_icon);
+
+                mWrappedDrawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLine(line)).mutate();
+                mWrappedDrawable = DrawableCompat.wrap(mWrappedDrawable);
+                DrawableCompat.setTint(mWrappedDrawable, Color.WHITE);
+                DrawableCompat.setTintMode(mWrappedDrawable, PorterDuff.Mode.SRC_IN);
+
+                bmp = getBitmapFromVectorDrawable(getContext(), mWrappedDrawable, 2, 1);
+                subicon.setImageBitmap(bmp);
+            }
             return convertView;
         }
     }
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, Drawable drawable, int widthDiv, int heightDiv) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap;
+        try {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        } catch (Exception e) {
+            bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        canvas.clipRect(0, 0, canvas.getWidth() / widthDiv, canvas.getHeight() / heightDiv);
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
 
     @Override
     public boolean isFocused() {
