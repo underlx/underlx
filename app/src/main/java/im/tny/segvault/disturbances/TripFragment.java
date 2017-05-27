@@ -3,7 +3,9 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,8 +37,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     private String tripId;
     private String networkId;
 
-    private TextView originNameView;
-    private TextView destNameView;
+    private TextView stationNamesView;
 
     private LinearLayout layoutRoute;
 
@@ -77,8 +78,7 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
 
-        originNameView = (TextView) view.findViewById(R.id.origin_name_view);
-        destNameView = (TextView) view.findViewById(R.id.destination_name_view);
+        stationNamesView = (TextView) view.findViewById(R.id.station_names_view);
 
         if (mListener == null)
             return view;
@@ -94,8 +94,12 @@ public class TripFragment extends BottomSheetDialogFragment {
         Station origin = network.getStation(trip.getPath().get(0).getStation().getId());
         Station dest = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId());
 
-        originNameView.setText(origin.getName());
-        destNameView.setText(dest.getName());
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        builder.append(origin.getName() + " ").append("#");
+        builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
+                builder.length() - 1, builder.length(), 0);
+        builder.append(" " + dest.getName());
+        stationNamesView.setText(builder);
 
         TextView dateView = (TextView)view.findViewById(R.id.date_view);
         dateView.setText(
