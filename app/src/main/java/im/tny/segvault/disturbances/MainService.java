@@ -442,7 +442,7 @@ public class MainService extends Service {
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
             if (loc.getState() instanceof InNetworkState) {
                 InNetworkState ins = (InNetworkState) loc.getState();
-                s += "\tPossible stations:\n";
+                s += "\tPossible stops:\n";
                 for (Stop stop : loc.getLocation().vertexSet()) {
                     s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getName());
                 }
@@ -484,7 +484,7 @@ public class MainService extends Service {
                             Log.d("UpdateTopologyTask", "  Stop: " + sid);
                             API.Station s = api.getStation(sid);
                             Station station = net.getStation(s.id);
-                            if(station == null) {
+                            if (station == null) {
                                 station = new Station(net, s.id, s.name,
                                         new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
                             }
@@ -869,8 +869,8 @@ public class MainService extends Service {
                 StationUse use = new StationUse();
                 use.setType(StationUse.UseType.VISIT);
                 use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
-                use.setEntryDate(path.getEnterTime(path.getStartVertex()));
-                use.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
+                use.setEntryDate(path.getEntryExitTimes(0).first);
+                use.setLeaveDate(path.getEntryExitTimes(0).second);
                 uses.add(realm.copyToRealm(use));
             } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
                 Connection c = path.getEdgeList().get(0);
@@ -878,21 +878,24 @@ public class MainService extends Service {
                 use.setType(StationUse.UseType.VISIT);
                 use.setSourceLine(c.getSource().getLine().getId());
                 use.setTargetLine(c.getTarget().getLine().getId());
-                use.setEntryDate(path.getEnterTime(c.getSource()));
-                use.setLeaveDate(path.getLeaveTime(c.getTarget()));
+                use.setEntryDate(path.getEntryExitTimes(0).first);
+                use.setLeaveDate(path.getEntryExitTimes(0).second);
                 use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
                 uses.add(realm.copyToRealm(use));
             } else {
+                int timeIdx = 0;
                 StationUse startUse = new StationUse();
                 startUse.setType(StationUse.UseType.NETWORK_ENTRY);
                 startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
-                startUse.setEntryDate(path.getEnterTime(path.getStartVertex()));
-                startUse.setLeaveDate(path.getLeaveTime(path.getStartVertex()));
+                startUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                startUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
                 uses.add(realm.copyToRealm(startUse));
 
                 int i = 1;
-                if(path.getEdgeList().get(0) instanceof Transfer) {
+                timeIdx++;
+                if (path.getEdgeList().get(0) instanceof Transfer) {
                     i = 2;
+                    timeIdx++;
                 }
 
                 for (; i < size; i++) {
@@ -903,13 +906,16 @@ public class MainService extends Service {
                         use.setType(StationUse.UseType.INTERCHANGE);
                         use.setSourceLine(c.getSource().getLine().getId());
                         use.setTargetLine(c.getTarget().getLine().getId());
-                        use.setEntryDate(path.getEnterTime(c.getSource()));
-                        use.setLeaveDate(path.getLeaveTime(c.getTarget()));
+                        use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                        timeIdx++;
+                        use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                        timeIdx++;
                         i++; // skip next station as then we'd have duplicate uses for the same station ID
                     } else {
                         use.setType(StationUse.UseType.GONE_THROUGH);
-                        use.setEntryDate(path.getEnterTime(c.getSource()));
-                        use.setLeaveDate(path.getLeaveTime(c.getSource()));
+                        use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                        use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                        timeIdx++;
                     }
                     use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
                     uses.add(realm.copyToRealm(use));
@@ -918,8 +924,8 @@ public class MainService extends Service {
                 StationUse endUse = new StationUse();
                 endUse.setType(StationUse.UseType.NETWORK_EXIT);
                 endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getStation().getId()).findFirst());
-                endUse.setEntryDate(path.getEnterTime(path.getEndVertex()));
-                endUse.setLeaveDate(path.getLeaveTime(path.getEndVertex()));
+                endUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                endUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
                 uses.add(realm.copyToRealm(endUse));
             }
             Trip trip = new Trip();

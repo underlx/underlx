@@ -1,15 +1,15 @@
 package im.tny.segvault.s2ls;
 
+import android.util.Pair;
+
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -69,6 +69,9 @@ public class InNetworkState extends State {
         if (detector instanceof WiFiLocator) {
             ticksSinceLeft = 0;
             mightHaveLeft = true;
+            if (path != null) {
+                path.registerExitTime();
+            }
         } else {
             if (getS2LS().detectNearNetwork()) {
                 setState(new NearNetworkState(getS2LS()));
@@ -85,12 +88,9 @@ public class InNetworkState extends State {
         }
         mightHaveLeft = false;
         if (path == null) {
-            path = new Path(getS2LS().getNetwork(), stops[0], stops[stops.length - 1], new LinkedList<Connection>(), 0);
+            path = new Path(getS2LS().getNetwork(), stops[0], stops[stops.length - 1], 0);
         } else {
-            path.setEndVertex(stops[stops.length - 1], false);
-        }
-        for (Stop stop : stops) {
-            path.setEnterTime(stop, new Date());
+            path.setEndVertex(stops[stops.length - 1]);
         }
         for (OnLocationChangedListener l : listeners) {
             l.onLocationChanged(this);
@@ -101,14 +101,8 @@ public class InNetworkState extends State {
     public void onLeftStations(ILocator locator, Stop... stops) {
         for (Stop stop : stops) {
             current.removeVertex(stop);
-            if(path != null) {
-                path.setLeaveTime(stop, new Date());
-                for (Connection c : getS2LS().getNetwork().outgoingEdgesOf(stop)) {
-                    if (c instanceof Transfer && current.containsVertex(c.getTarget())) {
-                        path.setEndVertex(c.getTarget(), true);
-                        break;
-                    }
-                }
+            if (path != null) {
+                path.registerExitTime(stop);
             }
         }
         for (OnLocationChangedListener l : listeners) {
@@ -144,10 +138,8 @@ public class InNetworkState extends State {
 
         private Network graph;
 
-        private List<Connection> edgeList;
-
-        private Map<Stop, Date> enterTimes = new HashMap<>();
-        private Map<Stop, Date> leaveTimes = new HashMap<>();
+        private List<Connection> edgeList = new LinkedList<Connection>();
+        private List<Pair<Date, Date>> times = new ArrayList<>();
 
         private Stop startVertex;
 
@@ -159,13 +151,12 @@ public class InNetworkState extends State {
                 Network graph,
                 Stop startVertex,
                 Stop endVertex,
-                List<Connection> edgeList,
                 double weight) {
             this.graph = graph;
             this.startVertex = startVertex;
             this.endVertex = endVertex;
-            this.edgeList = edgeList;
             this.weight = weight;
+            registerEntryTime();
         }
 
         @Override
@@ -183,28 +174,19 @@ public class InNetworkState extends State {
             return endVertex;
         }
 
-        public void setEndVertex(Stop vertex, boolean addLastTransfer) {
+        public void setEndVertex(Stop vertex) {
             List<Connection> cs = graph.getAnyPathBetween(endVertex, vertex).getEdgeList();
             int size = cs.size();
             for (int i = 0; i < size; i++) {
-                // if unsure between two stations (e.g. pt-ml-cg double-station on pt-ml network)
-                // then do not put a transfer as the last step (i.e. assume user will keep going on
+                // never add a transfer as the last step (i.e. always assume user will keep going on
                 // the same line)
-                if (i == size - 1 && cs.get(i) instanceof Transfer && !addLastTransfer) {
+                if (i == size - 1 && cs.get(i) instanceof Transfer) {
                     Transfer t = (Transfer) cs.get(i);
-                    if (current.containsVertex(t.getSource()) && current.containsVertex(t.getTarget())) {
-                        this.endVertex = t.getSource();
-                        return;
-                    }
+                    this.endVertex = t.getSource();
+                    return;
                 }
-                if (i > 0) {
-                    if(getEnterTime(cs.get(i).getSource()) == null) {
-                        setEnterTime(cs.get(i).getSource(), new Date());
-                    }
-                    if(getLeaveTime(cs.get(i).getSource()) == null) {
-                        setLeaveTime(cs.get(i).getSource(), new Date());
-                    }
-                }
+
+                registerEntryTime(); // also registers exit time for previous station if not yet registered
                 edgeList.add(cs.get(i));
             }
             this.endVertex = vertex;
@@ -220,17 +202,34 @@ public class InNetworkState extends State {
             return weight;
         }
 
-        public Date getEnterTime(Stop s) {
-            return enterTimes.get(s);
+        public Pair<Date, Date> getEntryExitTimes(int i) {
+            return times.get(i);
         }
-        public void setEnterTime(Stop s, Date d) {
-            enterTimes.put(s, d);
+
+        private void registerEntryTime() {
+            Date now = new Date();
+            if(times.size() > 0) {
+                Pair<Date, Date> p = times.get(times.size() - 1);
+                if (p.second == null) {
+                    times.set(times.size() - 1, new Pair<>(p.first, now));
+                }
+            }
+            times.add(new Pair<Date, Date>(now, null));
         }
-        public Date getLeaveTime(Stop s) {
-            return leaveTimes.get(s);
+
+        public void registerExitTime() {
+            Pair<Date, Date> p = times.get(times.size() - 1);
+            if (p.second == null) {
+                times.set(times.size() - 1, new Pair<>(p.first, new Date()));
+            }
         }
-        public void setLeaveTime(Stop s, Date d) {
-            leaveTimes.put(s, d);
+
+        public void registerExitTime(Stop s) {
+            if(!endVertex.equals(s)) {
+                // this is not the "current" station
+                return;
+            }
+            registerExitTime();
         }
     }
 }
