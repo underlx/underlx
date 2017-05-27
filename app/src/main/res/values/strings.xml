@@ -103,4 +103,15 @@
     <string name="frag_trip_delete">Delete</string>
     <string name="frag_trip_delete_confirm_title">Delete trip?</string>
     <string name="frag_trip_delete_confirm_desc">Information about this trip will be gone and the affected statistics will be recalculated.</string>
+    <string name="frag_station_lobby_name">Lobby %s</string>
+    <string name="frag_station_exits">Exits</string>
+    <string name="frag_station_schedule">Schedule</string>
+    <string name="lobby_schedule_weekdays">Weekdays: %s</string>
+    <string name="lobby_schedule_day">%1$s: %2$s</string>
+    <string name="lobby_schedule_weekends_holidays">Weekends and holidays: %s</string>
+    <string name="lobby_schedule_holidays">Holidays: %s</string>
+    <string name="lobby_schedule_closed">closed</string>
+    <string name="lobby_schedule_all_days">Every day: %s</string>
+    <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
+    <string name="lobby_exit_view_map">View map</string>
 </resources>

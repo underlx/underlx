@@ -79,12 +79,12 @@ public class API {
         public String network;
         public String station;
         public List<Exit> exits;
-        public List<Schedule> schedules;
+        public List<Schedule> schedule;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Exit {
-        public String id;
+        public int id;
         public float[] worldCoord;
         public List<String> streets;
     }
@@ -94,8 +94,8 @@ public class API {
         public boolean holiday;
         public int day;
         public boolean open;
-        public String openTime;
-        public String duration;
+        public int openTime;
+        public int duration;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

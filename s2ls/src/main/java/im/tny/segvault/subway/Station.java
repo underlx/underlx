@@ -132,4 +132,15 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     public void setFeatures(Features features) {
         this.features = features;
     }
+
+    private List<Lobby> lobbies = new ArrayList<>();
+
+    public List<Lobby> getLobbies() {
+        return lobbies;
+    }
+
+    public void addLobby(Lobby lobby) {
+        this.lobbies.add(lobby);
+    }
+
 }

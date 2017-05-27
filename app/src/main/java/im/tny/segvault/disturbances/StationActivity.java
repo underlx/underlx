@@ -29,6 +29,7 @@ import java.util.Set;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
@@ -173,6 +174,13 @@ public class StationActivity extends AppCompatActivity {
             if (station.getFeatures().lift) {
                 liftLayout.setVisibility(View.VISIBLE);
                 accessibilityTitleView.setVisibility(View.VISIBLE);
+            }
+
+            // Lobbies
+            LinearLayout lobbiesLayout = (LinearLayout) findViewById(R.id.lobbies_layout);
+            for (Lobby lobby : station.getLobbies()) {
+                LobbyView v = new LobbyView(StationActivity.this, lobby);
+                lobbiesLayout.addView(v);
             }
 
             // Statistics

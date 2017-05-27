@@ -31,7 +31,11 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +60,7 @@ import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
@@ -487,6 +492,22 @@ public class MainService extends Service {
                             if (station == null) {
                                 station = new Station(net, s.id, s.name,
                                         new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
+
+                                // Lobbies
+                                for (String id : s.lobbies) {
+                                    API.Lobby alobby = api.getLobby(id);
+                                    Lobby lobby = new Lobby(alobby.id, alobby.name);
+                                    for (API.Exit aexit : alobby.exits) {
+                                        Lobby.Exit exit = new Lobby.Exit(aexit.id, aexit.worldCoord, aexit.streets);
+                                        lobby.addExit(exit);
+                                    }
+                                    for (API.Schedule asched : alobby.schedule) {
+                                        Lobby.Schedule sched = new Lobby.Schedule(
+                                                asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
+                                        lobby.addSchedule(sched);
+                                    }
+                                    station.addLobby(lobby);
+                                }
                             }
                             Stop stop = new Stop(station, line);
                             line.addVertex(stop);

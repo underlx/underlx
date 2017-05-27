@@ -2,7 +2,10 @@ package im.tny.segvault.subway;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by gabriel on 4/5/17.
@@ -12,27 +15,36 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
     public Lobby(String id, String name) {
         setId(id);
         setName(name);
-        this.exits = new ArrayList<>();
+        this.exits = new HashMap<>();
+        this.schedules = new HashMap<>();
     }
 
-    private List<Exit> exits = null;
+    private Map<Integer, Exit> exits = null;
 
-    public List<Exit> getExits() {
-        return exits;
+    public Collection<Exit> getExits() {
+        return exits.values();
     }
 
-    public boolean addExit(Exit exit) {
-        return exits.add(exit);
+    public Exit getExit(int id) {
+        return exits.get(id);
     }
 
-    private List<Schedule> schedules = null;
-
-    public List<Schedule> getSchedules() {
-        return schedules;
+    public void addExit(Exit exit) {
+        exits.put(exit.id, exit);
     }
 
-    public boolean addSchedule(Schedule schedule) {
-        return schedules.add(schedule);
+    private Map<Integer, Schedule> schedules = null;
+
+    public Collection<Schedule> getSchedules() {
+        return schedules.values();
+    }
+
+    public Schedule getSchedule(int day) {
+        return schedules.get(day);
+    }
+
+    public void addSchedule(Schedule schedule) {
+        schedules.put(schedule.holiday ? -1 : schedule.day, schedule);
     }
 
     private String name;
@@ -90,12 +102,14 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
         public int day;
         public boolean open;
         public long openTime;
+        public long duration;
 
-        public Schedule(boolean holiday, int day, boolean open, long openTime) {
+        public Schedule(boolean holiday, int day, boolean open, long openTime, long duration) {
             this.holiday = holiday;
             this.day = day;
             this.open = open;
             this.openTime = openTime;
+            this.duration = duration;
         }
     }
 

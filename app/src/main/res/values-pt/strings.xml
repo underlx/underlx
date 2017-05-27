@@ -93,4 +93,15 @@
     <string name="frag_trip_delete">Apagar</string>
     <string name="frag_trip_delete_confirm_title">Apagar viagem?</string>
     <string name="frag_trip_delete_confirm_desc">A informação sobre esta viagem será eliminada e as estatísticas afectadas serão recalculadas.</string>
+    <string name="frag_station_lobby_name">Átrio %s</string>
+    <string name="frag_station_exits">Saídas</string>
+    <string name="frag_station_schedule">Horário</string>
+    <string name="lobby_schedule_weekdays">Dias úteis: %s</string>
+    <string name="lobby_schedule_day">%1$s: %2$s</string>
+    <string name="lobby_schedule_weekends_holidays">Fins de semana e feriados: %s</string>
+    <string name="lobby_schedule_holidays">Feriados: %s</string>
+    <string name="lobby_schedule_closed">encerrado</string>
+    <string name="lobby_schedule_all_days">Todos os dias: %s</string>
+    <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
+    <string name="lobby_exit_view_map">Ver mapa</string>
 </resources>

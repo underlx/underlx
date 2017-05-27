@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbars="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="im.tny.segvault.disturbances.StationActivity"
-    tools:showIn="@layout/activity_station"
-    android:scrollbars="vertical">
+    tools:showIn="@layout/activity_station">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -161,10 +161,19 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/lobbies_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="6dp"
             android:text="@string/frag_station_statistics"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 

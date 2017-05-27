@@ -3,4 +3,5 @@
     <declare-styleable name="StationPickerView">
         <attr name="hint" format="string" />
     </declare-styleable>
+    <attr name="viewMapButtonStyle" format="reference" />
 </resources>

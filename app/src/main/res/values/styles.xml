@@ -7,6 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="viewMapButtonStyle">@style/AppTheme.ViewMapButton</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -20,6 +21,9 @@
 
     <style name="AppTheme.WhiteButton" parent="ThemeOverlay.AppCompat.Light">
         <item name="colorButtonNormal">@android:color/white</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+    <style name="AppTheme.ViewMapButton" parent="Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
