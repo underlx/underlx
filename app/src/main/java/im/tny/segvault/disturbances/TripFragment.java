@@ -1,20 +1,26 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
@@ -38,6 +44,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     private String networkId;
 
     private TextView stationNamesView;
+    private Button deleteButton;
 
     private LinearLayout layoutRoute;
 
@@ -79,6 +86,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
 
         stationNamesView = (TextView) view.findViewById(R.id.station_names_view);
+        deleteButton = (Button) view.findViewById(R.id.delete_button);
 
         if (mListener == null)
             return view;
@@ -101,7 +109,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         builder.append(" " + dest.getName());
         stationNamesView.setText(builder);
 
-        TextView dateView = (TextView)view.findViewById(R.id.date_view);
+        TextView dateView = (TextView) view.findViewById(R.id.date_view);
         dateView.setText(
                 DateUtils.formatDateTime(getContext(),
                         trip.getPath().get(0).getEntryDate().getTime(),
@@ -162,31 +170,50 @@ public class TripFragment extends BottomSheetDialogFragment {
 
                 layoutRoute.addView(stepview);
                 curBulletIdx++;
-
-                if (c instanceof Transfer && i != el.size() - 1) {
-                    c = el.get(++i);
-                }
-                if (i == el.size() - 1) {
-                    stepview = inflater.inflate(R.layout.path_station_final, layoutRoute, false);
-
-                    int lineColor = c.getSource().getLine().getColor();
-                    FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
-                    lineStripeLayout.setBackgroundColor(lineColor);
-
-                    timeView = (TextView) stepview.findViewById(R.id.time_view);
-                    timeView.setText(
-                            DateUtils.formatDateTime(getContext(),
-                                    trip.getPath().get(curBulletIdx).getEntryDate().getTime(),
-                                    DateUtils.FORMAT_SHOW_TIME));
-
-                    RouteFragment.populateStationView(getActivity(), network, c.getTarget(), stepview);
-
-                    layoutRoute.addView(stepview);
-                    curBulletIdx++;
-                }
             }
+            if (c instanceof Transfer && i != el.size() - 1) {
+                c = el.get(++i);
+            }
+            if (i == el.size() - 1) {
+                View stepview = inflater.inflate(R.layout.path_station_final, layoutRoute, false);
+
+                int lineColor = c.getSource().getLine().getColor();
+                FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
+                lineStripeLayout.setBackgroundColor(lineColor);
+
+                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                timeView.setText(
+                        DateUtils.formatDateTime(getContext(),
+                                trip.getPath().get(curBulletIdx).getEntryDate().getTime(),
+                                DateUtils.FORMAT_SHOW_TIME));
+
+                RouteFragment.populateStationView(getActivity(), network, c.getTarget(), stepview);
+
+                layoutRoute.addView(stepview);
+                curBulletIdx++;
+            }
+
         }
 
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle(R.string.frag_trip_delete_confirm_title)
+                        .setMessage(R.string.frag_trip_delete_confirm_desc)
+                        .setPositiveButton(R.string.frag_trip_delete, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteTrip();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        })
+                        .show();
+            }
+        });
         return view;
     }
 
@@ -205,6 +232,16 @@ public class TripFragment extends BottomSheetDialogFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private void deleteTrip() {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        trip.getPath().deleteAllFromRealm();
+        trip.deleteFromRealm();
+        dismiss();
+        realm.commitTransaction();
     }
 
     /**

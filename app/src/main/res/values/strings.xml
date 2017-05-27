@@ -100,4 +100,7 @@
     </string-array>
     <string name="title_activity_station">Loading...</string>
     <string name="frag_station_more_information">More information</string>
+    <string name="frag_trip_delete">Delete</string>
+    <string name="frag_trip_delete_confirm_title">Delete trip?</string>
+    <string name="frag_trip_delete_confirm_desc">Information about this trip will be gone and the affected statistics will be recalculated.</string>
 </resources>

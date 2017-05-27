@@ -11,10 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:padding="8dp"
         app:layoutManager="LinearLayoutManager"
         tools:context="im.tny.segvault.disturbances.DisturbanceFragment"
-        tools:listitem="@layout/fragment_disturbance" />
+        tools:listitem="@layout/fragment_trip_history" />
 
     <TextView
         android:id="@+id/no_trips_view"

@@ -90,4 +90,7 @@
     <string name="frag_station_stats_transfer">Mudou de linha %d vezes</string>
     <string name="frag_station_more_information">Mais informação</string>
     <string name="title_activity_station">A carregar...</string>
+    <string name="frag_trip_delete">Apagar</string>
+    <string name="frag_trip_delete_confirm_title">Apagar viagem?</string>
+    <string name="frag_trip_delete_confirm_desc">A informação sobre esta viagem será eliminada e as estatísticas afectadas serão recalculadas.</string>
 </resources>

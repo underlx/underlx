@@ -6,16 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -24,17 +19,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.Trip;
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
 
 /**
  * A fragment representing a list of Items.
@@ -51,10 +42,12 @@ public class TripHistoryFragment extends TopFragment {
     private TextView emptyView;
 
     /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
+     * Mandatory constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public TripHistoryFragment() {
+        Realm realm = Realm.getDefaultInstance();
+        changeListenerHardReference = realm.where(Trip.class).findAll();
     }
 
     @SuppressWarnings("unused")
@@ -133,11 +126,13 @@ public class TripHistoryFragment extends TopFragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
+        changeListenerHardReference.addChangeListener(tripChangeListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        changeListenerHardReference.removeChangeListener(tripChangeListener);
         mListener = null;
     }
 
@@ -222,6 +217,14 @@ public class TripHistoryFragment extends TopFragment {
                     }
                     break;
             }
+        }
+    };
+
+    private RealmResults<Trip> changeListenerHardReference;
+    private final RealmChangeListener<RealmResults<Trip>> tripChangeListener = new RealmChangeListener<RealmResults<Trip>>() {
+        @Override
+        public void onChange(RealmResults<Trip> element) {
+            new TripHistoryFragment.UpdateDataTask().execute();
         }
     };
 }
