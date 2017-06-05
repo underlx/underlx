@@ -97,6 +97,27 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         return stops;
     }
 
+    public Set<Station> getImmediateNeighbors() {
+        Set<Station> neighbors = new HashSet<>();
+        for (Stop s : getStops()) {
+            for (Connection c : getBase().outgoingEdgesOf(s)) {
+                neighbors.add(c.getTarget().getStation());
+            }
+        }
+        return neighbors;
+    }
+
+    public boolean isAlwaysClosed() {
+        for (Lobby l : getLobbies()) {
+            for(Lobby.Schedule s : l.getSchedules()) {
+                if(s.open) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return String.format("Stop: %s", getName());

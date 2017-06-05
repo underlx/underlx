@@ -85,6 +85,10 @@ public class RouteFragment extends TopFragment {
     private StationPickerView destinationPicker;
     private ImageButton swapButton;
 
+    private LinearLayout layoutOriginStationClosed;
+    private LinearLayout layoutDestinationStationClosed;
+    private TextView viewOriginStationClosed;
+    private TextView viewDestinationStationClosed;
     private LinearLayout layoutRoute;
     private LinearLayout layoutInstructions;
 
@@ -97,6 +101,10 @@ public class RouteFragment extends TopFragment {
         View view = inflater.inflate(R.layout.fragment_route, container, false);
 
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
+        layoutOriginStationClosed = (LinearLayout) view.findViewById(R.id.origin_station_closed_layout);
+        layoutDestinationStationClosed = (LinearLayout) view.findViewById(R.id.destination_station_closed_layout);
+        viewOriginStationClosed = (TextView) view.findViewById(R.id.origin_station_closed_view);
+        viewDestinationStationClosed = (TextView) view.findViewById(R.id.destination_station_closed_view);
         layoutInstructions = (LinearLayout) view.findViewById(R.id.layout_instructions);
         swapButton = (ImageButton) view.findViewById(R.id.swap_button);
         swapButton.setOnClickListener(new View.OnClickListener() {
@@ -191,10 +199,22 @@ public class RouteFragment extends TopFragment {
         Station target = destinationPicker.getSelection();
 
         List<Stop> possibleSources = new ArrayList<>();
-        possibleSources.addAll(source.getStops());
+        if (source.isAlwaysClosed()) {
+            for (Station neighbor : source.getImmediateNeighbors()) {
+                possibleSources.addAll(neighbor.getStops());
+            }
+        } else {
+            possibleSources.addAll(source.getStops());
+        }
 
         List<Stop> possibleTargets = new ArrayList<>();
-        possibleTargets.addAll(target.getStops());
+        if (target.isAlwaysClosed()) {
+            for (Station neighbor : target.getImmediateNeighbors()) {
+                possibleTargets.addAll(neighbor.getStops());
+            }
+        } else {
+            possibleTargets.addAll(target.getStops());
+        }
 
         for (Stop pSource : possibleSources) {
             for (Stop pTarget : possibleTargets) {
@@ -219,12 +239,28 @@ public class RouteFragment extends TopFragment {
 
     private void hideRoute() {
         layoutRoute.setVisibility(View.GONE);
+        layoutOriginStationClosed.setVisibility(View.GONE);
+        layoutDestinationStationClosed.setVisibility(View.GONE);
         swapButton.setVisibility(View.GONE);
         layoutInstructions.setVisibility(View.VISIBLE);
     }
 
     private void showRoute(GraphPath path) {
         layoutRoute.removeAllViews();
+        if (originPicker.getSelection().isAlwaysClosed()) {
+            viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), originPicker.getSelection().getName()));
+            layoutOriginStationClosed.setVisibility(View.VISIBLE);
+        } else {
+            layoutOriginStationClosed.setVisibility(View.GONE);
+        }
+
+        if(destinationPicker.getSelection().isAlwaysClosed()) {
+            viewDestinationStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), destinationPicker.getSelection().getName()));
+            layoutDestinationStationClosed.setVisibility(View.VISIBLE);
+        } else {
+            layoutDestinationStationClosed.setVisibility(View.GONE);
+        }
+
         List<Connection> el = path.getEdgeList();
 
         boolean isFirst = true;
