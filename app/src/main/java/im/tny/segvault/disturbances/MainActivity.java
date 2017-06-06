@@ -150,19 +150,19 @@ public class MainActivity extends AppCompatActivity
         try {
             switch (id) {
                 case R.id.nav_home:
-                    return (Fragment) HomeFragment.newInstance();
+                    return HomeFragment.newInstance();
                 case R.id.nav_plan_route:
-                    return (Fragment) RouteFragment.newInstance("pt-ml");
+                    return RouteFragment.newInstance(MainService.PRIMARY_NETWORK_ID);
                 case R.id.nav_trip_history:
-                    return (Fragment) TripHistoryFragment.newInstance(1);
+                    return TripHistoryFragment.newInstance(1);
                 case R.id.nav_map:
-                    return (Fragment) MapFragment.newInstance();
+                    return MapFragment.newInstance();
                 case R.id.nav_about:
-                    return (Fragment) AboutFragment.newInstance();
+                    return AboutFragment.newInstance();
                 case R.id.nav_disturbances:
-                    return (Fragment) DisturbanceFragment.newInstance(1);
+                    return DisturbanceFragment.newInstance(1);
                 case R.id.nav_notif:
-                    return (Fragment) NotifPreferenceFragment.newInstance();
+                    return NotifPreferenceFragment.newInstance();
                 default:
                     return null;
             }
