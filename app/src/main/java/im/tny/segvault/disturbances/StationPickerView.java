@@ -210,7 +210,7 @@ public class StationPickerView extends LinearLayout {
                         .normalize(constraint.toString().toLowerCase().trim(), Normalizer.Form.NFD)
                         .replaceAll("[^\\p{ASCII}]", "");
 
-                for (final Station station: originalList) {
+                for (final Station station : originalList) {
                     String norm = Normalizer
                             .normalize(station.getName(), Normalizer.Form.NFD)
                             .replaceAll("[^\\p{ASCII}]", "").toLowerCase();
@@ -307,7 +307,7 @@ public class StationPickerView extends LinearLayout {
             drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 
             FrameLayout icon = (FrameLayout) convertView.findViewById(R.id.frame_circle);
-            if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                 icon.setBackgroundDrawable(drawable);
             } else {
                 icon.setBackground(drawable);
@@ -355,10 +355,6 @@ public class StationPickerView extends LinearLayout {
     }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, Drawable drawable, int widthDiv, int heightDiv) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = (DrawableCompat.wrap(drawable)).mutate();
-        }
-
         Bitmap bitmap;
         try {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
