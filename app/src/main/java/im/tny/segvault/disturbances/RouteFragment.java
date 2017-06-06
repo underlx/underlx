@@ -13,6 +13,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,7 @@ import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
@@ -85,6 +88,9 @@ public class RouteFragment extends TopFragment {
     private StationPickerView destinationPicker;
     private ImageButton swapButton;
 
+    private LinearLayout layoutNetworkClosed;
+    private TextView viewNetworkClosed;
+
     private LinearLayout layoutOriginStationClosed;
     private LinearLayout layoutDestinationStationClosed;
     private TextView viewOriginStationClosed;
@@ -100,6 +106,8 @@ public class RouteFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_route, container, false);
 
+        layoutNetworkClosed = (LinearLayout) view.findViewById(R.id.network_closed_layout);
+        viewNetworkClosed = (TextView) view.findViewById(R.id.network_closed_view);
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
         layoutOriginStationClosed = (LinearLayout) view.findViewById(R.id.origin_station_closed_layout);
         layoutDestinationStationClosed = (LinearLayout) view.findViewById(R.id.destination_station_closed_layout);
@@ -130,13 +138,14 @@ public class RouteFragment extends TopFragment {
             network = mListener.getMainService().getNetwork(networkId);
             // the network map might not be loaded yet
             if (network != null) {
-                populatePickers(network);
+                populatePickers();
+                updateClosedWarning();
             }
         }
         return view;
     }
 
-    private void populatePickers(Network network) {
+    private void populatePickers() {
         List<Station> stations = new ArrayList<>(network.getStations());
 
         originPicker.setStations(stations);
@@ -174,6 +183,17 @@ public class RouteFragment extends TopFragment {
                 hideRoute();
             }
         });
+    }
+
+    private void updateClosedWarning() {
+        if (network.isOpen()) {
+            layoutNetworkClosed.setVisibility(View.GONE);
+        } else {
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(getContext(), f, network.getOpenTime(), network.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            viewNetworkClosed.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
+            layoutNetworkClosed.setVisibility(View.VISIBLE);
+        }
     }
 
     private void tryPlanRoute() {
@@ -254,7 +274,7 @@ public class RouteFragment extends TopFragment {
             layoutOriginStationClosed.setVisibility(View.GONE);
         }
 
-        if(destinationPicker.getSelection().isAlwaysClosed()) {
+        if (destinationPicker.getSelection().isAlwaysClosed()) {
             viewDestinationStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), destinationPicker.getSelection().getName()));
             layoutDestinationStationClosed.setVisibility(View.VISIBLE);
         } else {
@@ -264,6 +284,7 @@ public class RouteFragment extends TopFragment {
         List<Connection> el = path.getEdgeList();
 
         boolean isFirst = true;
+        boolean hasTransfer = false;
         for (int i = 0; i < el.size(); i++) {
             Connection c = el.get(i);
             if (i == 0 && c instanceof Transfer) {
@@ -334,6 +355,7 @@ public class RouteFragment extends TopFragment {
 
                 layoutRoute.addView(view);
             } else if (c instanceof Transfer) {
+                hasTransfer = true;
                 Connection c2 = el.get(i + 1);
 
                 Line targetLine = c.getTarget().getLine();
@@ -403,6 +425,15 @@ public class RouteFragment extends TopFragment {
 
             layoutRoute.addView(view);
         }
+
+        if (network.isAboutToClose() && hasTransfer) {
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(getContext(), f, network.getOpenTime() + network.getOpenDuration(), network.getOpenTime() + network.getOpenDuration(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            viewNetworkClosed.setText(
+                    String.format(getString(R.string.warning_network_about_to_close_transfers),
+                            f.toString(), destinationPicker.getSelection().getName()));
+            layoutNetworkClosed.setVisibility(View.VISIBLE);
+        } else updateClosedWarning();
 
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
@@ -527,7 +558,8 @@ public class RouteFragment extends TopFragment {
                         network = mListener.getMainService().getNetwork(networkId);
                         // the network map might not be loaded yet
                         if (network != null) {
-                            populatePickers(network);
+                            populatePickers();
+                            updateClosedWarning();
                         }
                     }
                     break;

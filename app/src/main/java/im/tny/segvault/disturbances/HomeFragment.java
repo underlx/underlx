@@ -1,10 +1,17 @@
 package im.tny.segvault.disturbances;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.CardView;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.util.Formatter;
+
+import im.tny.segvault.subway.Network;
 
 
 /**
@@ -35,6 +46,8 @@ public class HomeFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
 
     private TextView debugInfoView;
+    private TextView networkClosedView;
+    private CardView networkClosedCard;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -75,6 +88,8 @@ public class HomeFragment extends TopFragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         debugInfoView = (TextView) view.findViewById(R.id.debug_info);
+        networkClosedCard = (CardView) view.findViewById(R.id.network_closed_card);
+        networkClosedView = (TextView) view.findViewById(R.id.network_closed_view);
 
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,15 +106,23 @@ public class HomeFragment extends TopFragment {
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshLineStatus();
+                refresh(true);
             }
         });
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
+        bm.registerReceiver(mBroadcastReceiver, filter);
 
 
         Fragment newFragment = LineFragment.newInstance(1);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.line_status_card, newFragment);
         transaction.commit();
+        refresh(true);
         return view;
     }
 
@@ -113,7 +136,7 @@ public class HomeFragment extends TopFragment {
         int id = item.getItemId();
 
         if (id == R.id.menu_refresh) {
-            refreshLineStatus();
+            refresh(true);
             return true;
         }
 
@@ -137,12 +160,25 @@ public class HomeFragment extends TopFragment {
         mListener = null;
     }
 
-    private void refreshLineStatus() {
-        if (mListener != null) {
-            MainService m = mListener.getMainService();
-            if (m != null) {
-                m.updateLineStatus();
-            }
+    private void refresh(boolean requestOnlineUpdate) {
+        if (mListener == null)
+            return;
+
+        MainService m = mListener.getMainService();
+        if (m == null)
+            return;
+
+        if (requestOnlineUpdate)
+            m.updateLineStatus();
+
+        Network net = m.getNetwork(MainService.PRIMARY_NETWORK_ID);
+        if (net == null || net.isOpen()) {
+            networkClosedCard.setVisibility(View.GONE);
+        } else {
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(getContext(), f, net.getOpenTime(), net.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
+            networkClosedCard.setVisibility(View.VISIBLE);
         }
     }
 
@@ -159,4 +195,22 @@ public class HomeFragment extends TopFragment {
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
 
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (getActivity() == null) {
+                return;
+            }
+            switch (intent.getAction()) {
+                case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                    refresh(false);
+                    break;
+                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    refresh(true);
+                    break;
+            }
+        }
+    };
 }

@@ -73,6 +73,29 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/network_closed_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="2dp"
+            android:src="@drawable/ic_warning_black_24dp"
+            android:tint="@color/colorWarning" />
+
+        <TextView
+            android:id="@+id/network_closed_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@color/colorWarning" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/origin_station_closed_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

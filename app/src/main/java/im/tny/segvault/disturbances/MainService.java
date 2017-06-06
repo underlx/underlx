@@ -77,6 +77,7 @@ import io.realm.Realm;
 import io.realm.RealmList;
 
 public class MainService extends Service {
+    public static final String PRIMARY_NETWORK_ID = "pt-ml";
     private API api;
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
@@ -188,7 +189,7 @@ public class MainService extends Service {
     private void loadNetworks() {
         synchronized (lock) {
             try {
-                Network net = TopologyCache.loadNetwork(this, "pt-ml");
+                Network net = TopologyCache.loadNetwork(this, PRIMARY_NETWORK_ID);
                 /*for (Line l : net.getLines()) {
                     Log.d("UpdateTopologyTask", "Line: " + l.getName());
                     for (Stop s : l.vertexSet()) {
@@ -210,7 +211,7 @@ public class MainService extends Service {
 
                 putNetwork(net);
 
-                S2LS loc = locServices.get("pt-ml");
+                S2LS loc = locServices.get(PRIMARY_NETWORK_ID);
                 Log.d("loadNetworks", String.format("In network? %b", loc.inNetwork()));
                 Log.d("loadNetworks", String.format("Near network? %b", loc.nearNetwork()));
                 Zone z = loc.getLocation();
@@ -227,7 +228,7 @@ public class MainService extends Service {
     public void updateTopology() {
         cancelTopologyUpdate();
         currentUpdateTopologyTask = new UpdateTopologyTask();
-        currentUpdateTopologyTask.executeOnExecutor(LARGE_STACK_THREAD_POOL_EXECUTOR, "pt-ml");
+        currentUpdateTopologyTask.executeOnExecutor(LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
     }
 
     public void updateTopology(String... network_ids) {
@@ -485,7 +486,7 @@ public class MainService extends Service {
                     int station_count = n.stations.size();
                     int cur_station = 0;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
-                    Network net = new Network(n.id, n.name, n.typCars);
+                    Network net = new Network(n.id, n.name, n.typCars, n.holidays, n.openTime * 1000, n.duration * 1000);
                     for (String lineid : n.lines) {
                         Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);

@@ -40,7 +40,6 @@ public class LineFragment extends Fragment {
     private RecyclerView recyclerView = null;
     private ProgressBar progressBar = null;
     private TextView updateInformationView = null;
-    private boolean requestedStatusUpdate = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -92,10 +91,6 @@ public class LineFragment extends Fragment {
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_FAILED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
-        if (mListener != null && mListener.getMainService() != null) {
-            mListener.getMainService().updateLineStatus();
-            requestedStatusUpdate = true;
-        }
         redraw(context);
         return view;
     }
@@ -203,15 +198,9 @@ public class LineFragment extends Fragment {
                     progressBar.setVisibility(View.GONE);
                     // fallthrough
                 case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
-                    if (!requestedStatusUpdate && mListener != null) {
-                        mListener.getMainService().updateLineStatus();
-                        requestedStatusUpdate = true;
-                    }
                     redraw(context);
                     break;
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    mListener.getMainService().updateLineStatus();
-                    requestedStatusUpdate = true;
                     break;
             }
         }

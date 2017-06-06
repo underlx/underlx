@@ -6,23 +6,29 @@ import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by gabriel on 4/5/17.
  */
 
 public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements INameable, IIDable {
-    public Network(String id, String name, int usualCarCount) {
+    public Network(String id, String name, int usualCarCount, List<Integer> holidays, long openTime, long duration) {
         /*super(new ConnectionFactory());
         ((ConnectionFactory)this.getEdgeFactory()).setNetwork(this);*/
         super(Connection.class);
         setId(id);
         setName(name);
         setUsualCarCount(usualCarCount);
+        setHolidays(holidays);
+        setOpenTime(openTime);
+        setOpenDuration(duration);
     }
 
     private String name;
@@ -77,6 +83,36 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     public void setUsualCarCount(int usualCarCount) {
         this.usualCarCount = usualCarCount;
+    }
+
+    private List<Integer> holidays;
+
+    public List<Integer> getHolidays() {
+        return holidays;
+    }
+
+    public void setHolidays(List<Integer> holidays) {
+        this.holidays = holidays;
+    }
+
+    private long openTime;
+
+    public long getOpenTime() {
+        return openTime;
+    }
+
+    public void setOpenTime(long openTime) {
+        this.openTime = openTime;
+    }
+
+    private long openDuration;
+
+    public long getOpenDuration() {
+        return openDuration;
+    }
+
+    public void setOpenDuration(long openDuration) {
+        this.openDuration = openDuration;
     }
 
     private Map<String, Line> lines = new HashMap<>();
@@ -152,6 +188,33 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         };
 
         return as.getShortestPath(source, target, heuristic);
+    }
+
+    public boolean isOpen() {
+        return isOpen(new Date());
+    }
+
+    public boolean isAboutToClose() {
+        return isAboutToClose(new Date());
+    }
+
+    public boolean isAboutToClose(Date at) {
+        return isOpen(at) && !isOpen(new Date(at.getTime() + 15*60*1000));
+    }
+
+    public boolean isOpen(Date at) {
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Lisbon")); // TODO constant should come from server
+        long now = at.getTime();
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        long passed = now - c.getTimeInMillis();
+        boolean openToday = passed >= getOpenTime() && passed < getOpenTime() + getOpenDuration();
+        c.add(Calendar.DATE, -1);
+        passed = now - c.getTimeInMillis();
+        boolean openYesterday = passed >= getOpenTime() && passed < getOpenTime() + getOpenDuration();
+        return openToday || openYesterday;
     }
 
     @Override

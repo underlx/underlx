@@ -115,4 +115,6 @@
     <string name="lobby_schedule_all_days">Every day: %s</string>
     <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
     <string name="lobby_exit_view_map">View map</string>
+    <string name="warning_network_closed">The subway network is currently closed. Service will resume at %s.</string>
+    <string name="warning_network_about_to_close_transfers">The subway network is about to close, at %1$s. You might not able to perform all line changes and thus fail to get to %2$s.</string>
 </resources>

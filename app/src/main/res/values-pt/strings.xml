@@ -105,4 +105,6 @@
     <string name="lobby_schedule_all_days">Todos os dias: %s</string>
     <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
     <string name="lobby_exit_view_map">Ver mapa</string>
+    <string name="warning_network_closed">A rede de Metro encontra-se encerrada. O serviço reabre às %s.</string>
+    <string name="warning_network_about_to_close_transfers">A rede de Metro está prestes a encerrar, às %1$s. Poderá não conseguir realizar todas as mudanças de linha e assim não conseguir chegar a %2$s.</string>
 </resources>
