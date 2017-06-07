@@ -107,4 +107,10 @@
     <string name="lobby_exit_view_map">Ver mapa</string>
     <string name="warning_network_closed">A rede de Metro encontra-se encerrada. O serviço reabre às %s.</string>
     <string name="warning_network_about_to_close_transfers">A rede de Metro está prestes a encerrar, às %1$s. Poderá não conseguir realizar todas as mudanças de linha e assim não conseguir chegar a %2$s.</string>
+    <string name="frag_announcements_title">Notícias</string>
+    <string name="nav_announcements">Notícias</string>
+    <string name="frag_announcements_empty">Notícias não disponíveis</string>
+    <string name="frag_announcements_updated">Notícias actualizadas</string>
+    <string name="frag_announcement_action_more">Toque para saber mais</string>
+    <string name="frag_announcement_posted_on">Publicado a %s</string>
 </resources>

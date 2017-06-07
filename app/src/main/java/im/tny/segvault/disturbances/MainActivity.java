@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity
         MapFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
+        AnnouncementFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
@@ -159,6 +161,8 @@ public class MainActivity extends AppCompatActivity
                     return MapFragment.newInstance();
                 case R.id.nav_about:
                     return AboutFragment.newInstance();
+                case R.id.nav_announcements:
+                    return AnnouncementFragment.newInstance(MainService.PRIMARY_NETWORK_ID, 1);
                 case R.id.nav_disturbances:
                     return DisturbanceFragment.newInstance(1);
                 case R.id.nav_notif:
@@ -358,6 +362,13 @@ public class MainActivity extends AppCompatActivity
             f.show(getSupportFragmentManager(), "trip-fragment");
         }
     }
+
+    @Override
+    public void onListFragmentInteraction(AnnouncementRecyclerViewAdapter.AnnouncementItem item) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
+        startActivity(browserIntent);
+    }
+
 
     @Override
     public MainService getMainService() {

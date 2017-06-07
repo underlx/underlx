@@ -117,4 +117,10 @@
     <string name="lobby_exit_view_map">View map</string>
     <string name="warning_network_closed">The subway network is currently closed. Service will resume at %s.</string>
     <string name="warning_network_about_to_close_transfers">The subway network is about to close, at %1$s. You might not able to perform all line changes and thus fail to get to %2$s.</string>
+    <string name="frag_announcements_title">Announcements</string>
+    <string name="nav_announcements">Announcements</string>
+    <string name="frag_announcements_empty">Announcements not available</string>
+    <string name="frag_announcements_updated">Announcements updated</string>
+    <string name="frag_announcement_action_more">Tap for more</string>
+    <string name="frag_announcement_posted_on">Posted on %s</string>
 </resources>

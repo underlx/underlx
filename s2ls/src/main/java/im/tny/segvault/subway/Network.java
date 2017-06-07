@@ -139,6 +139,10 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return stations.values();
     }
 
+    public String getAnnouncementsURL() {
+        return "http://www.metrolisboa.pt/feed/";  // TODO retrieve from server
+    }
+
     @Override
     public boolean addVertex(Stop stop) {
         Station s = stations.get(stop.getStation().getId());

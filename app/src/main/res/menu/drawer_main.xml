@@ -13,6 +13,8 @@
     </group>
 
     <group android:id="@+id/status_group" android:checkableBehavior="single">
+        <item android:id="@+id/nav_announcements" android:icon="@drawable/ic_info_black_24dp"
+            android:title="@string/nav_announcements" />
         <item android:id="@+id/nav_disturbances" android:icon="@drawable/ic_menu_announcement"
             android:title="@string/nav_disturbances" />
         <item android:id="@+id/nav_infrastructure" android:icon="@drawable/ic_menu_escalator"
