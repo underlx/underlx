@@ -4,6 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,13 +19,17 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,6 +56,8 @@ public class StationActivity extends AppCompatActivity
 
     private String networkId;
     private String stationId;
+
+    private LinearLayout lineIconsLayout;
 
     MainService locService;
     boolean locBound = false;
@@ -90,6 +99,8 @@ public class StationActivity extends AppCompatActivity
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId));
@@ -124,7 +135,7 @@ public class StationActivity extends AppCompatActivity
             setTitle(station.getName());
             getSupportActionBar().setTitle(station.getName());
             AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-            CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+            final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
             ctl.setTitle(station.getName());
 
             List<Line> lines = new ArrayList<>(station.getLines());
@@ -164,6 +175,38 @@ public class StationActivity extends AppCompatActivity
                 ctl.setStatusBarScrimColor(color);
                 abl.setBackgroundColor(color);
             }
+
+            for (Line l : lines) {
+                Drawable drawable = ContextCompat.getDrawable(StationActivity.this, Util.getDrawableResourceIdForLineId(l.getId()));
+                drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+
+                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35, getResources().getDisplayMetrics());
+                FrameLayout iconFrame = new FrameLayout(StationActivity.this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
+                int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    params.setMarginEnd(margin);
+                }
+                params.setMargins(0, 0, margin, 0);
+                iconFrame.setLayoutParams(params);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    iconFrame.setBackgroundDrawable(drawable);
+                } else {
+                    iconFrame.setBackground(drawable);
+                }
+                lineIconsLayout.addView(iconFrame);
+            }
+
+            abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                @Override
+                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                    if(ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                        lineIconsLayout.animate().alpha(0);
+                    } else {
+                        lineIconsLayout.animate().alpha(1);
+                    }
+                }
+            });
         }
 
         @Override
