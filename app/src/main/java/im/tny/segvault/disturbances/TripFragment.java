@@ -58,7 +58,6 @@ public class TripFragment extends BottomSheetDialogFragment {
      *
      * @return A new instance of fragment TripFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static TripFragment newInstance(String networkId, String tripId) {
         TripFragment fragment = new TripFragment();
         Bundle args = new Bundle();

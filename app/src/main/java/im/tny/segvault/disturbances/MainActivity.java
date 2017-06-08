@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
-        StationFragment.OnFragmentInteractionListener,
         TripFragment.OnFragmentInteractionListener {
 
     MainService locService;
@@ -354,8 +353,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item) {
         if(item.isTrip) {
-            StationFragment f = StationFragment.newInstance(item.networkId, item.originId);
-            f.show(getSupportFragmentManager(), "station-fragment");
+            Intent intent = new Intent(this, StationActivity.class);
+            intent.putExtra(StationActivity.EXTRA_STATION_ID, item.originId);
+            intent.putExtra(StationActivity.EXTRA_NETWORK_ID, item.networkId);
+            startActivity(intent);
         } else {
             TripFragment f = TripFragment.newInstance(item.networkId, item.id);
             f.show(getSupportFragmentManager(), "trip-fragment");

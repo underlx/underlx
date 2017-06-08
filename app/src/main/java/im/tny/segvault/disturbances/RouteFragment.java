@@ -481,9 +481,11 @@ public class RouteFragment extends TopFragment {
         stationLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StationFragment f = StationFragment.newInstance(network.getId(), station.getId());
                 if (activity != null) {
-                    f.show(activity.getSupportFragmentManager(), "stop-fragment");
+                    Intent intent = new Intent(activity, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
+                    activity.startActivity(intent);
                 }
             }
         });

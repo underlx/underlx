@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -136,11 +137,10 @@ public class MapFragment extends TopFragment {
 
         @JavascriptInterface
         public void onStationClicked(String id) {
-            StationFragment f = StationFragment.newInstance(networkId, id);
-            FragmentActivity a = getActivity();
-            if (a != null) {
-                f.show(a.getSupportFragmentManager(), "stop-fragment");
-            }
+            Intent intent = new Intent(getContext(), StationActivity.class);
+            intent.putExtra(StationActivity.EXTRA_STATION_ID, id);
+            intent.putExtra(StationActivity.EXTRA_NETWORK_ID, networkId);
+            startActivity(intent);
         }
     }
 
