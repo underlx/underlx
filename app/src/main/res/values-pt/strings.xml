@@ -113,4 +113,6 @@
     <string name="frag_announcements_updated">Notícias actualizadas</string>
     <string name="frag_announcement_action_more">Toque para saber mais</string>
     <string name="frag_announcement_posted_on">Publicado a %s</string>
+    <string name="frag_map_zoom_out">Reduzir</string>
+    <string name="frag_map_zoom_in">Ampliar</string>
 </resources>

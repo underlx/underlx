@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity
                 case R.id.nav_trip_history:
                     return TripHistoryFragment.newInstance(1);
                 case R.id.nav_map:
-                    return MapFragment.newInstance();
+                    return MapFragment.newInstance(MainService.PRIMARY_NETWORK_ID);
                 case R.id.nav_about:
                     return AboutFragment.newInstance();
                 case R.id.nav_announcements:

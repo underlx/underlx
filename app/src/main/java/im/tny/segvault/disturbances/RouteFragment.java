@@ -482,7 +482,6 @@ public class RouteFragment extends TopFragment {
             @Override
             public void onClick(View view) {
                 StationFragment f = StationFragment.newInstance(network.getId(), station.getId());
-                FragmentActivity a = activity;
                 if (activity != null) {
                     f.show(activity.getSupportFragmentManager(), "stop-fragment");
                 }

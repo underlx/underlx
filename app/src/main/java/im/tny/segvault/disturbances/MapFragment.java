@@ -3,7 +3,11 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -31,6 +35,12 @@ import im.tny.segvault.subway.Stop;
 public class MapFragment extends TopFragment {
     private OnFragmentInteractionListener mListener;
 
+    private WebView webview;
+
+    private static final String ARG_NETWORK_ID = "networkId";
+
+    private String networkId;
+
     public MapFragment() {
         // Required empty public constructor
     }
@@ -41,9 +51,10 @@ public class MapFragment extends TopFragment {
      *
      * @return A new instance of fragment MapFragment.
      */
-    public static MapFragment newInstance() {
+    public static MapFragment newInstance(String networkId) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_NETWORK_ID, networkId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,26 +62,50 @@ public class MapFragment extends TopFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
+        if (getArguments() != null) {
+            networkId = getArguments().getString(ARG_NETWORK_ID);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.frag_map_title), R.id.nav_map, false, false);
+        setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        WebView webview = (WebView) view.findViewById(R.id.webview);
+        webview = (WebView) view.findViewById(R.id.webview);
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webview.addJavascriptInterface(new MapWebInterface(this.getContext()), "android");
-        webview.loadUrl("file:///android_asset/map.html");
 
+        webview.getSettings().setLoadWithOverviewMode(true);
+        webview.getSettings().setUseWideViewPort(true);
+        webview.getSettings().setSupportZoom(true);
+        webview.getSettings().setBuiltInZoomControls(true);
+        webview.getSettings().setDisplayZoomControls(false);
+        webview.loadUrl("file:///android_asset/map-" + networkId + ".html");
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.map, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.menu_zoom_out:
+                webview.zoomOut();
+                return true;
+            case R.id.menu_zoom_in:
+                webview.zoomIn();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -94,63 +129,17 @@ public class MapFragment extends TopFragment {
         Context mContext;
         ObjectMapper mapper = new ObjectMapper();
 
-        public class MapStation {
-            public String id;
-            public String name;
-            public String line;
-
-            public MapStation(String id, String name, String line) {
-                this.id = id; this.name = name; this.line = line;
-            }
-        }
-
-        public class MapConnection {
-            public String from;
-            public String to;
-            public String line;
-
-            public MapConnection(String from, String to, String line) {
-                this.from = from; this.to = to; this.line = line;
-            }
-        }
-
-        public class MapGraph {
-            public List<MapStation> stations;
-            public List<MapConnection> connections;
-        }
-
         /** Instantiate the interface and set the context */
         MapWebInterface(Context c) {
             mContext = c;
         }
 
         @JavascriptInterface
-        public String getGraph(String network) {
-            if(mListener == null) {
-                return "";
-            }
-
-            MapGraph g = new MapGraph();
-            g.stations = new ArrayList<>();
-            g.connections = new ArrayList<>();
-            for(Stop s : mListener.getMainService().getNetwork(network).vertexSet()) {
-                g.stations.add(new MapStation(s.getStation().getId(), s.getStation().getName(), s.getLine().getId()));
-            }
-
-            List<MapStation> connections = new ArrayList<>();
-            for(Connection c : mListener.getMainService().getNetwork(network).edgeSet()) {
-                String line = "";
-                if(c.getSource().getLine() == c.getTarget().getLine()) {
-                    line = c.getSource().getLine().getId();
-                }
-                g.connections.add(new MapConnection(c.getSource().getStation().getId(), c.getTarget().getStation().getId(), line));
-            }
-
-            try {
-                return mapper.writeValueAsString(g);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                return "";
+        public void onStationClicked(String id) {
+            StationFragment f = StationFragment.newInstance(networkId, id);
+            FragmentActivity a = getActivity();
+            if (a != null) {
+                f.show(a.getSupportFragmentManager(), "stop-fragment");
             }
         }
     }

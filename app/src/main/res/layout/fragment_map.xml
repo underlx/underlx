@@ -4,9 +4,9 @@
     android:layout_height="match_parent"
     tools:context="im.tny.segvault.disturbances.MapFragment">
 
-    <WebView
+    <im.tny.segvault.disturbances.CustomWebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></WebView>
+        android:layout_height="match_parent"></im.tny.segvault.disturbances.CustomWebView>
 
 </FrameLayout>
