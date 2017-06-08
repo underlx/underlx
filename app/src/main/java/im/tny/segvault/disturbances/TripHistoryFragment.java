@@ -71,7 +71,7 @@ public class TripHistoryFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_trip_history_title), 0, false, false);
+        setUpActivity(getString(R.string.frag_trip_history_title), R.id.nav_trip_history, false, false);
         //setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_trip_history_list, container, false);
