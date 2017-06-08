@@ -8,9 +8,17 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -35,7 +43,9 @@ import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 
-public class StationActivity extends AppCompatActivity {
+public class StationActivity extends AppCompatActivity
+        implements StationGeneralFragment.OnFragmentInteractionListener,
+        StationLobbyFragment.OnFragmentInteractionListener {
 
     private String networkId;
     private String stationId;
@@ -43,7 +53,7 @@ public class StationActivity extends AppCompatActivity {
     MainService locService;
     boolean locBound = false;
 
-    ImageView topImage;
+    private LocalBroadcastManager bm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +79,6 @@ public class StationActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        topImage = (ImageView) findViewById(R.id.top_image);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,9 +89,21 @@ public class StationActivity extends AppCompatActivity {
         });
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId));
+        tabLayout.setupWithViewPager(pager);
+
+        bm = LocalBroadcastManager.getInstance(this);
     }
 
     private StationActivity.LocServiceConnection mConnection = new StationActivity.LocServiceConnection();
+
+    @Override
+    public MainService getMainService() {
+        return locService;
+    }
 
     class LocServiceConnection implements ServiceConnection {
         MainService.LocalBinder binder;
@@ -95,12 +115,15 @@ public class StationActivity extends AppCompatActivity {
             binder = (MainService.LocalBinder) service;
             locService = binder.getService();
             locBound = true;
+            Intent intent = new Intent(ACTION_MAIN_SERVICE_BOUND);
+            bm.sendBroadcast(intent);
 
             Network net = locService.getNetwork(networkId);
             Station station = net.getStation(stationId);
 
             setTitle(station.getName());
             getSupportActionBar().setTitle(station.getName());
+            AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
             CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
             ctl.setTitle(station.getName());
 
@@ -112,8 +135,8 @@ public class StationActivity extends AppCompatActivity {
                 }
             });
 
-            if(lines.size() > 1) {
-                int colors[] = new int[lines.size()*2];
+            if (lines.size() > 1) {
+                int colors[] = new int[lines.size() * 2];
                 int i = 0;
                 for (Line l : lines) {
                     colors[i++] = l.getColor();
@@ -128,82 +151,18 @@ public class StationActivity extends AppCompatActivity {
                 gd.setCornerRadius(0f);
                 ctl.setStatusBarScrim(gd);
 
-                gd = new GradientDrawable(GradientDrawable.Orientation.TL_BR, colors);
+                gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
                 gd.setCornerRadius(0f);
                 if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    ctl.setBackgroundDrawable(gd);
+                    abl.setBackgroundDrawable(gd);
                 } else {
-                    ctl.setBackground(gd);
+                    abl.setBackground(gd);
                 }
             } else {
                 int color = lines.get(0).getColor();
                 ctl.setContentScrimColor(color);
                 ctl.setStatusBarScrimColor(color);
-                ctl.setBackgroundColor(color);
-            }
-
-            // Connections
-            TextView connectionsTitleView = (TextView) findViewById(R.id.connections_title_view);
-            LinearLayout busLayout = (LinearLayout) findViewById(R.id.feature_bus_layout);
-            if (station.getFeatures().bus) {
-                busLayout.setVisibility(View.VISIBLE);
-                connectionsTitleView.setVisibility(View.VISIBLE);
-            }
-
-            LinearLayout boatLayout = (LinearLayout) findViewById(R.id.feature_boat_layout);
-            if (station.getFeatures().boat) {
-                boatLayout.setVisibility(View.VISIBLE);
-                connectionsTitleView.setVisibility(View.VISIBLE);
-            }
-
-            LinearLayout trainLayout = (LinearLayout) findViewById(R.id.feature_train_layout);
-            if (station.getFeatures().train) {
-                trainLayout.setVisibility(View.VISIBLE);
-                connectionsTitleView.setVisibility(View.VISIBLE);
-            }
-
-            LinearLayout airportLayout = (LinearLayout) findViewById(R.id.feature_airport_layout);
-            if (station.getFeatures().airport) {
-                airportLayout.setVisibility(View.VISIBLE);
-                connectionsTitleView.setVisibility(View.VISIBLE);
-            }
-
-            // Accessibility
-            TextView accessibilityTitleView = (TextView) findViewById(R.id.accessibility_title_view);
-            LinearLayout liftLayout = (LinearLayout) findViewById(R.id.feature_lift_layout);
-            if (station.getFeatures().lift) {
-                liftLayout.setVisibility(View.VISIBLE);
-                accessibilityTitleView.setVisibility(View.VISIBLE);
-            }
-
-            // Lobbies
-            LinearLayout lobbiesLayout = (LinearLayout) findViewById(R.id.lobbies_layout);
-            for (Lobby lobby : station.getLobbies()) {
-                LobbyView v = new LobbyView(StationActivity.this, lobby);
-                lobbiesLayout.addView(v);
-            }
-
-            // Statistics
-            Realm realm = Realm.getDefaultInstance();
-            TextView statsEntryCountView = (TextView) findViewById(R.id.station_entry_count_view);
-            long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-            statsEntryCountView.setText(String.format(getString(R.string.frag_station_stats_entry), entryCount));
-
-            TextView statsExitCountView = (TextView) findViewById(R.id.station_exit_count_view);
-            long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
-            statsExitCountView.setText(String.format(getString(R.string.frag_station_stats_exit), exitCount));
-
-            TextView statsGoneThroughCountView = (TextView) findViewById(R.id.station_gone_through_count_view);
-            long goneThroughCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.GONE_THROUGH.name()).count();
-            statsGoneThroughCountView.setText(String.format(getString(R.string.frag_station_stats_gone_through), goneThroughCount));
-
-            TextView statsTransferCountView = (TextView) findViewById(R.id.station_transfer_count_view);
-            if(station.getLines().size() > 1) {
-                long transferCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-                statsTransferCountView.setText(String.format(getString(R.string.frag_station_stats_transfer), transferCount));
-                statsTransferCountView.setVisibility(View.VISIBLE);
-            } else {
-                statsTransferCountView.setVisibility(View.GONE);
+                abl.setBackgroundColor(color);
             }
         }
 
@@ -227,6 +186,51 @@ public class StationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public static class StationPagerAdapter extends FragmentPagerAdapter {
+        private static int NUM_ITEMS = 2;
+
+        private String networkId;
+        private String stationId;
+        private Context context;
+
+        public StationPagerAdapter(FragmentManager fragmentManager, Context context, String networkId, String stationId) {
+            super(fragmentManager);
+            this.context = context;
+            this.networkId = networkId;
+            this.stationId = stationId;
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_ITEMS;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return StationGeneralFragment.newInstance(networkId, stationId);
+                case 1:
+                    return StationLobbyFragment.newInstance(networkId, stationId);
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return context.getString(R.string.act_station_tab_general);
+                case 1:
+                    return context.getString(R.string.act_station_tab_lobbies);
+                default:
+                    return null;
+            }
+        }
+
+    }
+
     public static final String STATE_STATION_ID = "stationId";
     public static final String STATE_NETWORK_ID = "networkId";
 
@@ -235,12 +239,13 @@ public class StationActivity extends AppCompatActivity {
         savedInstanceState.putString(STATE_STATION_ID, stationId);
         savedInstanceState.putString(STATE_NETWORK_ID, networkId);
 
-
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
     }
 
     public static final String EXTRA_STATION_ID = "im.tny.segvault.disturbances.extra.StationActivity.stationid";
     public static final String EXTRA_NETWORK_ID = "im.tny.segvault.disturbances.extra.StationActivity.networkid";
+
+    public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.StationActivity.mainservicebound";
 
 }

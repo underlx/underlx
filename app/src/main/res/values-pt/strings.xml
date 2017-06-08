@@ -115,4 +115,6 @@
     <string name="frag_announcement_posted_on">Publicado a %s</string>
     <string name="frag_map_zoom_out">Reduzir</string>
     <string name="frag_map_zoom_in">Ampliar</string>
+    <string name="act_station_tab_general">Geral</string>
+    <string name="act_station_tab_lobbies">Saídas e horários</string>
 </resources>

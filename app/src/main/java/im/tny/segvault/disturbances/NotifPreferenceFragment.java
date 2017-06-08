@@ -54,7 +54,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         srl.setEnabled(false);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(view.getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -189,7 +189,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     updateLinesPreference();
                     break;

@@ -96,7 +96,7 @@ public class DisturbanceFragment extends TopFragment {
         getSwipeRefreshLayout().setRefreshing(true);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -243,7 +243,7 @@ public class DisturbanceFragment extends TopFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if(getActivity() != null) {
                         new DisturbanceFragment.UpdateDataTask().execute();

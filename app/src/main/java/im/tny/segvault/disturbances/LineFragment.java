@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Typeface;
-import android.icu.util.TimeUnit;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -13,7 +12,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.text.style.TtsSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +82,7 @@ public class LineFragment extends Fragment {
         updateInformationView = (TextView) view.findViewById(R.id.update_information);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_STARTED);
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
@@ -197,7 +195,7 @@ public class LineFragment extends Fragment {
                     }
                     progressBar.setVisibility(View.GONE);
                     // fallthrough
-                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                     redraw(context);
                     break;
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:

@@ -125,4 +125,6 @@
     <string name="frag_announcement_posted_on">Posted on %s</string>
     <string name="frag_map_zoom_out">Zoom out</string>
     <string name="frag_map_zoom_in">Zoom in</string>
+    <string name="act_station_tab_general">General</string>
+    <string name="act_station_tab_lobbies">Exits and schedules</string>
 </resources>

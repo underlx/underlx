@@ -15,7 +15,6 @@ import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -231,7 +230,7 @@ public class MainActivity extends AppCompatActivity
             binder = (MainService.LocalBinder) service;
             locService = binder.getService();
             locBound = true;
-            Intent intent = new Intent(ACTION_LOCATION_SERVICE_BOUND);
+            Intent intent = new Intent(ACTION_MAIN_SERVICE_BOUND);
             bm.sendBroadcast(intent);
         }
 
@@ -375,7 +374,7 @@ public class MainActivity extends AppCompatActivity
         return locService;
     }
 
-    public static final String ACTION_LOCATION_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.locservicebound";
+    public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.mainservicebound";
 
     public static final String EXTRA_INITIAL_FRAGMENT = "im.tny.segvault.disturbances.extra.MainActivity.initialfragment";
 }

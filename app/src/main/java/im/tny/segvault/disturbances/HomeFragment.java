@@ -111,7 +111,7 @@ public class HomeFragment extends TopFragment {
         });
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
@@ -206,7 +206,7 @@ public class HomeFragment extends TopFragment {
                 case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                     refresh(false);
                     break;
-                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refresh(true);
                     break;

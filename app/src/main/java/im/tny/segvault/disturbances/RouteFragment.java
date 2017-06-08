@@ -129,7 +129,7 @@ public class RouteFragment extends TopFragment {
         destinationPicker = (StationPickerView) view.findViewById(R.id.destination_picker);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainActivity.ACTION_LOCATION_SERVICE_BOUND);
+        filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -551,7 +551,7 @@ public class RouteFragment extends TopFragment {
                 return;
             }
             switch (intent.getAction()) {
-                case MainActivity.ACTION_LOCATION_SERVICE_BOUND:
+                case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
                         network = mListener.getMainService().getNetwork(networkId);
