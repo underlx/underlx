@@ -486,7 +486,7 @@ public class MainService extends Service {
                     int station_count = n.stations.size();
                     int cur_station = 0;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
-                    Network net = new Network(n.id, n.name, n.typCars, n.holidays, n.openTime * 1000, n.duration * 1000);
+                    Network net = new Network(n.id, n.name, n.typCars, n.holidays, n.openTime * 1000, n.duration * 1000, n.timezone, n.newsURL);
                     for (String lineid : n.lines) {
                         Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);

@@ -19,7 +19,7 @@ import java.util.TimeZone;
  */
 
 public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements INameable, IIDable {
-    public Network(String id, String name, int usualCarCount, List<Integer> holidays, long openTime, long duration) {
+    public Network(String id, String name, int usualCarCount, List<Integer> holidays, long openTime, long duration, String timezone, String announcementsURL) {
         /*super(new ConnectionFactory());
         ((ConnectionFactory)this.getEdgeFactory()).setNetwork(this);*/
         super(Connection.class);
@@ -29,6 +29,8 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         setHolidays(holidays);
         setOpenTime(openTime);
         setOpenDuration(duration);
+        setTimezone(timezone);
+        setAnnouncementsURL(announcementsURL);
     }
 
     private String name;
@@ -115,6 +117,30 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         this.openDuration = openDuration;
     }
 
+    private TimeZone timezone;
+
+    public TimeZone getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(TimeZone timezone) {
+        this.timezone = timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = TimeZone.getTimeZone(timezone);
+    }
+
+    private String announcementsURL;
+
+    public String getAnnouncementsURL() {
+        return announcementsURL;
+    }
+
+    public void setAnnouncementsURL(String announcementsURL) {
+        this.announcementsURL = announcementsURL;
+    }
+
     private Map<String, Line> lines = new HashMap<>();
 
     public Collection<Line> getLines() {
@@ -137,10 +163,6 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     public Collection<Station> getStations() {
         return stations.values();
-    }
-
-    public String getAnnouncementsURL() {
-        return "http://www.metrolisboa.pt/feed/";  // TODO retrieve from server
     }
 
     @Override
@@ -207,7 +229,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     }
 
     public boolean isOpen(Date at) {
-        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Lisbon")); // TODO constant should come from server
+        Calendar c = Calendar.getInstance(getTimezone());
         long now = at.getTime();
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);

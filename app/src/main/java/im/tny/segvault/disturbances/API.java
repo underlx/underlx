@@ -41,6 +41,8 @@ public class API {
         public List<Integer> holidays;
         public int openTime;
         public int duration;
+        public String timezone;
+        public String newsURL;
         public List<String> lines;
         public List<String> stations;
     }
