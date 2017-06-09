@@ -488,10 +488,31 @@ public class MainService extends Service {
             try {
                 for (int cur_net = 0; cur_net < net_count; cur_net++) {
                     API.Network n = api.getNetwork(networkIds[cur_net]);
-                    int station_count = n.stations.size();
-                    int cur_station = 0;
+
+                    float netPart = (float) (cur_net + 1) / (float) net_count;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
                     Network net = new Network(n.id, n.name, n.typCars, n.holidays, n.openTime * 1000, n.duration * 1000, n.timezone, n.newsURL);
+
+                    Map<String, API.Station> apiStations = new HashMap<>();
+                    for (API.Station s : api.getStations()) {
+                        if (s.network.equals(n.id)) {
+                            apiStations.put(s.id, s);
+                        }
+                    }
+
+                    publishProgress(15);
+
+                    Map<String, API.Lobby> apiLobbies = new HashMap<>();
+                    for (API.Lobby l : api.getLobbies()) {
+                        if (l.network.equals(n.id)) {
+                            apiLobbies.put(l.id, l);
+                        }
+                    }
+
+                    publishProgress(40);
+
+                    int line_count = n.lines.size();
+                    int cur_line = 0;
                     for (String lineid : n.lines) {
                         Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);
@@ -499,7 +520,7 @@ public class MainService extends Service {
                         line.setColor(Color.parseColor("#" + l.color));
                         for (String sid : l.stations) {
                             Log.d("UpdateTopologyTask", "  Stop: " + sid);
-                            API.Station s = api.getStation(sid);
+                            API.Station s = apiStations.get(sid);
                             Station station = net.getStation(s.id);
                             if (station == null) {
                                 station = new Station(net, s.id, s.name,
@@ -507,7 +528,7 @@ public class MainService extends Service {
 
                                 // Lobbies
                                 for (String id : s.lobbies) {
-                                    API.Lobby alobby = api.getLobby(id);
+                                    API.Lobby alobby = apiLobbies.get(id);
                                     Lobby lobby = new Lobby(alobby.id, alobby.name);
                                     for (API.Exit aexit : alobby.exits) {
                                         Lobby.Exit exit = new Lobby.Exit(aexit.id, aexit.worldCoord, aexit.streets);
@@ -532,15 +553,14 @@ public class MainService extends Service {
                                     WiFiChecker.addBSSIDforStop(stop, new BSSID(w.bssid));
                                 }
                             }
-
-                            float netPart = (float) (cur_net + 1) / (float) net_count;
-                            publishProgress((int) (((cur_station / (float) (station_count)) * netPart) * 100));
-                            if (cur_station < station_count) {
-                                cur_station++;
-                            }
-                            if (isCancelled()) break;
                         }
                         net.addLine(line);
+                        cur_line++;
+                        publishProgress(40 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
+                        if (cur_line < line_count) {
+                            cur_line++;
+                        }
+                        if (isCancelled()) break;
                     }
                     if (isCancelled()) break;
 
@@ -564,6 +584,8 @@ public class MainService extends Service {
                         }
                     }
 
+                    publishProgress(80);
+
                     for (API.Transfer t : api.getTransfers()) {
                         Transfer newTransfer = new Transfer();
                         // find stations with the right IDs for each line
@@ -578,6 +600,8 @@ public class MainService extends Service {
 
                         }
                     }
+
+                    publishProgress(100);
 
                     API.DatasetInfo info = api.getDatasetInfo(net.getId());
                     net.setDatasetAuthors(info.authors);

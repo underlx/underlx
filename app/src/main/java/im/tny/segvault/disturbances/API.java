@@ -219,9 +219,35 @@ public class API {
         }
     }
 
+    public List<Station> getStations() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("stations")), new TypeReference<List<Station>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
     public Station getStation(String id) throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("stations/" + id)), Station.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Lobby> getLobbies() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("lobbies")), new TypeReference<List<Lobby>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
