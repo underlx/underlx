@@ -409,7 +409,7 @@ THE SOFTWARE.
         var offset = width + 4;
         var offsetDiag = offset / 1.4142;
         var topOffset = 0;
-        var centerOffset = "-50px";
+        var centerOffset = "-75px";
         switch(data.labelPos.toLowerCase())
         {
             case "n":
@@ -417,7 +417,7 @@ THE SOFTWARE.
                 topOffset = offset * 2;
                 break;
             case "w":
-                pos = "text-align: right; margin:6 " + offset + "px 0 -" + (100 + offset) + "px";
+                pos = "text-align: right; margin:6 " + offset + "px 0 -" + (150 + offset) + "px";
                 topOffset = offset;
                 break;
             case "e":
@@ -435,17 +435,17 @@ THE SOFTWARE.
                 topOffset = offsetDiag * 2;
                 break;
             case "sw":
-                pos = "text-align: right; margin:" + offsetDiag + "px 0 0 -" + (100 + offsetDiag) + "px";
+                pos = "text-align: right; margin:" + offsetDiag + "px 0 0 -" + (150 + offsetDiag) + "px";
                 topOffset = offsetDiag;
                 break;
             case "nw":
-                pos = "text-align: right; margin: -" + offsetDiag + "px 0 0 -" + (100 + offsetDiag) + "px";
+                pos = "text-align: right; margin: -" + offsetDiag + "px 0 0 -" + (150 + offsetDiag) + "px";
                 topOffset = offsetDiag;
                 break;
         }
-        style = (textClass != "" ? "class='" + textClass + "' " : "") + "style='" + (textClass == "" ? "font-size:8pt;font-family:Verdana,Arial,Helvetica,Sans Serif;text-decoration:none;" : "") + "width:100px;" + (pos != "" ? pos : "") + ";position:absolute;top:" + (y + el.offset().top - (topOffset > 0 ? topOffset : 0)) + "px;left:" + (x + el.offset().left) + "px;z-index:3000;'";
+        style = (textClass != "" ? "class='" + textClass + "' " : "") + "style='" + (textClass == "" ? "font-size:8pt;font-family:Verdana,Arial,Helvetica,Sans Serif;" : "") + "width:150px;" + (pos != "" ? pos : "") + ";position:absolute;top:" + (y + el.offset().top - (topOffset > 0 ? topOffset : 0)) + "px;left:" + (x + el.offset().left) + "px;z-index:3000;'";
         if (data.link != "")
-            $("<a " + style + " title='" + data.title.replace(/\\n/g,"<br />") + "' href='" + data.link + "'>" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
+            $("<span " + style + "><a class='" + textClass + "' style='text-decoration:none' title='" + data.title.replace(/\\n/g,"<br />") + "' href='" + data.link + "'>" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
         else
             $("<span " + style + ">" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
     },
