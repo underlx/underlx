@@ -145,11 +145,16 @@ public class MainService extends Service {
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
         wfc.setScanInterval(10000);
         checkForTopologyUpdates();
+
+        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
     }
 
     @Override
     public void onDestroy() {
         wfc.stopScanning();
+        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
     }
 
     @Override
@@ -864,9 +869,13 @@ public class MainService extends Service {
                 doTick(loc.getState());
             }
 
+            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+            boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+
             if (loc.getState() instanceof InNetworkState) {
                 wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
-                wfc.startScanning();
+                if (locationEnabled)
+                    wfc.startScanning();
                 final InNetworkState ins = (InNetworkState) loc.getState();
                 ins.addLocationChangedListener(new InNetworkState.OnLocationChangedListener() {
                     @Override
@@ -877,12 +886,14 @@ public class MainService extends Service {
                 });
             } else if (loc.getState() instanceof NearNetworkState) {
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
-                wfc.startScanningIfWiFiEnabled();
+                if (locationEnabled)
+                    wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             } else if (loc.getState() instanceof OffNetworkState) {
                 // wfc.stopScanning(); // TODO only enable this when there are locators besides WiFi
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
-                wfc.startScanningIfWiFiEnabled();
+                if (locationEnabled)
+                    wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             }
         }
@@ -982,7 +993,7 @@ public class MainService extends Service {
     private static final ThreadFactory yourFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
-        public Thread newThread(Runnable r) {
+        public Thread newThread(@NonNull Runnable r) {
             ThreadGroup group = new ThreadGroup("threadGroup");
             return new Thread(group, r, "LargeCallStackThread", 20000);
         }
@@ -994,4 +1005,16 @@ public class MainService extends Service {
     public static final Executor LARGE_STACK_THREAD_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, yourFactory);
+
+    private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            if (key.equals("pref_location_enable")) {
+                if (prefs.getBoolean("pref_location_enable", true))
+                    wfc.startScanningIfWiFiEnabled();
+                else
+                    wfc.stopScanning();
+            }
+        }
+    };
+
 }

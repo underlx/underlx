@@ -161,7 +161,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d("MainActivityFragment", "onSharedPreferenceChanged " + key);
+        Log.d("NotifPreferenceFrag", "onSharedPreferenceChanged " + key);
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -21,6 +22,8 @@ import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Stop;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by gabriel on 4/12/17.
@@ -124,6 +127,10 @@ class WiFiChecker {
         @Override
         public void onReceive(Context c, Intent intent) {
             Log.d("WiFiChecker", "onReceive");
+            SharedPreferences sharedPref = c.getSharedPreferences("settings", MODE_PRIVATE);
+            if(!sharedPref.getBoolean("pref_location_enable", true)) {
+                return;
+            }
             List<ScanResult> wifiList = wifiMan.getScanResults();
             List<BSSID> bssids = new ArrayList<>();
             // sort by descending signal strength

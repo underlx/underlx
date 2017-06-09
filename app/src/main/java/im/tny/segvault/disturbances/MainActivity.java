@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         AnnouncementFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
+        GeneralPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
         TripFragment.OnFragmentInteractionListener {
 
@@ -165,6 +166,8 @@ public class MainActivity extends AppCompatActivity
                     return DisturbanceFragment.newInstance(1);
                 case R.id.nav_notif:
                     return NotifPreferenceFragment.newInstance();
+                case R.id.nav_settings:
+                    return GeneralPreferenceFragment.newInstance();
                 default:
                     return null;
             }
@@ -352,7 +355,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item) {
-        if(item.isTrip) {
+        if (item.isTrip) {
             Intent intent = new Intent(this, StationActivity.class);
             intent.putExtra(StationActivity.EXTRA_STATION_ID, item.originId);
             intent.putExtra(StationActivity.EXTRA_NETWORK_ID, item.networkId);

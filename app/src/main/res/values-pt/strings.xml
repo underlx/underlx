@@ -117,4 +117,8 @@
     <string name="frag_map_zoom_in">Ampliar</string>
     <string name="act_station_tab_general">Geral</string>
     <string name="act_station_tab_lobbies">Saídas e horários</string>
+    <string name="frag_settings_location_title">Localização</string>
+    <string name="frag_settings_background_location">Localizar em segundo plano</string>
+    <string name="frag_settings_background_location_summary">Necessário para registar viagens e funcionalidades colaborativas em tempo real.</string>
+    <string name="frag_settings_title">Definições</string>
 </resources>

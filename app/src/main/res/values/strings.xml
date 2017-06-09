@@ -127,4 +127,8 @@
     <string name="frag_map_zoom_in">Zoom in</string>
     <string name="act_station_tab_general">General</string>
     <string name="act_station_tab_lobbies">Exits and schedules</string>
+    <string name="frag_settings_location_title">Location</string>
+    <string name="frag_settings_background_location">Locate in background</string>
+    <string name="frag_settings_background_location_summary">Required for trip logging and collaborative real-time features</string>
+    <string name="frag_settings_title">Settings</string>
 </resources>
