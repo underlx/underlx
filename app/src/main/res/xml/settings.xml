@@ -4,7 +4,7 @@
 
     <PreferenceCategory android:title="@string/frag_settings_location_title">
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="pref_location_enable"
             android:title="@string/frag_settings_background_location"
             android:summary="@string/frag_settings_background_location_summary"/>
