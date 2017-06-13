@@ -18,6 +18,11 @@ public class FCMService extends FirebaseMessagingService {
             case "/topics/disturbances":
                 handleDisturbanceMessage(remoteMessage);
                 break;
+            case "/topics/disturbances-debug":
+                if(BuildConfig.DEBUG) {
+                    handleDisturbanceMessage(remoteMessage);
+                }
+                break;
         }
     }
 

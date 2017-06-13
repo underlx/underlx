@@ -186,6 +186,9 @@ public class MainService extends Service {
         }
 
         FirebaseMessaging.getInstance().subscribeToTopic("disturbances");
+        if (BuildConfig.DEBUG) {
+            FirebaseMessaging.getInstance().subscribeToTopic("disturbances-debug");
+        }
 
         UpdateTopologyJob.schedule();
         return Service.START_STICKY;
@@ -410,7 +413,6 @@ public class MainService extends Service {
         } catch (Exception e) {
             // oh well, we'll have to do without cache
             // caching is best-effort
-            e.printStackTrace();
         }
         return info;
     }
@@ -775,9 +777,8 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
 
-        Map<String, LineStatus> statuses = getLineStatus();
-        if (statuses.containsKey(line)) {
-            LineStatus s = statuses.get(line);
+        LineStatus s = getLineStatus().get(line);
+        if (s != null && s.line != null) {
             synchronized (lock) {
                 if (downtime) {
                     lineStatuses.put(line, new LineStatus(s.line, new Date(msgtime)));
