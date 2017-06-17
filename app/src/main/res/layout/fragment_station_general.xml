@@ -37,13 +37,13 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_directions_bus_black_24dp"
                 android:tint="@color/colorPrimaryLight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/frag_station_bus"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -62,13 +62,13 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_directions_boat_black_24dp"
                 android:tint="@color/colorPrimaryLight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/frag_station_boat"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -87,13 +87,13 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_train_black_24dp"
                 android:tint="@color/colorPrimaryLight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/frag_station_train"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -112,13 +112,13 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_local_airport_black_24dp"
                 android:tint="@color/colorPrimaryLight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/frag_station_airport"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -146,14 +146,48 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_elevator"
                 android:tint="@color/colorPrimaryLight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:text="@string/frag_station_lift"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/services_title_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="@string/frag_station_services"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/service_wifi_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/ic_wifi_black_24dp"
+                android:tint="@color/colorPrimaryLight" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/frag_station_wifi"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         </LinearLayout>

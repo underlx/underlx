@@ -147,6 +147,14 @@ public class StationGeneralFragment extends Fragment {
             accessibilityTitleView.setVisibility(View.VISIBLE);
         }
 
+        // Services
+        TextView servicesTitleView = (TextView) view.findViewById(R.id.services_title_view);
+        LinearLayout wifiLayout = (LinearLayout) view.findViewById(R.id.service_wifi_layout);
+        if (station.getFeatures().wifi) {
+            wifiLayout.setVisibility(View.VISIBLE);
+            servicesTitleView.setVisibility(View.VISIBLE);
+        }
+
         // Statistics
         Realm realm = Realm.getDefaultInstance();
         TextView statsEntryCountView = (TextView) view.findViewById(R.id.station_entry_count_view);

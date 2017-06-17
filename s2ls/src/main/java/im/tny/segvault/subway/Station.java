@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import im.tny.segvault.s2ls.wifi.BSSID;
+
 /**
  * Created by gabriel on 5/25/17.
  */
@@ -134,6 +136,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         public boolean boat;
         public boolean train;
         public boolean airport;
+        public boolean wifi;
 
         public Features(boolean lift, boolean bus, boolean boat, boolean train, boolean airport) {
             this.lift = lift;
@@ -147,6 +150,18 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     private Features features;
 
     public Features getFeatures() {
+        // TODO wi-fi: un-mock this and use info from server
+        features.wifi = false;
+        for(Stop stop: getStops()) {
+            Object o = stop.getMeta("WiFiChecker");
+            if (o == null || !(o instanceof List)) {
+                continue;
+            }
+            features.wifi = ((List) o).size() > 0;
+            if(features.wifi) {
+                break;
+            }
+        }
         return features;
     }
 

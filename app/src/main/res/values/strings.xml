@@ -131,4 +131,6 @@
     <string name="frag_settings_background_location">Locate in background</string>
     <string name="frag_settings_background_location_summary">Required for trip logging and collaborative real-time features</string>
     <string name="frag_settings_title">Settings</string>
+    <string name="frag_station_wifi">Wi-Fi</string>
+    <string name="frag_station_services">Services</string>
 </resources>
