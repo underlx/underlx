@@ -1,7 +1,12 @@
 package im.tny.segvault.disturbances;
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
+
+import java.util.Locale;
 
 import im.tny.segvault.subway.Line;
 
@@ -37,6 +42,16 @@ public class Util {
                 return R.drawable.line_pt_ml_vermelha;
             default:
                 return R.drawable.ic_menu_directions_subway;
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    public static Locale getCurrentLocale(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return context.getResources().getConfiguration().getLocales().get(0);
+        } else {
+            //noinspection deprecation
+            return context.getResources().getConfiguration().locale;
         }
     }
 }

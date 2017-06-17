@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.exception.APIException;
 
@@ -66,6 +67,7 @@ public class API {
         public List<String> lobbies;
         public List<String> lines;
         public List<WiFiAP> wiFiAPs;
+        public Map<String, String> triviaURLs;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -154,6 +156,10 @@ public class API {
 
     private int timeoutMs;
     private URI endpoint;
+
+    public URI getEndpoint() {
+        return endpoint;
+    }
 
     private API(URI endpoint, int timeoutMs) {
         this.endpoint = endpoint;

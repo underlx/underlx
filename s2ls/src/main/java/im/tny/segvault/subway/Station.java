@@ -2,8 +2,10 @@ package im.tny.segvault.subway;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import im.tny.segvault.s2ls.wifi.BSSID;
@@ -13,16 +15,17 @@ import im.tny.segvault.s2ls.wifi.BSSID;
  */
 
 public class Station extends Zone implements INameable, IIDable, Comparable<Station> {
-    public Station(Network network, Set<Stop> stops, String id, String name, Features features) {
+    public Station(Network network, Set<Stop> stops, String id, String name, Features features, Map<String, String> triviaURLs) {
         super(network, stops);
         setId(id);
         setName(name);
         setFeatures(features);
         this.lines = new ArrayList<>();
+        setTriviaURLs(triviaURLs);
     }
 
-    public Station(Network network, String id, String name, Features features) {
-        this(network, new HashSet<Stop>(), id, name, features);
+    public Station(Network network, String id, String name, Features features, Map<String, String> triviaURLs) {
+        this(network, new HashSet<Stop>(), id, name, features, triviaURLs);
     }
 
     private String name;
@@ -177,6 +180,20 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public void addLobby(Lobby lobby) {
         this.lobbies.add(lobby);
+    }
+
+    public Map<String, String> triviaURLs = new HashMap<>();
+
+    public Map<String, String> getTriviaURLs() {
+        return triviaURLs;
+    }
+
+    public String getTriviaURLforLocale(String locale) {
+        return triviaURLs.get(locale);
+    }
+
+    public void setTriviaURLs(Map<String, String> triviaURLs) {
+        this.triviaURLs = triviaURLs;
     }
 
 }

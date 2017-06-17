@@ -52,7 +52,8 @@ import io.realm.Realm;
 
 public class StationActivity extends AppCompatActivity
         implements StationGeneralFragment.OnFragmentInteractionListener,
-        StationLobbyFragment.OnFragmentInteractionListener {
+        StationLobbyFragment.OnFragmentInteractionListener,
+        StationTriviaFragment.OnFragmentInteractionListener {
 
     private String networkId;
     private String stationId;
@@ -200,7 +201,7 @@ public class StationActivity extends AppCompatActivity
             abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
                 @Override
                 public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    if(ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                    if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
                         lineIconsLayout.animate().alpha(0);
                     } else {
                         lineIconsLayout.animate().alpha(1);
@@ -230,7 +231,7 @@ public class StationActivity extends AppCompatActivity
     }
 
     public static class StationPagerAdapter extends FragmentPagerAdapter {
-        private static int NUM_ITEMS = 2;
+        private static int NUM_ITEMS = 3;
 
         private String networkId;
         private String stationId;
@@ -255,6 +256,8 @@ public class StationActivity extends AppCompatActivity
                     return StationGeneralFragment.newInstance(networkId, stationId);
                 case 1:
                     return StationLobbyFragment.newInstance(networkId, stationId);
+                case 2:
+                    return StationTriviaFragment.newInstance(networkId, stationId);
                 default:
                     return null;
             }
@@ -267,6 +270,8 @@ public class StationActivity extends AppCompatActivity
                     return context.getString(R.string.act_station_tab_general);
                 case 1:
                     return context.getString(R.string.act_station_tab_lobbies);
+                case 2:
+                    return context.getString(R.string.act_station_tab_trivia);
                 default:
                     return null;
             }

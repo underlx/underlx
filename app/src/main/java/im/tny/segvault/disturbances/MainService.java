@@ -525,8 +525,14 @@ public class MainService extends Service {
                             API.Station s = apiStations.get(sid);
                             Station station = net.getStation(s.id);
                             if (station == null) {
+                                Map<String, String> triviaURLs = new HashMap<>();
+                                for (Map.Entry<String, String> entry : s.triviaURLs.entrySet()) {
+                                    triviaURLs.put(entry.getKey(), api.getEndpoint().toString() + entry.getValue());
+                                }
+
                                 station = new Station(net, s.id, s.name,
-                                        new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport));
+                                        new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport),
+                                        triviaURLs);
 
                                 // Lobbies
                                 for (String id : s.lobbies) {
