@@ -145,9 +145,6 @@ public class TripHistoryFragment extends TopFragment {
         }
 
         protected Boolean doInBackground(Void... v) {
-            if (!Connectivity.isConnected(getContext())) {
-                return false;
-            }
             while (mListener == null || mListener.getMainService() == null) {
                 try {
                     Thread.sleep(100);
