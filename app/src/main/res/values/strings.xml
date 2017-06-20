@@ -22,6 +22,7 @@
     <string name="nav_help_feedback"><![CDATA[Help & Feedback]]></string>
     <string name="nav_about">About &appname;</string>
     <string name="status_not_yet_implemented">Not implemented yet</string>
+    <string name="status_loading">Loading...</string>
     <string name="frag_about_title">About</string>
     <string name="frag_about_header" translatable="false">@string/app_name</string>
     <string name="frag_about_copyright">Copyright © Segvault 2017</string>
@@ -134,4 +135,5 @@
     <string name="frag_station_wifi">Wi-Fi</string>
     <string name="frag_station_services">Services</string>
     <string name="act_station_tab_trivia">Trivia</string>
+    <string name="frag_station_info_unavailable">Information not available.</string>
 </resources>

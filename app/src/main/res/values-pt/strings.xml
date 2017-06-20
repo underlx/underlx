@@ -124,4 +124,6 @@
     <string name="frag_settings_title">Definições</string>
     <string name="frag_station_wifi">Wi-Fi</string>
     <string name="frag_station_services">Serviços</string>
+    <string name="status_loading">A carregar...</string>
+    <string name="frag_station_info_unavailable">Informação não disponível.</string>
 </resources>

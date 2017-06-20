@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
@@ -16,16 +17,33 @@ import android.widget.LinearLayout;
 
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.exception.APIException;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -93,6 +111,7 @@ public class StationTriviaFragment extends Fragment {
 
         triviaView = (HtmlTextView) view.findViewById(R.id.trivia_view);
 
+        triviaView.setHtml(getString(R.string.status_loading));
         update();
 
         return view;
@@ -125,57 +144,108 @@ public class StationTriviaFragment extends Fragment {
         Network net = service.getNetwork(networkId);
         Station station = net.getStation(stationId);
 
-        Locale l = Util.getCurrentLocale(getContext());
-
-        new DownloadWebPageTask().execute(station.getTriviaURLforLocale(l.getLanguage()));
+        new RetrieveTriviaTask().execute(station);
     }
 
-    private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
+    private class RetrieveTriviaTask extends AsyncTask<Station, Void, String> {
         @Override
-        protected String doInBackground(String... urls) {
-            String response = "";
-            for (String url : urls) {
+        protected String doInBackground(Station... arrStation) {
+            String response = retrieveTrivia(7);
+            if(response != null) {
+                return response;
+            }
+            Locale l = Util.getCurrentLocale(getContext());
+            String url = arrStation[0].getTriviaURLforLocale(l.getLanguage());
+            try {
+                HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+                h.setRequestMethod("GET");
+                h.setDoInput(true);
+
+                InputStream is;
+                int code;
                 try {
-                    HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
-                    h.setRequestMethod("GET");
-                    h.setDoInput(true);
-
-                    InputStream is;
-                    int code;
-                    try {
-                        // Will throw IOException if server responds with 401.
-                        code = h.getResponseCode();
-                    } catch (IOException e) {
-                        // Will return 401, because now connection has the correct internal state.
-                        code = h.getResponseCode();
-                    }
-                    if (code == 200) {
-                        is = h.getInputStream();
-                    } else {
-                        is = h.getErrorStream();
-                    }
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null)
-                        sb.append(line + "\n");
-
-                    response = sb.toString();
+                    // Will throw IOException if server responds with 401.
+                    code = h.getResponseCode();
                 } catch (IOException e) {
-                    // TODO
-                    e.printStackTrace();
+                    // Will return 401, because now connection has the correct internal state.
+                    code = h.getResponseCode();
                 }
+                if (code == 200) {
+                    is = h.getInputStream();
+                } else {
+                    return null;
+                }
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null)
+                    sb.append(line + "\n");
+
+                response = sb.toString();
+                cacheTrivia(response);
+            } catch (IOException e) {
+                return null;
             }
             return response;
         }
 
         @Override
         protected void onPostExecute(String result) {
-            triviaView.setHtml(result);
+            if (result == null) {
+                triviaView.setHtml(getString(R.string.frag_station_info_unavailable));
+            } else {
+                triviaView.setHtml(result);
+            }
+        }
+
+        // cache mechanism
+        private final String TRIVIA_CACHE_FILENAME = "TriviaCache-%s";
+
+        private void cacheTrivia(String trivia) {
+            CachedTrivia toCache = new CachedTrivia(trivia);
+            try {
+                FileOutputStream fos = new FileOutputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId)));
+                ObjectOutputStream os = new ObjectOutputStream(fos);
+                os.writeObject(toCache);
+                os.close();
+                fos.close();
+            } catch (Exception e) {
+                // oh well, we'll have to do without cache
+                // caching is best-effort
+                e.printStackTrace();
+            }
+        }
+
+        @Nullable
+        private String retrieveTrivia(int maxAgeDays) {
+            try {
+                FileInputStream fis = new FileInputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId)));
+                ObjectInputStream is = new ObjectInputStream(fis);
+                CachedTrivia cached = (CachedTrivia) is.readObject();
+                is.close();
+                fis.close();
+
+                if (cached.date.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * maxAgeDays && Connectivity.isConnected(getContext())) {
+                    return null;
+                }
+                return cached.html;
+            } catch (Exception e) {
+                // oh well, we'll have to do without cache
+                // caching is best-effort
+                return null;
+            }
         }
     }
+    private static class CachedTrivia implements Serializable {
+        public String html;
+        public Date date;
 
+        public CachedTrivia(String html) {
+            this.html = html;
+            this.date = new Date();
+        }
+    }
 
     /**
      * This interface must be implemented by activities that contain this
