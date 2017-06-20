@@ -124,6 +124,12 @@ public class AboutFragment extends TopFragment {
         realm.put("url", "https://realm.io/products/realm-mobile-database/");
         data.add(realm);
 
+        Map<String, String> htmltv = new HashMap<>(3);
+        htmltv.put("name", "HtmlTextView");
+        htmltv.put("license", "© Sufficiently Secure - Apache License 2.0");
+        htmltv.put("url", "https://github.com/SufficientlySecure/html-textview/");
+        data.add(htmltv);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
