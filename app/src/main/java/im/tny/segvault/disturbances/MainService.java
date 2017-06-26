@@ -233,13 +233,13 @@ public class MainService extends Service {
     public void updateTopology() {
         cancelTopologyUpdate();
         currentUpdateTopologyTask = new UpdateTopologyTask();
-        currentUpdateTopologyTask.executeOnExecutor(LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
+        currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
     }
 
     public void updateTopology(String... network_ids) {
         cancelTopologyUpdate();
         currentUpdateTopologyTask = new UpdateTopologyTask();
-        currentUpdateTopologyTask.executeOnExecutor(LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
+        currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
     }
 
     public void cancelTopologyUpdate() {
@@ -940,79 +940,7 @@ public class MainService extends Service {
 
         @Override
         public void onTripEnded(S2LS s2ls) {
-            Path path = s2ls.getCurrentTrip();
-            Realm realm = Realm.getDefaultInstance();
-            realm.beginTransaction();
-            RealmList<StationUse> uses = new RealmList<>();
-            int size = path.getEdgeList().size();
-            if (size == 0) {
-                StationUse use = new StationUse();
-                use.setType(StationUse.UseType.VISIT);
-                use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
-                use.setEntryDate(path.getEntryExitTimes(0).first);
-                use.setLeaveDate(path.getEntryExitTimes(0).second);
-                uses.add(realm.copyToRealm(use));
-            } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
-                Connection c = path.getEdgeList().get(0);
-                StationUse use = new StationUse();
-                use.setType(StationUse.UseType.VISIT);
-                use.setSourceLine(c.getSource().getLine().getId());
-                use.setTargetLine(c.getTarget().getLine().getId());
-                use.setEntryDate(path.getEntryExitTimes(0).first);
-                use.setLeaveDate(path.getEntryExitTimes(0).second);
-                use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
-                uses.add(realm.copyToRealm(use));
-            } else {
-                int timeIdx = 0;
-                StationUse startUse = new StationUse();
-                startUse.setType(StationUse.UseType.NETWORK_ENTRY);
-                startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
-                startUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
-                startUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
-                uses.add(realm.copyToRealm(startUse));
-
-                int i = 1;
-                timeIdx++;
-                if (path.getEdgeList().get(0) instanceof Transfer) {
-                    i = 2;
-                    timeIdx++;
-                }
-
-                for (; i < size; i++) {
-                    Connection c = path.getEdgeList().get(i);
-                    StationUse use = new StationUse();
-                    if (c instanceof Transfer) {
-                        if (i == size - 1) break;
-                        use.setType(StationUse.UseType.INTERCHANGE);
-                        use.setSourceLine(c.getSource().getLine().getId());
-                        use.setTargetLine(c.getTarget().getLine().getId());
-                        use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
-                        timeIdx++;
-                        use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
-                        timeIdx++;
-                        i++; // skip next station as then we'd have duplicate uses for the same station ID
-                    } else {
-                        use.setType(StationUse.UseType.GONE_THROUGH);
-                        use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
-                        use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
-                        timeIdx++;
-                    }
-                    use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
-                    uses.add(realm.copyToRealm(use));
-                }
-
-                StationUse endUse = new StationUse();
-                endUse.setType(StationUse.UseType.NETWORK_EXIT);
-                endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getStation().getId()).findFirst());
-                endUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
-                endUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
-                uses.add(realm.copyToRealm(endUse));
-            }
-            Trip trip = new Trip();
-            trip.setId(UUID.randomUUID().toString());
-            trip.setPath(uses);
-            realm.copyToRealm(trip);
-            realm.commitTransaction();
+            Trip.persistConnectionPath(s2ls.getCurrentTrip());
         }
 
         private void doTick(final State state) {
@@ -1025,27 +953,6 @@ public class MainService extends Service {
             }, state.getPreferredTickIntervalMillis());
         }
     }
-
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
-    private static final int KEEP_ALIVE = 1;
-
-    private static final ThreadFactory yourFactory = new ThreadFactory() {
-        private final AtomicInteger mCount = new AtomicInteger(1);
-
-        public Thread newThread(@NonNull Runnable r) {
-            ThreadGroup group = new ThreadGroup("threadGroup");
-            return new Thread(group, r, "LargeCallStackThread", 20000);
-        }
-    };
-
-    private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<Runnable>(128);
-
-    public static final Executor LARGE_STACK_THREAD_POOL_EXECUTOR
-            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
-            TimeUnit.SECONDS, sPoolWorkQueue, yourFactory);
 
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {

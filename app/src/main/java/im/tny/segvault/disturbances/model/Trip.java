@@ -3,11 +3,15 @@ package im.tny.segvault.disturbances.model;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Transfer;
+import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -97,5 +101,80 @@ public class Trip extends RealmObject {
             }
         }
         return edges;
+    }
+
+    public static void persistConnectionPath(Path path) {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        RealmList<StationUse> uses = new RealmList<>();
+        int size = path.getEdgeList().size();
+        if (size == 0) {
+            StationUse use = new StationUse();
+            use.setType(StationUse.UseType.VISIT);
+            use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
+            use.setEntryDate(path.getEntryExitTimes(0).first);
+            use.setLeaveDate(path.getEntryExitTimes(0).second);
+            uses.add(realm.copyToRealm(use));
+        } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
+            Connection c = path.getEdgeList().get(0);
+            StationUse use = new StationUse();
+            use.setType(StationUse.UseType.VISIT);
+            use.setSourceLine(c.getSource().getLine().getId());
+            use.setTargetLine(c.getTarget().getLine().getId());
+            use.setEntryDate(path.getEntryExitTimes(0).first);
+            use.setLeaveDate(path.getEntryExitTimes(0).second);
+            use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
+            uses.add(realm.copyToRealm(use));
+        } else {
+            int timeIdx = 0;
+            StationUse startUse = new StationUse();
+            startUse.setType(StationUse.UseType.NETWORK_ENTRY);
+            startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
+            startUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+            startUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+            uses.add(realm.copyToRealm(startUse));
+
+            int i = 1;
+            timeIdx++;
+            if (path.getEdgeList().get(0) instanceof Transfer) {
+                i = 2;
+                timeIdx++;
+            }
+
+            for (; i < size; i++) {
+                Connection c = path.getEdgeList().get(i);
+                StationUse use = new StationUse();
+                if (c instanceof Transfer) {
+                    if (i == size - 1) break;
+                    use.setType(StationUse.UseType.INTERCHANGE);
+                    use.setSourceLine(c.getSource().getLine().getId());
+                    use.setTargetLine(c.getTarget().getLine().getId());
+                    use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                    timeIdx++;
+                    use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                    timeIdx++;
+                    i++; // skip next station as then we'd have duplicate uses for the same station ID
+                } else {
+                    use.setType(StationUse.UseType.GONE_THROUGH);
+                    use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+                    use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                    timeIdx++;
+                }
+                use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
+                uses.add(realm.copyToRealm(use));
+            }
+
+            StationUse endUse = new StationUse();
+            endUse.setType(StationUse.UseType.NETWORK_EXIT);
+            endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getStation().getId()).findFirst());
+            endUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
+            endUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+            uses.add(realm.copyToRealm(endUse));
+        }
+        Trip trip = new Trip();
+        trip.setId(UUID.randomUUID().toString());
+        trip.setPath(uses);
+        realm.copyToRealm(trip);
+        realm.commitTransaction();
     }
 }
