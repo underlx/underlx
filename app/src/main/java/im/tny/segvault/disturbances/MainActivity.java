@@ -378,6 +378,14 @@ public class MainActivity extends AppCompatActivity
         return locService;
     }
 
+    @Override
+    public LineStatusCache getLineStatusCache() {
+        if(locService == null) {
+            return null;
+        }
+        return locService.getLineStatusCache();
+    }
+
     public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.mainservicebound";
 
     public static final String EXTRA_INITIAL_FRAGMENT = "im.tny.segvault.disturbances.extra.MainActivity.initialfragment";

@@ -25,34 +25,19 @@ import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobRequest;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
@@ -71,17 +56,16 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
-import io.realm.RealmList;
 
 public class MainService extends Service {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
     private API api;
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
+    private LineStatusCache lineStatusCache;
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
-    private HashMap<String, LineStatus> lineStatuses = new HashMap<>();
     private Map<String, S2LS> locServices = new HashMap<>();
 
     private Date creationDate = null;
@@ -103,7 +87,7 @@ public class MainService extends Service {
     }
 
     public MainService() {
-
+        lineStatusCache = new LineStatusCache(this);
     }
 
     private void putNetwork(Network net) {
@@ -290,158 +274,8 @@ public class MainService extends Service {
         return lines;
     }
 
-    public static class LineStatus implements Serializable {
-        private final String id;
-        public final boolean down;
-        public final Date downSince;
-        public final Date updated;
-        public transient Line line;
-
-        public LineStatus(Line line) {
-            this.id = line.getId();
-            this.line = line;
-            this.down = false;
-            this.downSince = new Date();
-            this.updated = new Date();
-        }
-
-        public LineStatus(Line line, Date downSince) {
-            this.id = line.getId();
-            this.line = line;
-            this.down = true;
-            this.downSince = downSince;
-            this.updated = new Date();
-        }
-    }
-
-    private class UpdateLineStatusTask extends AsyncTask<Void, Integer, Boolean> {
-        private HashMap<String, LineStatus> statuses = new HashMap<>();
-
-        @Override
-        protected void onPreExecute() {
-            Intent intent = new Intent(ACTION_LINE_STATUS_UPDATE_STARTED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        protected Boolean doInBackground(Void... v) {
-            if (!Connectivity.isConnected(MainService.this)) {
-                return false;
-            }
-            List<Line> lines = new LinkedList<>();
-            for (Network n : getNetworks()) {
-                lines.addAll(n.getLines());
-            }
-            try {
-                List<API.Disturbance> disturbances = API.getInstance().getOngoingDisturbances();
-                for (Line l : lines) {
-                    boolean foundDisturbance = false;
-                    for (API.Disturbance d : disturbances) {
-                        if (d.line.equals(l.getId()) && !d.ended) {
-                            foundDisturbance = true;
-                            statuses.put(l.getId(), new LineStatus(l, new Date(d.startTime[0] * 1000)));
-                            break;
-                        }
-                    }
-                    if (!foundDisturbance) {
-                        statuses.put(l.getId(), new LineStatus(l));
-                    }
-                }
-            } catch (APIException e) {
-                return false;
-            }
-            cacheLineStatus(statuses);
-            synchronized (lock) {
-                lineStatuses.clear();
-                lineStatuses.putAll(statuses);
-            }
-            return true;
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(Boolean result) {
-            Intent intent;
-            if (result) {
-                intent = new Intent(ACTION_LINE_STATUS_UPDATE_SUCCESS);
-            } else {
-                intent = new Intent(ACTION_LINE_STATUS_UPDATE_FAILED);
-            }
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-    }
-
-    private final String LINE_STATUS_CACHE_FILENAME = "LineStatusCache";
-
-    private void cacheLineStatus(HashMap<String, LineStatus> info) {
-        try {
-            FileOutputStream fos = new FileOutputStream(new File(getCacheDir(), LINE_STATUS_CACHE_FILENAME));
-            ObjectOutputStream os = new ObjectOutputStream(fos);
-            os.writeObject(info);
-            os.close();
-            fos.close();
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
-            e.printStackTrace();
-        }
-    }
-
-    private HashMap<String, LineStatus> readLineStatus() {
-        HashMap<String, LineStatus> info = null;
-        try {
-            FileInputStream fis = new FileInputStream(new File(getCacheDir(), LINE_STATUS_CACHE_FILENAME));
-            ObjectInputStream is = new ObjectInputStream(fis);
-            info = (HashMap) is.readObject();
-            is.close();
-            fis.close();
-
-            Collection<Network> networks = getNetworks();
-            Map<String, Line> lines = new HashMap<>();
-            for (Line l : getAllLines()) {
-                lines.put(l.getId(), l);
-            }
-            for (LineStatus s : info.values()) {
-                s.line = lines.get(s.id);
-            }
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
-        }
-        return info;
-    }
-
-    public Map<String, LineStatus> getLineStatus() {
-        HashMap<String, LineStatus> statuses = new HashMap<>();
-        synchronized (lock) {
-            if (lineStatuses.isEmpty()) {
-                lineStatuses = readLineStatus();
-                if (lineStatuses == null) {
-                    lineStatuses = new HashMap<>();
-                }
-            }
-            statuses.putAll(lineStatuses);
-        }
-        return statuses;
-    }
-
-    public LineStatus getLineStatus(String id) {
-        synchronized (lock) {
-            if (lineStatuses.isEmpty()) {
-                lineStatuses = readLineStatus();
-                if (lineStatuses == null) {
-                    lineStatuses = new HashMap<>();
-                }
-            }
-            return lineStatuses.get(id);
-        }
-    }
-
-    public void updateLineStatus() {
-        new UpdateLineStatusTask().execute();
+    public LineStatusCache getLineStatusCache() {
+        return lineStatusCache;
     }
 
     // DEBUG:
@@ -613,9 +447,7 @@ public class MainService extends Service {
                     API.DatasetInfo info = api.getDatasetInfo(net.getId());
                     net.setDatasetAuthors(info.authors);
                     net.setDatasetVersion(info.version);
-                    synchronized (lock) {
-                        lineStatuses.clear();
-                    }
+                    lineStatusCache.clear();
                     putNetwork(net);
                     TopologyCache.saveNetwork(MainService.this, net);
                     if (isCancelled()) break;
@@ -707,10 +539,6 @@ public class MainService extends Service {
 
     public static final String ACTION_TOPOLOGY_UPDATE_AVAILABLE = "im.tny.segvault.disturbances.action.topology.update.available";
 
-    public static final String ACTION_LINE_STATUS_UPDATE_STARTED = "im.tny.segvault.disturbances.action.linestatus.update.started";
-    public static final String ACTION_LINE_STATUS_UPDATE_SUCCESS = "im.tny.segvault.disturbances.action.linestatus.update.success";
-    public static final String ACTION_LINE_STATUS_UPDATE_FAILED = "im.tny.segvault.disturbances.action.linestatus.update.failure";
-
     public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
 
     public static class LocationJobCreator implements JobCreator {
@@ -782,26 +610,6 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
 
-        LineStatus s = getLineStatus().get(line);
-        if (s != null && s.line != null) {
-            synchronized (lock) {
-                if (downtime) {
-                    lineStatuses.put(line, new LineStatus(s.line, new Date(msgtime)));
-                } else {
-                    lineStatuses.put(line, new LineStatus(s.line));
-                }
-                cacheLineStatus(lineStatuses);
-            }
-            Intent intent = new Intent(ACTION_LINE_STATUS_UPDATE_SUCCESS);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        if (linePref != null && !linePref.contains(line)) {
-            // notifications disabled for this line
-            return;
-        }
-
         Network snetwork;
         synchronized (lock) {
             if (!networks.containsKey(network)) {
@@ -811,6 +619,17 @@ public class MainService extends Service {
         }
         Line sline = snetwork.getLine(line);
         if (sline == null) {
+            return;
+        }
+
+        if(downtime) {
+            lineStatusCache.markLineAsDown(sline, new Date(msgtime));
+        } else {
+            lineStatusCache.markLineAsUp(sline);
+        }
+
+        if (linePref != null && !linePref.contains(line)) {
+            // notifications disabled for this line
             return;
         }
 

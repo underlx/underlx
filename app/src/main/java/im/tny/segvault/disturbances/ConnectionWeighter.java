@@ -1,10 +1,7 @@
 package im.tny.segvault.disturbances;
 
-import java.util.List;
-
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.IEdgeWeighter;
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
@@ -24,7 +21,7 @@ public class ConnectionWeighter implements IEdgeWeighter {
     public double getEdgeWeight(Network network, Connection connection) {
         double weight = network.getDefaultEdgeWeight(connection);
         // make transferring to lines with disturbances much "heavier"
-        MainService.LineStatus s = mainService.getLineStatus(connection.getTarget().getLine().getId());
+        LineStatusCache.Status s = mainService.getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
         if (connection instanceof Transfer || isSource(connection.getSource())) {
             if (!isTarget(connection.getTarget()) && s != null && s.down) {
                 // TODO adjust this according to disturbance severity, if possible

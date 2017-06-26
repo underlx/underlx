@@ -113,7 +113,7 @@ public class HomeFragment extends TopFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
+        filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -169,7 +169,7 @@ public class HomeFragment extends TopFragment {
             return;
 
         if (requestOnlineUpdate)
-            m.updateLineStatus();
+            m.getLineStatusCache().updateLineStatus();
 
         Network net = m.getNetwork(MainService.PRIMARY_NETWORK_ID);
         if (net == null || net.isOpen()) {
@@ -203,7 +203,7 @@ public class HomeFragment extends TopFragment {
                 return;
             }
             switch (intent.getAction()) {
-                case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                     refresh(false);
                     break;
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:

@@ -62,7 +62,7 @@ public class Util {
             return context.getResources().getConfiguration().locale;
         }
     }
-    
+
     // large stack thread pool executor
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final int CORE_POOL_SIZE = CPU_COUNT + 1;

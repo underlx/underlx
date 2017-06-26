@@ -84,9 +84,9 @@ public class LineFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_STARTED);
-        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS);
-        filter.addAction(MainService.ACTION_LINE_STATUS_UPDATE_FAILED);
+        filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_STARTED);
+        filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
+        filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
         redraw(context);
@@ -112,14 +112,14 @@ public class LineFragment extends Fragment {
     }
 
     private void redraw(Context context) {
-        if (mListener == null || mListener.getMainService() == null) {
+        if (mListener == null || mListener.getLineStatusCache() == null) {
             return;
         }
         List<LineRecyclerViewAdapter.LineItem> items = new ArrayList<>();
 
         Date mostRecentUpdate = new Date();
         int count = 0;
-        for (MainService.LineStatus s : mListener.getMainService().getLineStatus().values()) {
+        for (LineStatusCache.Status s : mListener.getLineStatusCache().getLineStatus().values()) {
             if (s.line == null) {
                 continue;
             }
@@ -175,7 +175,7 @@ public class LineFragment extends Fragment {
 
         void onFinishedRefreshing();
 
-        MainService getMainService();
+        LineStatusCache getLineStatusCache();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -185,11 +185,11 @@ public class LineFragment extends Fragment {
                 return;
             }
             switch (intent.getAction()) {
-                case MainService.ACTION_LINE_STATUS_UPDATE_STARTED:
+                case LineStatusCache.ACTION_LINE_STATUS_UPDATE_STARTED:
                     progressBar.setVisibility(View.VISIBLE);
                     break;
-                case MainService.ACTION_LINE_STATUS_UPDATE_SUCCESS:
-                case MainService.ACTION_LINE_STATUS_UPDATE_FAILED:
+                case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                case LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED:
                     if (mListener != null) {
                         mListener.onFinishedRefreshing();
                     }

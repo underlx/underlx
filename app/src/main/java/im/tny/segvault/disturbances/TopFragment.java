@@ -55,6 +55,7 @@ public abstract class TopFragment extends Fragment {
 
     public interface OnInteractionListener {
         MainService getMainService();
+        LineStatusCache getLineStatusCache();
         void checkNavigationDrawerItem(int id);
     }
 }

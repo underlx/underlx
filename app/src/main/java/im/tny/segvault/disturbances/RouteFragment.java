@@ -332,7 +332,7 @@ public class RouteFragment extends TopFragment {
                 }
 
                 if (mListener != null && mListener.getMainService() != null) {
-                    Map<String, MainService.LineStatus> statuses = mListener.getMainService().getLineStatus();
+                    Map<String, LineStatusCache.Status> statuses = mListener.getLineStatusCache().getLineStatus();
                     if (statuses.get(line.getId()) != null &&
                             statuses.get(line.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
@@ -400,7 +400,7 @@ public class RouteFragment extends TopFragment {
                 }
 
                 if (mListener != null && mListener.getMainService() != null) {
-                    Map<String, MainService.LineStatus> statuses = mListener.getMainService().getLineStatus();
+                    Map<String, LineStatusCache.Status> statuses = mListener.getLineStatusCache().getLineStatus();
                     if (statuses.get(targetLine.getId()) != null &&
                             statuses.get(targetLine.getId()).down) {
                         LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
