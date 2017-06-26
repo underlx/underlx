@@ -8,9 +8,9 @@ import im.tny.segvault.subway.Zone;
  */
 
 public abstract class State implements OnStatusChangeListener {
-    private S2LS s2ls;
+    private final S2LS s2ls;
 
-    protected S2LS getS2LS() {
+    protected final S2LS getS2LS() {
         return s2ls;
     }
 
@@ -21,8 +21,6 @@ public abstract class State implements OnStatusChangeListener {
     protected void setState(State state) {
         s2ls.setState(state);
     }
-
-    public abstract S2LS.StateType getType();
 
     public abstract boolean inNetwork();
 
@@ -71,6 +69,10 @@ public abstract class State implements OnStatusChangeListener {
     }
 
     public void tick() {
+
+    }
+
+    public void onLeaveState() {
 
     }
 }

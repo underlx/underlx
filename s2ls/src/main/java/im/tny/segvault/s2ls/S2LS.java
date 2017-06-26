@@ -16,17 +16,11 @@ public class S2LS implements OnStatusChangeListener {
     private Collection<ILocator> locators = new ArrayList<>();
     private Collection<IInNetworkDetector> networkDetectors = new ArrayList<>();
     private Collection<IProximityDetector> proximityDetectors = new ArrayList<>();
-    private OnChangeListener listener = null;
+    private EventListener listener = null;
 
     private State state;
 
-    public enum StateType {
-        OFF_NETWORK,
-        NEAR_NETWORK,
-        IN_NETWORK
-    }
-
-    public S2LS(Network network, OnChangeListener listener) {
+    public S2LS(Network network, EventListener listener) {
         this.network = network;
         this.listener = listener;
         // TODO: adjust initial state to current conditions
@@ -53,8 +47,8 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     protected boolean detectInNetwork() {
-        for(IInNetworkDetector d : networkDetectors) {
-            if(d.inNetwork(network)) {
+        for (IInNetworkDetector d : networkDetectors) {
+            if (d.inNetwork(network)) {
                 return true;
             }
         }
@@ -62,8 +56,8 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     protected boolean detectNearNetwork() {
-        for(IProximityDetector d : proximityDetectors) {
-            if(d.nearNetwork(network)) {
+        for (IProximityDetector d : proximityDetectors) {
+            if (d.nearNetwork(network)) {
                 return true;
             }
         }
@@ -72,7 +66,7 @@ public class S2LS implements OnStatusChangeListener {
 
     protected Zone detectLocation() {
         Zone zone = new Zone(network, network.vertexSet());
-        for(ILocator l : locators) {
+        for (ILocator l : locators) {
             zone.intersect(l.getLocation(network));
         }
         return zone;
@@ -125,14 +119,12 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     protected void setState(State state) {
-        if(this.state != null && this.state.getType() == StateType.IN_NETWORK && state.getType() != StateType.IN_NETWORK) {
-            if(listener != null && this.state instanceof InNetworkState) {
-                listener.onTripEnded(this, ((InNetworkState) this.state).getPath());
-            }
+        if (this.state != null) {
+            this.state.onLeaveState();
         }
         this.state = state;
-        if(listener != null) {
-            listener.onStateChanged(this, state.getType());
+        if (listener != null) {
+            listener.onStateChanged(this);
         }
     }
 
@@ -140,8 +132,29 @@ public class S2LS implements OnStatusChangeListener {
         return this.state;
     }
 
-    public interface OnChangeListener {
-        void onStateChanged(S2LS s2ls, StateType state);
-        void onTripEnded(S2LS s2ls, InNetworkState.Path path);
+    private Path path = null;
+
+    public Path getCurrentTrip() {
+        return path;
+    }
+
+    protected void startNewTrip(Stop stop) {
+        path = new Path(getNetwork(), stop, 0);
+        listener.onTripStarted(this);
+    }
+
+    protected void endCurrentTrip() {
+        listener.onTripEnded(this);
+        path = null;
+    }
+
+    public EventListener getEventListener() {
+        return listener;
+    }
+
+    public interface EventListener {
+        void onStateChanged(S2LS s2ls);
+        void onTripStarted(S2LS s2ls);
+        void onTripEnded(S2LS s2ls);
     }
 }

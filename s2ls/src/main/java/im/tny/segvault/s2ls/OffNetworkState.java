@@ -15,11 +15,6 @@ public class OffNetworkState extends State {
     }
 
     @Override
-    public S2LS.StateType getType() {
-        return S2LS.StateType.OFF_NETWORK;
-    }
-
-    @Override
     public boolean inNetwork() {
         return false;
     }
@@ -47,5 +42,10 @@ public class OffNetworkState extends State {
     @Override
     public void onGotNearNetwork(IProximityDetector detector) {
         setState(new NearNetworkState(getS2LS()));
+    }
+
+    @Override
+    public String toString() {
+        return "OffNetworkState";
     }
 }

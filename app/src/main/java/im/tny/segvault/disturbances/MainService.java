@@ -31,11 +31,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,6 +57,7 @@ import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
 import im.tny.segvault.s2ls.OffNetworkState;
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
@@ -457,7 +454,7 @@ public class MainService extends Service {
                 loc = locServices.get(n.getId());
             }
             s += "Network " + n.getName() + "\n";
-            s += "State machine: " + loc.getState().getType().toString() + "\n";
+            s += "State machine: " + loc.getState().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
             if (loc.getState() instanceof InNetworkState) {
                 InNetworkState ins = (InNetworkState) loc.getState();
@@ -466,8 +463,10 @@ public class MainService extends Service {
                     s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getName());
                 }
                 s += "\tPath:\n";
-                for (Connection c : ins.getPath().getEdgeList()) {
-                    s += String.format("\t\t%s -> %s\n", c.getSource().toString(), c.getTarget().toString());
+                if (loc.getCurrentTrip() != null) {
+                    for (Connection c : loc.getCurrentTrip().getEdgeList()) {
+                        s += String.format("\t\t%s -> %s\n", c.getSource().toString(), c.getTarget().toString());
+                    }
                 }
             }
         }
@@ -848,27 +847,32 @@ public class MainService extends Service {
         notificationManager.notify(id.hashCode(), notificationBuilder.build());
     }
 
-    private Notification buildRouteNotification(InNetworkState state) {
+    private Notification buildRouteNotification(String networkId) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_home);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Stop curStop = state.getPath().getEndVertex();
+        S2LS loc;
+        synchronized (lock) {
+            loc = locServices.get(networkId);
+        }
+        Path currentPath = loc.getCurrentTrip();
+
+        Stop curStop = currentPath.getCurrentStop();
         String title = curStop.getStation().getName();
-        String status = getString(R.string.notif_route_waiting);
-        if (state.getPath().getEdgeList().size() > 0) {
-            Connection latest = state.getPath().getEdgeList().get(state.getPath().getEdgeList().size() - 1);
-            Stop direction = curStop.getLine().getDirectionForConnection(latest);
-            Stop next = curStop.getLine().getStopAfter(latest);
+        String status;
+        if (currentPath.isWaitingFirstTrain()) {
+            status = getString(R.string.notif_route_waiting);
+        } else {
+            Stop direction = currentPath.getDirection();
+            Stop next = currentPath.getNextStop();
             if (direction != null && next != null) {
                 status = String.format(getString(R.string.notif_route_next_station) + "\n", next.getStation().getName());
                 status += String.format(getString(R.string.notif_route_direction), direction.getStation().getName());
-            } else if (state.getLocation().vertexSet().size() == 0) {
+            } else {
                 status = getString(R.string.notif_route_left_station);
             }
-        } else if (state.getLocation().vertexSet().size() == 0) {
-            status = getString(R.string.notif_route_left_station);
         }
 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
@@ -890,10 +894,10 @@ public class MainService extends Service {
 
     private static final int ROUTE_NOTIFICATION_ID = -100;
 
-    public class S2SLChangeListener implements S2LS.OnChangeListener {
+    public class S2SLChangeListener implements S2LS.EventListener {
         @Override
-        public void onStateChanged(S2LS loc, S2LS.StateType state) {
-            Log.d("onStateChanged", state.toString());
+        public void onStateChanged(final S2LS loc) {
+            Log.d("onStateChanged", "State changed");
 
             stateTickHandler.removeCallbacksAndMessages(null);
             if (loc.getState().getPreferredTickIntervalMillis() != 0) {
@@ -907,14 +911,6 @@ public class MainService extends Service {
                 wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
                 if (locationEnabled)
                     wfc.startScanning();
-                final InNetworkState ins = (InNetworkState) loc.getState();
-                ins.addLocationChangedListener(new InNetworkState.OnLocationChangedListener() {
-                    @Override
-                    public void onLocationChanged(InNetworkState state) {
-                        Log.d("onLocationChanged", "Location changed");
-                        startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(ins));
-                    }
-                });
             } else if (loc.getState() instanceof NearNetworkState) {
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 if (locationEnabled)
@@ -930,7 +926,21 @@ public class MainService extends Service {
         }
 
         @Override
-        public void onTripEnded(S2LS s2ls, InNetworkState.Path path) {
+        public void onTripStarted(final S2LS s2ls) {
+            Path path = s2ls.getCurrentTrip();
+            path.addPathChangedListener(new Path.OnPathChangedListener() {
+                @Override
+                public void onPathChanged(Path path) {
+                    Log.d("onPathChanged", "Path changed");
+                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
+                }
+            });
+            startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
+        }
+
+        @Override
+        public void onTripEnded(S2LS s2ls) {
+            Path path = s2ls.getCurrentTrip();
             Realm realm = Realm.getDefaultInstance();
             realm.beginTransaction();
             RealmList<StationUse> uses = new RealmList<>();
