@@ -144,8 +144,9 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     protected void endCurrentTrip() {
-        listener.onTripEnded(this);
+        Path p = path;
         path = null;
+        listener.onTripEnded(this, p);
     }
 
     public EventListener getEventListener() {
@@ -155,6 +156,6 @@ public class S2LS implements OnStatusChangeListener {
     public interface EventListener {
         void onStateChanged(S2LS s2ls);
         void onTripStarted(S2LS s2ls);
-        void onTripEnded(S2LS s2ls);
+        void onTripEnded(S2LS s2ls, Path path);
     }
 }

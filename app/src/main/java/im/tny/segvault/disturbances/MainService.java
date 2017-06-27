@@ -548,6 +548,7 @@ public class MainService extends Service {
     public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
 
     public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
+    public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
 
     public static class LocationJobCreator implements JobCreator {
 
@@ -770,8 +771,11 @@ public class MainService extends Service {
         }
 
         @Override
-        public void onTripEnded(S2LS s2ls) {
-            Trip.persistConnectionPath(s2ls.getCurrentTrip());
+        public void onTripEnded(S2LS s2ls, Path path) {
+            Trip.persistConnectionPath(path);
+            Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         }
 
         private void doTick(final State state) {

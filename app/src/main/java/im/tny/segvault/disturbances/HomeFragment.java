@@ -138,6 +138,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
+        filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -298,6 +299,7 @@ public class HomeFragment extends TopFragment {
                     refresh(true);
                     // fallthrough
                 case MainService.ACTION_CURRENT_TRIP_UPDATED:
+                case MainService.ACTION_CURRENT_TRIP_ENDED:
                     refreshCurrentTrip();
                     break;
             }

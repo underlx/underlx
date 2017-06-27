@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -108,7 +109,11 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+        if (locationEnabled &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
         }
     }
@@ -380,7 +385,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public LineStatusCache getLineStatusCache() {
-        if(locService == null) {
+        if (locService == null) {
             return null;
         }
         return locService.getLineStatusCache();

@@ -1,30 +1,19 @@
 package im.tny.segvault.disturbances;
 
-import android.content.BroadcastReceiver;
+import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import im.tny.segvault.subway.Line;
-import im.tny.segvault.subway.Network;
-import rikka.materialpreference.MultiSelectListPreference;
-import rikka.materialpreference.Preference;
 import rikka.materialpreference.PreferenceFragment;
 
 public class GeneralPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -87,6 +76,14 @@ public class GeneralPreferenceFragment extends PreferenceFragment implements Sha
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d("GeneralPreferenceFrag", "onSharedPreferenceChanged " + key);
+        if (key.equals("pref_location_enable")) {
+            boolean locationEnabled = sharedPreferences.getBoolean("pref_location_enable", true);
+            if (locationEnabled &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
+            }
+        }
     }
 
     @Override
