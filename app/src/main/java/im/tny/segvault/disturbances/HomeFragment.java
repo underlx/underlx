@@ -4,25 +4,39 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
+import java.util.List;
 
+import im.tny.segvault.s2ls.S2LS;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Station;
 
 
 /**
@@ -48,6 +62,10 @@ public class HomeFragment extends TopFragment {
     private TextView debugInfoView;
     private TextView networkClosedView;
     private CardView networkClosedCard;
+    private CardView ongoingTripCard;
+    private LinearLayout curStationLayout;
+    private LinearLayout curStationIconsLayout;
+    private TextView curStationNameView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -91,6 +109,11 @@ public class HomeFragment extends TopFragment {
         networkClosedCard = (CardView) view.findViewById(R.id.network_closed_card);
         networkClosedView = (TextView) view.findViewById(R.id.network_closed_view);
 
+        ongoingTripCard = (CardView) view.findViewById(R.id.ongoing_trip_card);
+        curStationLayout = (LinearLayout) view.findViewById(R.id.cur_station_layout);
+        curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
+        curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
+
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,6 +137,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
+        filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -123,6 +147,7 @@ public class HomeFragment extends TopFragment {
         transaction.replace(R.id.line_status_card, newFragment);
         transaction.commit();
         refresh(true);
+        refreshCurrentTrip();
         return view;
     }
 
@@ -182,6 +207,68 @@ public class HomeFragment extends TopFragment {
         }
     }
 
+    private void refreshCurrentTrip() {
+        if (mListener == null)
+            return;
+
+        MainService m = mListener.getMainService();
+        if (m == null)
+            return;
+
+        S2LS loc = m.getS2LS(MainService.PRIMARY_NETWORK_ID);
+
+        if (loc.getCurrentTrip() == null) {
+            ongoingTripCard.setVisibility(View.GONE);
+        } else {
+            final Station station = loc.getCurrentTrip().getCurrentStop().getStation();
+            curStationNameView.setText(station.getName());
+            redrawCurrentStationLineIcons(station);
+            curStationLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getContext(), StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MainService.PRIMARY_NETWORK_ID);
+                    startActivity(intent);
+                }
+            });
+            ongoingTripCard.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void redrawCurrentStationLineIcons(Station station) {
+        curStationIconsLayout.removeAllViews();
+        List<Line> lines = new ArrayList<>(station.getLines());
+        Collections.sort(lines, new Comparator<Line>() {
+            @Override
+            public int compare(Line l1, Line l2) {
+                return l1.getName().compareTo(l2.getName());
+            }
+        });
+
+        for (Line l : lines) {
+            Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(l.getId()));
+            drawable.setColorFilter(l.getColor(), PorterDuff.Mode.SRC_ATOP);
+
+            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
+            FrameLayout iconFrame = new FrameLayout(getContext());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
+            int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                params.setMarginEnd(margin);
+            }
+            int marginTop = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+            params.setMargins(0, marginTop, margin, 0);
+            iconFrame.setLayoutParams(params);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                iconFrame.setBackgroundDrawable(drawable);
+            } else {
+                iconFrame.setBackground(drawable);
+            }
+            curStationIconsLayout.addView(iconFrame);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -209,6 +296,9 @@ public class HomeFragment extends TopFragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refresh(true);
+                    // fallthrough
+                case MainService.ACTION_CURRENT_TRIP_UPDATED:
+                    refreshCurrentTrip();
                     break;
             }
         }

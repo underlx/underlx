@@ -107,7 +107,7 @@ public class MainService extends Service {
 
             net.setEdgeWeighter(cweighter);
             networks.put(net.getId(), net);
-            S2LS loc = new S2LS(net, new S2SLChangeListener());
+            S2LS loc = new S2LS(net, new S2LSChangeListener());
             locServices.put(net.getId(), loc);
             WiFiLocator wl = new WiFiLocator(net);
             wfc.setLocatorForNetwork(net, wl);
@@ -251,6 +251,12 @@ public class MainService extends Service {
     public Network getNetwork(String id) {
         synchronized (lock) {
             return networks.get(id);
+        }
+    }
+
+    public S2LS getS2LS(String networkId) {
+        synchronized (lock) {
+            return locServices.get(networkId);
         }
     }
 
@@ -541,6 +547,8 @@ public class MainService extends Service {
 
     public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
 
+    public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
+
     public static class LocationJobCreator implements JobCreator {
 
         @Override
@@ -622,7 +630,7 @@ public class MainService extends Service {
             return;
         }
 
-        if(downtime) {
+        if (downtime) {
             lineStatusCache.markLineAsDown(sline, new Date(msgtime));
         } else {
             lineStatusCache.markLineAsUp(sline);
@@ -713,7 +721,7 @@ public class MainService extends Service {
 
     private static final int ROUTE_NOTIFICATION_ID = -100;
 
-    public class S2SLChangeListener implements S2LS.EventListener {
+    public class S2LSChangeListener implements S2LS.EventListener {
         @Override
         public void onStateChanged(final S2LS loc) {
             Log.d("onStateChanged", "State changed");
@@ -752,6 +760,10 @@ public class MainService extends Service {
                 public void onPathChanged(Path path) {
                     Log.d("onPathChanged", "Path changed");
                     startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
+
+                    Intent intent = new Intent(ACTION_CURRENT_TRIP_UPDATED);
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+                    bm.sendBroadcast(intent);
                 }
             });
             startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
