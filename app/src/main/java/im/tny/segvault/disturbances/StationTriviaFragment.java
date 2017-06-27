@@ -150,11 +150,11 @@ public class StationTriviaFragment extends Fragment {
     private class RetrieveTriviaTask extends AsyncTask<Station, Void, String> {
         @Override
         protected String doInBackground(Station... arrStation) {
-            String response = retrieveTrivia(7);
+            Locale l = Util.getCurrentLocale(getContext());
+            String response = retrieveTrivia(7, l.getLanguage());
             if(response != null) {
                 return response;
             }
-            Locale l = Util.getCurrentLocale(getContext());
             String url = arrStation[0].getTriviaURLforLocale(l.getLanguage());
             try {
                 HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
@@ -183,7 +183,7 @@ public class StationTriviaFragment extends Fragment {
                     sb.append(line + "\n");
 
                 response = sb.toString();
-                cacheTrivia(response);
+                cacheTrivia(response, l.getLanguage());
             } catch (IOException e) {
                 return null;
             }
@@ -200,12 +200,12 @@ public class StationTriviaFragment extends Fragment {
         }
 
         // cache mechanism
-        private final String TRIVIA_CACHE_FILENAME = "TriviaCache-%s";
+        private final String TRIVIA_CACHE_FILENAME = "TriviaCache-%s-%s";
 
-        private void cacheTrivia(String trivia) {
+        private void cacheTrivia(String trivia, String locale) {
             CachedTrivia toCache = new CachedTrivia(trivia);
             try {
-                FileOutputStream fos = new FileOutputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId)));
+                FileOutputStream fos = new FileOutputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId, locale)));
                 ObjectOutputStream os = new ObjectOutputStream(fos);
                 os.writeObject(toCache);
                 os.close();
@@ -218,9 +218,9 @@ public class StationTriviaFragment extends Fragment {
         }
 
         @Nullable
-        private String retrieveTrivia(int maxAgeDays) {
+        private String retrieveTrivia(int maxAgeDays, String locale) {
             try {
-                FileInputStream fis = new FileInputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId)));
+                FileInputStream fis = new FileInputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId, locale)));
                 ObjectInputStream is = new ObjectInputStream(fis);
                 CachedTrivia cached = (CachedTrivia) is.readObject();
                 is.close();
