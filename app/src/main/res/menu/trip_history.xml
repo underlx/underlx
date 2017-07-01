@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_show_visits"
+        android:icon="@drawable/ic_visibility_white_24dp"
+        android:title="@string/frag_trip_history_show_visits"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_hide_visits"
+        android:icon="@drawable/ic_visibility_off_white_24dp"
+        android:title="@string/frag_trip_history_hide_visits"
+        app:showAsAction="ifRoom" />
+</menu>

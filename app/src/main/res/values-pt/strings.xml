@@ -126,4 +126,6 @@
     <string name="frag_station_services">Serviços</string>
     <string name="status_loading">A carregar...</string>
     <string name="frag_station_info_unavailable">Informação não disponível.</string>
+    <string name="frag_trip_history_show_visits">Mostrar visitas a estações</string>
+    <string name="frag_trip_history_hide_visits">Ocultar visitas a estações</string>
 </resources>

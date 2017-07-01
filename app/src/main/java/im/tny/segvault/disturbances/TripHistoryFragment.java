@@ -11,6 +11,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -40,6 +43,9 @@ public class TripHistoryFragment extends TopFragment {
 
     private RecyclerView recyclerView = null;
     private TextView emptyView;
+
+    private boolean showVisits = false;
+    private Menu menu;
 
     /**
      * Mandatory constructor for the fragment manager to instantiate the
@@ -72,7 +78,7 @@ public class TripHistoryFragment extends TopFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.frag_trip_history_title), R.id.nav_trip_history, false, false);
-        //setHasOptionsMenu(true);
+        setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_trip_history_list, container, false);
 
@@ -100,22 +106,36 @@ public class TripHistoryFragment extends TopFragment {
         return view;
     }
 
-    /*@Override
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.disturbance_list, menu);
+        inflater.inflate(R.menu.trip_history, menu);
+        if(showVisits) {
+            menu.findItem(R.id.menu_show_visits).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_hide_visits).setVisible(false);
+        }
+        this.menu = menu;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.menu_refresh) {
-            new TripHistoryFragment.UpdateDataTask().execute();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.menu_show_visits:
+                showVisits = true;
+                item.setVisible(false);
+                menu.findItem(R.id.menu_hide_visits).setVisible(true);
+                new TripHistoryFragment.UpdateDataTask().execute();
+                return true;
+            case R.id.menu_hide_visits:
+                showVisits = false;
+                item.setVisible(false);
+                menu.findItem(R.id.menu_show_visits).setVisible(true);
+                new TripHistoryFragment.UpdateDataTask().execute();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
-    }*/
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -154,9 +174,12 @@ public class TripHistoryFragment extends TopFragment {
             Collection<Network> networks = mListener.getMainService().getNetworks();
             Realm realm = Realm.getDefaultInstance();
             for (Trip t : realm.where(Trip.class).findAll()) {
-                items.add(new TripRecyclerViewAdapter.TripItem(t, networks));
+                TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
+                if (showVisits || !item.isVisit) {
+                    items.add(item);
+                }
             }
-            if(items.size() == 0) {
+            if (items.size() == 0) {
                 return false;
             }
             Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder(new Comparator<TripRecyclerViewAdapter.TripItem>() {
@@ -209,7 +232,7 @@ public class TripHistoryFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    if(getActivity() != null) {
+                    if (getActivity() != null) {
                         new TripHistoryFragment.UpdateDataTask().execute();
                     }
                     break;

@@ -53,7 +53,6 @@ import info.debatty.java.stringsimilarity.experimental.Sift4;
 public class StationPickerView extends LinearLayout {
     private InstantAutoComplete textView;
     private ImageButton clearButton;
-    private ImageButton locationButton;
     private AutoCompleteStationsAdapter adapter = null;
     private OnStationSelectedListener onStationSelectedListener = null;
     private OnSelectionLostListener onSelectionLostListener = null;
@@ -152,8 +151,6 @@ public class StationPickerView extends LinearLayout {
                 focusOnEntry();
             }
         });
-
-        locationButton = (ImageButton) findViewById(R.id.button_location);
 
         textView.addTextChangedListener(new TextWatcher() {
             @Override

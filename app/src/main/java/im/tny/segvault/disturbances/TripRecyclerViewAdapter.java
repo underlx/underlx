@@ -5,7 +5,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +65,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                             DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_NUMERIC_DATE));
         }
 
-        if (holder.mItem.isTrip) {
+        if (holder.mItem.isVisit) {
             holder.destinationLayout.setVisibility(View.GONE);
             holder.lineLayout.setVisibility(View.GONE);
             holder.secondDotView.setVisibility(View.GONE);
@@ -158,7 +157,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final Date destTime;
         public final int destColor;
         public final List<Integer> lineColors;
-        public final boolean isTrip;
+        public final boolean isVisit;
 
         public TripItem(Trip trip, Collection<Network> networks) {
             this.id = trip.getId();
@@ -191,9 +190,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                     }
                 }
                 lineColors.add(path.get(path.size() - 1).getTarget().getLine().getColor());
-                isTrip = false;
+                isVisit = false;
             } else {
-                isTrip = true;
+                isVisit = true;
             }
         }
 

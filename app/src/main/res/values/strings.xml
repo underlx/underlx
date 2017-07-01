@@ -136,4 +136,6 @@
     <string name="frag_station_services">Services</string>
     <string name="act_station_tab_trivia">Trivia</string>
     <string name="frag_station_info_unavailable">Information not available.</string>
+    <string name="frag_trip_history_show_visits">Show station visits</string>
+    <string name="frag_trip_history_hide_visits">Hide station visits</string>
 </resources>
