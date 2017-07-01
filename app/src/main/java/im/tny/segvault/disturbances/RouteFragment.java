@@ -34,6 +34,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
+import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -84,6 +85,7 @@ public class RouteFragment extends TopFragment {
     }
 
     private Network network = null;
+    private S2LS loc = null;
     private StationPickerView originPicker;
     private StationPickerView destinationPicker;
     private ImageButton swapButton;
@@ -136,8 +138,9 @@ public class RouteFragment extends TopFragment {
 
         if (mListener != null && mListener.getMainService() != null) {
             network = mListener.getMainService().getNetwork(networkId);
+            loc = mListener.getMainService().getS2LS(networkId);
             // the network map might not be loaded yet
-            if (network != null) {
+            if (network != null && loc != null) {
                 populatePickers();
                 updateClosedWarning();
             }
@@ -162,6 +165,10 @@ public class RouteFragment extends TopFragment {
                 hideRoute();
             }
         });
+
+        if(loc.getCurrentTrip() != null) {
+            originPicker.setWeakSelection(loc.getCurrentTrip().getStartVertex().getStation());
+        }
 
         destinationPicker.setStations(stations);
         destinationPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
@@ -557,8 +564,9 @@ public class RouteFragment extends TopFragment {
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
                         network = mListener.getMainService().getNetwork(networkId);
+                        loc = mListener.getMainService().getS2LS(networkId);
                         // the network map might not be loaded yet
-                        if (network != null) {
+                        if (network != null && loc != null) {
                             populatePickers();
                             updateClosedWarning();
                         }

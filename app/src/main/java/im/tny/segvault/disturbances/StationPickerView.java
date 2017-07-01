@@ -53,11 +53,14 @@ import info.debatty.java.stringsimilarity.experimental.Sift4;
 public class StationPickerView extends LinearLayout {
     private InstantAutoComplete textView;
     private ImageButton clearButton;
+    private ImageButton locationButton;
     private AutoCompleteStationsAdapter adapter = null;
     private OnStationSelectedListener onStationSelectedListener = null;
     private OnSelectionLostListener onSelectionLostListener = null;
 
     private Station selection = null;
+    // weakSelection: if true, selection should clear once the textbox gets focus
+    private boolean weakSelection = false;
 
     public Station getSelection() {
         return selection;
@@ -67,10 +70,16 @@ public class StationPickerView extends LinearLayout {
         if (adapter.stations.contains(station)) {
             textView.setText(station.getName());
             selection = station;
+            weakSelection = false;
             if (onStationSelectedListener != null) {
                 onStationSelectedListener.onStationSelected(selection);
             }
         }
+    }
+
+    public void setWeakSelection(Station station) {
+        setSelection(station);
+        weakSelection = true;
     }
 
     public void setSelectionById(String id) {
@@ -83,6 +92,11 @@ public class StationPickerView extends LinearLayout {
                 break;
             }
         }
+    }
+
+    public void setWeakSelectionById(String id) {
+        setSelectionById(id);
+        weakSelection = true;
     }
 
     public StationPickerView(Context context) {
@@ -125,6 +139,7 @@ public class StationPickerView extends LinearLayout {
             public void onItemClick(AdapterView<?> parent, View arg1, int pos,
                                     long id) {
                 selection = (Station) parent.getItemAtPosition(pos);
+                weakSelection = false;
                 if (onStationSelectedListener != null) {
                     onStationSelectedListener.onStationSelected(selection);
                 }
@@ -137,6 +152,9 @@ public class StationPickerView extends LinearLayout {
                 focusOnEntry();
             }
         });
+
+        locationButton = (ImageButton) findViewById(R.id.button_location);
+
         textView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -154,12 +172,16 @@ public class StationPickerView extends LinearLayout {
                 if (onSelectionLostListener != null) {
                     onSelectionLostListener.onSelectionLost();
                 }
+                weakSelection = false;
                 showHideClearButton();
             }
         });
         textView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
+                if (weakSelection && hasFocus) {
+                    textView.setText("");
+                }
                 showHideClearButton();
             }
         });
