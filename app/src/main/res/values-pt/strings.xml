@@ -77,7 +77,7 @@
     <string name="nav_trip_history">Histórico de viagens</string>
     <string name="frag_trip_history_empty">Sem viagens</string>
     <string name="frag_station_connections">Correspondências</string>
-    <string name="frag_station_bus">Autocarros</string>
+    <string name="frag_station_bus">Terminal rodoviário</string>
     <string name="frag_station_boat">Barcos</string>
     <string name="frag_station_train">Comboios</string>
     <string name="frag_station_airport">Aeroporto</string>
