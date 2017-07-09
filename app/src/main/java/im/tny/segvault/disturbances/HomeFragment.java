@@ -37,6 +37,7 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 
 
 /**
@@ -66,6 +67,7 @@ public class HomeFragment extends TopFragment {
     private LinearLayout curStationLayout;
     private LinearLayout curStationIconsLayout;
     private TextView curStationNameView;
+    private TextView nextStationView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -113,6 +115,7 @@ public class HomeFragment extends TopFragment {
         curStationLayout = (LinearLayout) view.findViewById(R.id.cur_station_layout);
         curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
         curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
+        nextStationView = (TextView) view.findViewById(R.id.next_station_view);
 
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,6 +226,13 @@ public class HomeFragment extends TopFragment {
         } else {
             final Station station = loc.getCurrentTrip().getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
+            Stop nextExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
+            if (nextExit == null) {
+                nextStationView.setVisibility(View.GONE);
+            } else {
+                nextStationView.setText(nextExit.getStation().getName());
+                nextStationView.setVisibility(View.VISIBLE);
+            }
             redrawCurrentStationLineIcons(station);
             curStationLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

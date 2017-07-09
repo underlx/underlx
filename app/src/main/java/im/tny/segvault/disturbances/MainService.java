@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
@@ -282,6 +283,71 @@ public class MainService extends Service {
 
     public LineStatusCache getLineStatusCache() {
         return lineStatusCache;
+    }
+
+    public Stop getLikelyNextExit(List<Connection> path, double threshold) {
+        if(path.size() == 0) {
+            return null;
+        }
+        // get the line for the latest connection
+        Connection last = path.get(path.size() - 1);
+        Line line = null;
+        for(Line l : getAllLines()) {
+            if(l.edgeSet().contains(last)) {
+                line = l;
+                break;
+            }
+        }
+        if (line == null) {
+            return null;
+        }
+
+        Set<Stop> alreadyVisited = new HashSet<>();
+        for(Connection c : path) {
+            alreadyVisited.add(c.getSource());
+            alreadyVisited.add(c.getTarget());
+        }
+
+        // get all the stops till the end of the line, after the given connection
+        // (or in the case of circular lines, all stops of the line)
+        Stop maxStop = null;
+        double max = 0;
+        Set<Stop> stops = new HashSet<>();
+        while (stops.add(last.getSource())) {
+            Stop curStop = last.getTarget();
+            if(!alreadyVisited.contains(curStop)) {
+                double r = getLeaveTrainFactorForStop(curStop);
+                if(maxStop == null || r > max) {
+                    maxStop = curStop;
+                    max = r;
+                }
+            }
+            if (line.outDegreeOf(curStop) == 1) {
+                break;
+            }
+            for (Connection outedge : line.outgoingEdgesOf(curStop)) {
+                if (!stops.contains(outedge.getTarget())) {
+                    last = outedge;
+                    break;
+                }
+            }
+        }
+
+        if(max < threshold) {
+            // most relevant station is not relevant enough
+            return null;
+        }
+        return maxStop;
+    }
+
+    public double getLeaveTrainFactorForStop(Stop stop) {
+        Realm realm = Realm.getDefaultInstance();
+        long entryCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
+        long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
+        // number of times user left at this stop to transfer to another line
+        long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
+        Log.d("leaveFactor", stop.getStation().getId() + " " + (exitCount + transferCount));
+        return entryCount * 0.3 + exitCount + transferCount;
     }
 
     // DEBUG:
