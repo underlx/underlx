@@ -100,7 +100,7 @@
         <item>pt-ml-verde</item>
         <item>pt-ml-vermelha</item>
     </string-array>
-    <string name="title_activity_station">Loading...</string>
+    <string name="activity_station_title">Loading...</string>
     <string name="frag_station_more_information">More information</string>
     <string name="frag_trip_delete">Delete</string>
     <string name="frag_trip_delete_confirm_title">Delete trip?</string>
@@ -138,4 +138,6 @@
     <string name="frag_station_info_unavailable">Information not available.</string>
     <string name="frag_trip_history_show_visits">Show station visits</string>
     <string name="frag_trip_history_hide_visits">Hide station visits</string>
+    <string name="activity_station_favorite">Add to favorites</string>
+    <string name="activity_station_unfavorite">Remove from favorites</string>
 </resources>

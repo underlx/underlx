@@ -27,6 +27,8 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -41,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
@@ -108,6 +111,24 @@ public class StationActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(pager);
 
         bm = LocalBroadcastManager.getInstance(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.station, menu);
+
+        Realm realm = Realm.getDefaultInstance();
+        boolean isFavorite = realm.where(RStation.class).equalTo("id", stationId).findFirst().isFavorite();
+        MenuItem favItem = menu.findItem(R.id.menu_favorite);
+        if(isFavorite) {
+            favItem.setTitle(R.string.activity_station_favorite);
+            favItem.setIcon(R.drawable.ic_star_white_24dp);
+        } else {
+            favItem.setTitle(R.string.activity_station_unfavorite);
+            favItem.setIcon(R.drawable.ic_star_border_white_24dp);
+        }
+        return true;
     }
 
     private StationActivity.LocServiceConnection mConnection = new StationActivity.LocServiceConnection();
@@ -225,6 +246,23 @@ public class StationActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                return true;
+            case R.id.menu_favorite:
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
+                boolean isFavorite = rstation.isFavorite();
+                isFavorite = !isFavorite;
+                rstation.setFavorite(isFavorite);
+                realm.copyToRealm(rstation);
+                realm.commitTransaction();
+                if(isFavorite) {
+                    item.setTitle(R.string.activity_station_favorite);
+                    item.setIcon(R.drawable.ic_star_white_24dp);
+                } else {
+                    item.setTitle(R.string.activity_station_unfavorite);
+                    item.setIcon(R.drawable.ic_star_border_white_24dp);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);

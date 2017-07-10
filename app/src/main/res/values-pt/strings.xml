@@ -90,7 +90,7 @@
     <string name="frag_station_stats_gone_through">Atravessou %d vezes</string>
     <string name="frag_station_stats_transfer">Mudou de linha %d vezes</string>
     <string name="frag_station_more_information">Mais informação</string>
-    <string name="title_activity_station">A carregar...</string>
+    <string name="activity_station_title">A carregar...</string>
     <string name="frag_trip_delete">Apagar</string>
     <string name="frag_trip_delete_confirm_title">Apagar viagem?</string>
     <string name="frag_trip_delete_confirm_desc">A informação sobre esta viagem será eliminada e as estatísticas afectadas serão recalculadas.</string>
@@ -128,4 +128,6 @@
     <string name="frag_station_info_unavailable">Informação não disponível.</string>
     <string name="frag_trip_history_show_visits">Mostrar visitas a estações</string>
     <string name="frag_trip_history_hide_visits">Ocultar visitas a estações</string>
+    <string name="activity_station_favorite">Adicionar aos favoritos</string>
+    <string name="activity_station_unfavorite">Remover dos favoritos</string>
 </resources>
