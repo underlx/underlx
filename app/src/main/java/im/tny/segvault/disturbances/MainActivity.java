@@ -57,10 +57,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getLastCustomNonConfigurationInstance() != null) {
+        Object conn = getLastCustomNonConfigurationInstance();
+        if (conn != null) {
             // have the service connection survive through activity configuration changes
             // (e.g. screen orientation changes)
-            mConnection = (LocServiceConnection) getLastCustomNonConfigurationInstance();
+            mConnection = (LocServiceConnection) conn;
             locService = mConnection.getBinder().getService();
             locBound = true;
         } else if (!locBound) {
