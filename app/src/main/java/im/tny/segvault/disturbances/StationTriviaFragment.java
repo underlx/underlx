@@ -136,11 +136,16 @@ public class StationTriviaFragment extends Fragment {
         @Override
         protected String doInBackground(Station... arrStation) {
             Locale l = Util.getCurrentLocale(getContext());
-            String response = retrieveTrivia(7, l.getLanguage());
+            String lang = l.getLanguage();
+            String url = arrStation[0].getTriviaURLforLocale(lang);
+            if(url == null) {
+                lang = "en";
+                url = arrStation[0].getTriviaURLforLocale(lang);
+            }
+            String response = retrieveTrivia(7, lang);
             if(response != null) {
                 return response;
             }
-            String url = arrStation[0].getTriviaURLforLocale(l.getLanguage());
             try {
                 HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
                 h.setRequestMethod("GET");
@@ -168,7 +173,7 @@ public class StationTriviaFragment extends Fragment {
                     sb.append(line + "\n");
 
                 response = sb.toString();
-                cacheTrivia(response, l.getLanguage());
+                cacheTrivia(response, lang);
             } catch (IOException e) {
                 return null;
             }
