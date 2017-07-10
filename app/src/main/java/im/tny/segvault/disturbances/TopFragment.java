@@ -1,13 +1,9 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * Created by gabriel on 5/6/17.

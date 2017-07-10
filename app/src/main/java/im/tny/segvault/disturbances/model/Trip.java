@@ -9,7 +9,6 @@ import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Stop;
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Transfer;
 import io.realm.Realm;
 import io.realm.RealmList;

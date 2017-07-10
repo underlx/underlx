@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +18,6 @@ import java.text.DateFormatSymbols;
 import java.util.Formatter;
 import java.util.Locale;
 
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 
 public class LobbyView extends LinearLayout {

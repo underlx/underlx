@@ -8,8 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,21 +16,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import im.tny.segvault.disturbances.DisturbanceFragment.OnListFragmentInteractionListener;
-import im.tny.segvault.subway.Line;
-import im.tny.segvault.subway.Network;
-
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import im.tny.segvault.disturbances.DisturbanceFragment.OnListFragmentInteractionListener;
+import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Network;
+
 /**
  * {@link RecyclerView.Adapter} that can display a {@link DisturbanceItem} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<DisturbanceRecyclerViewAdapter.ViewHolder> {
 

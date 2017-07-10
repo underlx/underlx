@@ -3,7 +3,6 @@ package im.tny.segvault.disturbances;
 import com.evernote.android.job.JobManager;
 
 import io.realm.DynamicRealm;
-import io.realm.FieldAttribute;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;

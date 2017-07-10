@@ -49,12 +49,12 @@ import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
+import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
-import im.tny.segvault.subway.Line;
-import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
 
@@ -346,7 +346,6 @@ public class MainService extends Service {
         long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
         // number of times user left at this stop to transfer to another line
         long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-        Log.d("leaveFactor", stop.getStation().getId() + " " + (exitCount + transferCount));
         return entryCount * 0.3 + exitCount + transferCount;
     }
 

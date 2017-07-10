@@ -23,7 +23,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
@@ -32,25 +31,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.StationUse;
-import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
-import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
-import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 
 public class StationActivity extends AppCompatActivity

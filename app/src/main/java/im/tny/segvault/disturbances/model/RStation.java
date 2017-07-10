@@ -1,7 +1,6 @@
 package im.tny.segvault.disturbances.model;
 
 import im.tny.segvault.subway.Station;
-import im.tny.segvault.subway.Stop;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;

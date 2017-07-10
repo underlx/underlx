@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import im.tny.segvault.disturbances.LineFragment.OnListFragmentInteractionListener;
-import im.tny.segvault.subway.Line;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import im.tny.segvault.disturbances.LineFragment.OnListFragmentInteractionListener;
+import im.tny.segvault.subway.Line;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link LineItem} and makes a call to the
