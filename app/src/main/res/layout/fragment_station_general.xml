@@ -25,6 +25,39 @@
             android:visibility="gone" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/connections_bus_button"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/frag_station_bus_lines"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/connections_boat_button"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/frag_station_ferry_routes"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/connections_train_button"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/frag_station_rail_services"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/feature_bus_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

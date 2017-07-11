@@ -130,4 +130,8 @@
     <string name="frag_trip_history_hide_visits">Ocultar visitas a estações</string>
     <string name="activity_station_favorite">Adicionar aos favoritos</string>
     <string name="activity_station_unfavorite">Remover dos favoritos</string>
+    <string name="frag_station_bus_lines">Carreiras urbanas</string>
+    <string name="frag_station_ferry_routes">Ligações fluviais</string>
+    <string name="frag_station_rail_services">Comboios</string>
+    <string name="frag_station_conn_info_loading">A carregar...</string>
 </resources>

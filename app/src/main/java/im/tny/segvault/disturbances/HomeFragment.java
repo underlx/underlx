@@ -221,7 +221,7 @@ public class HomeFragment extends TopFragment {
 
         S2LS loc = m.getS2LS(MainService.PRIMARY_NETWORK_ID);
 
-        if (loc.getCurrentTrip() == null) {
+        if (loc == null || loc.getCurrentTrip() == null) {
             ongoingTripCard.setVisibility(View.GONE);
         } else {
             final Station station = loc.getCurrentTrip().getCurrentStop().getStation();

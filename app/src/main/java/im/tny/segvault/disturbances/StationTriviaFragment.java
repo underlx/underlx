@@ -141,6 +141,9 @@ public class StationTriviaFragment extends Fragment {
             if(url == null) {
                 lang = "en";
                 url = arrStation[0].getTriviaURLforLocale(lang);
+                if(url == null) {
+                    return null;
+                }
             }
             String response = retrieveTrivia(7, lang);
             if(response != null) {

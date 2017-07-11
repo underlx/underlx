@@ -1,17 +1,42 @@
 package im.tny.segvault.disturbances;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.sufficientlysecure.htmltextview.HtmlTextView;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Date;
+import java.util.Locale;
 
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Network;
@@ -109,10 +134,49 @@ public class StationGeneralFragment extends Fragment {
             return;
 
         Network net = service.getNetwork(networkId);
-        Station station = net.getStation(stationId);
+        final Station station = net.getStation(stationId);
 
         // Connections
         TextView connectionsTitleView = (TextView) view.findViewById(R.id.connections_title_view);
+
+        // buttons
+        Button busButton = (Button) view.findViewById(R.id.connections_bus_button);
+        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BUS)) {
+            busButton.setVisibility(View.VISIBLE);
+            busButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new RetrieveConnectionInfoTask(Station.CONNECTION_TYPE_BUS).execute(station);
+                }
+            });
+            connectionsTitleView.setVisibility(View.VISIBLE);
+        }
+
+        Button boatButton = (Button) view.findViewById(R.id.connections_boat_button);
+        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BOAT)) {
+            boatButton.setVisibility(View.VISIBLE);
+            boatButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new RetrieveConnectionInfoTask(Station.CONNECTION_TYPE_BOAT).execute(station);
+                }
+            });
+            connectionsTitleView.setVisibility(View.VISIBLE);
+        }
+
+        Button trainButton = (Button) view.findViewById(R.id.connections_train_button);
+        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_TRAIN)) {
+            trainButton.setVisibility(View.VISIBLE);
+            trainButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new RetrieveConnectionInfoTask(Station.CONNECTION_TYPE_TRAIN).execute(station);
+                }
+            });
+            connectionsTitleView.setVisibility(View.VISIBLE);
+        }
+
+        // icons
         LinearLayout busLayout = (LinearLayout) view.findViewById(R.id.feature_bus_layout);
         if (station.getFeatures().bus) {
             busLayout.setVisibility(View.VISIBLE);
@@ -176,6 +240,167 @@ public class StationGeneralFragment extends Fragment {
             statsTransferCountView.setVisibility(View.GONE);
         }
     }
+
+    public static class ConnectionsDialogFragment extends DialogFragment {
+        private static final String ARG_HTML = "html";
+
+        public static ConnectionsDialogFragment newInstance(String html) {
+            ConnectionsDialogFragment fragment = new ConnectionsDialogFragment();
+            Bundle args = new Bundle();
+            args.putString(ARG_HTML, html);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            String html = "";
+            if (getArguments() != null) {
+                html = getArguments().getString(ARG_HTML);
+            }
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+
+            View view = inflater.inflate(R.layout.dialog_connections, null);
+
+            HtmlTextView htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
+            htmltv.setHtml(html);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setView(view);
+            return builder.create();
+        }
+    }
+
+    private class RetrieveConnectionInfoTask extends AsyncTask<Station, Void, String> {
+        private String type;
+        private Snackbar snackbar = null;
+
+        RetrieveConnectionInfoTask(String type) {
+            this.type = type;
+        }
+
+        @Override
+        protected String doInBackground(Station... arrStation) {
+            Locale l = Util.getCurrentLocale(getContext());
+            String lang = l.getLanguage();
+            String url = arrStation[0].getConnectionURLforLocale(type, lang);
+            if (url == null) {
+                lang = "en";
+                url = arrStation[0].getConnectionURLforLocale(type, lang);
+                if (url == null) {
+                    return null;
+                }
+            }
+            String response = retrieveConnectionInfo(7, type, lang);
+            if (response != null) {
+                return response;
+            }
+            publishProgress();
+            try {
+                HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+                h.setRequestMethod("GET");
+                h.setDoInput(true);
+
+                InputStream is;
+                int code;
+                try {
+                    // Will throw IOException if server responds with 401.
+                    code = h.getResponseCode();
+                } catch (IOException e) {
+                    // Will return 401, because now connection has the correct internal state.
+                    code = h.getResponseCode();
+                }
+                if (code == 200) {
+                    is = h.getInputStream();
+                } else {
+                    return null;
+                }
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null)
+                    sb.append(line + "\n");
+
+                response = sb.toString();
+                cacheConnectionInfo(response, type, lang);
+            } catch (IOException e) {
+                return null;
+            }
+            return response;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            snackbar = Snackbar.make(getActivity().findViewById(R.id.fab), R.string.frag_station_conn_info_loading, Snackbar.LENGTH_INDEFINITE);
+            snackbar.show();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result == null) {
+                result = getString(R.string.frag_station_info_unavailable);
+            }
+            if(getActivity() == null) {
+                // our activity went away while we worked...
+                return;
+            }
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+            DialogFragment newFragment = ConnectionsDialogFragment.newInstance(result);
+            newFragment.show(getActivity().getSupportFragmentManager(), "conninfo");
+        }
+
+        // cache mechanism
+        private final String CONN_INFO_CACHE_FILENAME = "ConnCache-%s-%s-%s";
+
+        private void cacheConnectionInfo(String trivia, String type, String locale) {
+            CachedConnectionInfo toCache = new CachedConnectionInfo(trivia);
+            try {
+                FileOutputStream fos = new FileOutputStream(new File(getContext().getCacheDir(), String.format(CONN_INFO_CACHE_FILENAME, stationId, type, locale)));
+                ObjectOutputStream os = new ObjectOutputStream(fos);
+                os.writeObject(toCache);
+                os.close();
+                fos.close();
+            } catch (Exception e) {
+                // oh well, we'll have to do without cache
+                // caching is best-effort
+                e.printStackTrace();
+            }
+        }
+
+        @Nullable
+        private String retrieveConnectionInfo(int maxAgeDays, String type, String locale) {
+            try {
+                FileInputStream fis = new FileInputStream(new File(getContext().getCacheDir(), String.format(CONN_INFO_CACHE_FILENAME, stationId, type, locale)));
+                ObjectInputStream is = new ObjectInputStream(fis);
+                CachedConnectionInfo cached = (CachedConnectionInfo) is.readObject();
+                is.close();
+                fis.close();
+
+                if (cached.date.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * maxAgeDays && Connectivity.isConnected(getContext())) {
+                    return null;
+                }
+                return cached.html;
+            } catch (Exception e) {
+                // oh well, we'll have to do without cache
+                // caching is best-effort
+                return null;
+            }
+        }
+    }
+
+    private static class CachedConnectionInfo implements Serializable {
+        public String html;
+        public Date date;
+
+        public CachedConnectionInfo(String html) {
+            this.html = html;
+            this.date = new Date();
+        }
+    }
+
 
     public interface OnFragmentInteractionListener {
         MainService getMainService();

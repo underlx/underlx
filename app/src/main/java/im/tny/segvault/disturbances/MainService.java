@@ -434,9 +434,19 @@ public class MainService extends Service {
                                     triviaURLs.put(entry.getKey(), api.getEndpoint().toString() + entry.getValue());
                                 }
 
+                                Map<String, Map<String, String>> connURLs = new HashMap<>();
+                                for (Map.Entry<String, Map<String, String>> entry : s.connURLs.entrySet()) {
+                                    Map<String, String> urls = new HashMap<>();
+                                    for (Map.Entry<String, String> localeEntry : entry.getValue().entrySet()) {
+                                        urls.put(localeEntry.getKey(), api.getEndpoint().toString() + localeEntry.getValue());
+                                    }
+                                    connURLs.put(entry.getKey(), urls);
+                                }
+
                                 station = new Station(net, s.id, s.name,
                                         new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport),
                                         triviaURLs);
+                                station.setConnectionURLs(connURLs);
 
                                 // Lobbies
                                 for (String id : s.lobbies) {

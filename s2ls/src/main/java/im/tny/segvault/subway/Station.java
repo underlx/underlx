@@ -95,7 +95,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     public Set<Stop> getStops() {
         Set<Stop> stops = new HashSet<>();
         for (Stop s : getBase().vertexSet()) {
-            if(s.getStation() == this) {
+            if (s.getStation() == this) {
                 stops.add(s);
             }
         }
@@ -114,8 +114,8 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public boolean isAlwaysClosed() {
         for (Lobby l : getLobbies()) {
-            for(Lobby.Schedule s : l.getSchedules()) {
-                if(s.open) {
+            for (Lobby.Schedule s : l.getSchedules()) {
+                if (s.open) {
                     return false;
                 }
             }
@@ -155,13 +155,13 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     public Features getFeatures() {
         // TODO wi-fi: un-mock this and use info from server
         features.wifi = false;
-        for(Stop stop: getStops()) {
+        for (Stop stop : getStops()) {
             Object o = stop.getMeta("WiFiChecker");
             if (o == null || !(o instanceof List)) {
                 continue;
             }
             features.wifi = ((List) o).size() > 0;
-            if(features.wifi) {
+            if (features.wifi) {
                 break;
             }
         }
@@ -182,7 +182,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         this.lobbies.add(lobby);
     }
 
-    public Map<String, String> triviaURLs = new HashMap<>();
+    private Map<String, String> triviaURLs = new HashMap<>();
 
     public Map<String, String> getTriviaURLs() {
         return triviaURLs;
@@ -194,6 +194,32 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public void setTriviaURLs(Map<String, String> triviaURLs) {
         this.triviaURLs = triviaURLs;
+    }
+
+    private Map<String, Map<String, String>> connURLs = new HashMap<>();
+
+    public static final String CONNECTION_TYPE_BOAT = "boat";
+    public static final String CONNECTION_TYPE_BUS = "bus";
+    public static final String CONNECTION_TYPE_TRAIN = "train";
+
+    public Map<String, Map<String, String>> getConnectionURLs() {
+        return connURLs;
+    }
+
+    public String getConnectionURLforLocale(String type, String locale) {
+        Map<String, String> l = connURLs.get(type);
+        if (l == null) {
+            return null;
+        }
+        return l.get(locale);
+    }
+
+    public boolean hasConnectionUrl(String type) {
+        return connURLs.get(type) != null;
+    }
+
+    public void setConnectionURLs(Map<String, Map<String, String>> connURLs) {
+        this.connURLs = connURLs;
     }
 
 }
