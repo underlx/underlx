@@ -1,9 +1,7 @@
 package im.tny.segvault.disturbances;
 
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
@@ -13,15 +11,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -241,36 +236,6 @@ public class StationGeneralFragment extends Fragment {
         }
     }
 
-    public static class ConnectionsDialogFragment extends DialogFragment {
-        private static final String ARG_HTML = "html";
-
-        public static ConnectionsDialogFragment newInstance(String html) {
-            ConnectionsDialogFragment fragment = new ConnectionsDialogFragment();
-            Bundle args = new Bundle();
-            args.putString(ARG_HTML, html);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            String html = "";
-            if (getArguments() != null) {
-                html = getArguments().getString(ARG_HTML);
-            }
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-
-            View view = inflater.inflate(R.layout.dialog_connections, null);
-
-            HtmlTextView htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
-            htmltv.setHtml(html);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setView(view);
-            return builder.create();
-        }
-    }
-
     private class RetrieveConnectionInfoTask extends AsyncTask<Station, Void, String> {
         private String type;
         private Snackbar snackbar = null;
@@ -348,7 +313,7 @@ public class StationGeneralFragment extends Fragment {
             if (snackbar != null) {
                 snackbar.dismiss();
             }
-            DialogFragment newFragment = ConnectionsDialogFragment.newInstance(result);
+            DialogFragment newFragment = HtmlDialogFragment.newInstance(result);
             newFragment.show(getActivity().getSupportFragmentManager(), "conninfo");
         }
 
