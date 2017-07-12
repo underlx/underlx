@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity
         HomeFragment.OnFragmentInteractionListener,
         RouteFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener,
+        HelpFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         LineFragment.OnListFragmentInteractionListener,
         AnnouncementFragment.OnListFragmentInteractionListener,
@@ -164,8 +165,6 @@ public class MainActivity extends AppCompatActivity
                     return TripHistoryFragment.newInstance(1);
                 case R.id.nav_map:
                     return MapFragment.newInstance(MainService.PRIMARY_NETWORK_ID);
-                case R.id.nav_about:
-                    return AboutFragment.newInstance();
                 case R.id.nav_announcements:
                     return AnnouncementFragment.newInstance(MainService.PRIMARY_NETWORK_ID, 1);
                 case R.id.nav_disturbances:
@@ -174,6 +173,10 @@ public class MainActivity extends AppCompatActivity
                     return NotifPreferenceFragment.newInstance();
                 case R.id.nav_settings:
                     return GeneralPreferenceFragment.newInstance();
+                case R.id.nav_help:
+                    return HelpFragment.newInstance();
+                case R.id.nav_about:
+                    return AboutFragment.newInstance();
                 default:
                     return null;
             }
@@ -221,6 +224,20 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onHelpLinkClicked(String destination) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(destination));
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void onLinkClicked(String destination) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(destination));
+        startActivity(browserIntent);
     }
 
     /**

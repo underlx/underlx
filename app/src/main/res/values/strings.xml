@@ -144,4 +144,5 @@
     <string name="frag_station_ferry_routes">Ferry routes</string>
     <string name="frag_station_rail_services">Rail services</string>
     <string name="frag_station_conn_info_loading">Loading...</string>
+    <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
 </resources>
