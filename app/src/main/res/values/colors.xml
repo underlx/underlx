@@ -5,5 +5,6 @@
     <color name="colorAccent">#F15D2A</color>
     <color name="colorWarning">#FF9100</color>
     <color name="colorError">#D50000</color>
+    <color name="colorInfo">#0D47A1</color>
     <color name="colorPrimaryLight">#5591CD</color>
 </resources>

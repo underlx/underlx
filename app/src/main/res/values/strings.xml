@@ -145,4 +145,5 @@
     <string name="frag_station_rail_services">Rail services</string>
     <string name="frag_station_conn_info_loading">Loading...</string>
     <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
+    <string name="frag_station_closed_extended">This station is closed for an extended period.</string>
 </resources>

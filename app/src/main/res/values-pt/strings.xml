@@ -134,4 +134,6 @@
     <string name="frag_station_ferry_routes">Ligações fluviais</string>
     <string name="frag_station_rail_services">Comboios</string>
     <string name="frag_station_conn_info_loading">A carregar...</string>
+    <string name="frag_help_title">Ajuda e comentários</string>
+    <string name="frag_station_closed_extended">Esta estação está encerrada por tempo indeterminado.</string>
 </resources>
