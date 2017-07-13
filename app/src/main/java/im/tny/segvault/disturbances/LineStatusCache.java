@@ -76,7 +76,7 @@ public class LineStatusCache {
     }
 
     private HashMap<String, Status> readLineStatus() {
-        HashMap<String, Status> info = null;
+        HashMap<String, Status> info;
         try {
             FileInputStream fis = new FileInputStream(new File(context.getCacheDir(), LINE_STATUS_CACHE_FILENAME));
             ObjectInputStream is = new ObjectInputStream(fis);
@@ -97,6 +97,7 @@ public class LineStatusCache {
         } catch (Exception e) {
             // oh well, we'll have to do without cache
             // caching is best-effort
+            return null;
         }
         return info;
     }
