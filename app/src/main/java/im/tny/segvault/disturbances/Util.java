@@ -7,6 +7,15 @@ import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Spanned;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -61,6 +70,34 @@ public class Util {
             //noinspection deprecation
             return context.getResources().getConfiguration().locale;
         }
+    }
+
+    public static PrivateKey getPrivateKeyFromAsset(Context context, String path) {
+        try {
+            InputStream is = context.getAssets().open(path);
+            byte[] keyBytes = new byte[is.available()];
+            is.read(keyBytes);
+            is.close();
+
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("EC");
+            return kf.generatePrivate(spec);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+            return null;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public static String encodeRFC3339(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date)
+                .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
     }
 
     // large stack thread pool executor

@@ -26,6 +26,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginRight="5dp"
+                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_info_black_24dp"
                 android:tint="@color/colorInfo" />
 

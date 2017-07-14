@@ -8,13 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -154,6 +155,22 @@ public class API {
         public List<Status> statuses;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class PairRequest {
+        public String nonce;
+        public String timestamp;
+        public String androidID;
+        public String signature;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Pair {
+        public String key;
+        public String secret;
+        public String type;
+        public long[] activation;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -197,6 +214,45 @@ public class API {
             throw new APIException(e).addInfo("Malformed URL on GET request");
         } catch (IOException e) {
             throw new APIException(e).addInfo("IOException on GET request");
+        }
+    }
+
+    private InputStream postRequest(URI uri, byte[] content) throws APIException {
+        try {
+            HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
+
+            h.setConnectTimeout(timeoutMs);
+            h.setReadTimeout(timeoutMs);
+            h.setRequestProperty("Accept", "application/msgpack");
+            h.setRequestProperty("Content-Type", "application/msgpack");
+            h.setRequestMethod("POST");
+            h.setDoInput(true);
+            h.setDoOutput(true);
+
+            h.setFixedLengthStreamingMode(content.length);
+            OutputStream out = new BufferedOutputStream(h.getOutputStream());
+            out.write(content);
+            out.close();
+
+            InputStream is;
+            int code;
+            try {
+                // Will throw IOException if server responds with 401.
+                code = h.getResponseCode();
+            } catch (IOException e) {
+                // Will return 401, because now connection has the correct internal state.
+                code = h.getResponseCode();
+            }
+            if (code == 200) {
+                is = h.getInputStream();
+            } else {
+                is = h.getErrorStream();
+            }
+            return is;
+        } catch (MalformedURLException e) {
+            throw new APIException(e).addInfo("Malformed URL on POST request");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException on POST request");
         }
     }
 
@@ -367,11 +423,23 @@ public class API {
     public List<Disturbance> getDisturbancesSince(Date since) throws APIException {
         try {
             String url = String.format("disturbances?omitduplicatestatus=true&start=%s",
-                    URLEncoder.encode(
-                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(since)
-                                    .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2"), "utf-8"));
+                    URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"));
             return mapper.readValue(getRequest(endpoint.resolve(url)), new TypeReference<List<Disturbance>>() {
             });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Pair postPairRequest(PairRequest request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("pair"), content);
+            return mapper.readValue(is, Pair.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

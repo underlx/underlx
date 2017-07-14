@@ -64,6 +64,7 @@ public class MainService extends Service {
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
     private LineStatusCache lineStatusCache;
+    private PairManager pairManager;
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
@@ -130,6 +131,12 @@ public class MainService extends Service {
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
+
+        pairManager = new PairManager(getApplicationContext());
+        pairManager.unpair();
+        if (!pairManager.isPaired()) {
+            pairManager.pairAsync();
+        }
     }
 
     @Override
