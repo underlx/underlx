@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import im.tny.segvault.subway.Network;
@@ -129,116 +130,24 @@ public class StationTriviaFragment extends Fragment {
         Network net = service.getNetwork(networkId);
         Station station = net.getStation(stationId);
 
-        new RetrieveTriviaTask().execute(station);
-    }
-
-    private class RetrieveTriviaTask extends AsyncTask<Station, Void, String> {
-        @Override
-        protected String doInBackground(Station... arrStation) {
-            Locale l = Util.getCurrentLocale(getContext());
-            String lang = l.getLanguage();
-            String url = arrStation[0].getTriviaURLforLocale(lang);
-            if(url == null) {
-                lang = "en";
-                url = arrStation[0].getTriviaURLforLocale(lang);
-                if(url == null) {
-                    return null;
-                }
+        ExtraContentCache.getTrivia(getContext(), new ExtraContentCache.OnTriviaReadyListener() {
+            @Override
+            public void onSuccessful(List<String> trivia) {
+                triviaView.setHtml(trivia.get(0));
             }
-            String response = retrieveTrivia(7, lang);
-            if(response != null) {
-                return response;
+
+            @Override
+            public void onProgress(int current) {
+
             }
-            try {
-                HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
-                h.setRequestMethod("GET");
-                h.setDoInput(true);
 
-                InputStream is;
-                int code;
-                try {
-                    // Will throw IOException if server responds with 401.
-                    code = h.getResponseCode();
-                } catch (IOException e) {
-                    // Will return 401, because now connection has the correct internal state.
-                    code = h.getResponseCode();
-                }
-                if (code == 200) {
-                    is = h.getInputStream();
-                } else {
-                    return null;
-                }
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-                while ((line = reader.readLine()) != null)
-                    sb.append(line + "\n");
-
-                response = sb.toString();
-                cacheTrivia(response, lang);
-            } catch (IOException e) {
-                return null;
-            }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result == null) {
+            @Override
+            public void onFailure() {
                 triviaView.setHtml(getString(R.string.frag_station_info_unavailable));
-            } else {
-                triviaView.setHtml(result);
             }
-        }
-
-        // cache mechanism
-        private final String TRIVIA_CACHE_FILENAME = "TriviaCache-%s-%s";
-
-        private void cacheTrivia(String trivia, String locale) {
-            CachedTrivia toCache = new CachedTrivia(trivia);
-            try {
-                FileOutputStream fos = new FileOutputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId, locale)));
-                ObjectOutputStream os = new ObjectOutputStream(fos);
-                os.writeObject(toCache);
-                os.close();
-                fos.close();
-            } catch (Exception e) {
-                // oh well, we'll have to do without cache
-                // caching is best-effort
-                e.printStackTrace();
-            }
-        }
-
-        @Nullable
-        private String retrieveTrivia(int maxAgeDays, String locale) {
-            try {
-                FileInputStream fis = new FileInputStream(new File(getContext().getCacheDir(), String.format(TRIVIA_CACHE_FILENAME, stationId, locale)));
-                ObjectInputStream is = new ObjectInputStream(fis);
-                CachedTrivia cached = (CachedTrivia) is.readObject();
-                is.close();
-                fis.close();
-
-                if (cached.date.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * maxAgeDays && Connectivity.isConnected(getContext())) {
-                    return null;
-                }
-                return cached.html;
-            } catch (Exception e) {
-                // oh well, we'll have to do without cache
-                // caching is best-effort
-                return null;
-            }
-        }
+        }, station);
     }
-    private static class CachedTrivia implements Serializable {
-        public String html;
-        public Date date;
 
-        public CachedTrivia(String html) {
-            this.html = html;
-            this.date = new Date();
-        }
-    }
 
     /**
      * This interface must be implemented by activities that contain this
