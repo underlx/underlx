@@ -96,6 +96,8 @@ public class HelpFragment extends TopFragment {
                 }
                 if (url.startsWith("help:")) {
                     mListener.onHelpLinkClicked(url.substring(5));
+                } else if (url.startsWith("station:")) {
+                    mListener.onStationLinkClicked(url.substring(8));
                 } else {
                     mListener.onLinkClicked(url);
                 }
@@ -141,6 +143,7 @@ public class HelpFragment extends TopFragment {
 
     public interface OnFragmentInteractionListener extends OnInteractionListener {
         void onHelpLinkClicked(String destination);
+        void onStationLinkClicked(String destination);
         void onLinkClicked(String destination);
     }
 }

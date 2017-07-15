@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Station;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -232,6 +233,22 @@ public class MainActivity extends AppCompatActivity
         transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(destination));
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void onStationLinkClicked(String destination) {
+        if(locService != null) {
+            for(Network network : locService.getNetworks()) {
+                Station station;
+                if ((station = network.getStation(destination)) != null) {
+                    Intent intent = new Intent(this, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
+                    startActivity(intent);
+                    return;
+                }
+            }
+        }
     }
 
     @Override
