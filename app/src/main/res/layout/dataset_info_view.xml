@@ -1,4 +1,5 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
+
     <TextView
         android:id="@+id/dataset_info_name"
         android:layout_width="match_parent"
@@ -15,20 +16,33 @@
         android:id="@+id/dataset_info_authors_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/dataset_info_authors"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        android:textStyle="bold"
-        android:text="@string/dataset_info_authors" />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/dataset_info_authors"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:layout_marginLeft="16dp"
-        android:text="@string/dataset_info_authors" />
-    <Button
-        android:id="@+id/dataset_update_button"
-        android:layout_width="wrap_content"
+        android:text="@string/dataset_info_authors"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/dataset_info_update"/>
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/dataset_update_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dataset_info_update" />
+
+        <Button
+            android:id="@+id/dataset_cache_all_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dataset_info_cache_all_extras" />
+    </LinearLayout>
 </merge>

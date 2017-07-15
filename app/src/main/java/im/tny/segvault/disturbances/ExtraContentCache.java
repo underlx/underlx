@@ -17,10 +17,12 @@ import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 
 /**
@@ -34,6 +36,83 @@ public class ExtraContentCache {
 
     public static void getConnectionInfo(Context context, OnConnectionInfoReadyListener listener, String type, Station... stations) {
         new RetrieveConnectionInfoTask(context, listener, type).execute(stations);
+    }
+
+    public static void cacheAllExtras(final Context context, final OnCacheAllListener listener, Network network) {
+        String[] types = new String[3];
+        types[0] = Station.CONNECTION_TYPE_BOAT;
+        types[1] = Station.CONNECTION_TYPE_BUS;
+        types[2] = Station.CONNECTION_TYPE_TRAIN;
+        Locale l = Util.getCurrentLocale(context);
+        int total = 0;
+        Collection<Station> stations = network.getStations();
+        for (Station station : stations) {
+            for (String type : types) {
+                String lang = l.getLanguage();
+                String url = station.getConnectionURLforLocale(type, lang);
+                if (url == null) {
+                    lang = "en";
+                    url = station.getConnectionURLforLocale(type, lang);
+                    if (url != null) {
+                        total++;
+                    }
+                } else {
+                    total++;
+                }
+            }
+            total++; // for trivia
+        }
+        final int finalTotal = total;
+        listener.onProgress(0, finalTotal);
+
+        final Station[] stationsArray = stations.toArray(new Station[stations.size()]);
+
+        new RetrieveConnectionInfoTask(context, new OnConnectionInfoReadyListener() {
+            private int lastCurrent = 0;
+
+            @Override
+            public void onSuccess(List<String> connectionInfo) {
+                new RetrieveTriviaTask(context, new OnTriviaReadyListener() {
+                    @Override
+                    public void onSuccess(List<String> trivia) {
+                        listener.onSuccess();
+                    }
+
+                    @Override
+                    public void onProgress(int current) {
+                        listener.onProgress(lastCurrent + current, finalTotal);
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        listener.onFailure();
+                    }
+                }).execute(stationsArray);
+            }
+
+            @Override
+            public void onProgress(int current) {
+                listener.onProgress(current, finalTotal);
+                lastCurrent = current;
+            }
+
+            @Override
+            public void onFailure() {
+                listener.onFailure();
+            }
+        }, types).execute(stationsArray);
+    }
+
+    public static void clearAllCachedExtras(Context context) {
+        File cacheDir = context.getCacheDir();
+        File[] files = cacheDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().startsWith("ConnCache-") || file.getName().startsWith("TriviaCache-")) {
+                    file.delete();
+                }
+            }
+        }
     }
 
     private static class RetrieveTriviaTask extends AsyncTask<Station, Integer, List<String>> {
@@ -114,7 +193,7 @@ public class ExtraContentCache {
             if (result == null || result.size() != count) {
                 listener.onFailure();
             } else {
-                listener.onSuccessful(result);
+                listener.onSuccess(result);
             }
         }
 
@@ -168,76 +247,78 @@ public class ExtraContentCache {
     }
 
     public interface OnTriviaReadyListener {
-        void onSuccessful(List<String> trivia);
+        void onSuccess(List<String> trivia);
+
         void onProgress(int current);
+
         void onFailure();
     }
 
     private static class RetrieveConnectionInfoTask extends AsyncTask<Station, Integer, List<String>> {
-        private String type;
+        private String[] types;
         private Context context;
         private OnConnectionInfoReadyListener listener;
-        private int count;
+        private int count = 0;
 
-        RetrieveConnectionInfoTask(Context context, OnConnectionInfoReadyListener listener, String type) {
+        RetrieveConnectionInfoTask(Context context, OnConnectionInfoReadyListener listener, String... types) {
             this.context = context;
             this.listener = listener;
-            this.type = type;
+            this.types = types;
         }
 
         @Override
         protected List<String> doInBackground(Station... arrStation) {
             List<String> retList = new ArrayList<>();
             Locale l = Util.getCurrentLocale(context);
-            count = arrStation.length;
-            int current = 0;
             for (Station station : arrStation) {
-                publishProgress(current++);
-                String lang = l.getLanguage();
-                String url = station.getConnectionURLforLocale(type, lang);
-                if (url == null) {
-                    lang = "en";
-                    url = station.getConnectionURLforLocale(type, lang);
+                for (String type : types) {
+                    String lang = l.getLanguage();
+                    String url = station.getConnectionURLforLocale(type, lang);
                     if (url == null) {
+                        lang = "en";
+                        url = station.getConnectionURLforLocale(type, lang);
+                        if (url == null) {
+                            continue;
+                        }
+                    }
+                    publishProgress(count++);
+                    String response = retrieveConnectionInfo(7, station.getId(), type, lang);
+                    if (response != null) {
+                        retList.add(response);
                         continue;
                     }
-                }
-                String response = retrieveConnectionInfo(7, station.getId(), type, lang);
-                if (response != null) {
-                    retList.add(response);
-                    continue;
-                }
-                try {
-                    HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
-                    h.setRequestMethod("GET");
-                    h.setDoInput(true);
-
-                    InputStream is;
-                    int code;
                     try {
-                        // Will throw IOException if server responds with 401.
-                        code = h.getResponseCode();
+                        HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+                        h.setRequestMethod("GET");
+                        h.setDoInput(true);
+
+                        InputStream is;
+                        int code;
+                        try {
+                            // Will throw IOException if server responds with 401.
+                            code = h.getResponseCode();
+                        } catch (IOException e) {
+                            // Will return 401, because now connection has the correct internal state.
+                            code = h.getResponseCode();
+                        }
+                        if (code == 200) {
+                            is = h.getInputStream();
+                        } else {
+                            continue;
+                        }
+
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
+                        StringBuilder sb = new StringBuilder();
+                        String line = null;
+                        while ((line = reader.readLine()) != null)
+                            sb.append(line + "\n");
+
+                        response = sb.toString();
+                        cacheConnectionInfo(response, station.getId(), type, lang);
+                        retList.add(response);
                     } catch (IOException e) {
-                        // Will return 401, because now connection has the correct internal state.
-                        code = h.getResponseCode();
-                    }
-                    if (code == 200) {
-                        is = h.getInputStream();
-                    } else {
                         continue;
                     }
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null)
-                        sb.append(line + "\n");
-
-                    response = sb.toString();
-                    cacheConnectionInfo(response, station.getId(), type, lang);
-                    retList.add(response);
-                } catch (IOException e) {
-                    continue;
                 }
             }
             return retList;
@@ -250,10 +331,10 @@ public class ExtraContentCache {
 
         @Override
         protected void onPostExecute(List<String> result) {
-            if(result == null || result.size() != count) {
+            if (result == null || result.size() != count) {
                 listener.onFailure();
             } else {
-                listener.onSuccessful(result);
+                listener.onSuccess(result);
             }
         }
 
@@ -307,8 +388,18 @@ public class ExtraContentCache {
     }
 
     public interface OnConnectionInfoReadyListener {
-        void onSuccessful(List<String> connectionInfo);
+        void onSuccess(List<String> connectionInfo);
+
         void onProgress(int current);
+
+        void onFailure();
+    }
+
+    public interface OnCacheAllListener {
+        void onSuccess();
+
+        void onProgress(int current, int total);
+
         void onFailure();
     }
 }

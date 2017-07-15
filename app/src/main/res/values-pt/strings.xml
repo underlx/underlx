@@ -136,4 +136,8 @@
     <string name="frag_station_conn_info_loading">A carregar...</string>
     <string name="frag_help_title">Ajuda e comentários</string>
     <string name="frag_station_closed_extended">Esta estação está encerrada por tempo indeterminado.</string>
+    <string name="cache_extras_success">Conteúdo adicional descarregado</string>
+    <string name="cache_extras_failure">Erro ao obter conteúdo adicional</string>
+    <string name="cache_extras_progress">A obter conteúdo adicional %d%%</string>
+    <string name="dataset_info_cache_all_extras">Descarregar conteúdo adicional</string>
 </resources>

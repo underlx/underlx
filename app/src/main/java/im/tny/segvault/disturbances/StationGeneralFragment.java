@@ -251,7 +251,7 @@ public class StationGeneralFragment extends Fragment {
         private Snackbar snackbar;
 
         @Override
-        public void onSuccessful(List<String> connectionInfo) {
+        public void onSuccess(List<String> connectionInfo) {
             if (snackbar != null) {
                 snackbar.dismiss();
             }

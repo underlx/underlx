@@ -635,6 +635,12 @@ public class MainService extends Service {
     public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
     public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
 
+    public static final String ACTION_CACHE_EXTRAS_PROGRESS = "im.tny.segvault.disturbances.action.cacheextras.progress";
+    public static final String EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT = "im.tny.segvault.disturbances.extra.cacheextras.progress.current";
+    public static final String EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL = "im.tny.segvault.disturbances.extra.cacheextras.progress.total";
+    public static final String ACTION_CACHE_EXTRAS_FINISHED = "im.tny.segvault.disturbances.action.cacheextras.finished";
+    public static final String EXTRA_CACHE_EXTRAS_FINISHED = "im.tny.segvault.disturbances.extra.cacheextras.finished";
+
     public static class LocationJobCreator implements JobCreator {
 
         @Override
@@ -871,6 +877,39 @@ public class MainService extends Service {
                     state.tick();
                 }
             }, state.getPreferredTickIntervalMillis());
+        }
+    }
+
+    public void cacheAllExtras(String... network_ids) {
+        ExtraContentCache.clearAllCachedExtras(this);
+        for(String id: network_ids) {
+            Network network = getNetwork(id);
+            ExtraContentCache.cacheAllExtras(this, new ExtraContentCache.OnCacheAllListener() {
+                @Override
+                public void onSuccess() {
+                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_FINISHED);
+                    intent.putExtra(EXTRA_CACHE_EXTRAS_FINISHED, true);
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+                    bm.sendBroadcast(intent);
+                }
+
+                @Override
+                public void onProgress(int current, int total) {
+                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_PROGRESS);
+                    intent.putExtra(EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, current);
+                    intent.putExtra(EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL, total);
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+                    bm.sendBroadcast(intent);
+                }
+
+                @Override
+                public void onFailure() {
+                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_FINISHED);
+                    intent.putExtra(EXTRA_CACHE_EXTRAS_FINISHED, false);
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+                    bm.sendBroadcast(intent);
+                }
+            }, network);
         }
     }
 

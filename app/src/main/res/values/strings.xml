@@ -146,4 +146,8 @@
     <string name="frag_station_conn_info_loading">Loading...</string>
     <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
     <string name="frag_station_closed_extended">This station is closed for an extended period.</string>
+    <string name="cache_extras_success">Extra content downloaded successfully</string>
+    <string name="cache_extras_failure">Error downloading extra content</string>
+    <string name="cache_extras_progress">Downloading extra content %d%%</string>
+    <string name="dataset_info_cache_all_extras">Download extra content</string>
 </resources>

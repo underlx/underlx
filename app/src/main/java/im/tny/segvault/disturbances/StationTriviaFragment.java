@@ -132,7 +132,7 @@ public class StationTriviaFragment extends Fragment {
 
         ExtraContentCache.getTrivia(getContext(), new ExtraContentCache.OnTriviaReadyListener() {
             @Override
-            public void onSuccessful(List<String> trivia) {
+            public void onSuccess(List<String> trivia) {
                 triviaView.setHtml(trivia.get(0));
             }
 

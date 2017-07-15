@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
+        filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
+        filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -237,8 +239,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onStationLinkClicked(String destination) {
-        if(locService != null) {
-            for(Network network : locService.getNetworks()) {
+        if (locService != null) {
+            for (Network network : locService.getNetworks()) {
                 Station station;
                 if ((station = network.getStation(destination)) != null) {
                     Intent intent = new Intent(this, StationActivity.class);
@@ -294,6 +296,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private Snackbar topologyUpdateSnackbar = null;
+    private Snackbar cacheExtrasSnackbar = null;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -344,6 +347,32 @@ public class MainActivity extends AppCompatActivity
                                 }
                             }).show();
                     break;
+                case MainService.ACTION_CACHE_EXTRAS_PROGRESS:
+                    final int progressCurrent = intent.getIntExtra(MainService.EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, 0);
+                    final int progressTotal = intent.getIntExtra(MainService.EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL, 1);
+                    final String msg2 = String.format(getString(R.string.cache_extras_progress), (progressCurrent * 100) / progressTotal);
+                    if (cacheExtrasSnackbar == null) {
+                        cacheExtrasSnackbar = Snackbar.make(findViewById(R.id.fab), msg2, Snackbar.LENGTH_INDEFINITE);
+                    } else {
+                        cacheExtrasSnackbar.setText(msg2);
+                        if (!cacheExtrasSnackbar.isShown()) {
+                            cacheExtrasSnackbar.show();
+                        }
+                    }
+                    break;
+                case MainService.ACTION_CACHE_EXTRAS_FINISHED:
+                    final boolean success2 = intent.getBooleanExtra(MainService.EXTRA_CACHE_EXTRAS_FINISHED, false);
+                    if (cacheExtrasSnackbar != null) {
+                        cacheExtrasSnackbar.setDuration(Snackbar.LENGTH_LONG);
+                        if (success2) {
+                            cacheExtrasSnackbar.setText(R.string.cache_extras_success);
+                        } else {
+                            cacheExtrasSnackbar.setText(R.string.cache_extras_failure);
+                        }
+                        cacheExtrasSnackbar.show();
+                        cacheExtrasSnackbar = null;
+                    }
+                    break;
             }
         }
     };
@@ -374,6 +403,13 @@ public class MainActivity extends AppCompatActivity
     public void updateNetworks(String... network_ids) {
         if (locBound) {
             locService.updateTopology(network_ids);
+        }
+    }
+
+    @Override
+    public void cacheAllExtras(String... network_ids) {
+        if (locBound) {
+            locService.cacheAllExtras(network_ids);
         }
     }
 

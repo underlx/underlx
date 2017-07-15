@@ -195,11 +195,18 @@ public class AboutFragment extends TopFragment {
         Collection<Network> getNetworks();
 
         void updateNetworks(String... network_ids);
+        void cacheAllExtras(String... network_ids);
     }
 
     public void updateNetworks(String... network_ids) {
         if (mListener != null) {
             mListener.updateNetworks(network_ids);
+        }
+    }
+
+    public void cacheAllExtras(String... network_ids) {
+        if (mListener != null) {
+            mListener.cacheAllExtras(network_ids);
         }
     }
 

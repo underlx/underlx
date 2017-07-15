@@ -19,6 +19,7 @@ public class DatasetInfoView extends LinearLayout {
     private TextView versionView;
     private TextView authorsView;
     private Button updateButton;
+    private Button cacheAllExtrasButton;
     private Network net;
     private AboutFragment containingFragment;
 
@@ -62,6 +63,7 @@ public class DatasetInfoView extends LinearLayout {
         versionView = (TextView) findViewById(R.id.dataset_info_version);
         authorsView = (TextView) findViewById(R.id.dataset_info_authors);
         updateButton = (Button) findViewById(R.id.dataset_update_button);
+        cacheAllExtrasButton = (Button) findViewById(R.id.dataset_cache_all_button);
 
         nameView.setText(net.getName());
         versionView.setText(String.format(context.getString(R.string.dataset_info_version), net.getDatasetVersion()));
@@ -76,6 +78,12 @@ public class DatasetInfoView extends LinearLayout {
             @Override
             public void onClick(View view) {
                 containingFragment.updateNetworks(net.getId());
+            }
+        });
+        cacheAllExtrasButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                containingFragment.cacheAllExtras(net.getId());
             }
         });
 
