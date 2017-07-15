@@ -135,11 +135,11 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
 
-        pairManager = new PairManager(getApplicationContext());
+        /*pairManager = new PairManager(getApplicationContext());
         pairManager.unpair();
         if (!pairManager.isPaired()) {
             pairManager.pairAsync();
-        }
+        }*/
     }
 
     @Override
