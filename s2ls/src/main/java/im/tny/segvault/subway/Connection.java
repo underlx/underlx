@@ -10,18 +10,38 @@ import java.util.ArrayList;
  */
 
 public class Connection extends DefaultWeightedEdge {
+    private boolean virtual = false;
+    private Stop virtualSource;
+    private Stop virtualTarget;
+    public Connection() {
+
+    }
+    public Connection(boolean virtual, Stop source, Stop target) {
+        this.virtual = virtual;
+        if(virtual) {
+            virtualSource = source;
+            virtualTarget = target;
+        }
+    }
+
     public List<Stop> getStops() {
         List<Stop> s = new ArrayList<>();
-        s.add((Stop) getSource());
-        s.add((Stop) getTarget());
+        s.add(getSource());
+        s.add(getTarget());
         return s;
     }
 
     public Stop getSource() {
+        if(virtual) {
+            return virtualSource;
+        }
         return (Stop) super.getSource();
     }
 
     public Stop getTarget() {
+        if(virtual) {
+            return virtualTarget;
+        }
         return (Stop) super.getTarget();
     }
 }

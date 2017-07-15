@@ -38,7 +38,7 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
 
     private boolean checkBSSIDs(Stop stop) {
         Object o = stop.getMeta(STATION_META_WIFICHECKER_KEY);
-        if (o == null || !(o instanceof List)) {
+        if (o == null || !(o instanceof List) || stop.getStation().isAlwaysClosed()) {
             return false;
         }
         List<BSSID> stationBSSID = (List<BSSID>) o;

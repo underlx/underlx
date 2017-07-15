@@ -89,6 +89,13 @@ public class Trip extends RealmObject {
                     for (Stop s : previous) {
                         for (Stop s2 : network.getStation(use.getStation().getId()).getStops()) {
                             Connection e = network.getEdge(s, s2);
+                            // deal with our way of closing stations
+                            // where closed stations only have their outbound edges
+                            // (but the user may have travelled through a no longer existing
+                            // inbound edge, before the station closed)
+                            if(e == null && network.getEdge(s2, s) != null) {
+                                e = new Connection(true, s, s2);
+                            }
                             if (e != null) {
                                 edges.add(e);
                                 previous = new ArrayList<>();
