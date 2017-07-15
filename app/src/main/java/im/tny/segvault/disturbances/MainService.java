@@ -127,6 +127,9 @@ public class MainService extends Service {
         api = API.getInstance();
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
         wfc.setScanInterval(10000);
+        if (networks.size() == 0) {
+            loadNetworks();
+        }
         checkForTopologyUpdates();
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
