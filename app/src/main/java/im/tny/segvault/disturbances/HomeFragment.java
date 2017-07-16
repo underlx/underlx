@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -120,12 +121,24 @@ public class HomeFragment extends TopFragment {
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mListener != null) {
-                    MainService m = mListener.getMainService();
-                    if (m != null) {
-                        debugInfoView.setText(m.dumpDebugInfo());
+                new AsyncTask<Void, Void, String>() {
+
+                    @Override
+                    protected String doInBackground(Void... voids) {
+                        if (mListener != null) {
+                            MainService m = mListener.getMainService();
+                            if (m != null) {
+                                return m.dumpDebugInfo();
+                            }
+                        }
+                        return "";
                     }
-                }
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        debugInfoView.setText(s);
+                    }
+                }.execute();
             }
         });
 

@@ -135,11 +135,12 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
 
-        /*pairManager = new PairManager(getApplicationContext());
-        pairManager.unpair();
+        pairManager = new PairManager(getApplicationContext());
+        //pairManager.unpair();
+        API.getInstance().setPairManager(pairManager);
         if (!pairManager.isPaired()) {
             pairManager.pairAsync();
-        }*/
+        }
     }
 
     @Override
@@ -296,14 +297,14 @@ public class MainService extends Service {
     }
 
     public Stop getLikelyNextExit(List<Connection> path, double threshold) {
-        if(path.size() == 0) {
+        if (path.size() == 0) {
             return null;
         }
         // get the line for the latest connection
         Connection last = path.get(path.size() - 1);
         Line line = null;
-        for(Line l : getAllLines()) {
-            if(l.edgeSet().contains(last)) {
+        for (Line l : getAllLines()) {
+            if (l.edgeSet().contains(last)) {
                 line = l;
                 break;
             }
@@ -313,7 +314,7 @@ public class MainService extends Service {
         }
 
         Set<Stop> alreadyVisited = new HashSet<>();
-        for(Connection c : path) {
+        for (Connection c : path) {
             alreadyVisited.add(c.getSource());
             alreadyVisited.add(c.getTarget());
         }
@@ -325,9 +326,9 @@ public class MainService extends Service {
         Set<Stop> stops = new HashSet<>();
         while (stops.add(last.getSource())) {
             Stop curStop = last.getTarget();
-            if(!alreadyVisited.contains(curStop)) {
+            if (!alreadyVisited.contains(curStop)) {
                 double r = getLeaveTrainFactorForStop(curStop);
-                if(maxStop == null || r > max) {
+                if (maxStop == null || r > max) {
                     maxStop = curStop;
                     max = r;
                 }
@@ -343,7 +344,7 @@ public class MainService extends Service {
             }
         }
 
-        if(max < threshold) {
+        if (max < threshold) {
             // most relevant station is not relevant enough
             return null;
         }
@@ -385,6 +386,16 @@ public class MainService extends Service {
                 }
             }
         }
+
+        try {
+            API.AuthTest authTest = API.getInstance().getAuthTest();
+            s += "API auth test result: " + authTest.result + "\n";
+            s += "API key as perceived by server: " + authTest.key + "\n";
+        } catch (APIException e) {
+            e.printStackTrace();
+            s += "Error testing API authentication\n";
+        }
+
         return s;
     }
 
@@ -882,7 +893,7 @@ public class MainService extends Service {
 
     public void cacheAllExtras(String... network_ids) {
         ExtraContentCache.clearAllCachedExtras(this);
-        for(String id: network_ids) {
+        for (String id : network_ids) {
             Network network = getNetwork(id);
             ExtraContentCache.cacheAllExtras(this, new ExtraContentCache.OnCacheAllListener() {
                 @Override

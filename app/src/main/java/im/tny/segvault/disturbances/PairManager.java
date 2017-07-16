@@ -97,12 +97,19 @@ public class PairManager {
     }
 
     public void unpair() {
-        SharedPreferences sharedPref = context.getSharedPreferences(PAIR_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(PREF_API_KEY, "");
         editor.putString(PREF_API_SECRET, "");
         editor.putLong(PREF_API_ACTIVATION, Long.MAX_VALUE);
         editor.commit();
+    }
+
+    public String getPairKey() {
+        return sharedPref.getString(PREF_API_KEY, "");
+    }
+
+    public String getPairSecret() {
+        return sharedPref.getString(PREF_API_SECRET, "");
     }
 
     private class PairTask extends AsyncTask<Void, Integer, Object> {
