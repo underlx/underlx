@@ -141,8 +141,10 @@ class WiFiChecker {
                 }
             }));
             for (ScanResult s : wifiList) {
-                bssids.add(new BSSID(s.BSSID));
-                Log.d("WiFiChecker", s.BSSID);
+                if(s.BSSID != "01:80:c2:00:00:03") {
+                    bssids.add(new BSSID(s.BSSID));
+                    Log.d("WiFiChecker", s.BSSID);
+                }
             }
             for(WiFiLocator w : locators.values()) {
                 w.updateCurrentBSSIDs(bssids);

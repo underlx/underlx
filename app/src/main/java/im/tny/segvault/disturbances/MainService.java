@@ -41,6 +41,7 @@ import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.InNetworkState;
+import im.tny.segvault.s2ls.LeavingNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
 import im.tny.segvault.s2ls.OffNetworkState;
 import im.tny.segvault.s2ls.Path;
@@ -166,7 +167,7 @@ public class MainService extends Service {
                     checkForTopologyUpdates(true);
                     Log.d("MainService", "onStartCommand updates checked");
                     break;
-                case ACTION_DISTURBANCE_NOTIFICATION:
+                case ACTION_DISTURBANCE_NOTIFICATION: {
                     final String network = intent.getStringExtra(EXTRA_DISTURBANCE_NETWORK);
                     final String line = intent.getStringExtra(EXTRA_DISTURBANCE_LINE);
                     final String id = intent.getStringExtra(EXTRA_DISTURBANCE_ID);
@@ -175,6 +176,18 @@ public class MainService extends Service {
                     final long msgtime = intent.getLongExtra(EXTRA_DISTURBANCE_MSGTIME, 0);
                     handleDisturbanceNotification(network, line, id, status, downtime, msgtime);
                     break;
+                }
+                case ACTION_END_TRIP: {
+                    final String network = intent.getStringExtra(EXTRA_TRIP_NETWORK);
+                    S2LS loc;
+                    synchronized (lock) {
+                        loc = locServices.get(network);
+                    }
+                    if(loc != null) {
+                        loc.endCurrentTrip();
+                    }
+                    break;
+                }
             }
         }
 
@@ -373,7 +386,6 @@ public class MainService extends Service {
             s += "State machine: " + loc.getState().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
             if (loc.getState() instanceof InNetworkState) {
-                InNetworkState ins = (InNetworkState) loc.getState();
                 s += "\tPossible stops:\n";
                 for (Stop stop : loc.getLocation().vertexSet()) {
                     s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getName());
@@ -747,7 +759,7 @@ public class MainService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                0);
 
         String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
 
@@ -777,11 +789,15 @@ public class MainService extends Service {
         notificationManager.notify(id.hashCode(), notificationBuilder.build());
     }
 
+    private static final int ROUTE_NOTIFICATION_ID = -100;
+    private static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
+    private static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
+
     private Notification buildRouteNotification(String networkId) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_home);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
+                intent, 0);
 
         S2LS loc;
         synchronized (lock) {
@@ -819,10 +835,17 @@ public class MainService extends Service {
                 .setContentIntent(pendingIntent)
                 .setOngoing(true);
 
+        if (loc.getState() instanceof LeavingNetworkState) {
+            Intent stopIntent = new Intent(this, MainService.class);
+            stopIntent.setAction(ACTION_END_TRIP);
+            stopIntent.putExtra(EXTRA_TRIP_NETWORK, networkId);
+            PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
+                    stopIntent, 0);
+            notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
+        }
+
         return notificationBuilder.build();
     }
-
-    private static final int ROUTE_NOTIFICATION_ID = -100;
 
     public class S2LSChangeListener implements S2LS.EventListener {
         @Override
@@ -839,8 +862,12 @@ public class MainService extends Service {
 
             if (loc.getState() instanceof InNetworkState) {
                 wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
-                if (locationEnabled)
+                if (locationEnabled) {
                     wfc.startScanning();
+                }
+                if (loc.getCurrentTrip() != null) {
+                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(loc.getNetwork().getId()));
+                }
             } else if (loc.getState() instanceof NearNetworkState) {
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 if (locationEnabled)

@@ -72,7 +72,7 @@ public abstract class State implements OnStatusChangeListener {
 
     }
 
-    public void onLeaveState() {
+    public void onLeaveState(State newState) {
 
     }
 }

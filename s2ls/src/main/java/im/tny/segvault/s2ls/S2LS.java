@@ -120,7 +120,7 @@ public class S2LS implements OnStatusChangeListener {
 
     protected void setState(State state) {
         if (this.state != null) {
-            this.state.onLeaveState();
+            this.state.onLeaveState(state);
         }
         this.state = state;
         if (listener != null) {
@@ -143,10 +143,18 @@ public class S2LS implements OnStatusChangeListener {
         listener.onTripStarted(this);
     }
 
-    protected void endCurrentTrip() {
+    protected void endCurrentTripInternal() {
         Path p = path;
         path = null;
         listener.onTripEnded(this, p);
+    }
+
+    public void endCurrentTrip() {
+        if (detectNearNetwork()) {
+            setState(new NearNetworkState(this));
+        } else {
+            setState(new OffNetworkState(this));
+        }
     }
 
     public EventListener getEventListener() {
