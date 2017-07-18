@@ -141,4 +141,5 @@
     <string name="cache_extras_progress">A obter conteúdo adicional %d%%</string>
     <string name="dataset_info_cache_all_extras">Descarregar conteúdo adicional</string>
     <string name="notif_route_end_trip">Terminar viagem</string>
+    <string name="frag_home_end_trip">Terminar viagem</string>
 </resources>

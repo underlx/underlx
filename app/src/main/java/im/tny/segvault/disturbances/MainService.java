@@ -657,6 +657,7 @@ public class MainService extends Service {
 
     public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
     public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
+    public static final String ACTION_S2LS_STATUS_CHANGED = "im.tny.segvault.disturbances.action.s2ls.status.changed";
 
     public static final String ACTION_CACHE_EXTRAS_PROGRESS = "im.tny.segvault.disturbances.action.cacheextras.progress";
     public static final String EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT = "im.tny.segvault.disturbances.extra.cacheextras.progress.current";
@@ -790,8 +791,8 @@ public class MainService extends Service {
     }
 
     private static final int ROUTE_NOTIFICATION_ID = -100;
-    private static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
-    private static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
+    public static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
+    public static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
 
     private Notification buildRouteNotification(String networkId) {
         Intent intent = new Intent(this, MainActivity.class);
@@ -880,6 +881,10 @@ public class MainService extends Service {
                     wfc.startScanningIfWiFiEnabled();
                 stopForeground(true);
             }
+
+            Intent intent = new Intent(ACTION_S2LS_STATUS_CHANGED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         }
 
         @Override

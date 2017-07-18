@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 
+import im.tny.segvault.s2ls.LeavingNetworkState;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -69,6 +71,8 @@ public class HomeFragment extends TopFragment {
     private LinearLayout curStationIconsLayout;
     private TextView curStationNameView;
     private TextView nextStationView;
+    private LinearLayout curTripActionsLayout;
+    private Button curTripEndButton;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -117,6 +121,18 @@ public class HomeFragment extends TopFragment {
         curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
         curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
         nextStationView = (TextView) view.findViewById(R.id.next_station_view);
+        curTripActionsLayout = (LinearLayout) view.findViewById(R.id.cur_trip_actions_layout);
+        curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
+
+        curTripEndButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent stopIntent = new Intent(getContext(), MainService.class);
+                stopIntent.setAction(MainService.ACTION_END_TRIP);
+                stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MainService.PRIMARY_NETWORK_ID);
+                getContext().startService(stopIntent);
+            }
+        });
 
         getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,9 +171,9 @@ public class HomeFragment extends TopFragment {
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
+        filter.addAction(MainService.ACTION_S2LS_STATUS_CHANGED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
-
 
         Fragment newFragment = LineFragment.newInstance(1);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
@@ -256,6 +272,14 @@ public class HomeFragment extends TopFragment {
                     startActivity(intent);
                 }
             });
+
+            if(loc.getState() instanceof LeavingNetworkState) {
+                curTripEndButton.setVisibility(View.VISIBLE);
+                curTripActionsLayout.setVisibility(View.VISIBLE);
+            } else {
+                curTripEndButton.setVisibility(View.GONE);
+                curTripActionsLayout.setVisibility(View.GONE);
+            }
             ongoingTripCard.setVisibility(View.VISIBLE);
         }
     }
@@ -323,6 +347,7 @@ public class HomeFragment extends TopFragment {
                     // fallthrough
                 case MainService.ACTION_CURRENT_TRIP_UPDATED:
                 case MainService.ACTION_CURRENT_TRIP_ENDED:
+                case MainService.ACTION_S2LS_STATUS_CHANGED:
                     refreshCurrentTrip();
                     break;
             }

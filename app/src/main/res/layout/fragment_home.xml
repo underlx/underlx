@@ -19,13 +19,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
             android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/cur_station_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/text_margin"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -47,6 +47,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <LinearLayout
+                android:id="@+id/cur_trip_actions_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
+
+                <Button
+                    android:id="@+id/cur_trip_end"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:drawableLeft="@drawable/ic_stop_accent_24dp"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_stop_accent_24dp"
+                    android:text="@string/frag_home_end_trip"
+                    android:textAlignment="textStart" />
+            </LinearLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>
 
