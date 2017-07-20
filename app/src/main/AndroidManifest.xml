@@ -66,6 +66,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+        <activity android:name=".TripCorrectionActivity"
+            android:label="@string/activity_trip_correction_title"></activity>
     </application>
 
 </manifest>

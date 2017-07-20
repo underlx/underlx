@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -166,7 +167,7 @@ public class RouteFragment extends TopFragment {
             }
         });
 
-        if(loc.getCurrentTrip() != null) {
+        if (loc.getCurrentTrip() != null) {
             originPicker.setWeakSelection(loc.getCurrentTrip().getStartVertex().getStation());
         }
 
@@ -447,7 +448,7 @@ public class RouteFragment extends TopFragment {
         swapButton.setVisibility(View.VISIBLE);
     }
 
-    public static void populateStationView(final FragmentActivity activity, final Network network, final Station station, View view) {
+    public static void populateStationView(final Context context, final Network network, final Station station, View view) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
@@ -488,18 +489,18 @@ public class RouteFragment extends TopFragment {
         stationLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (activity != null) {
-                    Intent intent = new Intent(activity, StationActivity.class);
+                if (context != null) {
+                    Intent intent = new Intent(context, StationActivity.class);
                     intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
                     intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
-                    activity.startActivity(intent);
+                    context.startActivity(intent);
                 }
             }
         });
     }
 
-    public static void populateStationView(final FragmentActivity activity, final Network network, final Stop stop, View view) {
-        populateStationView(activity, network, stop.getStation(), view);
+    public static void populateStationView(final Context context, final Network network, final Stop stop, View view) {
+        populateStationView(context, network, stop.getStation(), view);
     }
 
     @Override

@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item) {
+    public void onListFragmentClick(TripRecyclerViewAdapter.TripItem item) {
         if (item.isVisit) {
             Intent intent = new Intent(this, StationActivity.class);
             intent.putExtra(StationActivity.EXTRA_STATION_ID, item.originId);
@@ -440,6 +440,14 @@ public class MainActivity extends AppCompatActivity
             TripFragment f = TripFragment.newInstance(item.networkId, item.id);
             f.show(getSupportFragmentManager(), "trip-fragment");
         }
+    }
+
+    @Override
+    public void onListFragmentLongClick(TripRecyclerViewAdapter.TripItem item) {
+        Intent intent = new Intent(this, TripCorrectionActivity.class);
+        intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, item.networkId);
+        intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, item.id);
+        startActivity(intent);
     }
 
     @Override

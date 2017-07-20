@@ -133,6 +133,7 @@ public class Trip extends RealmObject {
         return new Path(network, startVertex, edges, times, manualEntry, 0);
     }
 
+
     public static void persistConnectionPath(Path path) {
         persistConnectionPath(path, null);
     }

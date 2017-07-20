@@ -221,7 +221,8 @@ public class TripHistoryFragment extends TopFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener extends OnInteractionListener {
-        void onListFragmentInteraction(TripRecyclerViewAdapter.TripItem item);
+        void onListFragmentClick(TripRecyclerViewAdapter.TripItem item);
+        void onListFragmentLongClick(TripRecyclerViewAdapter.TripItem item);
 
         MainService getMainService();
     }

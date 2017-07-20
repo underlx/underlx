@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -96,7 +97,6 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
         Path path = trip.toConnectionPath(network);
-        List<Connection> el = path.getEdgeList();
 
         Station origin = path.getStartVertex().getStation();
         Station dest = path.getEndVertex().getStation();
@@ -114,83 +114,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                         path.getEntryTime(0).getTime(),
                         DateUtils.FORMAT_SHOW_DATE));
 
-        layoutRoute.removeAllViews();
-
-        boolean isFirst = true;
-        int curBulletIdx = 0;
-        for (int i = 0; i < el.size(); i++) {
-            Connection c = el.get(i);
-            if (i == 0 && c instanceof Transfer) {
-                // starting with a line change? ignore
-                continue;
-            }
-            if (isFirst) {
-                View stepview = inflater.inflate(R.layout.path_station_initial, layoutRoute, false);
-
-                Line line = c.getSource().getLine();
-
-                int lineColor = line.getColor();
-                FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
-                lineStripeLayout.setBackgroundColor(lineColor);
-
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
-                timeView.setText(
-                        DateUtils.formatDateTime(getContext(),
-                                path.getEntryTime(i).getTime(),
-                                DateUtils.FORMAT_SHOW_TIME));
-
-                RouteFragment.populateStationView(getActivity(), network, c.getSource(), stepview);
-
-                layoutRoute.addView(stepview);
-                curBulletIdx++;
-                isFirst = false;
-            } else {
-                Line targetLine = c.getTarget().getLine();
-
-                View stepview = inflater.inflate(R.layout.path_station_intermediate, layoutRoute, false);
-
-                int prevLineColor = c.getSource().getLine().getColor();
-                FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
-                prevLineStripeLayout.setBackgroundColor(prevLineColor);
-
-                int nextLineColor = targetLine.getColor();
-                FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
-                nextLineStripeLayout.setBackgroundColor(nextLineColor);
-
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
-                timeView.setText(
-                        DateUtils.formatDateTime(getContext(),
-                                path.getEntryTime(i).getTime(),
-                                DateUtils.FORMAT_SHOW_TIME));
-
-                RouteFragment.populateStationView(getActivity(), network, c.getSource(), stepview);
-
-                layoutRoute.addView(stepview);
-                curBulletIdx++;
-            }
-            if (c instanceof Transfer && i != el.size() - 1) {
-                c = el.get(++i);
-            }
-            if (i == el.size() - 1) {
-                View stepview = inflater.inflate(R.layout.path_station_final, layoutRoute, false);
-
-                int lineColor = c.getSource().getLine().getColor();
-                FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
-                lineStripeLayout.setBackgroundColor(lineColor);
-
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
-                timeView.setText(
-                        DateUtils.formatDateTime(getContext(),
-                                path.getEntryTime(i+1).getTime(),
-                                DateUtils.FORMAT_SHOW_TIME));
-
-                RouteFragment.populateStationView(getActivity(), network, c.getTarget(), stepview);
-
-                layoutRoute.addView(stepview);
-                curBulletIdx++;
-            }
-
-        }
+        populatePathView(getContext(), inflater, network, path, layoutRoute);
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,6 +136,103 @@ public class TripFragment extends BottomSheetDialogFragment {
             }
         });
         return view;
+    }
+
+    public static void populatePathView(final Context context, final LayoutInflater inflater, final Network network, final Path path, ViewGroup root) {
+        root.removeAllViews();
+
+        List<Connection> el = path.getEdgeList();
+
+        boolean isFirst = true;
+        int curBulletIdx = 0;
+        for (int i = 0; i < el.size(); i++) {
+            Connection c = el.get(i);
+            if (i == 0 && c instanceof Transfer) {
+                // starting with a line change? ignore
+                continue;
+            }
+            if (isFirst) {
+                View stepview = inflater.inflate(R.layout.path_station_initial, root, false);
+
+                Line line = c.getSource().getLine();
+
+                int lineColor = line.getColor();
+                FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
+                lineStripeLayout.setBackgroundColor(lineColor);
+
+                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                if (path.getManualEntry(i)) {
+                    timeView.setVisibility(View.INVISIBLE);
+                } else {
+                    timeView.setText(
+                            DateUtils.formatDateTime(context,
+                                    path.getEntryTime(i).getTime(),
+                                    DateUtils.FORMAT_SHOW_TIME));
+                }
+
+                RouteFragment.populateStationView(context, network, c.getSource(), stepview);
+
+                root.addView(stepview);
+                curBulletIdx++;
+                isFirst = false;
+            } else {
+                Line targetLine = c.getTarget().getLine();
+
+                View stepview = inflater.inflate(R.layout.path_station_intermediate, root, false);
+
+                int prevLineColor = c.getSource().getLine().getColor();
+                FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
+                prevLineStripeLayout.setBackgroundColor(prevLineColor);
+
+                int nextLineColor = targetLine.getColor();
+                FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+                nextLineStripeLayout.setBackgroundColor(nextLineColor);
+
+                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                // left side of the outer && is a small hack to fix time not displaying when the
+                // start of the path was extended with the first step getting replaced by a transfer
+                if (path.getManualEntry(i) && !(c instanceof Transfer && !path.getManualEntry(i+1))) {
+                    timeView.setVisibility(View.INVISIBLE);
+                } else {
+                    timeView.setText(
+                            DateUtils.formatDateTime(context,
+                                    path.getEntryTime(i).getTime(),
+                                    DateUtils.FORMAT_SHOW_TIME));
+                }
+
+                RouteFragment.populateStationView(context, network, c.getSource(), stepview);
+
+                root.addView(stepview);
+                curBulletIdx++;
+            }
+            if (c instanceof Transfer && i != el.size() - 1) {
+                c = el.get(++i);
+            }
+            if (i == el.size() - 1) {
+                View stepview = inflater.inflate(R.layout.path_station_final, root, false);
+
+                int lineColor = c.getSource().getLine().getColor();
+                FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
+                lineStripeLayout.setBackgroundColor(lineColor);
+
+                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                if (path.getManualEntry(i + 1)) {
+                    timeView.setVisibility(View.INVISIBLE);
+                } else {
+                    timeView.setText(
+                            DateUtils.formatDateTime(context,
+                                    path.getEntryTime(i + 1).getTime(),
+                                    DateUtils.FORMAT_SHOW_TIME));
+                }
+
+                RouteFragment.populateStationView(context, network, c.getTarget(), stepview);
+
+                root.addView(stepview);
+                curBulletIdx++;
+            }
+
+        }
+
     }
 
     @Override

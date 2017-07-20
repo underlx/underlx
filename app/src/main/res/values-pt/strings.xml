@@ -142,4 +142,9 @@
     <string name="dataset_info_cache_all_extras">Descarregar conteúdo adicional</string>
     <string name="notif_route_end_trip">Terminar viagem</string>
     <string name="frag_home_end_trip">Terminar viagem</string>
+    <string name="activity_trip_correction_start_station">Estação inicial</string>
+    <string name="activity_trip_correction_end_station">Estação final</string>
+    <string name="activity_trip_correction_title">Corrigir registo de viagem</string>
+    <string name="activity_trip_correction_instructions">Verifique se os pontos de início e fim da viagem estão correctos, e corrija-os se necessário.</string>
+    <string name="activity_trip_correction_save">Guardar alterações</string>
 </resources>
