@@ -45,9 +45,6 @@ public class InNetworkState extends State {
     @Override
     public void onLeftNetwork(IInNetworkDetector detector) {
         if (detector instanceof WiFiLocator) {
-            if (getS2LS().getCurrentTrip() != null) {
-                getS2LS().getCurrentTrip().registerExitTime();
-            }
             setState(new LeavingNetworkState(getS2LS(), current));
         } else {
             if (getS2LS().detectNearNetwork()) {
@@ -83,6 +80,9 @@ public class InNetworkState extends State {
     @Override
     public void onLeaveState(State newState) {
         if (!(newState instanceof InNetworkState)) {
+            if (getS2LS().getCurrentTrip() != null) {
+                getS2LS().getCurrentTrip().registerExitTime();
+            }
             getS2LS().endCurrentTripInternal();
         }
     }

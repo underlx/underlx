@@ -23,6 +23,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
     private List<Connection> edgeList = new LinkedList<Connection>();
     private List<Pair<Date, Date>> times = new ArrayList<>();
+    private List<Boolean> manualEntry = new ArrayList<>();
 
     private Stop startVertex;
 
@@ -38,6 +39,25 @@ public class Path implements GraphPath<Stop, Connection> {
         this.endVertex = startVertex;
         this.weight = weight;
         registerEntryTime();
+    }
+
+    public Path(Network graph,
+                Stop startVertex,
+                List<Connection> edgeList,
+                List<Pair<Date, Date>> times,
+                List<Boolean> manualEntry,
+                double weight) {
+        this.graph = graph;
+        this.edgeList = edgeList;
+        this.times = times;
+        this.manualEntry = manualEntry;
+        this.startVertex = startVertex;
+        if(edgeList.size() > 0) {
+            this.endVertex = edgeList.get(edgeList.size() - 1).getTarget();
+        } else {
+            this.endVertex = startVertex;
+        }
+        this.weight = weight;
     }
 
     @Override
@@ -90,6 +110,18 @@ public class Path implements GraphPath<Stop, Connection> {
         return times.get(i);
     }
 
+    public Date getEntryTime(int i) {
+        return times.get(i).first;
+    }
+
+    public Date getExitTime(int i) {
+        return times.get(i).second;
+    }
+
+    public boolean getManualEntry(int i) {
+        return manualEntry.get(i);
+    }
+
     private void registerEntryTime() {
         Date now = new Date();
         if (times.size() > 0) {
@@ -99,17 +131,19 @@ public class Path implements GraphPath<Stop, Connection> {
             }
         }
         times.add(new Pair<Date, Date>(now, null));
+        manualEntry.add(false);
     }
 
     private boolean exitedOnce = false;
+
     public void registerExitTime() {
         exitedOnce = true;
         Pair<Date, Date> p = times.get(times.size() - 1);
         if (p.second == null) {
             times.set(times.size() - 1, new Pair<>(p.first, new Date()));
-        }
-        for (OnPathChangedListener l : listeners) {
-            l.onPathChanged(this);
+            for (OnPathChangedListener l : listeners) {
+                l.onPathChanged(this);
+            }
         }
     }
 

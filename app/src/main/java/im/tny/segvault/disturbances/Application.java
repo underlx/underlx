@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import com.evernote.android.job.JobManager;
 
 import io.realm.DynamicRealm;
+import io.realm.FieldAttribute;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;
@@ -21,7 +22,7 @@ public class Application extends android.app.Application {
         // Initialize Realm. Should only be done once when the application starts.
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(1) // Must be bumped when the schema changes
+                .schemaVersion(2) // Must be bumped when the schema changes
                 .migration(new MyMigration())
                 .build();
         Realm.setDefaultConfiguration(config);
@@ -37,6 +38,12 @@ public class Application extends android.app.Application {
             if (oldVersion == 0) {
                 schema.get("Trip")
                         .addField("synced", boolean.class);
+                oldVersion++;
+            }
+
+            if (oldVersion == 1) {
+                schema.get("StationUse")
+                        .addField("manualEntry", boolean.class);
                 oldVersion++;
             }
         }

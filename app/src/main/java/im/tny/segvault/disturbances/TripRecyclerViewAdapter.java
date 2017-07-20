@@ -21,6 +21,7 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.TripHistoryFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Transfer;
@@ -180,16 +181,17 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             this.destColor = Color.BLACK;
 
             this.lineColors = new ArrayList<>();
-            List<Connection> path = trip.toConnectionPath(network);
-            if (path.size() > 0) {
-                lineColors.add(path.get(0).getSource().getLine().getColor());
-                for (Connection c : path) {
+            Path path = trip.toConnectionPath(network);
+            List<Connection> edges = path.getEdgeList();
+            if (edges.size() > 0) {
+                lineColors.add(edges.get(0).getSource().getLine().getColor());
+                for (Connection c : edges) {
                     if (c instanceof Transfer) {
                         lineColors.add(c.getSource().getLine().getColor());
                         lineColors.add(c.getTarget().getLine().getColor());
                     }
                 }
-                lineColors.add(path.get(path.size() - 1).getTarget().getLine().getColor());
+                lineColors.add(edges.get(edges.size() - 1).getTarget().getLine().getColor());
                 isVisit = false;
             } else {
                 isVisit = true;

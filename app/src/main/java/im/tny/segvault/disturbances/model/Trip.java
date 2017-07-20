@@ -1,6 +1,9 @@
 package im.tny.segvault.disturbances.model;
 
+import android.util.Pair;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -51,8 +54,11 @@ public class Trip extends RealmObject {
         this.synced = synced;
     }
 
-    public List<Connection> toConnectionPath(Network network) {
+    public Path toConnectionPath(Network network) {
         List<Connection> edges = new LinkedList<>();
+        List<Pair<Date, Date>> times = new ArrayList<>();
+        List<Boolean> manualEntry = new ArrayList<>();
+        Stop startVertex = null;
 
         List<Stop> previous = new ArrayList<>();
         for (StationUse use : path) {
@@ -79,10 +85,17 @@ public class Trip extends RealmObject {
                         edges.add(edge);
                         previous = new ArrayList<>();
                         previous.add(target);
+                        // in a Path, there are originally two entries for an interchange
+                        times.add(new Pair<>(use.getEntryDate(), use.getLeaveDate()));
+                        times.add(new Pair<>(use.getEntryDate(), use.getLeaveDate()));
+                        manualEntry.add(use.isManualEntry());
+                        manualEntry.add(use.isManualEntry());
                     }
                     break;
                 case NETWORK_ENTRY:
                     previous = new ArrayList<>(network.getStation(use.getStation().getId()).getStops());
+                    times.add(new Pair<>(use.getEntryDate(), use.getLeaveDate()));
+                    manualEntry.add(use.isManualEntry());
                     break;
                 case NETWORK_EXIT:
                 case GONE_THROUGH:
@@ -93,23 +106,38 @@ public class Trip extends RealmObject {
                             // where closed stations only have their outbound edges
                             // (but the user may have travelled through a no longer existing
                             // inbound edge, before the station closed)
-                            if(e == null && network.getEdge(s2, s) != null) {
+                            if (e == null && network.getEdge(s2, s) != null) {
                                 e = new Connection(true, s, s2);
                             }
                             if (e != null) {
                                 edges.add(e);
                                 previous = new ArrayList<>();
                                 previous.add(s2);
+                                times.add(new Pair<>(use.getEntryDate(), use.getLeaveDate()));
+                                manualEntry.add(use.isManualEntry());
                             }
                         }
                     }
                     break;
+                case VISIT:
+                    times.add(new Pair<>(use.getEntryDate(), use.getLeaveDate()));
+                    manualEntry.add(use.isManualEntry());
+                    // a stop, any stop
+                    startVertex = network.getStation(use.getStation().getId()).getStops().iterator().next();
+                    break;
             }
         }
-        return edges;
+        if(startVertex == null) {
+            startVertex = edges.get(0).getSource();
+        }
+        return new Path(network, startVertex, edges, times, manualEntry, 0);
     }
 
     public static void persistConnectionPath(Path path) {
+        persistConnectionPath(path, null);
+    }
+
+    public static void persistConnectionPath(Path path, String replaceTrip) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         RealmList<StationUse> uses = new RealmList<>();
@@ -120,6 +148,7 @@ public class Trip extends RealmObject {
             use.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
             use.setEntryDate(path.getEntryExitTimes(0).first);
             use.setLeaveDate(path.getEntryExitTimes(0).second);
+            use.setManualEntry(path.getManualEntry(0));
             uses.add(realm.copyToRealm(use));
         } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
             Connection c = path.getEdgeList().get(0);
@@ -129,6 +158,7 @@ public class Trip extends RealmObject {
             use.setTargetLine(c.getTarget().getLine().getId());
             use.setEntryDate(path.getEntryExitTimes(0).first);
             use.setLeaveDate(path.getEntryExitTimes(0).second);
+            use.setManualEntry(path.getManualEntry(0));
             use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
             uses.add(realm.copyToRealm(use));
         } else {
@@ -138,6 +168,7 @@ public class Trip extends RealmObject {
             startUse.setStation(realm.where(RStation.class).equalTo("id", path.getStartVertex().getStation().getId()).findFirst());
             startUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
             startUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+            startUse.setManualEntry(path.getManualEntry(timeIdx));
             uses.add(realm.copyToRealm(startUse));
 
             int i = 1;
@@ -158,12 +189,14 @@ public class Trip extends RealmObject {
                     use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
                     timeIdx++;
                     use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                    use.setManualEntry(path.getManualEntry(timeIdx));
                     timeIdx++;
                     i++; // skip next station as then we'd have duplicate uses for the same station ID
                 } else {
                     use.setType(StationUse.UseType.GONE_THROUGH);
                     use.setEntryDate(path.getEntryExitTimes(timeIdx).first);
                     use.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+                    use.setManualEntry(path.getManualEntry(timeIdx));
                     timeIdx++;
                 }
                 use.setStation(realm.where(RStation.class).equalTo("id", c.getSource().getStation().getId()).findFirst());
@@ -175,12 +208,18 @@ public class Trip extends RealmObject {
             endUse.setStation(realm.where(RStation.class).equalTo("id", path.getEndVertex().getStation().getId()).findFirst());
             endUse.setEntryDate(path.getEntryExitTimes(timeIdx).first);
             endUse.setLeaveDate(path.getEntryExitTimes(timeIdx).second);
+            endUse.setManualEntry(path.getManualEntry(timeIdx));
             uses.add(realm.copyToRealm(endUse));
         }
-        Trip trip = new Trip();
-        trip.setId(UUID.randomUUID().toString());
+
+        Trip trip;
+        if (replaceTrip != null) {
+            trip = realm.where(Trip.class).equalTo("id", replaceTrip).findFirst();
+            trip.getPath().deleteAllFromRealm();
+        } else {
+            trip = realm.createObject(Trip.class, UUID.randomUUID().toString());
+        }
         trip.setPath(uses);
-        realm.copyToRealm(trip);
         realm.commitTransaction();
     }
 }

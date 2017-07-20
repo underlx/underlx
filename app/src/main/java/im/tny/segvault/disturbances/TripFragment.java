@@ -19,6 +19,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -92,10 +93,13 @@ public class TripFragment extends BottomSheetDialogFragment {
         Network network = service.getNetwork(networkId);
 
         Realm realm = Realm.getDefaultInstance();
-        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
 
-        Station origin = network.getStation(trip.getPath().get(0).getStation().getId());
-        Station dest = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId());
+        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        Path path = trip.toConnectionPath(network);
+        List<Connection> el = path.getEdgeList();
+
+        Station origin = path.getStartVertex().getStation();
+        Station dest = path.getEndVertex().getStation();
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
         builder.append(origin.getName() + " ").append("#");
@@ -107,10 +111,8 @@ public class TripFragment extends BottomSheetDialogFragment {
         TextView dateView = (TextView) view.findViewById(R.id.date_view);
         dateView.setText(
                 DateUtils.formatDateTime(getContext(),
-                        trip.getPath().get(0).getEntryDate().getTime(),
+                        path.getEntryTime(0).getTime(),
                         DateUtils.FORMAT_SHOW_DATE));
-
-        List<Connection> el = trip.toConnectionPath(network);
 
         layoutRoute.removeAllViews();
 
@@ -134,7 +136,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
                 timeView.setText(
                         DateUtils.formatDateTime(getContext(),
-                                trip.getPath().get(curBulletIdx).getEntryDate().getTime(),
+                                path.getEntryTime(i).getTime(),
                                 DateUtils.FORMAT_SHOW_TIME));
 
                 RouteFragment.populateStationView(getActivity(), network, c.getSource(), stepview);
@@ -158,7 +160,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
                 timeView.setText(
                         DateUtils.formatDateTime(getContext(),
-                                trip.getPath().get(curBulletIdx).getEntryDate().getTime(),
+                                path.getEntryTime(i).getTime(),
                                 DateUtils.FORMAT_SHOW_TIME));
 
                 RouteFragment.populateStationView(getActivity(), network, c.getSource(), stepview);
@@ -179,7 +181,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
                 timeView.setText(
                         DateUtils.formatDateTime(getContext(),
-                                trip.getPath().get(curBulletIdx).getEntryDate().getTime(),
+                                path.getEntryTime(i+1).getTime(),
                                 DateUtils.FORMAT_SHOW_TIME));
 
                 RouteFragment.populateStationView(getActivity(), network, c.getTarget(), stepview);
@@ -235,8 +237,8 @@ public class TripFragment extends BottomSheetDialogFragment {
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
         trip.getPath().deleteAllFromRealm();
         trip.deleteFromRealm();
-        dismiss();
         realm.commitTransaction();
+        dismiss();
     }
 
     /**

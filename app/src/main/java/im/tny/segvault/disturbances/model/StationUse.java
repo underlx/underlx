@@ -25,6 +25,8 @@ public class StationUse extends RealmObject {
         VISIT, // user entered and exited the station without riding the subway
     }
 
+    private boolean manualEntry;
+
     // for interchange uses:
     private String sourceLine;
     private String targetLine;
@@ -64,6 +66,14 @@ public class StationUse extends RealmObject {
 
     public void setLeaveDate(Date leaveDate) {
         this.leaveDate = leaveDate;
+    }
+
+    public boolean isManualEntry() {
+        return manualEntry;
+    }
+
+    public void setManualEntry(boolean manualEntry) {
+        this.manualEntry = manualEntry;
     }
 
     public String getSourceLine() {
