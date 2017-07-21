@@ -42,11 +42,16 @@ public class TripFragment extends BottomSheetDialogFragment {
     private String tripId;
     private String networkId;
 
+    private Network network;
+
     private TextView stationNamesView;
+    private TextView dateView;
     private Button correctButton;
     private Button deleteButton;
 
     private LinearLayout layoutRoute;
+
+    private LayoutInflater inflater;
 
     public TripFragment() {
         // Required empty public constructor
@@ -85,6 +90,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
 
         stationNamesView = (TextView) view.findViewById(R.id.station_names_view);
+        dateView = (TextView) view.findViewById(R.id.date_view);
         correctButton = (Button) view.findViewById(R.id.correct_button);
         deleteButton = (Button) view.findViewById(R.id.delete_button);
 
@@ -94,39 +100,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         if (service == null)
             return view;
 
-        Network network = service.getNetwork(networkId);
-
-        Realm realm = Realm.getDefaultInstance();
-        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-        realm.close();
-
-        Path path = trip.toConnectionPath(network);
-
-        Station origin = path.getStartVertex().getStation();
-        Station dest = path.getEndVertex().getStation();
-
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        if (path.getEdgeList().size() == 0) {
-            builder.append("#");
-            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_beenhere_black_24dp),
-                    builder.length() - 1, builder.length(), 0);
-            builder.append(" " + origin.getName());
-        } else {
-            builder.append(origin.getName() + " ").append("#");
-            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
-                    builder.length() - 1, builder.length(), 0);
-            builder.append(" " + dest.getName());
-
-        }
-        stationNamesView.setText(builder);
-
-        TextView dateView = (TextView) view.findViewById(R.id.date_view);
-        dateView.setText(
-                DateUtils.formatDateTime(getContext(),
-                        path.getEntryTime(0).getTime(),
-                        DateUtils.FORMAT_SHOW_DATE));
-
-        populatePathView(getContext(), inflater, network, path, layoutRoute);
+        network = service.getNetwork(networkId);
 
         correctButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,7 +131,51 @@ public class TripFragment extends BottomSheetDialogFragment {
                         .show();
             }
         });
+        this.inflater = inflater;
+        refreshUI();
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        refreshUI();
+    }
+
+    private void refreshUI() {
+        Realm realm = Realm.getDefaultInstance();
+        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        realm.close();
+
+        Path path = trip.toConnectionPath(network);
+
+        Station origin = path.getStartVertex().getStation();
+        Station dest = path.getEndVertex().getStation();
+
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        if (path.getEdgeList().size() == 0) {
+            builder.append("#");
+            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_beenhere_black_24dp),
+                    builder.length() - 1, builder.length(), 0);
+            builder.append(" " + origin.getName());
+        } else {
+            builder.append(origin.getName() + " ").append("#");
+            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
+                    builder.length() - 1, builder.length(), 0);
+            builder.append(" " + dest.getName());
+
+        }
+        stationNamesView.setText(builder);
+
+
+        dateView.setText(
+                DateUtils.formatDateTime(getContext(),
+                        path.getEntryTime(0).getTime(),
+                        DateUtils.FORMAT_SHOW_DATE));
+
+        populatePathView(getContext(), inflater, network, path, layoutRoute);
     }
 
     public static void populatePathView(final Context context, final LayoutInflater inflater, final Network network, final Path path, ViewGroup root) {
@@ -233,7 +251,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
                 // left side of the outer && is a small hack to fix time not displaying when the
                 // start of the path was extended with the first step getting replaced by a transfer
-                if (path.getManualEntry(i) && !(c instanceof Transfer && !path.getManualEntry(i+1))) {
+                if (path.getManualEntry(i) && !(c instanceof Transfer && !path.getManualEntry(i + 1))) {
                     timeView.setVisibility(View.INVISIBLE);
                 } else {
                     timeView.setText(
