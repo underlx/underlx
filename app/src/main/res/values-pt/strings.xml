@@ -152,4 +152,5 @@
     <string name="act_trip_correction_title">Corrigir registo de viagem</string>
     <string name="act_trip_correction_instructions">Verifique se os pontos de início e fim da viagem estão correctos, e corrija-os se necessário.</string>
     <string name="act_trip_correction_save">Guardar alterações</string>
+    <string name="frag_trip_correct">Corrigir</string>
 </resources>

@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -42,6 +43,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     private String networkId;
 
     private TextView stationNamesView;
+    private Button correctButton;
     private Button deleteButton;
 
     private LinearLayout layoutRoute;
@@ -83,6 +85,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
 
         stationNamesView = (TextView) view.findViewById(R.id.station_names_view);
+        correctButton = (Button) view.findViewById(R.id.correct_button);
         deleteButton = (Button) view.findViewById(R.id.delete_button);
 
         if (mListener == null)
@@ -123,6 +126,16 @@ public class TripFragment extends BottomSheetDialogFragment {
                         DateUtils.FORMAT_SHOW_DATE));
 
         populatePathView(getContext(), inflater, network, path, layoutRoute);
+
+        correctButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), TripCorrectionActivity.class);
+                intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, networkId);
+                intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
+                startActivity(intent);
+            }
+        });
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override

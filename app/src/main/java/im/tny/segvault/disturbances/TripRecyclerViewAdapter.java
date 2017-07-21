@@ -110,15 +110,6 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             }
         });
         holder.mView.setLongClickable(true);
-        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (null != mListener) {
-                    mListener.onListFragmentLongClick(holder.mItem);
-                }
-                return true;
-            }
-        });
     }
 
     @Override

@@ -39,12 +39,18 @@
                 android:layout_weight="1" />
 
             <Button
+                android:id="@+id/correct_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/frag_trip_correct"
+                android:theme="@style/AppTheme.WhiteButton" />
+
+            <Button
                 android:id="@+id/delete_button"
-                style="Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/frag_trip_delete"
-                android:theme="@style/AppTheme.WhiteButton" />
+                android:theme="@style/AppTheme.ColoredButton"/>
         </LinearLayout>
 
         <LinearLayout

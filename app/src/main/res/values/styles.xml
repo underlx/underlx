@@ -21,10 +21,14 @@
 
     <style name="AppTheme.WhiteButton" parent="ThemeOverlay.AppCompat.Light">
         <item name="colorButtonNormal">@android:color/white</item>
-        <item name="android:textColor">@color/colorAccent</item>
     </style>
     <style name="AppTheme.ViewMapButton" parent="Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.ColoredButton" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.TextProtectionScrim" parent="TextAppearance.Design.Tab">

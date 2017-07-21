@@ -222,7 +222,6 @@ public class TripHistoryFragment extends TopFragment {
      */
     public interface OnListFragmentInteractionListener extends OnInteractionListener {
         void onListFragmentClick(TripRecyclerViewAdapter.TripItem item);
-        void onListFragmentLongClick(TripRecyclerViewAdapter.TripItem item);
 
         MainService getMainService();
     }

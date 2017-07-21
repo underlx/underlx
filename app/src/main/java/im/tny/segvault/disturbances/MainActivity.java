@@ -436,14 +436,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentLongClick(TripRecyclerViewAdapter.TripItem item) {
-        Intent intent = new Intent(this, TripCorrectionActivity.class);
-        intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, item.networkId);
-        intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, item.id);
-        startActivity(intent);
-    }
-
-    @Override
     public void onListFragmentInteraction(AnnouncementRecyclerViewAdapter.AnnouncementItem item) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.url));
         startActivity(browserIntent);
