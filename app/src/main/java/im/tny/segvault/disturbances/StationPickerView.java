@@ -31,6 +31,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.jgrapht.alg.BellmanFordShortestPath;
+import org.jgrapht.alg.DijkstraShortestPath;
+
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,10 +41,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
 import io.realm.Realm;
 
@@ -556,6 +563,37 @@ public class StationPickerView extends LinearLayout {
                 scores.put(station.getId(), score);
             }
             return score;
+        }
+    }
+
+    public static class DistanceSortStrategy implements AllStationsSortStrategy {
+        private Network network;
+        private Stop startVertex;
+
+        public DistanceSortStrategy(Network network, Stop startVertex) {
+            this.network = network;
+            this.startVertex = startVertex;
+        }
+
+        @Override
+        public void sortStations(List<Station> stations) {
+            final BellmanFordShortestPath<Stop, Connection> bfsp = new BellmanFordShortestPath<Stop, Connection>(network, startVertex);
+            Collections.sort(stations, new Comparator<Station>() {
+                @Override
+                public int compare(Station station, Station t1) {
+                    return Double.compare(getStationWeight(station, bfsp), getStationWeight(t1, bfsp));
+                }
+            });
+
+        }
+
+        private double getStationWeight(Station station, BellmanFordShortestPath<Stop, Connection> bfsp) {
+            Set<Stop> stops = station.getStops();
+            double weight = Double.MAX_VALUE;
+            for (Stop s : stops) {
+                weight = Math.min(s == startVertex ? 0 : bfsp.getCost(s), weight);
+            }
+            return weight;
         }
     }
 }

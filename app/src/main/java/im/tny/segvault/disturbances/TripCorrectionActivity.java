@@ -123,6 +123,9 @@ public class TripCorrectionActivity extends AppCompatActivity {
         startPicker.setStations(stations);
         endPicker.setStations(stations);
 
+        startPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(network, originalPath.getStartVertex()));
+        endPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(network, originalPath.getEndVertex()));
+
         startPicker.setWeakSelection(originalPath.getStartVertex().getStation());
         endPicker.setWeakSelection(originalPath.getEndVertex().getStation());
 
