@@ -153,6 +153,7 @@ public class RouteFragment extends TopFragment {
         List<Station> stations = new ArrayList<>(network.getStations());
 
         originPicker.setStations(stations);
+        originPicker.setAllStationsSortStrategy(new StationPickerView.EnterFrequencySortStrategy());
         originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
             @Override
             public void onStationSelected(Station station) {
@@ -172,6 +173,7 @@ public class RouteFragment extends TopFragment {
         }
 
         destinationPicker.setStations(stations);
+        destinationPicker.setAllStationsSortStrategy(new StationPickerView.ExitFrequencySortStrategy());
         destinationPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
             @Override
             public void onStationSelected(Station station) {

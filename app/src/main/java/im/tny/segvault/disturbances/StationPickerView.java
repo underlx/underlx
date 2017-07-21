@@ -39,9 +39,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Station;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
+import io.realm.Realm;
 
 public class StationPickerView extends LinearLayout {
     private InstantAutoComplete textView;
@@ -49,6 +51,7 @@ public class StationPickerView extends LinearLayout {
     private AutoCompleteStationsAdapter adapter = null;
     private OnStationSelectedListener onStationSelectedListener = null;
     private OnSelectionLostListener onSelectionLostListener = null;
+    private AllStationsSortStrategy allStationsSortStrategy = new AZSortStrategy();
 
     private Station selection = null;
     // weakSelection: if true, selection should clear once the textbox gets focus
@@ -220,6 +223,7 @@ public class StationPickerView extends LinearLayout {
 
             if (constraint == null || constraint.length() == 0) {
                 filteredList.addAll(originalList);
+                allStationsSortStrategy.sortStations(filteredList);
             } else {
                 final String filterPattern = Normalizer
                         .normalize(constraint.toString().toLowerCase().trim(), Normalizer.Form.NFD)
@@ -479,11 +483,79 @@ public class StationPickerView extends LinearLayout {
         onSelectionLostListener = listener;
     }
 
+    public void setAllStationsSortStrategy(AllStationsSortStrategy strategy) {
+        allStationsSortStrategy = strategy;
+    }
+
     public interface OnStationSelectedListener {
         void onStationSelected(Station station);
     }
 
     public interface OnSelectionLostListener {
         void onSelectionLost();
+    }
+
+    public interface AllStationsSortStrategy {
+        void sortStations(List<Station> stations);
+    }
+
+    public static class AZSortStrategy implements AllStationsSortStrategy {
+        @Override
+        public void sortStations(List<Station> stations) {
+            Collections.sort(stations, new Comparator<Station>() {
+                @Override
+                public int compare(Station station, Station t1) {
+                    return station.getName().compareTo(t1.getName());
+                }
+            });
+        }
+    }
+
+    private static abstract class RealmBasedSortStrategy implements AllStationsSortStrategy {
+        protected Realm realm = null;
+        protected Map<String, Double> scores = new HashMap<>();
+        @Override
+        public void sortStations(List<Station> stations) {
+            // ensure this is created in the right thread
+            realm = Realm.getDefaultInstance();
+            Collections.sort(stations, new Comparator<Station>() {
+                @Override
+                public int compare(Station station, Station t1) {
+                    // order by decreasing score, then A-Z
+                    int result = Double.compare(getScore(t1), getScore(station));
+                    if (result == 0) {
+                        return station.getName().compareTo(t1.getName());
+                    }
+                    return result;
+                }
+            });
+            realm.close();
+        }
+
+        abstract protected double getScore(Station station);
+    }
+
+    public static class EnterFrequencySortStrategy extends RealmBasedSortStrategy {
+        protected double getScore(Station station) {
+            Double score = scores.get(station.getId());
+            if (score == null) {
+                long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
+                score = new Double(entryCount);
+                scores.put(station.getId(), score);
+            }
+            return score;
+        }
+    }
+
+    public static class ExitFrequencySortStrategy extends RealmBasedSortStrategy {
+        protected double getScore(Station station) {
+            Double score = scores.get(station.getId());
+            if (score == null) {
+                long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
+                score = new Double(exitCount);
+                scores.put(station.getId(), score);
+            }
+            return score;
+        }
     }
 }
