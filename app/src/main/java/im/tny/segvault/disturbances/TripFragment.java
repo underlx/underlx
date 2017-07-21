@@ -102,10 +102,18 @@ public class TripFragment extends BottomSheetDialogFragment {
         Station dest = path.getEndVertex().getStation();
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append(origin.getName() + " ").append("#");
-        builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
-                builder.length() - 1, builder.length(), 0);
-        builder.append(" " + dest.getName());
+        if (path.getEdgeList().size() == 0) {
+            builder.append("#");
+            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_beenhere_black_24dp),
+                    builder.length() - 1, builder.length(), 0);
+            builder.append(" " + origin.getName());
+        } else {
+            builder.append(origin.getName() + " ").append("#");
+            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
+                    builder.length() - 1, builder.length(), 0);
+            builder.append(" " + dest.getName());
+
+        }
         stationNamesView.setText(builder);
 
         TextView dateView = (TextView) view.findViewById(R.id.date_view);

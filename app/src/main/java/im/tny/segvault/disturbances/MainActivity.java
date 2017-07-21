@@ -431,15 +431,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentClick(TripRecyclerViewAdapter.TripItem item) {
-        if (item.isVisit) {
-            Intent intent = new Intent(this, StationActivity.class);
-            intent.putExtra(StationActivity.EXTRA_STATION_ID, item.originId);
-            intent.putExtra(StationActivity.EXTRA_NETWORK_ID, item.networkId);
-            startActivity(intent);
-        } else {
-            TripFragment f = TripFragment.newInstance(item.networkId, item.id);
-            f.show(getSupportFragmentManager(), "trip-fragment");
-        }
+        TripFragment f = TripFragment.newInstance(item.networkId, item.id);
+        f.show(getSupportFragmentManager(), "trip-fragment");
     }
 
     @Override
