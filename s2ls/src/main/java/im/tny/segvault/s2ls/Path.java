@@ -121,7 +121,9 @@ public class Path implements GraphPath<Stop, Connection> {
         for(int i = 0; i < edgesToRemove; i++) {
             edgeList.remove(0);
         }
-        startVertex = edgeList.get(0).getSource();
+        if(edgeList.size() > 0) {
+            startVertex = edgeList.get(0).getSource();
+        }
 
         // now go from the program-made start
         Date entryTime = times.get(0).first;
@@ -175,7 +177,9 @@ public class Path implements GraphPath<Stop, Connection> {
         for(int i = 0; i < edgesToRemove; i++) {
             edgeList.remove(edgeList.size() - 1);
         }
-        endVertex = edgeList.get(edgeList.size() - 1).getTarget();
+        if(edgeList.size() > 0) {
+            endVertex = edgeList.get(edgeList.size() - 1).getTarget();
+        }
 
         // now go from the program-made end
         Date entryTime = times.get(times.size() - 1).first;
