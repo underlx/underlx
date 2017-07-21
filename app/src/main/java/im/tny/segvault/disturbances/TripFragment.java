@@ -143,8 +143,29 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         List<Connection> el = path.getEdgeList();
 
+        if (el.size() == 0) {
+            View stepview = inflater.inflate(R.layout.path_station_initial, root, false);
+
+            FrameLayout lineStripeLayout = (FrameLayout) stepview.findViewById(R.id.line_stripe_layout);
+            lineStripeLayout.setVisibility(View.INVISIBLE);
+
+            TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+            if (path.getManualEntry(0)) {
+                timeView.setVisibility(View.INVISIBLE);
+            } else {
+                timeView.setText(
+                        DateUtils.formatDateTime(context,
+                                path.getEntryTime(0).getTime(),
+                                DateUtils.FORMAT_SHOW_TIME));
+            }
+
+            RouteFragment.populateStationView(context, network, path.getStartVertex(), stepview);
+
+            root.addView(stepview);
+            return;
+        }
+
         boolean isFirst = true;
-        int curBulletIdx = 0;
         for (int i = 0; i < el.size(); i++) {
             Connection c = el.get(i);
             if (i == 0 && c instanceof Transfer) {
@@ -173,7 +194,6 @@ public class TripFragment extends BottomSheetDialogFragment {
                 RouteFragment.populateStationView(context, network, c.getSource(), stepview);
 
                 root.addView(stepview);
-                curBulletIdx++;
                 isFirst = false;
             } else {
                 Line targetLine = c.getTarget().getLine();
@@ -203,7 +223,6 @@ public class TripFragment extends BottomSheetDialogFragment {
                 RouteFragment.populateStationView(context, network, c.getSource(), stepview);
 
                 root.addView(stepview);
-                curBulletIdx++;
             }
             if (c instanceof Transfer && i != el.size() - 1) {
                 c = el.get(++i);
@@ -228,7 +247,6 @@ public class TripFragment extends BottomSheetDialogFragment {
                 RouteFragment.populateStationView(context, network, c.getTarget(), stepview);
 
                 root.addView(stepview);
-                curBulletIdx++;
             }
 
         }
