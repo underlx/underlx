@@ -6,7 +6,21 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_location_enable"
-            android:title="@string/frag_settings_background_location"
-            android:summary="@string/frag_settings_background_location_summary"/>
+            android:summary="@string/frag_settings_background_location_summary"
+            android:title="@string/frag_settings_background_location" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/frag_settings_trip_logging_title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_auto_open_trip_correction"
+            android:summary="@string/frag_settings_auto_open_trip_correction_summary"
+            android:title="@string/frag_settings_auto_open_trip_correction" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="pref_auto_open_trip_correction"
+            android:key="pref_auto_open_visit_correction"
+            android:summary="@string/frag_settings_auto_open_visit_correction_summary"
+            android:title="@string/frag_settings_auto_open_visit_correction" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -114,10 +114,10 @@ public class StationActivity extends AppCompatActivity
         boolean isFavorite = realm.where(RStation.class).equalTo("id", stationId).findFirst().isFavorite();
         MenuItem favItem = menu.findItem(R.id.menu_favorite);
         if(isFavorite) {
-            favItem.setTitle(R.string.activity_station_favorite);
+            favItem.setTitle(R.string.act_station_favorite);
             favItem.setIcon(R.drawable.ic_star_white_24dp);
         } else {
-            favItem.setTitle(R.string.activity_station_unfavorite);
+            favItem.setTitle(R.string.act_station_unfavorite);
             favItem.setIcon(R.drawable.ic_star_border_white_24dp);
         }
         return true;
@@ -249,10 +249,10 @@ public class StationActivity extends AppCompatActivity
                 realm.copyToRealm(rstation);
                 realm.commitTransaction();
                 if(isFavorite) {
-                    item.setTitle(R.string.activity_station_favorite);
+                    item.setTitle(R.string.act_station_favorite);
                     item.setIcon(R.drawable.ic_star_white_24dp);
                 } else {
-                    item.setTitle(R.string.activity_station_unfavorite);
+                    item.setTitle(R.string.act_station_unfavorite);
                     item.setIcon(R.drawable.ic_star_border_white_24dp);
                 }
                 return true;

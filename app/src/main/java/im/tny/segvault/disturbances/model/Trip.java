@@ -134,11 +134,11 @@ public class Trip extends RealmObject {
     }
 
 
-    public static void persistConnectionPath(Path path) {
-        persistConnectionPath(path, null);
+    public static String persistConnectionPath(Path path) {
+        return persistConnectionPath(path, null);
     }
 
-    public static void persistConnectionPath(Path path, String replaceTrip) {
+    public static String persistConnectionPath(Path path, String replaceTrip) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         RealmList<StationUse> uses = new RealmList<>();
@@ -222,5 +222,6 @@ public class Trip extends RealmObject {
         }
         trip.setPath(uses);
         realm.commitTransaction();
+        return trip.getId();
     }
 }

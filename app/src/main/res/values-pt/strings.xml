@@ -120,7 +120,12 @@
     <string name="act_station_tab_trivia">Trívia</string>
     <string name="frag_settings_location_title">Localização</string>
     <string name="frag_settings_background_location">Localizar em segundo plano</string>
-    <string name="frag_settings_background_location_summary">Necessário para registar viagens e funcionalidades colaborativas em tempo real.</string>
+    <string name="frag_settings_background_location_summary">Necessário para registar viagens e funcionalidades colaborativas em tempo real</string>
+    <string name="frag_settings_trip_logging_title">Registo de viagens</string>
+    <string name="frag_settings_auto_open_trip_correction">Corrigir imediatamente</string>
+    <string name="frag_settings_auto_open_trip_correction_summary">Abrir o ecrã de correcção de registo assim que as viagens terminem</string>
+    <string name="frag_settings_auto_open_visit_correction">Corrigir visitas imediatamente</string>
+    <string name="frag_settings_auto_open_visit_correction_summary">Também abrir o ecrã de correcção quando parecer que só passou numa estação</string>
     <string name="frag_settings_title">Definições</string>
     <string name="frag_station_wifi">Wi-Fi</string>
     <string name="frag_station_services">Serviços</string>
@@ -128,8 +133,8 @@
     <string name="frag_station_info_unavailable">Informação não disponível.</string>
     <string name="frag_trip_history_show_visits">Mostrar visitas a estações</string>
     <string name="frag_trip_history_hide_visits">Ocultar visitas a estações</string>
-    <string name="activity_station_favorite">Adicionar aos favoritos</string>
-    <string name="activity_station_unfavorite">Remover dos favoritos</string>
+    <string name="act_station_favorite">Adicionar aos favoritos</string>
+    <string name="act_station_unfavorite">Remover dos favoritos</string>
     <string name="frag_station_bus_lines">Carreiras urbanas</string>
     <string name="frag_station_ferry_routes">Ligações fluviais</string>
     <string name="frag_station_rail_services">Comboios</string>
@@ -142,9 +147,9 @@
     <string name="dataset_info_cache_all_extras">Descarregar conteúdo adicional</string>
     <string name="notif_route_end_trip">Terminar viagem</string>
     <string name="frag_home_end_trip">Terminar viagem</string>
-    <string name="activity_trip_correction_start_station">Estação inicial</string>
-    <string name="activity_trip_correction_end_station">Estação final</string>
-    <string name="activity_trip_correction_title">Corrigir registo de viagem</string>
-    <string name="activity_trip_correction_instructions">Verifique se os pontos de início e fim da viagem estão correctos, e corrija-os se necessário.</string>
-    <string name="activity_trip_correction_save">Guardar alterações</string>
+    <string name="act_trip_correction_start_station">Estação inicial</string>
+    <string name="act_trip_correction_end_station">Estação final</string>
+    <string name="act_trip_correction_title">Corrigir registo de viagem</string>
+    <string name="act_trip_correction_instructions">Verifique se os pontos de início e fim da viagem estão correctos, e corrija-os se necessário.</string>
+    <string name="act_trip_correction_save">Guardar alterações</string>
 </resources>

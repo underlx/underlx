@@ -183,7 +183,7 @@ public class MainService extends Service {
                     synchronized (lock) {
                         loc = locServices.get(network);
                     }
-                    if(loc != null) {
+                    if (loc != null) {
                         loc.endCurrentTrip();
                     }
                     break;
@@ -906,10 +906,22 @@ public class MainService extends Service {
 
         @Override
         public void onTripEnded(S2LS s2ls, Path path) {
-            Trip.persistConnectionPath(path);
+            String tripId = Trip.persistConnectionPath(path);
             Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
+
+            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+            boolean openTripCorrection = sharedPref.getBoolean("pref_auto_open_trip_correction", false);
+            boolean openVisitCorrection = sharedPref.getBoolean("pref_auto_open_visit_correction", false);
+            if (openTripCorrection && (path.getEdgeList().size() > 0 || openVisitCorrection)) {
+                intent = new Intent(getApplicationContext(), TripCorrectionActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, s2ls.getNetwork().getId());
+                intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
+                intent.putExtra(TripCorrectionActivity.EXTRA_IS_STANDALONE, true);
+                startActivity(intent);
+            }
         }
 
         private void doTick(final State state) {

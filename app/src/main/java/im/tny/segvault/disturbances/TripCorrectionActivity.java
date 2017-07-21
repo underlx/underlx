@@ -7,6 +7,10 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -24,6 +28,7 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     private String networkId;
     private String tripId;
+    private boolean isStandalone;
 
     MainService locService;
     boolean locBound = false;
@@ -44,9 +49,11 @@ public class TripCorrectionActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             networkId = getIntent().getStringExtra(EXTRA_NETWORK_ID);
             tripId = getIntent().getStringExtra(EXTRA_TRIP_ID);
+            isStandalone = getIntent().getBooleanExtra(EXTRA_IS_STANDALONE, false);
         } else {
             networkId = savedInstanceState.getString(STATE_NETWORK_ID);
             tripId = savedInstanceState.getString(STATE_TRIP_ID);
+            isStandalone = savedInstanceState.getBoolean(STATE_IS_STANDALONE, false);
         }
         Object conn = getLastCustomNonConfigurationInstance();
         if (conn != null) {
@@ -62,6 +69,13 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_trip_correction);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(isStandalone) {
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+        }
+
         startPicker = (StationPickerView) findViewById(R.id.start_picker);
         endPicker = (StationPickerView) findViewById(R.id.end_picker);
         pathLayout = (LinearLayout) findViewById(R.id.path_layout);
@@ -75,6 +89,26 @@ public class TripCorrectionActivity extends AppCompatActivity {
                 endPicker.focusOnEntry();
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.trip_correction, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+            case R.id.menu_save:
+                saveChanges();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void populateUI() {
@@ -114,8 +148,7 @@ public class TripCorrectionActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Trip.persistConnectionPath(newPath, tripId);
-                finish();
+                saveChanges();
             }
         });
     }
@@ -130,6 +163,11 @@ public class TripCorrectionActivity extends AppCompatActivity {
         }
 
         TripFragment.populatePathView(this, getLayoutInflater(), network, newPath, pathLayout);
+    }
+
+    private void saveChanges() {
+        Trip.persistConnectionPath(newPath, tripId);
+        finish();
     }
 
     private LocServiceConnection mConnection = new LocServiceConnection();
@@ -162,6 +200,7 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     public static final String STATE_TRIP_ID = "tripId";
     public static final String STATE_NETWORK_ID = "networkId";
+    public static final String STATE_IS_STANDALONE = "standalone";
     public static final String STATE_START_FOCUSED = "startFocused";
     public static final String STATE_END_FOCUSED = "endFocused";
 
@@ -178,4 +217,5 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     public static final String EXTRA_TRIP_ID = "im.tny.segvault.disturbances.extra.TripCorrectionActivity.tripid";
     public static final String EXTRA_NETWORK_ID = "im.tny.segvault.disturbances.extra.TripCorrectionActivity.networkid";
+    public static final String EXTRA_IS_STANDALONE = "im.tny.segvault.disturbances.extra.StationActivity.standalone";
 }
