@@ -222,6 +222,7 @@ public class Trip extends RealmObject {
         }
         trip.setPath(uses);
         realm.commitTransaction();
+        realm.close();
         return trip.getId();
     }
 }

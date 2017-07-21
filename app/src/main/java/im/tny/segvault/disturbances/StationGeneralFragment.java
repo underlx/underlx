@@ -1,13 +1,10 @@
 package im.tny.segvault.disturbances;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -19,21 +16,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Network;
@@ -241,6 +224,7 @@ public class StationGeneralFragment extends Fragment {
         } else {
             statsTransferCountView.setVisibility(View.GONE);
         }
+        realm.close();
     }
 
     public interface OnFragmentInteractionListener {

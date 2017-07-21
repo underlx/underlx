@@ -112,6 +112,7 @@ public class StationActivity extends AppCompatActivity
 
         Realm realm = Realm.getDefaultInstance();
         boolean isFavorite = realm.where(RStation.class).equalTo("id", stationId).findFirst().isFavorite();
+        realm.close();
         MenuItem favItem = menu.findItem(R.id.menu_favorite);
         if(isFavorite) {
             favItem.setTitle(R.string.act_station_favorite);
@@ -248,6 +249,7 @@ public class StationActivity extends AppCompatActivity
                 rstation.setFavorite(isFavorite);
                 realm.copyToRealm(rstation);
                 realm.commitTransaction();
+                realm.close();
                 if(isFavorite) {
                     item.setTitle(R.string.act_station_favorite);
                     item.setIcon(R.drawable.ic_star_white_24dp);

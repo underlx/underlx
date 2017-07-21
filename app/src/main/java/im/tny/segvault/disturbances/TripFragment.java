@@ -97,8 +97,9 @@ public class TripFragment extends BottomSheetDialogFragment {
         Network network = service.getNetwork(networkId);
 
         Realm realm = Realm.getDefaultInstance();
-
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        realm.close();
+
         Path path = trip.toConnectionPath(network);
 
         Station origin = path.getStartVertex().getStation();
@@ -298,6 +299,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         trip.getPath().deleteAllFromRealm();
         trip.deleteFromRealm();
         realm.commitTransaction();
+        realm.close();
         dismiss();
     }
 

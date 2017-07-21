@@ -107,6 +107,7 @@ public class MainService extends Service {
                 }
             }
             realm.commitTransaction();
+            realm.close();
 
             net.setEdgeWeighter(cweighter);
             networks.put(net.getId(), net);
@@ -370,6 +371,7 @@ public class MainService extends Service {
         long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
         // number of times user left at this stop to transfer to another line
         long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
+        realm.close();
         return entryCount * 0.3 + exitCount + transferCount;
     }
 

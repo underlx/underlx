@@ -113,8 +113,9 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     private void populateUI() {
         Realm realm = Realm.getDefaultInstance();
-
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        realm.close();
+
         originalPath = trip.toConnectionPath(network);
 
         List<Station> stations = new ArrayList<>(network.getStations());

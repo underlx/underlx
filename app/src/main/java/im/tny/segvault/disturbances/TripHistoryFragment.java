@@ -47,12 +47,13 @@ public class TripHistoryFragment extends TopFragment {
     private boolean showVisits = false;
     private Menu menu;
 
+    private Realm realm = Realm.getDefaultInstance();
+
     /**
      * Mandatory constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public TripHistoryFragment() {
-        Realm realm = Realm.getDefaultInstance();
         changeListenerHardReference = realm.where(Trip.class).findAll();
     }
 
@@ -153,6 +154,7 @@ public class TripHistoryFragment extends TopFragment {
     public void onDetach() {
         super.onDetach();
         changeListenerHardReference.removeChangeListener(tripChangeListener);
+        realm.close();
         mListener = null;
     }
 
@@ -179,6 +181,7 @@ public class TripHistoryFragment extends TopFragment {
                     items.add(item);
                 }
             }
+            realm.close();
             if (items.size() == 0) {
                 return false;
             }
