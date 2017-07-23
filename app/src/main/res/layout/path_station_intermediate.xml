@@ -4,10 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/time_view"
@@ -17,37 +16,41 @@
             android:text="12:34"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:text="12:34"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginRight="10dp">
-
         <FrameLayout
             android:id="@+id/prev_line_stripe_layout"
-            android:layout_width="match_parent"
-            android:layout_height="23dp"></FrameLayout>
+            android:layout_width="15dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@id/time_view"></FrameLayout>
 
         <FrameLayout
             android:id="@+id/next_line_stripe_layout"
-            android:layout_width="match_parent"
+            android:layout_width="15dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="23dp"></FrameLayout>
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="23dp"
+            android:layout_toRightOf="@id/time_view"></FrameLayout>
 
         <ImageView
+            android:id="@+id/station_dot_image"
             android:layout_width="15dp"
             android:layout_height="15dp"
+            android:layout_marginRight="10dp"
             android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/time_view"
             android:src="@drawable/ic_station_dot" />
-    </FrameLayout>
+
+        <ImageView
+            android:id="@+id/station_cross_image"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginLeft="-9dp"
+            android:layout_marginTop="6.5dp"
+            android:layout_toRightOf="@id/time_view"
+            android:src="@drawable/ic_close_white_24dp"
+            android:tint="@color/colorError"
+            android:visibility="gone" />
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

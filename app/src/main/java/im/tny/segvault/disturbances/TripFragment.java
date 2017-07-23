@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -231,6 +232,11 @@ public class TripFragment extends BottomSheetDialogFragment {
                                     DateUtils.FORMAT_SHOW_TIME));
                 }
 
+                ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
+                if (c.getSource().getStation().isAlwaysClosed()) {
+                    crossView.setVisibility(View.VISIBLE);
+                }
+
                 RouteFragment.populateStationView(context, network, c.getSource(), stepview);
 
                 root.addView(stepview);
@@ -260,6 +266,11 @@ public class TripFragment extends BottomSheetDialogFragment {
                                     DateUtils.FORMAT_SHOW_TIME));
                 }
 
+                ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
+                if (c.getSource().getStation().isAlwaysClosed()) {
+                    crossView.setVisibility(View.VISIBLE);
+                }
+
                 RouteFragment.populateStationView(context, network, c.getSource(), stepview);
 
                 root.addView(stepview);
@@ -282,6 +293,11 @@ public class TripFragment extends BottomSheetDialogFragment {
                             DateUtils.formatDateTime(context,
                                     path.getEntryTime(i + 1).getTime(),
                                     DateUtils.FORMAT_SHOW_TIME));
+                }
+
+                ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
+                if (c.getTarget().getStation().isAlwaysClosed()) {
+                    crossView.setVisibility(View.VISIBLE);
                 }
 
                 RouteFragment.populateStationView(context, network, c.getTarget(), stepview);
