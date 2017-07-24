@@ -116,6 +116,16 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         return null;
     }
 
+    private Stop firstStop;
+
+    public Stop getFirstStop() {
+        return firstStop;
+    }
+
+    public void setFirstStop(Stop stop) {
+        firstStop = stop;
+    }
+
     private int usualCarCount;
 
     public int getUsualCarCount() {

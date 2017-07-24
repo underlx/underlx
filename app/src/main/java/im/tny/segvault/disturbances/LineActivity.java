@@ -178,7 +178,7 @@ public class LineActivity extends AppCompatActivity {
         // TODO note: this doesn't work for circular lines
 
         List<Station> stations = new ArrayList<>();
-        Stop s = line.getEndStops().iterator().next();
+        Stop s = line.getFirstStop();
         Set<Stop> visited = new HashSet<>();
         // terminus will only have one outgoing edge
         Connection c = line.outgoingEdgesOf(s).iterator().next();

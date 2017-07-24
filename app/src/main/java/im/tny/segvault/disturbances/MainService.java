@@ -459,6 +459,7 @@ public class MainService extends Service {
                         API.Line l = api.getLine(lineid);
                         Line line = new Line(net, new HashSet<Stop>(), l.id, l.name, l.typCars);
                         line.setColor(Color.parseColor("#" + l.color));
+                        boolean isFirstStationInLine = true;
                         for (String sid : l.stations) {
                             Log.d("UpdateTopologyTask", "  Stop: " + sid);
                             API.Station s = apiStations.get(sid);
@@ -502,6 +503,10 @@ public class MainService extends Service {
                             Stop stop = new Stop(station, line);
                             line.addVertex(stop);
                             station.addVertex(stop);
+                            if(isFirstStationInLine) {
+                                line.setFirstStop(stop);
+                                isFirstStationInLine = false;
+                            }
 
                             // WiFi APs
                             for (API.WiFiAP w : s.wiFiAPs) {
