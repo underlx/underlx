@@ -59,13 +59,24 @@
 
         <activity
             android:name=".StationActivity"
-            android:label="@string/activity_station_title"
+            android:label="@string/activity_loading_title"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+
+        <activity
+            android:name=".LineActivity"
+            android:label="@string/activity_loading_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
+
         <activity
             android:name=".TripCorrectionActivity"
             android:label="@string/act_trip_correction_title"

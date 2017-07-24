@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:orientation="horizontal">
 
     <RelativeLayout
@@ -15,6 +16,24 @@
             android:layout_marginTop="12dp"
             android:text="12:34"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
+
+        <FrameLayout
+            android:id="@+id/left_line_stripe_layout"
+            android:layout_width="20dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="-15dp"
+            android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/time_view"
+            android:visibility="gone"></FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/right_line_stripe_layout"
+            android:layout_width="20dp"
+            android:layout_height="15dp"
+            android:layout_marginRight="-76dp"
+            android:layout_marginTop="15dp"
+            android:layout_toLeftOf="@id/time_view"
+            android:visibility="gone"></FrameLayout>
 
         <FrameLayout
             android:id="@+id/prev_line_stripe_layout"

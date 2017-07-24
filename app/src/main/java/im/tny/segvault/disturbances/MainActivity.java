@@ -31,6 +31,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 
@@ -415,7 +416,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item) {
-
+        if (locService != null) {
+            for (Network network : locService.getNetworks()) {
+                Line line;
+                if ((line = network.getLine(item.id)) != null) {
+                    Intent intent = new Intent(this, LineActivity.class);
+                    intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
+                    intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                    startActivity(intent);
+                    return;
+                }
+            }
+        }
     }
 
     @Override

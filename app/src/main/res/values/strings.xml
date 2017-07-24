@@ -100,7 +100,7 @@
         <item>pt-ml-verde</item>
         <item>pt-ml-vermelha</item>
     </string-array>
-    <string name="activity_station_title">Loading...</string>
+    <string name="activity_loading_title">Loading...</string>
     <string name="frag_station_more_information">More information</string>
     <string name="frag_trip_correct">Correct</string>
     <string name="frag_trip_delete">Delete</string>
@@ -163,4 +163,5 @@
     <string name="act_trip_correction_title">Correct trip log</string>
     <string name="act_trip_correction_instructions">Check if the start and end points for the trip are right, and correct them if not.</string>
     <string name="act_trip_correction_save">Save changes</string>
+    <string name="act_line_title">%1$s line</string>
 </resources>

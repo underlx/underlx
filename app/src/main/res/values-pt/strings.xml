@@ -90,7 +90,7 @@
     <string name="frag_station_stats_gone_through">Atravessou %d vezes</string>
     <string name="frag_station_stats_transfer">Mudou de linha %d vezes</string>
     <string name="frag_station_more_information">Mais informação</string>
-    <string name="activity_station_title">A carregar...</string>
+    <string name="activity_loading_title">A carregar...</string>
     <string name="frag_trip_delete">Apagar</string>
     <string name="frag_trip_delete_confirm_title">Apagar viagem?</string>
     <string name="frag_trip_delete_confirm_desc">A informação sobre esta viagem será eliminada e as estatísticas afectadas serão recalculadas.</string>
@@ -153,4 +153,5 @@
     <string name="act_trip_correction_instructions">Verifique se os pontos de início e fim da viagem estão correctos, e corrija-os se necessário.</string>
     <string name="act_trip_correction_save">Guardar alterações</string>
     <string name="frag_trip_correct">Corrigir</string>
+    <string name="act_line_title">Linha %1$s</string>
 </resources>
