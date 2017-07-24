@@ -17,11 +17,19 @@
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
 
         <FrameLayout
-            android:id="@+id/line_stripe_layout"
+            android:id="@+id/prev_line_stripe_layout"
+            android:layout_width="15dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="23dp"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@id/time_view"></FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/next_line_stripe_layout"
             android:layout_width="15dp"
             android:layout_height="match_parent"
             android:layout_marginRight="10dp"
-            android:layout_marginBottom="23dp"
+            android:layout_marginTop="23dp"
             android:layout_toRightOf="@id/time_view"></FrameLayout>
 
         <ImageView
@@ -53,6 +61,5 @@
         android:orientation="vertical">
 
         <include layout="@layout/station_include" />
-
     </LinearLayout>
 </LinearLayout>
