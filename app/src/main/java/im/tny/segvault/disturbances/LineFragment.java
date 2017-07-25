@@ -81,6 +81,9 @@ public class LineFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         updateInformationView = (TextView) view.findViewById(R.id.update_information);
 
+        // fix scroll fling. less than ideal, but apparently there's still no other solution
+        recyclerView.setNestedScrollingEnabled(false);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);

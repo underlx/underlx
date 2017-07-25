@@ -85,6 +85,9 @@ public class UnconfirmedTripsFragment extends Fragment {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
 
+        // fix scroll fling. less than ideal, but apparently there's still no other solution
+        recyclerView.setNestedScrollingEnabled(false);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
