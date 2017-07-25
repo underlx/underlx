@@ -155,4 +155,5 @@
     <string name="act_trip_correction_correct">Confirmar correcção</string>
     <string name="frag_trip_correct">Corrigir</string>
     <string name="act_line_title">Linha %1$s</string>
+    <string name="act_line_disturbances_warning">Existem perturbações na circulação nesta linha. O tempo de espera pode ser superior ao normal.</string>
 </resources>

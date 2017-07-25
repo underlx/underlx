@@ -18,11 +18,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,21 +29,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import im.tny.segvault.subway.Transfer;
-import io.realm.Realm;
 
 public class LineActivity extends AppCompatActivity {
 
@@ -54,8 +46,10 @@ public class LineActivity extends AppCompatActivity {
     private String lineId;
 
     private LinearLayout lineIconsLayout;
+    private LinearLayout disturbancesWarningLayout;
+    private LinearLayout lineLayout;
 
-    MainService locService;
+    MainService mainService;
     boolean locBound = false;
 
     @Override
@@ -73,7 +67,7 @@ public class LineActivity extends AppCompatActivity {
             // have the service connection survive through activity configuration changes
             // (e.g. screen orientation changes)
             mConnection = (LocServiceConnection) conn;
-            locService = mConnection.getBinder().getService();
+            mainService = mConnection.getBinder().getService();
             locBound = true;
         } else if (!locBound) {
             startService(new Intent(this, MainService.class));
@@ -88,6 +82,8 @@ public class LineActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
+        disturbancesWarningLayout = (LinearLayout) findViewById(R.id.disturbances_warning_layout);
+        lineLayout = (LinearLayout) findViewById(R.id.line_layout);
     }
 
     private LineActivity.LocServiceConnection mConnection = new LineActivity.LocServiceConnection();
@@ -100,10 +96,10 @@ public class LineActivity extends AppCompatActivity {
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             binder = (MainService.LocalBinder) service;
-            locService = binder.getService();
+            mainService = binder.getService();
             locBound = true;
 
-            Network net = locService.getNetwork(networkId);
+            Network net = mainService.getNetwork(networkId);
             Line line = net.getLine(lineId);
 
             String title = String.format(getString(R.string.act_line_title), line.getName());
@@ -148,7 +144,14 @@ public class LineActivity extends AppCompatActivity {
                 }
             });
 
-            LinearLayout lineLayout = (LinearLayout)findViewById(R.id.line_layout);
+            Map<String, LineStatusCache.Status> statuses = mainService.getLineStatusCache().getLineStatus();
+            if (statuses.get(line.getId()) != null &&
+                    statuses.get(line.getId()).down) {
+                disturbancesWarningLayout.setVisibility(View.VISIBLE);
+            } else {
+                disturbancesWarningLayout.setVisibility(View.GONE);
+            }
+
             populateLineView(LineActivity.this, getLayoutInflater(), net, line, lineLayout);
         }
 
@@ -224,17 +227,17 @@ public class LineActivity extends AppCompatActivity {
                 nextLineStripeLayout.setBackgroundColor(lineColor);
             }
 
-            if(station.getLines().size() > 1) {
-                for(Stop stop : station.getStops()) {
+            if (station.getLines().size() > 1) {
+                for (Stop stop : station.getStops()) {
                     if (stop.getLine() != line) {
                         rightLineStripeLayout.setVisibility(View.VISIBLE);
 
                         GradientDrawable gd = new GradientDrawable(
                                 GradientDrawable.Orientation.RIGHT_LEFT,
-                                new int[] {0,stop.getLine().getColor()});
+                                new int[]{0, stop.getLine().getColor()});
                         gd.setCornerRadius(0f);
 
-                        if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                             rightLineStripeLayout.setBackgroundDrawable(gd);
                         } else {
                             rightLineStripeLayout.setBackground(gd);
@@ -244,10 +247,10 @@ public class LineActivity extends AppCompatActivity {
                             leftLineStripeLayout.setVisibility(View.VISIBLE);
                             gd = new GradientDrawable(
                                     GradientDrawable.Orientation.LEFT_RIGHT,
-                                    new int[] {0,stop.getLine().getColor()});
+                                    new int[]{0, stop.getLine().getColor()});
                             gd.setCornerRadius(0f);
 
-                            if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                            if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                                 leftLineStripeLayout.setBackgroundDrawable(gd);
                             } else {
                                 leftLineStripeLayout.setBackground(gd);

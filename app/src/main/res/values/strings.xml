@@ -165,4 +165,5 @@
     <string name="act_trip_correction_save">Save changes</string>
     <string name="act_trip_correction_correct">Confirm correctness</string>
     <string name="act_line_title">%1$s line</string>
+    <string name="act_line_disturbances_warning">Ongoing disturbances in this line. The waiting time may be longer than usual.</string>
 </resources>
