@@ -227,30 +227,30 @@ public class LineActivity extends AppCompatActivity {
             if(station.getLines().size() > 1) {
                 for(Stop stop : station.getStops()) {
                     if (stop.getLine() != line) {
-                        leftLineStripeLayout.setVisibility(View.VISIBLE);
+                        rightLineStripeLayout.setVisibility(View.VISIBLE);
 
                         GradientDrawable gd = new GradientDrawable(
-                                GradientDrawable.Orientation.LEFT_RIGHT,
+                                GradientDrawable.Orientation.RIGHT_LEFT,
                                 new int[] {0,stop.getLine().getColor()});
                         gd.setCornerRadius(0f);
 
                         if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                            leftLineStripeLayout.setBackgroundDrawable(gd);
+                            rightLineStripeLayout.setBackgroundDrawable(gd);
                         } else {
-                            leftLineStripeLayout.setBackground(gd);
+                            rightLineStripeLayout.setBackground(gd);
                         }
 
                         if (stop.getLine().outDegreeOf(stop) > 1) {
-                            rightLineStripeLayout.setVisibility(View.VISIBLE);
+                            leftLineStripeLayout.setVisibility(View.VISIBLE);
                             gd = new GradientDrawable(
-                                    GradientDrawable.Orientation.RIGHT_LEFT,
+                                    GradientDrawable.Orientation.LEFT_RIGHT,
                                     new int[] {0,stop.getLine().getColor()});
                             gd.setCornerRadius(0f);
 
                             if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                                rightLineStripeLayout.setBackgroundDrawable(gd);
+                                leftLineStripeLayout.setBackgroundDrawable(gd);
                             } else {
-                                rightLineStripeLayout.setBackground(gd);
+                                leftLineStripeLayout.setBackground(gd);
                             }
                         }
                         break;
