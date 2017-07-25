@@ -157,4 +157,6 @@
     <string name="act_line_title">Linha %1$s</string>
     <string name="act_line_disturbances_warning">Existem perturbações na circulação nesta linha. O tempo de espera pode ser superior ao normal.</string>
     <string name="frag_unconfirmed_trips_title">Viagens por confirmar</string>
+    <string name="frag_unconfirmed_trip_confirm">Confirmar</string>
+    <string name="frag_unconfirmed_trip_correct">Corrigir</string>
 </resources>

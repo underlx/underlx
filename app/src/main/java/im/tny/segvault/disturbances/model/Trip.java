@@ -154,6 +154,14 @@ public class Trip extends RealmObject {
         return new Path(network, startVertex, edges, times, manualEntry, 0);
     }
 
+    public boolean missingCorrection() {
+        return !userConfirmed && canBeCorrected();
+    }
+
+    public boolean canBeCorrected() {
+        return new Date().getTime() - path.first().getEntryDate().getTime() < TimeUnit.DAYS.toMillis(7);
+    }
+
 
     public static String persistConnectionPath(Path path) {
         return persistConnectionPath(path, null);
@@ -239,6 +247,7 @@ public class Trip extends RealmObject {
             trip = realm.where(Trip.class).equalTo("id", replaceTrip).findFirst();
             trip.getPath().deleteAllFromRealm();
             trip.setUserConfirmed(true);
+            trip.setSynced(false);
         } else {
             trip = realm.createObject(Trip.class, UUID.randomUUID().toString());
             trip.setUserConfirmed(false);
@@ -249,11 +258,14 @@ public class Trip extends RealmObject {
         return trip.getId();
     }
 
-    public boolean missingCorrection() {
-        return !userConfirmed && canBeCorrected();
-    }
-
-    public boolean canBeCorrected() {
-        return new Date().getTime() - path.first().getEntryDate().getTime() < TimeUnit.DAYS.toMillis(7);
+    public static void confirm(String id) {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        Trip trip = realm.where(Trip.class).equalTo("id", id).findFirst();
+        trip.setUserConfirmed(true);
+        trip.setSynced(false);
+        realm.copyToRealm(trip);
+        realm.commitTransaction();
+        realm.close();
     }
 }

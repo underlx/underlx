@@ -31,6 +31,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -446,6 +447,19 @@ public class MainActivity extends AppCompatActivity
     public void onListFragmentClick(TripRecyclerViewAdapter.TripItem item) {
         TripFragment f = TripFragment.newInstance(item.networkId, item.id);
         f.show(getSupportFragmentManager(), "trip-fragment");
+    }
+
+    @Override
+    public void onListFragmentConfirmButtonClick(TripRecyclerViewAdapter.TripItem item) {
+        Trip.confirm(item.id);
+    }
+
+    @Override
+    public void onListFragmentCorrectButtonClick(TripRecyclerViewAdapter.TripItem item) {
+        Intent intent = new Intent(this, TripCorrectionActivity.class);
+        intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, item.networkId);
+        intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, item.id);
+        startActivity(intent);
     }
 
     @Override

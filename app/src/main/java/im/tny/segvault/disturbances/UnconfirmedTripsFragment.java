@@ -13,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,7 @@ public class UnconfirmedTripsFragment extends Fragment {
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
+        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
 
         // fix scroll fling. less than ideal, but apparently there's still no other solution
         recyclerView.setNestedScrollingEnabled(false);
@@ -91,6 +93,7 @@ public class UnconfirmedTripsFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -127,10 +130,7 @@ public class UnconfirmedTripsFragment extends Fragment {
 
         protected Boolean doInBackground(Void... v) {
             while (mListener == null || mListener.getMainService() == null) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                }
+                return false;
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
             Realm realm = Realm.getDefaultInstance();
@@ -172,7 +172,7 @@ public class UnconfirmedTripsFragment extends Fragment {
                 return;
             }
             if (result && recyclerView != null && mListener != null) {
-                recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener));
+                recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener, true));
                 recyclerView.invalidate();
                 // TODO empty view
                 //emptyView.setVisibility(View.GONE);
@@ -205,6 +205,7 @@ public class UnconfirmedTripsFragment extends Fragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MainService.ACTION_TRIP_REALM_UPDATED:
                     new UpdateDataTask().execute();
                     break;
             }

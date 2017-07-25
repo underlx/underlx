@@ -51,16 +51,14 @@
 
             <TextView
                 android:id="@+id/origin_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Marquês de Pombal"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <View
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:text="Marquês de Pombal"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" /> />
 
             <TextView
                 android:id="@+id/origin_time_view"
@@ -79,17 +77,15 @@
 
             <TextView
                 android:id="@+id/destination_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="@dimen/text_margin"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="Santa Apolónia"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/destination_time_view"

@@ -58,13 +58,15 @@ import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
 
 public class MainService extends Service {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
     private API api;
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
-    private LineStatusCache lineStatusCache;
+    private LineStatusCache lineStatusCache = new LineStatusCache(this);
     private PairManager pairManager;
 
     private final Object lock = new Object();
@@ -78,6 +80,8 @@ public class MainService extends Service {
 
     private Handler stateTickHandler = null;
 
+    private Realm realmForListeners;
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -90,7 +94,7 @@ public class MainService extends Service {
     }
 
     public MainService() {
-        lineStatusCache = new LineStatusCache(this);
+
     }
 
     private void putNetwork(Network net) {
@@ -137,6 +141,10 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
 
+        realmForListeners = Realm.getDefaultInstance();
+        tripRealmResults = realmForListeners.where(Trip.class).findAll();
+        tripRealmResults.addChangeListener(tripRealmChangeListener);
+
         pairManager = new PairManager(getApplicationContext());
         //pairManager.unpair();
         API.getInstance().setPairManager(pairManager);
@@ -150,6 +158,8 @@ public class MainService extends Service {
         wfc.stopScanning();
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
+        tripRealmResults.removeChangeListener(tripRealmChangeListener);
+        realmForListeners.close();
     }
 
     @Override
@@ -983,6 +993,18 @@ public class MainService extends Service {
                 else
                     wfc.stopScanning();
             }
+        }
+    };
+
+    public static final String ACTION_TRIP_REALM_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
+
+    private RealmResults<Trip> tripRealmResults;
+    private final RealmChangeListener<RealmResults<Trip>> tripRealmChangeListener = new RealmChangeListener<RealmResults<Trip>>() {
+        @Override
+        public void onChange(RealmResults<Trip> element) {
+            Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         }
     };
 

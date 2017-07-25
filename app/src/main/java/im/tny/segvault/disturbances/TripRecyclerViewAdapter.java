@@ -8,6 +8,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,16 +35,26 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
     private final List<TripItem> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private final boolean homeScreenList;
 
-    public TripRecyclerViewAdapter(List<TripItem> items, OnListFragmentInteractionListener listener) {
+    public TripRecyclerViewAdapter(List<TripItem> items, OnListFragmentInteractionListener listener, boolean forHomeScreen) {
         mValues = items;
         mListener = listener;
+        homeScreenList = forHomeScreen;
+    }
+
+    public TripRecyclerViewAdapter(List<TripItem> items, OnListFragmentInteractionListener listener) {
+        this(items, listener, false);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        int l = R.layout.fragment_trip_history;
+        if (homeScreenList) {
+            l = R.layout.fragment_unconfirmed_trip;
+        }
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_trip_history, parent, false);
+                .inflate(l, parent, false);
         return new ViewHolder(view);
     }
 
@@ -110,6 +121,26 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             }
         });
         holder.mView.setLongClickable(true);
+
+        if(homeScreenList) {
+            holder.confirmButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        mListener.onListFragmentConfirmButtonClick(holder.mItem);
+                    }
+                }
+            });
+
+            holder.correctButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        mListener.onListFragmentCorrectButtonClick(holder.mItem);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -126,6 +157,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final FrameLayout lineLayout;
         public final LinearLayout destinationLayout;
         public final ImageView secondDotView;
+
+        public final Button confirmButton;
+        public final Button correctButton;
         public TripItem mItem;
 
         public ViewHolder(View view) {
@@ -138,6 +172,13 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             lineLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
             destinationLayout = (LinearLayout) view.findViewById(R.id.destination_layout);
             secondDotView = (ImageView) view.findViewById(R.id.second_dot_view);
+            if(homeScreenList) {
+                confirmButton = (Button) view.findViewById(R.id.confirm_button);
+                correctButton = (Button) view.findViewById(R.id.correct_button);
+            } else {
+                confirmButton = null;
+                correctButton = null;
+            }
         }
 
         @Override
@@ -205,6 +246,8 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
     public interface OnListFragmentInteractionListener {
         void onListFragmentClick(TripRecyclerViewAdapter.TripItem item);
+        void onListFragmentConfirmButtonClick(TripRecyclerViewAdapter.TripItem item);
+        void onListFragmentCorrectButtonClick(TripRecyclerViewAdapter.TripItem item);
     }
 }
 

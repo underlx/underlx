@@ -54,7 +54,7 @@ public class TripHistoryFragment extends TopFragment {
      * fragment (e.g. upon screen orientation changes).
      */
     public TripHistoryFragment() {
-        changeListenerHardReference = realm.where(Trip.class).findAll();
+
     }
 
     @SuppressWarnings("unused")
@@ -100,6 +100,7 @@ public class TripHistoryFragment extends TopFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -147,13 +148,11 @@ public class TripHistoryFragment extends TopFragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-        changeListenerHardReference.addChangeListener(tripChangeListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        changeListenerHardReference.removeChangeListener(tripChangeListener);
         realm.close();
         mListener = null;
     }
@@ -233,19 +232,12 @@ public class TripHistoryFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MainService.ACTION_TRIP_REALM_UPDATED:
                     if (getActivity() != null) {
                         new UpdateDataTask().execute();
                     }
                     break;
             }
-        }
-    };
-
-    private RealmResults<Trip> changeListenerHardReference;
-    private final RealmChangeListener<RealmResults<Trip>> tripChangeListener = new RealmChangeListener<RealmResults<Trip>>() {
-        @Override
-        public void onChange(RealmResults<Trip> element) {
-            new UpdateDataTask().execute();
         }
     };
 }
