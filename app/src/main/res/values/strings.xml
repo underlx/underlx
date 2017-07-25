@@ -163,5 +163,6 @@
     <string name="act_trip_correction_title">Correct trip log</string>
     <string name="act_trip_correction_instructions">Check if the start and end points for the trip are right, and correct them if not.</string>
     <string name="act_trip_correction_save">Save changes</string>
+    <string name="act_trip_correction_correct">Confirm correctness</string>
     <string name="act_line_title">%1$s line</string>
 </resources>

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
@@ -30,6 +31,8 @@ public class Trip extends RealmObject {
 
     private boolean synced;
 
+    private boolean userConfirmed;
+
     public String getId() {
         return id;
     }
@@ -52,6 +55,14 @@ public class Trip extends RealmObject {
 
     public void setSynced(boolean synced) {
         this.synced = synced;
+    }
+
+    public boolean isUserConfirmed() {
+        return userConfirmed;
+    }
+
+    public void setUserConfirmed(boolean userConfirmed) {
+        this.userConfirmed = userConfirmed;
     }
 
     public Path toConnectionPath(Network network) {
@@ -217,12 +228,22 @@ public class Trip extends RealmObject {
         if (replaceTrip != null) {
             trip = realm.where(Trip.class).equalTo("id", replaceTrip).findFirst();
             trip.getPath().deleteAllFromRealm();
+            trip.setUserConfirmed(true);
         } else {
             trip = realm.createObject(Trip.class, UUID.randomUUID().toString());
+            trip.setUserConfirmed(false);
         }
         trip.setPath(uses);
         realm.commitTransaction();
         realm.close();
         return trip.getId();
+    }
+
+    public boolean missingCorrection() {
+        return !userConfirmed && canBeCorrected();
+    }
+
+    public boolean canBeCorrected() {
+        return new Date().getTime() - path.first().getEntryDate().getTime() < TimeUnit.DAYS.toMillis(7);
     }
 }

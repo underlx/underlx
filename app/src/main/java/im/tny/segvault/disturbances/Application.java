@@ -22,7 +22,7 @@ public class Application extends android.app.Application {
         // Initialize Realm. Should only be done once when the application starts.
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(2) // Must be bumped when the schema changes
+                .schemaVersion(3) // Must be bumped when the schema changes
                 .migration(new MyMigration())
                 .build();
         Realm.setDefaultConfiguration(config);
@@ -44,6 +44,12 @@ public class Application extends android.app.Application {
             if (oldVersion == 1) {
                 schema.get("StationUse")
                         .addField("manualEntry", boolean.class);
+                oldVersion++;
+            }
+
+            if (oldVersion == 2) {
+                schema.get("Trip")
+                        .addField("userConfirmed", boolean.class);
                 oldVersion++;
             }
         }

@@ -159,14 +159,23 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     private void redrawPath() {
         newPath = new Path(originalPath);
-        if (startPicker.getSelection() != null && !startPicker.getSelection().isAlwaysClosed()) {
+        boolean hasChanges = false;
+        if (startPicker.getSelection() != null && !startPicker.getSelection().isAlwaysClosed() && startPicker.getSelection() != originalPath.getStartVertex().getStation()) {
             newPath.manualExtendStart(startPicker.getSelection().getStops().iterator().next());
+            hasChanges = true;
         }
-        if (endPicker.getSelection() != null && !endPicker.getSelection().isAlwaysClosed()) {
+        if (endPicker.getSelection() != null && !endPicker.getSelection().isAlwaysClosed() && endPicker.getSelection() != originalPath.getEndVertex().getStation()) {
             newPath.manualExtendEnd(endPicker.getSelection().getStops().iterator().next());
+            hasChanges = true;
         }
 
         TripFragment.populatePathView(this, getLayoutInflater(), network, newPath, pathLayout);
+
+        if (hasChanges) {
+            saveButton.setText(getString(R.string.act_trip_correction_save));
+        } else {
+            saveButton.setText(getString(R.string.act_trip_correction_correct));
+        }
     }
 
     private void saveChanges() {
