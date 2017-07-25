@@ -996,7 +996,7 @@ public class MainService extends Service {
         }
     };
 
-    public static final String ACTION_TRIP_REALM_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
+    public static final String ACTION_TRIP_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.trip.updated";
 
     private RealmResults<Trip> tripRealmResults;
     private final RealmChangeListener<RealmResults<Trip>> tripRealmChangeListener = new RealmChangeListener<RealmResults<Trip>>() {

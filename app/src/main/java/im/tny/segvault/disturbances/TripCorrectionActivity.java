@@ -118,6 +118,10 @@ public class TripCorrectionActivity extends AppCompatActivity {
         originalPath = trip.toConnectionPath(network);
         realm.close();
 
+        if(!trip.canBeCorrected()) {
+            finish();
+        }
+
         List<Station> stations = new ArrayList<>(network.getStations());
 
         startPicker.setStations(stations);

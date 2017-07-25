@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,28 +11,19 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Network;
 import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 
 /**
  * A fragment representing a list of Items.
@@ -134,24 +124,13 @@ public class UnconfirmedTripsFragment extends Fragment {
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
             Realm realm = Realm.getDefaultInstance();
-
-            RealmResults<StationUse> uses = realm.where(StationUse.class)
-                    .greaterThan("entryDate", new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(7))).findAll().where()
-                    .equalTo("type", "NETWORK_ENTRY").or().equalTo("type", "VISIT").findAll();
-
-            // now we have all station uses that **might** be part of editable trips
-            // get all trips that contain these uses and which are yet to be confirmed
-            RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
-            for(StationUse use : uses) {
-                tripsQuery = tripsQuery.or().equalTo("userConfirmed", false).equalTo("path.station.id", use.getStation().getId()).equalTo("path.entryDate", use.getEntryDate());
-            }
-            for (Trip t : tripsQuery.findAll()) {
+            for (Trip t : Trip.getMissingConfirmTrips(realm)) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
                 items.add(item);
             }
             realm.close();
             if (items.size() == 0) {
-                return false;
+                return true;
             }
             Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder(new Comparator<TripRecyclerViewAdapter.TripItem>() {
                 @Override

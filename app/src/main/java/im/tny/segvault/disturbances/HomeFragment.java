@@ -35,12 +35,14 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 
+import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.LeavingNetworkState;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
+import io.realm.Realm;
 
 
 /**
@@ -73,6 +75,7 @@ public class HomeFragment extends TopFragment {
     private TextView nextStationView;
     private LinearLayout curTripActionsLayout;
     private Button curTripEndButton;
+    private CardView unconfirmedTripsCard;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -124,6 +127,8 @@ public class HomeFragment extends TopFragment {
         curTripActionsLayout = (LinearLayout) view.findViewById(R.id.cur_trip_actions_layout);
         curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
 
+        unconfirmedTripsCard = (CardView) view.findViewById(R.id.unconfirmed_trips_card);
+
         curTripEndButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,14 +177,16 @@ public class HomeFragment extends TopFragment {
         filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
         filter.addAction(MainService.ACTION_S2LS_STATUS_CHANGED);
+        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
+        Realm realm = Realm.getDefaultInstance();
+        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
+        realm.close();
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         Fragment newFragment = LineFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
-        newFragment = UnconfirmedTripsFragment.newInstance(1);
-        transaction.replace(R.id.unconfirmed_trips_card, newFragment);
         transaction.commit();
         refresh(true);
         refreshCurrentTrip();
@@ -239,6 +246,22 @@ public class HomeFragment extends TopFragment {
             DateUtils.formatDateRange(getContext(), f, net.getOpenTime(), net.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
+        }
+
+        Realm realm = Realm.getDefaultInstance();
+        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
+        realm.close();
+
+        if (hasTripsToConfirm) {
+            if(unconfirmedTripsCard.getVisibility() == View.GONE) {
+                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
+                transaction.replace(R.id.unconfirmed_trips_card, newFragment);
+                transaction.commitAllowingStateLoss();
+                unconfirmedTripsCard.setVisibility(View.VISIBLE);
+            }
+        } else {
+            unconfirmedTripsCard.setVisibility(View.GONE);
         }
     }
 
@@ -341,6 +364,7 @@ public class HomeFragment extends TopFragment {
             }
             switch (intent.getAction()) {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                case MainService.ACTION_TRIP_REALM_UPDATED:
                     refresh(false);
                     break;
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:

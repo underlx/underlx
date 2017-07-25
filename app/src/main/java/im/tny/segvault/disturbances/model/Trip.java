@@ -17,6 +17,8 @@ import im.tny.segvault.subway.Transfer;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -267,5 +269,19 @@ public class Trip extends RealmObject {
         realm.copyToRealm(trip);
         realm.commitTransaction();
         realm.close();
+    }
+
+    public static RealmResults<Trip> getMissingConfirmTrips(Realm realm) {
+        RealmResults<StationUse> uses = realm.where(StationUse.class)
+                .greaterThan("entryDate", new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(7))).findAll().where()
+                .equalTo("type", "NETWORK_ENTRY").or().equalTo("type", "VISIT").findAll();
+
+        // now we have all station uses that **might** be part of editable trips
+        // get all trips that contain these uses and which are yet to be confirmed
+        RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
+        for(StationUse use : uses) {
+            tripsQuery = tripsQuery.or().equalTo("userConfirmed", false).equalTo("path.station.id", use.getStation().getId()).equalTo("path.entryDate", use.getEntryDate());
+        }
+        return tripsQuery.findAll();
     }
 }
