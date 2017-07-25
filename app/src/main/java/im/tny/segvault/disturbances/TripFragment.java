@@ -147,7 +147,6 @@ public class TripFragment extends BottomSheetDialogFragment {
     private void refreshUI() {
         Realm realm = Realm.getDefaultInstance();
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-        realm.close();
 
         Path path = trip.toConnectionPath(network);
 
@@ -169,13 +168,18 @@ public class TripFragment extends BottomSheetDialogFragment {
         }
         stationNamesView.setText(builder);
 
-
         dateView.setText(
                 DateUtils.formatDateTime(getContext(),
                         path.getEntryTime(0).getTime(),
                         DateUtils.FORMAT_SHOW_DATE));
 
         populatePathView(getContext(), inflater, network, path, layoutRoute);
+
+        if (!trip.canBeCorrected()) {
+            correctButton.setVisibility(View.GONE);
+        }
+
+        realm.close();
     }
 
     public static void populatePathView(final Context context, final LayoutInflater inflater, final Network network, final Path path, ViewGroup root) {

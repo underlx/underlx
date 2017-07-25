@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity
         NotifPreferenceFragment.OnFragmentInteractionListener,
         GeneralPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
-        TripFragment.OnFragmentInteractionListener {
+        TripFragment.OnFragmentInteractionListener,
+        UnconfirmedTripsFragment.OnListFragmentInteractionListener {
 
     MainService locService;
     boolean locBound = false;

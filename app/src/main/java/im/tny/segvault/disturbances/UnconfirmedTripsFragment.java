@@ -4,30 +4,34 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Network;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
@@ -36,30 +40,22 @@ import io.realm.RealmResults;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class TripHistoryFragment extends TopFragment {
+public class UnconfirmedTripsFragment extends Fragment {
+
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
-
     private RecyclerView recyclerView = null;
-    private TextView emptyView;
-
-    private boolean showVisits = false;
-    private Menu menu;
-
-    private Realm realm = Realm.getDefaultInstance();
 
     /**
-     * Mandatory constructor for the fragment manager to instantiate the
+     * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TripHistoryFragment() {
-        changeListenerHardReference = realm.where(Trip.class).findAll();
+    public UnconfirmedTripsFragment() {
     }
 
-    @SuppressWarnings("unused")
-    public static TripHistoryFragment newInstance(int columnCount) {
-        TripHistoryFragment fragment = new TripHistoryFragment();
+    public static UnconfirmedTripsFragment newInstance(int columnCount) {
+        UnconfirmedTripsFragment fragment = new UnconfirmedTripsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -78,24 +74,16 @@ public class TripHistoryFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_trip_history_title), R.id.nav_trip_history, false, false);
-        setHasOptionsMenu(true);
-
-        View view = inflater.inflate(R.layout.fragment_trip_history_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_unconfirmed_trips, container, false);
 
         // Set the adapter
         Context context = view.getContext();
-        emptyView = (TextView) view.findViewById(R.id.no_trips_view);
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
-        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
-
-        // fix scroll fling. less than ideal, but apparently there's still no other solution
-        recyclerView.setNestedScrollingEnabled(false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -103,40 +91,11 @@ public class TripHistoryFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        new TripHistoryFragment.UpdateDataTask().execute();
+        new UpdateDataTask().execute();
+
         return view;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.trip_history, menu);
-        if(showVisits) {
-            menu.findItem(R.id.menu_show_visits).setVisible(false);
-        } else {
-            menu.findItem(R.id.menu_hide_visits).setVisible(false);
-        }
-        this.menu = menu;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_show_visits:
-                showVisits = true;
-                item.setVisible(false);
-                menu.findItem(R.id.menu_hide_visits).setVisible(true);
-                new TripHistoryFragment.UpdateDataTask().execute();
-                return true;
-            case R.id.menu_hide_visits:
-                showVisits = false;
-                item.setVisible(false);
-                menu.findItem(R.id.menu_show_visits).setVisible(true);
-                new TripHistoryFragment.UpdateDataTask().execute();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -147,14 +106,11 @@ public class TripHistoryFragment extends TopFragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-        changeListenerHardReference.addChangeListener(tripChangeListener);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        changeListenerHardReference.removeChangeListener(tripChangeListener);
-        realm.close();
         mListener = null;
     }
 
@@ -175,11 +131,20 @@ public class TripHistoryFragment extends TopFragment {
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
             Realm realm = Realm.getDefaultInstance();
-            for (Trip t : realm.where(Trip.class).findAll()) {
+
+            RealmResults<StationUse> uses = realm.where(StationUse.class)
+                    .greaterThan("entryDate", new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(7))).findAll().where()
+                    .equalTo("type", "NETWORK_ENTRY").or().equalTo("type", "VISIT").findAll();
+
+            // now we have all station uses that **might** be part of editable trips
+            // get all trips that contain these uses and which are yet to be confirmed
+            RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
+            for(StationUse use : uses) {
+                tripsQuery = tripsQuery.or().equalTo("userConfirmed", false).equalTo("path.station.id", use.getStation().getId()).equalTo("path.entryDate", use.getEntryDate());
+            }
+            for (Trip t : tripsQuery.findAll()) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
-                if (showVisits || !item.isVisit) {
-                    items.add(item);
-                }
+                items.add(item);
             }
             realm.close();
             if (items.size() == 0) {
@@ -206,9 +171,10 @@ public class TripHistoryFragment extends TopFragment {
             if (result && recyclerView != null && mListener != null) {
                 recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
-                emptyView.setVisibility(View.GONE);
+                // TODO empty view
+                //emptyView.setVisibility(View.GONE);
             } else {
-                emptyView.setVisibility(View.VISIBLE);
+                //emptyView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -223,29 +189,22 @@ public class TripHistoryFragment extends TopFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnListFragmentInteractionListener extends OnInteractionListener, TripRecyclerViewAdapter.OnListFragmentInteractionListener {
+    public interface OnListFragmentInteractionListener extends TripRecyclerViewAdapter.OnListFragmentInteractionListener {
         MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (getActivity() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    if (getActivity() != null) {
-                        new UpdateDataTask().execute();
-                    }
+                    new UpdateDataTask().execute();
                     break;
             }
-        }
-    };
-
-    private RealmResults<Trip> changeListenerHardReference;
-    private final RealmChangeListener<RealmResults<Trip>> tripChangeListener = new RealmChangeListener<RealmResults<Trip>>() {
-        @Override
-        public void onChange(RealmResults<Trip> element) {
-            new UpdateDataTask().execute();
         }
     };
 }

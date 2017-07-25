@@ -33,6 +33,8 @@ public class Trip extends RealmObject {
 
     private boolean userConfirmed;
 
+    private boolean submitted;
+
     public String getId() {
         return id;
     }
@@ -63,6 +65,14 @@ public class Trip extends RealmObject {
 
     public void setUserConfirmed(boolean userConfirmed) {
         this.userConfirmed = userConfirmed;
+    }
+
+    public boolean isSubmitted() {
+        return submitted;
+    }
+
+    public void setSubmitted(boolean submitted) {
+        this.submitted = submitted;
     }
 
     public Path toConnectionPath(Network network) {

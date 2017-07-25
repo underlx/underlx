@@ -202,5 +202,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             return id;
         }
     }
+
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentClick(TripRecyclerViewAdapter.TripItem item);
+    }
 }
 

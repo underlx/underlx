@@ -175,9 +175,11 @@ public class HomeFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        Fragment newFragment = LineFragment.newInstance(1);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        Fragment newFragment = LineFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
+        newFragment = UnconfirmedTripsFragment.newInstance(1);
+        transaction.replace(R.id.unconfirmed_trips_card, newFragment);
         transaction.commit();
         refresh(true);
         refreshCurrentTrip();
@@ -273,7 +275,7 @@ public class HomeFragment extends TopFragment {
                 }
             });
 
-            if(loc.getState() instanceof LeavingNetworkState) {
+            if (loc.getState() instanceof LeavingNetworkState) {
                 curTripEndButton.setVisibility(View.VISIBLE);
                 curTripActionsLayout.setVisibility(View.VISIBLE);
             } else {
