@@ -57,23 +57,7 @@ public class Synchronizer {
                 public void execute(Realm realm) {
                     RealmResults<Trip> unsyncedTrips = realm.where(Trip.class).equalTo("synced", false).findAll();
                     for (Trip t : unsyncedTrips) {
-                        API.TripRequest request = new API.TripRequest();
-                        request.id = t.getId();
-                        request.userConfirmed = t.isUserConfirmed();
-                        request.uses = new ArrayList<>(t.getPath().size());
-                        for (StationUse use : t.getPath()) {
-                            API.StationUse apiUse = new API.StationUse();
-                            apiUse.station = use.getStation().getId();
-                            apiUse.entryTime = new long[]{use.getEntryDate().getTime() / 1000, (use.getEntryDate().getTime() % 1000) * 1000000};
-                            apiUse.leaveTime = new long[]{use.getLeaveDate().getTime() / 1000, (use.getLeaveDate().getTime() % 1000) * 1000000};
-                            apiUse.type = use.getType().name();
-                            apiUse.manual = use.isManualEntry();
-                            if (use.getType() == StationUse.UseType.INTERCHANGE) {
-                                apiUse.sourceLine = use.getSourceLine();
-                                apiUse.targetLine = use.getTargetLine();
-                            }
-                            request.uses.add(apiUse);
-                        }
+                        API.TripRequest request = tripToAPIRequest(t);
                         try {
                             if (t.isSubmitted()) {
                                 // submit update
@@ -95,6 +79,31 @@ public class Synchronizer {
             lastSync = new Date();
             Log.d("sync", "Sync done");
         }
+    }
+
+    private API.TripRequest tripToAPIRequest(Trip t) {
+        API.TripRequest request = new API.TripRequest();
+        request.id = t.getId();
+        request.userConfirmed = t.isUserConfirmed();
+        request.uses = new ArrayList<>(t.getPath().size());
+        for (StationUse use : t.getPath()) {
+            request.uses.add(stationUseToAPI(use));
+        }
+        return request;
+    }
+
+    private API.StationUse stationUseToAPI(StationUse use) {
+        API.StationUse apiUse = new API.StationUse();
+        apiUse.station = use.getStation().getId();
+        apiUse.entryTime = new long[]{use.getEntryDate().getTime() / 1000, (use.getEntryDate().getTime() % 1000) * 1000000};
+        apiUse.leaveTime = new long[]{use.getLeaveDate().getTime() / 1000, (use.getLeaveDate().getTime() % 1000) * 1000000};
+        apiUse.type = use.getType().name();
+        apiUse.manual = use.isManualEntry();
+        if (use.getType() == StationUse.UseType.INTERCHANGE) {
+            apiUse.sourceLine = use.getSourceLine();
+            apiUse.targetLine = use.getTargetLine();
+        }
+        return apiUse;
     }
 
     private class SyncTask extends AsyncTask<Void, Void, Void> {
