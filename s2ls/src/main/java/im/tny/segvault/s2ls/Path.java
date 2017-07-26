@@ -113,15 +113,15 @@ public class Path implements GraphPath<Stop, Connection> {
     public void manualExtendStart(Stop vertex) {
         // start by reverting to the path with the start without user-made extensions
         int edgesToRemove = 0;
-        while(manualEntry.get(0)) {
+        while (manualEntry.get(0)) {
             manualEntry.remove(0);
             times.remove(0);
             edgesToRemove++;
         }
-        for(int i = 0; i < edgesToRemove; i++) {
+        for (int i = 0; i < edgesToRemove; i++) {
             edgeList.remove(0);
         }
-        if(edgeList.size() > 0) {
+        if (edgeList.size() > 0) {
             startVertex = edgeList.get(0).getSource();
         }
 
@@ -153,8 +153,8 @@ public class Path implements GraphPath<Stop, Connection> {
             public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
                 // let's assume users rarely go through edges they have already visited elsewhere in the trip
                 // (in the same direction or not)
-                for(Connection c : edgeList) {
-                    if((c.getSource() == sourceVertex && c.getTarget() == targetVertex) || (c.getSource() == targetVertex && c.getTarget() == sourceVertex)) {
+                for (Connection c : edgeList) {
+                    if ((c.getSource() == sourceVertex && c.getTarget() == targetVertex) || (c.getSource() == targetVertex && c.getTarget() == sourceVertex)) {
                         return 10000;
                     }
                 }
@@ -168,15 +168,15 @@ public class Path implements GraphPath<Stop, Connection> {
     public void manualExtendEnd(Stop vertex) {
         // start by reverting to the path with the end without user-made extensions
         int edgesToRemove = 0;
-        while(manualEntry.get(manualEntry.size() - 1)) {
+        while (manualEntry.get(manualEntry.size() - 1)) {
             manualEntry.remove(manualEntry.size() - 1);
             times.remove(times.size() - 1);
             edgesToRemove++;
         }
-        for(int i = 0; i < edgesToRemove; i++) {
+        for (int i = 0; i < edgesToRemove; i++) {
             edgeList.remove(edgeList.size() - 1);
         }
-        if(edgeList.size() > 0) {
+        if (edgeList.size() > 0) {
             endVertex = edgeList.get(edgeList.size() - 1).getTarget();
         }
 
@@ -245,11 +245,9 @@ public class Path implements GraphPath<Stop, Connection> {
     public void registerExitTime() {
         exitedOnce = true;
         Pair<Date, Date> p = times.get(times.size() - 1);
-        if (p.second == null) {
-            times.set(times.size() - 1, new Pair<>(p.first, new Date()));
-            for (OnPathChangedListener l : listeners) {
-                l.onPathChanged(this);
-            }
+        times.set(times.size() - 1, new Pair<>(p.first, new Date()));
+        for (OnPathChangedListener l : listeners) {
+            l.onPathChanged(this);
         }
     }
 
