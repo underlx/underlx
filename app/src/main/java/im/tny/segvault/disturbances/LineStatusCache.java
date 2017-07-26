@@ -135,7 +135,7 @@ public class LineStatusCache {
     }
 
     public void updateLineStatus() {
-        new UpdateLineStatusTask().execute();
+        new UpdateLineStatusTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void markLineAsDown(Line line, Date since) {

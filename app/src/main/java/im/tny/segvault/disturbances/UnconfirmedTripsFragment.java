@@ -87,8 +87,6 @@ public class UnconfirmedTripsFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        new UpdateDataTask().execute();
-
         return view;
     }
 
@@ -102,6 +100,7 @@ public class UnconfirmedTripsFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
+        new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -153,10 +152,6 @@ public class UnconfirmedTripsFragment extends Fragment {
             if (result && recyclerView != null && mListener != null) {
                 recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener, true));
                 recyclerView.invalidate();
-                // TODO empty view
-                //emptyView.setVisibility(View.GONE);
-            } else {
-                //emptyView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -185,7 +180,7 @@ public class UnconfirmedTripsFragment extends Fragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_TRIP_REALM_UPDATED:
-                    new UpdateDataTask().execute();
+                    new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }
         }

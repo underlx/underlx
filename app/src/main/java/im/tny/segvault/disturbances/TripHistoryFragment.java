@@ -104,7 +104,7 @@ public class TripHistoryFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        new TripHistoryFragment.UpdateDataTask().execute();
+        new TripHistoryFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         return view;
     }
 
@@ -126,13 +126,13 @@ public class TripHistoryFragment extends TopFragment {
                 showVisits = true;
                 item.setVisible(false);
                 menu.findItem(R.id.menu_hide_visits).setVisible(true);
-                new TripHistoryFragment.UpdateDataTask().execute();
+                new TripHistoryFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return true;
             case R.id.menu_hide_visits:
                 showVisits = false;
                 item.setVisible(false);
                 menu.findItem(R.id.menu_show_visits).setVisible(true);
-                new TripHistoryFragment.UpdateDataTask().execute();
+                new TripHistoryFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

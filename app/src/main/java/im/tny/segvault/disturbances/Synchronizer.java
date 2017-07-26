@@ -39,7 +39,7 @@ public class Synchronizer {
     }
 
     public void attemptSync() {
-        new SyncTask().execute();
+        new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void sync() {
@@ -128,7 +128,7 @@ public class Synchronizer {
             switch (intent.getAction()) {
                 case MainService.ACTION_TRIP_REALM_UPDATED:
                     // TODO. this may cause cycles (we change the realm ourselves)
-                    new SyncTask().execute();
+                    new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }
         }

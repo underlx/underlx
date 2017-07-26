@@ -181,9 +181,6 @@ public class HomeFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        Realm realm = Realm.getDefaultInstance();
-        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
-        realm.close();
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         Fragment newFragment = LineFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
@@ -228,6 +225,22 @@ public class HomeFragment extends TopFragment {
     }
 
     private void refresh(boolean requestOnlineUpdate) {
+        Realm realm = Realm.getDefaultInstance();
+        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
+        realm.close();
+
+        if (hasTripsToConfirm) {
+            if(unconfirmedTripsCard.getVisibility() == View.GONE) {
+                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
+                transaction.replace(R.id.unconfirmed_trips_card, newFragment);
+                transaction.commitAllowingStateLoss();
+                unconfirmedTripsCard.setVisibility(View.VISIBLE);
+            }
+        } else {
+            unconfirmedTripsCard.setVisibility(View.GONE);
+        }
+
         if (mListener == null)
             return;
 
@@ -246,22 +259,6 @@ public class HomeFragment extends TopFragment {
             DateUtils.formatDateRange(getContext(), f, net.getOpenTime(), net.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
-        }
-
-        Realm realm = Realm.getDefaultInstance();
-        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
-        realm.close();
-
-        if (hasTripsToConfirm) {
-            if(unconfirmedTripsCard.getVisibility() == View.GONE) {
-                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
-                transaction.replace(R.id.unconfirmed_trips_card, newFragment);
-                transaction.commitAllowingStateLoss();
-                unconfirmedTripsCard.setVisibility(View.VISIBLE);
-            }
-        } else {
-            unconfirmedTripsCard.setVisibility(View.GONE);
         }
     }
 

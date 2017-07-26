@@ -93,7 +93,7 @@ public class PairManager {
     }
 
     public void pairAsync() {
-        new PairTask().execute();
+        new PairTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void unpair() {

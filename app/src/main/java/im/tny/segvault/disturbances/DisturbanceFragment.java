@@ -102,13 +102,13 @@ public class DisturbanceFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         if (mListener != null && mListener.getMainService() != null) {
-            new DisturbanceFragment.UpdateDataTask().execute();
+            new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new DisturbanceFragment.UpdateDataTask().execute();
+                new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
         return view;
@@ -124,7 +124,7 @@ public class DisturbanceFragment extends TopFragment {
         int id = item.getItemId();
 
         if (id == R.id.menu_refresh) {
-            new DisturbanceFragment.UpdateDataTask().execute();
+            new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             return true;
         }
 
@@ -213,7 +213,7 @@ public class DisturbanceFragment extends TopFragment {
                             .setAction(getString(R.string.error_no_connection_action_retry), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    new DisturbanceFragment.UpdateDataTask().execute();
+                                    new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                                 }
                             }).show();
                 }
@@ -246,7 +246,7 @@ public class DisturbanceFragment extends TopFragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if(getActivity() != null) {
-                        new DisturbanceFragment.UpdateDataTask().execute();
+                        new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                     break;
             }

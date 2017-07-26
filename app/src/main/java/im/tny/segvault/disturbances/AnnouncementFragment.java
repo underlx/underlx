@@ -105,12 +105,12 @@ public class AnnouncementFragment extends TopFragment {
 
         getSwipeRefreshLayout().setRefreshing(true);
 
-        new AnnouncementFragment.UpdateDataTask().execute();
+        new AnnouncementFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new AnnouncementFragment.UpdateDataTask().execute();
+                new AnnouncementFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
         return view;
@@ -126,7 +126,7 @@ public class AnnouncementFragment extends TopFragment {
         int id = item.getItemId();
 
         if (id == R.id.menu_refresh) {
-            new AnnouncementFragment.UpdateDataTask().execute();
+            new AnnouncementFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             return true;
         }
 
@@ -218,7 +218,7 @@ public class AnnouncementFragment extends TopFragment {
                             .setAction(getString(R.string.error_no_connection_action_retry), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    new AnnouncementFragment.UpdateDataTask().execute();
+                                    new AnnouncementFragment.UpdateDataTask().executeOnExecutor(THREAD_POOL_EXECUTOR);
                                 }
                             }).show();
                 }
