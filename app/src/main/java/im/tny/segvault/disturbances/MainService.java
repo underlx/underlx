@@ -632,8 +632,9 @@ public class MainService extends Service {
             this.autoUpdate = autoUpdate[0];
             Log.d("MainService", "CheckTopologyUpdatesTask");
             try {
+                List<API.DatasetInfo> datasetInfos = api.getDatasetInfos();
                 synchronized (lock) {
-                    for (API.DatasetInfo di : api.getDatasetInfos()) {
+                    for (API.DatasetInfo di : datasetInfos) {
                         if (!networks.containsKey(di.network)) {
                             return true;
                         }
