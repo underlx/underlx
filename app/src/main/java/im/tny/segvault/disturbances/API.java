@@ -30,8 +30,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -185,6 +185,36 @@ public class API {
         public String key;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class TripRequest {
+        public String id;
+        public List<StationUse> uses;
+        public boolean userConfirmed;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Trip {
+        public String id;
+        public long[] startTime;
+        public long[] endTime;
+        public long[] submitTime;
+        public long[] editTime;
+        public boolean edited;
+        public boolean userConfirmed;
+        public List<StationUse> uses;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class StationUse {
+        public String station;
+        public long[] entryTime;
+        public long[] leaveTime;
+        public String type;
+        public boolean manual;
+        public String sourceLine;
+        public String targetLine;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -235,7 +265,7 @@ public class API {
         }
     }
 
-    private InputStream postRequest(URI uri, byte[] content, boolean authenticate) throws APIException {
+    private InputStream doInputRequest(URI uri, byte[] content, boolean authenticate, String method) throws APIException {
         try {
             HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
 
@@ -248,7 +278,7 @@ public class API {
                 h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
             }
 
-            h.setRequestMethod("POST");
+            h.setRequestMethod(method);
             h.setDoInput(true);
             h.setDoOutput(true);
 
@@ -273,10 +303,18 @@ public class API {
             }
             return is;
         } catch (MalformedURLException e) {
-            throw new APIException(e).addInfo("Malformed URL on POST request");
+            throw new APIException(e).addInfo("Malformed URL on " + method + " request");
         } catch (IOException e) {
-            throw new APIException(e).addInfo("IOException on POST request");
+            throw new APIException(e).addInfo("IOException on " + method +" request");
         }
+    }
+
+    private InputStream postRequest(URI uri, byte[] content, boolean authenticate) throws APIException {
+        return doInputRequest(uri, content, authenticate, "POST");
+    }
+
+    private InputStream putRequest(URI uri, byte[] content, boolean authenticate) throws APIException {
+        return doInputRequest(uri, content, authenticate, "PUT");
     }
 
     public List<Network> getNetworks() throws APIException {
@@ -475,6 +513,34 @@ public class API {
     public AuthTest getAuthTest() throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("authtest"), true), AuthTest.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Trip postTrip(TripRequest request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("trip"), content, true);
+            return mapper.readValue(is, Trip.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Trip putTrip(TripRequest request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = putRequest(endpoint.resolve("trip"), content, true);
+            return mapper.readValue(is, Trip.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

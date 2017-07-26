@@ -68,6 +68,7 @@ public class MainService extends Service {
     private WiFiChecker wfc;
     private LineStatusCache lineStatusCache = new LineStatusCache(this);
     private PairManager pairManager;
+    private Synchronizer synchronizer;
 
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
@@ -151,6 +152,8 @@ public class MainService extends Service {
         if (!pairManager.isPaired()) {
             pairManager.pairAsync();
         }
+
+        synchronizer = new Synchronizer(getApplicationContext());
     }
 
     @Override
