@@ -126,8 +126,7 @@ public class Path implements GraphPath<Stop, Connection> {
         }
 
         // now go from the program-made start
-        Date entryTime = times.get(0).first;
-        Date exitTime = times.get(0).second;
+        Date time = times.get(0).first;
         List<Connection> cs = getPathBetweenAvoidingExisting(vertex, startVertex).getEdgeList();
         int size = cs.size();
         int insertPos = 0;
@@ -137,7 +136,7 @@ public class Path implements GraphPath<Stop, Connection> {
                 continue;
             }
 
-            times.add(insertPos, new Pair<Date, Date>(entryTime, exitTime));
+            times.add(insertPos, new Pair<Date, Date>(time, time));
             manualEntry.add(insertPos, true);
             edgeList.add(insertPos++, cs.get(i));
         }
@@ -182,8 +181,7 @@ public class Path implements GraphPath<Stop, Connection> {
         }
 
         // now go from the program-made end
-        Date entryTime = times.get(times.size() - 1).first;
-        Date exitTime = times.get(times.size() - 1).second;
+        Date time = times.get(times.size() - 1).second;
         List<Connection> cs = graph.getAnyPathBetween(endVertex, vertex).getEdgeList();
         int size = cs.size();
         for (int i = 0; i < size; i++) {
@@ -194,7 +192,7 @@ public class Path implements GraphPath<Stop, Connection> {
                 return;
             }
 
-            times.add(new Pair<Date, Date>(entryTime, exitTime));
+            times.add(new Pair<Date, Date>(time, time));
             manualEntry.add(true);
             edgeList.add(cs.get(i));
         }
