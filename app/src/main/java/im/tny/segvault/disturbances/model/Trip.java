@@ -279,9 +279,20 @@ public class Trip extends RealmObject {
         // now we have all station uses that **might** be part of editable trips
         // get all trips that contain these uses and which are yet to be confirmed
         RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
-        for(StationUse use : uses) {
-            tripsQuery = tripsQuery.or().equalTo("userConfirmed", false).equalTo("path.station.id", use.getStation().getId()).equalTo("path.entryDate", use.getEntryDate());
+        if (uses.size() > 0) {
+            // first item detached from the others because otherwise "Missing left-hand side of OR" might happen
+            // https://github.com/realm/realm-java/issues/1014#issuecomment-107235374
+            tripsQuery = tripsQuery.equalTo("userConfirmed", false).equalTo("path.station.id", uses.get(0).getStation().getId()).equalTo("path.entryDate", uses.get(0).getEntryDate());
+            for (int i = 1; i < uses.size(); i++) {
+                tripsQuery = tripsQuery.or().equalTo("userConfirmed", false).equalTo("path.station.id", uses.get(i).getStation().getId()).equalTo("path.entryDate", uses.get(i).getEntryDate());
+            }
+            return tripsQuery.findAll();
+        } else {
+            // realm is just terrible. not only is it hard to do a proper WHERE ... IN ... query, it's also hard to generate an empty result set.
+            // https://github.com/realm/realm-java/issues/1862
+            // https://github.com/realm/realm-java/issues/1575
+            // https://github.com/realm/realm-java/issues/4011
+            return tripsQuery.equalTo("id", "NEVER_BE_TRUE").findAll();
         }
-        return tripsQuery.findAll();
     }
 }
