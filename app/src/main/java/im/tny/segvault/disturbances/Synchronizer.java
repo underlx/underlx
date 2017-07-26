@@ -38,6 +38,10 @@ public class Synchronizer {
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
 
+    public void attemptSync() {
+        new SyncTask().execute();
+    }
+
     private void sync() {
         Log.d("sync", "Waiting for lock");
         synchronized (lock) {
@@ -60,15 +64,18 @@ public class Synchronizer {
                         API.TripRequest request = tripToAPIRequest(t);
                         try {
                             if (t.isSubmitted()) {
-                                // submit update
-                                API.getInstance().putTrip(request);
+                                // submit update, if possible
+                                if (t.canBeCorrected()) {
+                                    API.getInstance().putTrip(request);
+                                    t.setSynced(true);
+                                    t.setSubmitted(true);
+                                }
                             } else {
                                 // submit new
                                 API.getInstance().postTrip(request);
+                                t.setSynced(true);
+                                t.setSubmitted(true);
                             }
-                            t.setSynced(true);
-                            t.setSubmitted(true);
-                            realm.copyToRealm(t);
                         } catch (APIException e) {
                             e.printStackTrace();
                         }

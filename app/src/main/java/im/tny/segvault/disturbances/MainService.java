@@ -423,6 +423,8 @@ public class MainService extends Service {
             s += "Error testing API authentication\n";
         }
 
+        synchronizer.attemptSync();
+
         return s;
     }
 
