@@ -30,8 +30,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -252,7 +252,7 @@ public class API {
                 // Will return 401, because now connection has the correct internal state.
                 code = h.getResponseCode();
             }
-            if (code == 200) {
+            if (code < HttpURLConnection.HTTP_BAD_REQUEST) {
                 is = h.getInputStream();
             } else {
                 is = h.getErrorStream();
@@ -296,7 +296,7 @@ public class API {
                 // Will return 401, because now connection has the correct internal state.
                 code = h.getResponseCode();
             }
-            if (code == 200) {
+            if (code < HttpURLConnection.HTTP_BAD_REQUEST) {
                 is = h.getInputStream();
             } else {
                 is = h.getErrorStream();
@@ -525,7 +525,7 @@ public class API {
     public Trip postTrip(TripRequest request) throws APIException {
         try {
             byte[] content = mapper.writeValueAsBytes(request);
-            InputStream is = postRequest(endpoint.resolve("trip"), content, true);
+            InputStream is = postRequest(endpoint.resolve("trips"), content, true);
             return mapper.readValue(is, Trip.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
@@ -539,7 +539,7 @@ public class API {
     public Trip putTrip(TripRequest request) throws APIException {
         try {
             byte[] content = mapper.writeValueAsBytes(request);
-            InputStream is = putRequest(endpoint.resolve("trip"), content, true);
+            InputStream is = putRequest(endpoint.resolve("trips"), content, true);
             return mapper.readValue(is, Trip.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
