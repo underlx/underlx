@@ -128,6 +128,12 @@ public class AboutFragment extends TopFragment {
         htmltv.put("url", "https://github.com/SufficientlySecure/html-textview/");
         data.add(htmltv);
 
+        Map<String, String> intro = new HashMap<>(3);
+        intro.put("name", "AppIntro");
+        intro.put("license", "© Paolo Rotolo, Maximilian Narr - Apache License 2.0");
+        intro.put("url", "https://github.com/apl-devs/AppIntro");
+        data.add(intro);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");

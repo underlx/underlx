@@ -169,4 +169,22 @@
     <string name="frag_unconfirmed_trips_title">Unconfirmed trips</string>
     <string name="frag_unconfirmed_trip_confirm">Confirm</string>
     <string name="frag_unconfirmed_trip_correct">Correct</string>
+    <string name="act_intro_title">Welcome</string>
+    <string name="intro_disturbances_title">Disturbance notifications</string>
+    <string name="intro_disturbances_desc">Know about delays and service interruptions before you go down there, so you can avoid further frustration</string>
+    <string name="intro_disturbances_select_lines">Select lines</string>
+    <string name="intro_disturbances_select_lines_instruction">Choose for which lines you want to see notifications:</string>
+    <string name="intro_disturbances_misc_error">Network map not yet downloaded. Please try again later.</string>
+    <string name="intro_disturbances_connection_error">Network map not yet downloaded. Check your network connection.</string>
+    <string name="intro_welcome_title">Welcome to UnderLX</string>
+    <string name="intro_welcome_desc">Insert witty introductory sentence here</string>
+    <string name="intro_location_title">Never get lost</string>
+    <string name="intro_location_desc">Check where you are inside of the subway network, learn how to get to any station and see what trips you\'ve made</string>
+    <string name="intro_finish_wait_title">We\'re almost done</string>
+    <string name="intro_finish_connect_desc">We need to connect to the internet to download a few things (less than 1 MB). Please check your connection.</string>
+    <string name="intro_finish_try_again">Try again</string>
+    <string name="intro_finish_downloading">Downloading subway network map - %d%% complete</string>
+    <string name="intro_finish_done_title">You are all set. Enjoy UnderLX.</string>
+    <string name="intro_finish_done_desc">While using UnderLX, keep in mind that it is:\n- still under development\n- not an official or officially endorsed app\n- a non-profit, collaborative project</string>
+    <string name="intro_finish_get_started">Get started</string>
 </resources>

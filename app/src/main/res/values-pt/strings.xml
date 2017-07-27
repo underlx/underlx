@@ -159,4 +159,21 @@
     <string name="frag_unconfirmed_trips_title">Viagens por confirmar</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmar</string>
     <string name="frag_unconfirmed_trip_correct">Corrigir</string>
+    <string name="intro_disturbances_title">Notificações de perturbações</string>
+    <string name="intro_disturbances_desc">Seja informado de atrasos e interrupções de serviço antes de entrar lá em baixo, evitando frustrações adicionais</string>
+    <string name="intro_disturbances_select_lines">Escolher linhas</string>
+    <string name="intro_disturbances_select_lines_instruction">Escolha para que linhas quer receber notificações:</string>
+    <string name="intro_disturbances_misc_error">Mapa de rede ainda não obtido. Tente de novo mais tarde.</string>
+    <string name="intro_disturbances_connection_error">Mapa de rede ainda não obtido. Verifique a sua ligação à internet.</string>
+    <string name="intro_welcome_title">Bem-vindo ao UnderLX</string>
+    <string name="intro_welcome_desc">Insert witty introductory sentence here</string>
+    <string name="intro_location_title">Nunca se perca</string>
+    <string name="intro_location_desc">Veja onde se encontra dentro da rede de Metro, descubra como chegar a qualquer estação e saiba que viagens fez</string>
+    <string name="intro_finish_wait_title">Está quase</string>
+    <string name="intro_finish_connect_desc">É necessário descarregar algumas coisas da internet (menos de 1 MB). Verifique a sua ligação.</string>
+    <string name="intro_finish_try_again">Repetir</string>
+    <string name="intro_finish_downloading">A obter mapa de rede - %d%% completo</string>
+    <string name="intro_finish_done_title">Está pronto. Aproveite o UnderLX.</string>
+    <string name="intro_finish_done_desc">Ao utilizar o UnderLX, não se esqueça que este:\n- ainda está em desenvolvimento\n- não é uma app oficial, nem oficialmente recomendada\n- é um projecto colaborativo sem fins lucrativos</string>
+    <string name="intro_finish_get_started">Começar</string>
 </resources>

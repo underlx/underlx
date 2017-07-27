@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -109,6 +110,43 @@ public class MainActivity extends AppCompatActivity
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+                boolean isFirstStart = sharedPref.getBoolean("fuse_first_run", true);
+
+                if (isFirstStart) {
+                    // intro will request permission for us
+                    final Intent i = new Intent(MainActivity.this, IntroActivity.class);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startActivity(i);
+                        }
+                    });
+                } else {
+                    boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+                    if (locationEnabled &&
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
+                                }
+                            }
+                        });
+
+                    }
+                }
+            }
+        });
+
+        // Start the thread
+        t.start();
     }
 
     public static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 10001;
@@ -116,14 +154,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-
-        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-        boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
-        if (locationEnabled &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
-        }
     }
 
     @Override
