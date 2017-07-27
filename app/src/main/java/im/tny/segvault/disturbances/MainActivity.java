@@ -350,9 +350,9 @@ public class MainActivity extends AppCompatActivity
                                 });
                     } else {
                         topologyUpdateSnackbar.setText(msg);
-                        if (!topologyUpdateSnackbar.isShown()) {
-                            topologyUpdateSnackbar.show();
-                        }
+                    }
+                    if (!topologyUpdateSnackbar.isShown()) {
+                        topologyUpdateSnackbar.show();
                     }
                     break;
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:

@@ -444,6 +444,7 @@ public class MainService extends Service {
             try {
                 for (int cur_net = 0; cur_net < net_count; cur_net++) {
                     API.Network n = api.getNetwork(networkIds[cur_net]);
+                    publishProgress(5);
 
                     float netPart = (float) (cur_net + 1) / (float) net_count;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
@@ -456,7 +457,7 @@ public class MainService extends Service {
                         }
                     }
 
-                    publishProgress(15);
+                    publishProgress(20);
 
                     Map<String, API.Lobby> apiLobbies = new HashMap<>();
                     for (API.Lobby l : api.getLobbies()) {
