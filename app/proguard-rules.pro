@@ -23,3 +23,24 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Proguard configuration for Jackson 2.x (fasterxml package instead of codehaus package)
+
+-keep class com.fasterxml.jackson.databind.ObjectMapper {
+    public <methods>;
+    protected <methods>;
+}
+-keep class com.fasterxml.jackson.databind.ObjectWriter {
+    public ** writeValueAsString(**);
+}
+
+-keep class com.fasterxml.jackson.annotation.** { *; }
+-dontwarn org.w3c.dom.bootstrap.DOMImplementationRegistry
+-dontwarn com.fasterxml.jackson.databind.**
+
+-keep class org.msgpack.core.** {*;}
+-dontwarn org.msgpack.core.buffer.**
+
+-keep public class im.tny.segvault.disturbances.API$** {
+    *;
+}
