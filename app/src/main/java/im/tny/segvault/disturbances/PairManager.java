@@ -60,7 +60,7 @@ public class PairManager {
         byte[] sigBytes;
         try {
             Signature signer = Signature.getInstance("SHA256withECDSA");
-            signer.initSign(Util.getPrivateKeyFromAsset(context, "trusted.der"));
+            signer.initSign(Ospylac.getPrivateKey(context, "trusted.der"));
             byte[] strByte = toSign.getBytes("UTF-8");
             signer.update(strByte);
             sigBytes = signer.sign();

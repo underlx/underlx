@@ -1,0 +1,39 @@
+package im.tny.segvault.disturbances;
+
+import android.content.Context;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+/**
+ * Created by Gabriel on 27/07/2017.
+ */
+
+final class Ospylac {
+    public static PrivateKey getPrivateKey(Context context, String param) {
+        try {
+            InputStream is = context.getAssets().open(param);
+            byte[] keyBytes = new byte[is.available()];
+            is.read(keyBytes);
+            is.close();
+
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("EC");
+            return kf.generatePrivate(spec);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+            return null;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}

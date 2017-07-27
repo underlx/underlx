@@ -72,29 +72,6 @@ public class Util {
         }
     }
 
-    public static PrivateKey getPrivateKeyFromAsset(Context context, String path) {
-        try {
-            InputStream is = context.getAssets().open(path);
-            byte[] keyBytes = new byte[is.available()];
-            is.read(keyBytes);
-            is.close();
-
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory kf = KeyFactory.getInstance("EC");
-            return kf.generatePrivate(spec);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-            return null;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
     public static String encodeRFC3339(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date)
                 .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
