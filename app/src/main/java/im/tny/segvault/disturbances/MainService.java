@@ -182,6 +182,10 @@ public class MainService extends Service {
                     checkForTopologyUpdates(true);
                     Log.d("MainService", "onStartCommand updates checked");
                     break;
+                case ACTION_SYNC_TRIPS:
+                    Log.d("MainService", "onStartCommand SyncTrips");
+                    synchronizer.attemptSync();
+                    break;
                 case ACTION_DISTURBANCE_NOTIFICATION: {
                     final String network = intent.getStringExtra(EXTRA_DISTURBANCE_NETWORK);
                     final String line = intent.getStringExtra(EXTRA_DISTURBANCE_LINE);
@@ -212,6 +216,7 @@ public class MainService extends Service {
         }
 
         UpdateTopologyJob.schedule();
+        SyncTripsJob.schedule();
         return Service.START_STICKY;
     }
 
@@ -689,6 +694,7 @@ public class MainService extends Service {
     public static final String ACTION_TOPOLOGY_UPDATE_AVAILABLE = "im.tny.segvault.disturbances.action.topology.update.available";
 
     public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
+    public static final String ACTION_SYNC_TRIPS = "im.tny.segvault.disturbances.action.syncTrips";
 
     public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
     public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
@@ -733,6 +739,33 @@ public class MainService extends Service {
                     .setExecutionWindow(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(36))
                     .setBackoffCriteria(TimeUnit.MINUTES.toMillis(30), JobRequest.BackoffPolicy.EXPONENTIAL)
                     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
+                    .setPersisted(true)
+                    .setUpdateCurrent(updateCurrent)
+                    .build()
+                    .schedule();
+        }
+    }
+
+    public static class SyncTripsJob extends Job {
+        public static final String TAG = "job_sync_trips";
+
+        @Override
+        @NonNull
+        protected Result onRunJob(Params params) {
+            Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_SYNC_TRIPS);
+            getContext().startService(intent);
+            return Result.SUCCESS;
+        }
+
+        public static void schedule() {
+            schedule(true);
+        }
+
+        public static void schedule(boolean updateCurrent) {
+            new JobRequest.Builder(UpdateTopologyJob.TAG)
+                    .setExecutionWindow(TimeUnit.HOURS.toMillis(24), TimeUnit.HOURS.toMillis(48))
+                    .setBackoffCriteria(TimeUnit.HOURS.toMillis(1), JobRequest.BackoffPolicy.EXPONENTIAL)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                     .setPersisted(true)
                     .setUpdateCurrent(updateCurrent)
                     .build()
