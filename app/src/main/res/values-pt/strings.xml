@@ -158,6 +158,7 @@
     <string name="frag_unconfirmed_trips_title">Viagens por confirmar</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmar</string>
     <string name="frag_unconfirmed_trip_correct">Corrigir</string>
+    <string name="act_intro_title">Bem-vindo</string>
     <string name="intro_disturbances_title">Notificações de perturbações</string>
     <string name="intro_disturbances_desc">Seja informado de atrasos e interrupções de serviço antes de entrar lá em baixo, evitando frustrações adicionais</string>
     <string name="intro_disturbances_select_lines">Escolher linhas</string>
