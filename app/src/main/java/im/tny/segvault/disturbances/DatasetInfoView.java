@@ -91,6 +91,8 @@ public class DatasetInfoView extends LinearLayout {
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED);
+        filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
+        filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(containingFragment.getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -110,6 +112,12 @@ public class DatasetInfoView extends LinearLayout {
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED:
                     updateButton.setEnabled(true);
+                    break;
+                case MainService.ACTION_CACHE_EXTRAS_PROGRESS:
+                    cacheAllExtrasButton.setEnabled(false);
+                    break;
+                case MainService.ACTION_CACHE_EXTRAS_FINISHED:
+                    cacheAllExtrasButton.setEnabled(true);
                     break;
             }
         }

@@ -445,6 +445,7 @@ public class MainService extends Service {
                 for (int cur_net = 0; cur_net < net_count; cur_net++) {
                     API.Network n = api.getNetwork(networkIds[cur_net]);
                     publishProgress(5);
+                    if (isCancelled()) break;
 
                     float netPart = (float) (cur_net + 1) / (float) net_count;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
@@ -458,6 +459,7 @@ public class MainService extends Service {
                     }
 
                     publishProgress(20);
+                    if (isCancelled()) break;
 
                     Map<String, API.Lobby> apiLobbies = new HashMap<>();
                     for (API.Lobby l : api.getLobbies()) {
@@ -467,6 +469,7 @@ public class MainService extends Service {
                     }
 
                     publishProgress(40);
+                    if (isCancelled()) break;
 
                     int line_count = n.lines.size();
                     int cur_line = 0;
@@ -563,8 +566,10 @@ public class MainService extends Service {
                     }
 
                     publishProgress(80);
+                    if (isCancelled()) break;
 
                     for (API.Transfer t : api.getTransfers()) {
+                        if (isCancelled()) break;
                         Transfer newTransfer = new Transfer();
                         // find stations with the right IDs for each line
                         Station station = net.getStation(t.station);
