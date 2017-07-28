@@ -67,6 +67,7 @@ public class MainService extends Service {
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
     private LineStatusCache lineStatusCache = new LineStatusCache(this);
+    private StatsCache statsCache = new StatsCache(this);
     private PairManager pairManager;
     private Synchronizer synchronizer;
 
@@ -321,6 +322,10 @@ public class MainService extends Service {
 
     public LineStatusCache getLineStatusCache() {
         return lineStatusCache;
+    }
+
+    public StatsCache getStatsCache() {
+        return statsCache;
     }
 
     public Stop getLikelyNextExit(List<Connection> path, double threshold) {
@@ -590,6 +595,7 @@ public class MainService extends Service {
                     net.setDatasetAuthors(info.authors);
                     net.setDatasetVersion(info.version);
                     lineStatusCache.clear();
+                    statsCache.clear();
                     putNetwork(net);
                     TopologyCache.saveNetwork(MainService.this, net);
                     if (isCancelled()) break;

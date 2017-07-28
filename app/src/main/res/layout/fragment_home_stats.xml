@@ -10,24 +10,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:text="@string/frag_lines_line_status"
+        android:text="@string/frag_stats_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/list"
-        android:name="im.tny.segvault.disturbances.LineFragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layoutManager="LinearLayoutManager"
-        tools:context="im.tny.segvault.disturbances.LineFragment"
-        tools:listitem="@layout/fragment_line" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/text_margin"
         android:layout_marginRight="@dimen/text_margin"
+        android:orientation="vertical">
+
+        <org.sufficientlysecure.htmltextview.HtmlTextView
+            android:id="@+id/last_disturbance_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="5dp"/>
+
+        <TableLayout
+            android:id="@+id/line_stats_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:stretchColumns="1">
+        </TableLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
+        android:layout_marginLeft="@dimen/text_margin"
+        android:layout_marginRight="@dimen/text_margin"
         android:layout_marginTop="5dp"
         android:orientation="horizontal">
 

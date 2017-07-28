@@ -1,7 +1,6 @@
 package im.tny.segvault.disturbances;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,12 +9,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -48,7 +45,8 @@ public class MainActivity extends AppCompatActivity
         MapFragment.OnFragmentInteractionListener,
         HelpFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
-        LineFragment.OnListFragmentInteractionListener,
+        HomeLinesFragment.OnListFragmentInteractionListener,
+        HomeStatsFragment.OnFragmentInteractionListener,
         AnnouncementFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
@@ -158,9 +156,9 @@ public class MainActivity extends AppCompatActivity
 
     private void showTargetPrompt() {
         new MaterialTapTargetPrompt.Builder(MainActivity.this)
-                .setTarget(Util.getToolbarNavigationIcon((Toolbar)findViewById(R.id.toolbar)))
-                .setPrimaryText("Don't miss a thing")
-                .setSecondaryText("Tap the menu icon to see all the sections")
+                .setTarget(Util.getToolbarNavigationIcon((Toolbar) findViewById(R.id.toolbar)))
+                .setPrimaryText(R.string.act_main_nav_taptarget_title)
+                .setSecondaryText(R.string.act_main_nav_taptarget_subtitle)
                 .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
                     @Override
                     public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
@@ -498,7 +496,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFinishedRefreshing() {
+    public void onLinesFinishedRefreshing() {
+        SwipeRefreshLayout srl = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        srl.setRefreshing(false);
+    }
+
+    @Override
+    public void onStatsFinishedRefreshing() {
         SwipeRefreshLayout srl = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         srl.setRefreshing(false);
     }

@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -213,6 +214,18 @@ public class API {
         public boolean manual;
         public String sourceLine;
         public String targetLine;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Stats {
+        public Map<String, LineStats> lineStats;
+        public long[] lastDisturbance;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class LineStats {
+        public float availability;
+        public int avgDistDuration;
     }
 
     private int timeoutMs;
@@ -541,6 +554,20 @@ public class API {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = putRequest(endpoint.resolve("trips"), content, true);
             return mapper.readValue(is, Trip.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Stats getStats(String networkID, Date since, Date until) throws APIException {
+        try {
+            String url = String.format("stats/%s?start=%s&end=%s",
+                    networkID, URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"), URLEncoder.encode(Util.encodeRFC3339(until), "utf-8"));
+            return mapper.readValue(getRequest(endpoint.resolve(url), false), Stats.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

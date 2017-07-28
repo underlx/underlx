@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:text="@string/frag_stats_line_availability"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:gravity="center"
+        android:text="@string/frag_stats_week"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:gravity="center"
+        android:text="@string/frag_stats_month"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+</TableRow>

@@ -182,8 +182,10 @@ public class HomeFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        Fragment newFragment = LineFragment.newInstance(1);
+        Fragment newFragment = HomeLinesFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
+        newFragment = HomeStatsFragment.newInstance(MainService.PRIMARY_NETWORK_ID);
+        transaction.replace(R.id.stats_card, newFragment);
         transaction.commit();
         refresh(true);
         refreshCurrentTrip();
@@ -248,8 +250,10 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
-        if (requestOnlineUpdate)
+        if (requestOnlineUpdate) {
             m.getLineStatusCache().updateLineStatus();
+            m.getStatsCache().updateStats();
+        }
 
         Network net = m.getNetwork(MainService.PRIMARY_NETWORK_ID);
         if (net == null || net.isOpen()) {

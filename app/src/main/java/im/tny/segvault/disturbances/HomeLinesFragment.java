@@ -30,7 +30,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class LineFragment extends Fragment {
+public class HomeLinesFragment extends Fragment {
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
@@ -43,11 +43,11 @@ public class LineFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public LineFragment() {
+    public HomeLinesFragment() {
     }
 
-    public static LineFragment newInstance(int columnCount) {
-        LineFragment fragment = new LineFragment();
+    public static HomeLinesFragment newInstance(int columnCount) {
+        HomeLinesFragment fragment = new HomeLinesFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -66,7 +66,7 @@ public class LineFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_line_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_home_lines, container, false);
 
         // Set the adapter
         Context context = view.getContext();
@@ -176,7 +176,7 @@ public class LineFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item);
 
-        void onFinishedRefreshing();
+        void onLinesFinishedRefreshing();
 
         LineStatusCache getLineStatusCache();
     }
@@ -194,7 +194,7 @@ public class LineFragment extends Fragment {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED:
                     if (mListener != null) {
-                        mListener.onFinishedRefreshing();
+                        mListener.onLinesFinishedRefreshing();
                     }
                     progressBar.setVisibility(View.GONE);
                     // fallthrough

@@ -38,7 +38,6 @@
     <string name="update_topology_available">Actualização do mapa de rede disponível</string>
     <string name="update_topology_update_action">Actualizar</string>
     <string name="navigation_drawer_open">Abrir painel de navegação</string>
-    <string name="hello_blank_fragment">Olá fragmento vazio</string>
     <string name="frag_lines_error_updating">Erro ao actualizar estado das linhas</string>
     <string name="frag_disturbances_title">Perturbações</string>
     <string name="frag_disturbance_ongoing">Por resolver</string>
@@ -176,4 +175,13 @@
     <string name="intro_finish_done_title">Está pronto. Aproveite o &appname;.</string>
     <string name="intro_finish_done_desc">Ao utilizar o &appname;, não se esqueça que este:\n- ainda está em desenvolvimento\n- não é uma app oficial, nem oficialmente recomendada\n- é um projecto colaborativo sem fins lucrativos</string>
     <string name="intro_finish_get_started">Começar</string>
+    <string name="frag_stats_updated">Actualizado %s</string>
+    <string name="frag_stats_title">Estatísticas</string>
+    <string name="frag_stats_line_availability">Disponibilidade</string>
+    <string name="frag_stats_week">Semana</string>
+    <string name="frag_stats_month">Mês</string>
+    <string name="frag_stats_last_disturbance_days"><![CDATA[Há <big>%d dias</big> sem perturbações]]></string>
+    <string name="frag_stats_last_disturbance_hours"><![CDATA[Há <big>%d horas</big> sem perturbações]]></string>
+    <string name="act_main_nav_taptarget_title">Não perca nada</string>
+    <string name="act_main_nav_taptarget_subtitle">Toque no ícone de menu para ver todas as secções</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/line_name_view" />
+
+    <TextView
+        android:id="@+id/week_availability_view"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/month_availability_view"
+        android:gravity="center" />
+</TableRow>

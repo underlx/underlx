@@ -184,4 +184,13 @@
     <string name="intro_finish_done_title">You are all set. Enjoy &appname;.</string>
     <string name="intro_finish_done_desc">While using &appname;, keep in mind that it is:\n- still under development\n- not an official or officially endorsed app\n- a non-profit, collaborative project</string>
     <string name="intro_finish_get_started">Get started</string>
+    <string name="frag_stats_updated">Updated %s</string>
+    <string name="frag_stats_title">Statistics</string>
+    <string name="frag_stats_line_availability">Line availability</string>
+    <string name="frag_stats_week">Week</string>
+    <string name="frag_stats_month">Month</string>
+    <string name="frag_stats_last_disturbance_days"><![CDATA[<big>%d days</big> since last disturbance]]></string>
+    <string name="frag_stats_last_disturbance_hours"><![CDATA[<big>%d hours</big> since last disturbance]]></string>
+    <string name="act_main_nav_taptarget_title">Don\'t miss a thing</string>
+    <string name="act_main_nav_taptarget_subtitle">Tap the menu icon to see all the sections</string>
 </resources>

@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import im.tny.segvault.disturbances.LineFragment.OnListFragmentInteractionListener;
+import im.tny.segvault.disturbances.HomeLinesFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.subway.Line;
 
 /**
