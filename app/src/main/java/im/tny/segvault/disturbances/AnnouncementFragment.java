@@ -261,7 +261,6 @@ public class AnnouncementFragment extends TopFragment {
                         }
                     }
 
-                    Log.d("MyXmlParser", "Parsing name ==> " + name);
                     String result = "";
                     if (xmlPullParser.next() == XmlPullParser.TEXT) {
                         result = xmlPullParser.getText();
