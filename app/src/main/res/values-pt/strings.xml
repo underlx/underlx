@@ -165,7 +165,7 @@
     <string name="intro_disturbances_misc_error">Mapa de rede ainda não obtido. Tente de novo mais tarde.</string>
     <string name="intro_disturbances_connection_error">Mapa de rede ainda não obtido. Verifique a sua ligação à internet.</string>
     <string name="intro_welcome_title">Bem-vindo ao &appname;</string>
-    <string name="intro_welcome_desc">Insert witty introductory sentence here</string>
+    <string name="intro_welcome_desc">O seu companheiro no Metropolitano de Lisboa</string>
     <string name="intro_location_title">Nunca se perca</string>
     <string name="intro_location_desc">Veja onde se encontra dentro da rede de Metro, descubra como chegar a qualquer estação e saiba que viagens fez</string>
     <string name="intro_finish_wait_title">Está quase</string>

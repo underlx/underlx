@@ -174,7 +174,7 @@
     <string name="intro_disturbances_misc_error">Network map not yet downloaded. Please try again later.</string>
     <string name="intro_disturbances_connection_error">Network map not yet downloaded. Check your network connection.</string>
     <string name="intro_welcome_title">Welcome to &appname;</string>
-    <string name="intro_welcome_desc">Insert witty introductory sentence here</string>
+    <string name="intro_welcome_desc">Your companion in the Lisbon subway</string>
     <string name="intro_location_title">Never get lost</string>
     <string name="intro_location_desc">Check where you are inside of the subway network, learn how to get to any station and see what trips you\'ve made</string>
     <string name="intro_finish_wait_title">We\'re almost done</string>
