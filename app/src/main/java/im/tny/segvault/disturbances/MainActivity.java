@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -287,9 +288,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onMailtoLinkClicked(String address) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    @Override
     public void onLinkClicked(String destination) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(destination));
-        startActivity(browserIntent);
+        if (browserIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(browserIntent);
+        }
     }
 
     /**

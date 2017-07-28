@@ -98,6 +98,8 @@ public class HelpFragment extends TopFragment {
                     mListener.onHelpLinkClicked(url.substring(5));
                 } else if (url.startsWith("station:")) {
                     mListener.onStationLinkClicked(url.substring(8));
+                } else if (url.startsWith("mailto:")) {
+                    mListener.onMailtoLinkClicked(url.substring(7));
                 } else {
                     mListener.onLinkClicked(url);
                 }
@@ -144,6 +146,7 @@ public class HelpFragment extends TopFragment {
     public interface OnFragmentInteractionListener extends OnInteractionListener {
         void onHelpLinkClicked(String destination);
         void onStationLinkClicked(String destination);
+        void onMailtoLinkClicked(String address);
         void onLinkClicked(String destination);
     }
 }
