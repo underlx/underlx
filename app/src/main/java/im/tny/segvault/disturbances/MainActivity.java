@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -37,6 +39,7 @@ import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -125,6 +128,7 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void run() {
                             startActivity(i);
+                            showTargetPrompt();
                         }
                     });
                 } else {
@@ -151,6 +155,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 10001;
+
+    private void showTargetPrompt() {
+        new MaterialTapTargetPrompt.Builder(MainActivity.this)
+                .setTarget(Util.getToolbarNavigationIcon((Toolbar)findViewById(R.id.toolbar)))
+                .setPrimaryText("Don't miss a thing")
+                .setSecondaryText("Tap the menu icon to see all the sections")
+                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
+                    @Override
+                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
+                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
+                            // User has pressed the prompt target
+                        }
+                    }
+                })
+                .setFocalColour(ContextCompat.getColor(this, R.color.colorAccent))
+                .setBackgroundColour(ContextCompat.getColor(this, R.color.colorPrimaryLight))
+                .show();
+    }
 
     @Override
     protected void onStart() {

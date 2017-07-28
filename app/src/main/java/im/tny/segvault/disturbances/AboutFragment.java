@@ -134,6 +134,12 @@ public class AboutFragment extends TopFragment {
         intro.put("url", "https://github.com/apl-devs/AppIntro");
         data.add(intro);
 
+        Map<String, String> mtp = new HashMap<>(3);
+        mtp.put("name", "Material Tap Target Prompt");
+        mtp.put("license", "© Samuel Wall - Apache License 2.0");
+        mtp.put("url", "https://github.com/sjwall/MaterialTapTargetPrompt");
+        data.add(mtp);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");

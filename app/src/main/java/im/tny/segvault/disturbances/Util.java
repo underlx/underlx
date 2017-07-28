@@ -4,8 +4,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextUtils;
+import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +18,7 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
@@ -75,6 +79,27 @@ public class Util {
     public static String encodeRFC3339(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date)
                 .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
+    }
+
+    public static View getToolbarNavigationIcon(Toolbar toolbar) {
+        // https://gist.github.com/NikolaDespotoski/bb963f9b8f40beb954a0
+
+        //check if contentDescription previously was set
+        boolean hadContentDescription = TextUtils.isEmpty(toolbar.getNavigationContentDescription());
+        String contentDescription = !hadContentDescription ? toolbar.getNavigationContentDescription().toString() : "navigationIcon";
+        toolbar.setNavigationContentDescription(contentDescription);
+        ArrayList<View> potentialViews = new ArrayList<View>();
+        //find the view based on it's content description, set programatically or with android:contentDescription
+        toolbar.findViewsWithText(potentialViews, contentDescription, View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+        //Nav icon is always instantiated at this point because calling setNavigationContentDescription ensures its existence
+        View navIcon = null;
+        if (potentialViews.size() > 0) {
+            navIcon = potentialViews.get(0); //navigation icon is ImageButton
+        }
+        //Clear content description if not previously present
+        if (hadContentDescription)
+            toolbar.setNavigationContentDescription(null);
+        return navIcon;
     }
 
     // large stack thread pool executor
