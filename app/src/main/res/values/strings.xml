@@ -22,7 +22,7 @@
     <string name="nav_help_feedback"><![CDATA[Help & Feedback]]></string>
     <string name="nav_about">About &appname;</string>
     <string name="status_not_yet_implemented">Not implemented yet</string>
-    <string name="status_loading">Loading...</string>
+    <string name="status_loading">Loading…</string>
     <string name="frag_about_title">About</string>
     <string name="frag_about_header" translatable="false">@string/app_name</string>
     <string name="frag_about_copyright">Copyright © Segvault 2017</string>
@@ -57,9 +57,6 @@
     <string name="frag_route_origin_station">Starting station</string>
     <string name="frag_route_destination_station">Destination station</string>
     <string name="frag_route_instructions">Pick a starting point and a destination to see the recommended route.</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="developer_website" translatable="false">http://segvault.tny.im</string>
     <string name="notif_disturbance_title">%s line</string>
     <string name="frag_route_short_cars_warning">In this line, trains are shorter. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
@@ -68,10 +65,10 @@
     <string name="frag_route_line_name">%s line</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_station_closed_extended">Station %s is closed for an extended period. An alternative station was suggested.</string>
-    <string name="notif_route_left_station">Left station...</string>
+    <string name="notif_route_left_station">Left station…</string>
     <string name="notif_route_direction">Direction %s</string>
     <string name="notif_route_next_station">Next station: %s</string>
-    <string name="notif_route_waiting">Waiting for train...</string>
+    <string name="notif_route_waiting">Waiting for train…</string>
     <string name="frag_disturbance_menu_refresh">Refresh</string>
     <string name="frag_disturbance_updated">Disturbance list updated</string>
     <string name="frag_home_menu_refresh">Refresh</string>
@@ -88,7 +85,7 @@
     <string name="frag_station_accessibility">Accessibility</string>
     <string name="frag_station_lift">Lift</string>
     <string name="frag_station_statistics">Statistics</string>
-    <string name="frag_station_stats_intro">In this station, you...</string>
+    <string name="frag_station_stats_intro">In this station, you…</string>
     <string name="frag_station_stats_entry">Entered the network %d times</string>
     <string name="frag_station_stats_exit">Exited the network %d times</string>
     <string name="frag_station_stats_gone_through">Went through %d times</string>
@@ -149,7 +146,7 @@
     <string name="frag_station_bus_lines">Bus lines</string>
     <string name="frag_station_ferry_routes">Ferry routes</string>
     <string name="frag_station_rail_services">Rail services</string>
-    <string name="frag_station_conn_info_loading">Loading...</string>
+    <string name="frag_station_conn_info_loading">Loading…</string>
     <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
     <string name="frag_station_closed_extended">This station is closed for an extended period.</string>
     <string name="cache_extras_success">Extra content downloaded successfully</string>
@@ -176,7 +173,7 @@
     <string name="intro_disturbances_select_lines_instruction">Choose for which lines you want to see notifications:</string>
     <string name="intro_disturbances_misc_error">Network map not yet downloaded. Please try again later.</string>
     <string name="intro_disturbances_connection_error">Network map not yet downloaded. Check your network connection.</string>
-    <string name="intro_welcome_title">Welcome to UnderLX</string>
+    <string name="intro_welcome_title">Welcome to &appname;</string>
     <string name="intro_welcome_desc">Insert witty introductory sentence here</string>
     <string name="intro_location_title">Never get lost</string>
     <string name="intro_location_desc">Check where you are inside of the subway network, learn how to get to any station and see what trips you\'ve made</string>
@@ -184,7 +181,7 @@
     <string name="intro_finish_connect_desc">We need to connect to the internet to download a few things (less than 1 MB). Please check your connection.</string>
     <string name="intro_finish_try_again">Try again</string>
     <string name="intro_finish_downloading">Downloading subway network map - %d%% complete</string>
-    <string name="intro_finish_done_title">You are all set. Enjoy UnderLX.</string>
-    <string name="intro_finish_done_desc">While using UnderLX, keep in mind that it is:\n- still under development\n- not an official or officially endorsed app\n- a non-profit, collaborative project</string>
+    <string name="intro_finish_done_title">You are all set. Enjoy &appname;.</string>
+    <string name="intro_finish_done_desc">While using &appname;, keep in mind that it is:\n- still under development\n- not an official or officially endorsed app\n- a non-profit, collaborative project</string>
     <string name="intro_finish_get_started">Get started</string>
 </resources>
