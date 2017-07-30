@@ -44,3 +44,5 @@
 -keep public class im.tny.segvault.disturbances.API$** {
     *;
 }
+
+-keep class rikka.materialpreference.** { *; }
