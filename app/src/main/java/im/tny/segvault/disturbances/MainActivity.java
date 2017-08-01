@@ -10,11 +10,13 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -246,16 +248,26 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Action bar menu item selected
-        Fragment newFragment = getNewFragment(item.getItemId());
 
-        if (newFragment != null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        switch (item.getItemId()) {
+            case R.id.menu_debug:
+                new AsyncTask<Void, Void, String>() {
 
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack
-            transaction.replace(R.id.main_fragment_container, newFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+                    @Override
+                    protected String doInBackground(Void... voids) {
+                        if (locBound) {
+                            return locService.dumpDebugInfo();
+                        }
+                        return "";
+                    }
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
+                        newFragment.show(getSupportFragmentManager(), "debugtext");
+                    }
+                }.execute();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

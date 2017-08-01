@@ -109,7 +109,7 @@ public class HomeFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.app_name), R.id.nav_home, true, true);
+        setUpActivity(getString(R.string.app_name), R.id.nav_home, false, true);
         setHasOptionsMenu(true);
 
         // Inflate the layout for this fragment
@@ -135,32 +135,6 @@ public class HomeFragment extends TopFragment {
                 stopIntent.setAction(MainService.ACTION_END_TRIP);
                 stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MainService.PRIMARY_NETWORK_ID);
                 getContext().startService(stopIntent);
-            }
-        });
-
-        getFloatingActionButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new AsyncTask<Void, Void, String>() {
-
-                    @Override
-                    protected String doInBackground(Void... voids) {
-                        if (mListener != null) {
-                            MainService m = mListener.getMainService();
-                            if (m != null) {
-                                return m.dumpDebugInfo();
-                            }
-                        }
-                        return "";
-                    }
-
-                    @Override
-                    protected void onPostExecute(String s) {
-
-                        DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
-                        newFragment.show(getActivity().getSupportFragmentManager(), "debugtext");
-                    }
-                }.execute();
             }
         });
 
