@@ -185,4 +185,5 @@
     <string name="frag_stats_last_disturbance_hours"><![CDATA[Há <big>%d horas</big> sem perturbações]]></string>
     <string name="act_main_nav_taptarget_title">Não perca nada</string>
     <string name="act_main_nav_taptarget_subtitle">Toque no ícone de menu para ver todas as secções</string>
+    <string name="debug_info">Informação de depuração</string>
 </resources>
