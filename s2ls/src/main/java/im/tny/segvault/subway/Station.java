@@ -222,4 +222,38 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         this.connURLs = connURLs;
     }
 
+    public float[] getWorldCoordinates() {
+        // return the center of the coordinates for all the exits...
+        // they are close enough together so we can treat Earth as a flat plane
+        List<Double> xs = new ArrayList<>();
+        List<Double> ys = new ArrayList<>();
+        List<Double> zs = new ArrayList<>();
+        for (Lobby l : getLobbies()) {
+            for (Lobby.Exit exit : l.getExits()) {
+                double lat = Math.toRadians((double) exit.worldCoord[0]);
+                double lon = Math.toRadians((double) exit.worldCoord[1]);
+                xs.add(Math.cos(lat) * Math.cos(lon));
+                ys.add(Math.cos(lat) * Math.sin(lon));
+                zs.add(Math.sin(lat));
+            }
+        }
+
+        double avgX = 0;
+        double avgY = 0;
+        double avgZ = 0;
+        for (int i = 0; i < xs.size(); i++) {
+            avgX += xs.get(i);
+            avgY += ys.get(i);
+            avgZ += zs.get(i);
+        }
+        avgX /= xs.size();
+        avgY /= xs.size();
+        avgZ /= xs.size();
+
+        double lon = Math.atan2(avgY, avgX);
+        double hyp = Math.sqrt(avgX * avgX + avgY * avgY);
+        double lat = Math.atan2(avgZ, hyp);
+        return new float[]{(float) Math.toDegrees(lat), (float) Math.toDegrees(lon)};
+    }
+
 }

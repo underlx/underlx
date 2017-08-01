@@ -144,6 +144,7 @@
     <string name="frag_trip_history_hide_visits">Hide station visits</string>
     <string name="act_station_favorite">Add to favorites</string>
     <string name="act_station_unfavorite">Remove from favorites</string>
+    <string name="act_station_share">Share location</string>
     <string name="frag_station_bus_lines">Bus lines</string>
     <string name="frag_station_ferry_routes">Ferry routes</string>
     <string name="frag_station_rail_services">Rail services</string>

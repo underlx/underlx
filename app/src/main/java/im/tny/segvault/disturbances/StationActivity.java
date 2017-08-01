@@ -8,13 +8,13 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,7 +29,6 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -37,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.subway.Line;
@@ -51,6 +51,8 @@ public class StationActivity extends AppCompatActivity
 
     private String networkId;
     private String stationId;
+
+    private float[] worldCoords;
 
     private LinearLayout lineIconsLayout;
 
@@ -139,6 +141,7 @@ public class StationActivity extends AppCompatActivity
 
             Network net = locService.getNetwork(networkId);
             Station station = net.getStation(stationId);
+            worldCoords = station.getWorldCoordinates();
 
             setTitle(station.getName());
             getSupportActionBar().setTitle(station.getName());
@@ -232,6 +235,14 @@ public class StationActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                return true;
+            case R.id.menu_share:
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse(String.format(
+                                Locale.ROOT, "geo:0,0?q=%f,%f(%s)",
+                                worldCoords[0], worldCoords[1], getTitle())));
+
+                startActivity(intent);
                 return true;
             case R.id.menu_favorite:
                 Realm realm = Realm.getDefaultInstance();

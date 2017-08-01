@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_share"
+        android:title="@string/act_station_share"
+        android:icon="@drawable/ic_share_white_24dp"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_favorite"
         android:title=""
         app:showAsAction="ifRoom" />
