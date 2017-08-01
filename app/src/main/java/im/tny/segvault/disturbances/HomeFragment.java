@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -65,7 +66,6 @@ public class HomeFragment extends TopFragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private TextView debugInfoView;
     private TextView networkClosedView;
     private CardView networkClosedCard;
     private CardView ongoingTripCard;
@@ -115,7 +115,6 @@ public class HomeFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        debugInfoView = (TextView) view.findViewById(R.id.debug_info);
         networkClosedCard = (CardView) view.findViewById(R.id.network_closed_card);
         networkClosedView = (TextView) view.findViewById(R.id.network_closed_view);
 
@@ -157,7 +156,9 @@ public class HomeFragment extends TopFragment {
 
                     @Override
                     protected void onPostExecute(String s) {
-                        debugInfoView.setText(s);
+
+                        DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
+                        newFragment.show(getActivity().getSupportFragmentManager(), "debugtext");
                     }
                 }.execute();
             }
