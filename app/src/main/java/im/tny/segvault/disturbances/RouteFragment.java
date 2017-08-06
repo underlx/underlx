@@ -302,7 +302,7 @@ public class RouteFragment extends TopFragment {
             if (isFirst) {
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_enter_network, layoutRoute, false);
 
-                Line line = c.getSource().getLine();
+                final Line line = c.getSource().getLine();
 
                 int lineColor = line.getColor();
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
@@ -326,6 +326,15 @@ public class RouteFragment extends TopFragment {
                     lineView.setTextColor(lineColor);
 
                     LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                    lineLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getContext(), LineActivity.class);
+                            intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
+                            intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                            startActivity(intent);
+                        }
+                    });
                     lineLayout.setVisibility(View.VISIBLE);
                 }
 
@@ -366,7 +375,7 @@ public class RouteFragment extends TopFragment {
                 hasTransfer = true;
                 Connection c2 = el.get(i + 1);
 
-                Line targetLine = c.getTarget().getLine();
+                final Line targetLine = c.getTarget().getLine();
 
                 View view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
@@ -395,6 +404,15 @@ public class RouteFragment extends TopFragment {
                 lineView.setTextColor(nextLineColor);
 
                 LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                lineLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getContext(), LineActivity.class);
+                        intent.putExtra(LineActivity.EXTRA_LINE_ID, targetLine.getId());
+                        intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                        startActivity(intent);
+                    }
+                });
                 lineLayout.setVisibility(View.VISIBLE);
 
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);

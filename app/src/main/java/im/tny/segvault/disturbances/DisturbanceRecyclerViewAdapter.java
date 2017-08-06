@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -36,6 +37,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
     private final List<DisturbanceItem> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private Context context;
 
     public DisturbanceRecyclerViewAdapter(List<DisturbanceItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
@@ -46,6 +48,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_disturbance, parent, false);
+        context = parent.getContext();
         return new ViewHolder(view);
     }
 
@@ -86,6 +89,19 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                 }
             }
         });
+
+        View.OnClickListener lineClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, LineActivity.class);
+                intent.putExtra(LineActivity.EXTRA_LINE_ID, holder.mItem.lineId);
+                intent.putExtra(LineActivity.EXTRA_NETWORK_ID, holder.mItem.networkId);
+                context.startActivity(intent);
+            }
+        };
+
+        holder.mLineNameView.setOnClickListener(lineClickListener);
+        holder.iconLayout.setOnClickListener(lineClickListener);
     }
 
     @Override
@@ -123,6 +139,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final Date startTime;
         public final Date endTime;
         public final boolean ended;
+        public final String networkId;
         public final String lineId;
         public final String lineName;
         public final int lineColor;
@@ -135,9 +152,11 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.ended = disturbance.ended;
             this.lineId = disturbance.line;
             String name = "Unknown line";
+            String netId = "";
             int color = 0;
             for(Network n : networks) {
                 if(n.getId().equals(disturbance.network)) {
+                    netId = n.getId();
                     for(Line l : n.getLines()) {
                         if(l.getId().equals(disturbance.line)) {
                             name = l.getName();
@@ -149,6 +168,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             }
             this.lineName = name;
             this.lineColor = color;
+            this.networkId = netId;
             statuses = new ArrayList<>();
             for(API.Status s : disturbance.statuses) {
                 statuses.add(new Status(new Date(s.time[0] * 1000), s.status, s.downtime));
