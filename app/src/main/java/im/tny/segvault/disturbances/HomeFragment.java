@@ -207,7 +207,7 @@ public class HomeFragment extends TopFragment {
         realm.close();
 
         if (hasTripsToConfirm) {
-            if(unconfirmedTripsCard.getVisibility() == View.GONE) {
+            if (unconfirmedTripsCard.getVisibility() == View.GONE) {
                 FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
                 Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
                 transaction.replace(R.id.unconfirmed_trips_card, newFragment);
@@ -256,13 +256,13 @@ public class HomeFragment extends TopFragment {
         } else {
             final Station station = loc.getCurrentTrip().getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
-            Stop nextExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
-            if (nextExit == null) {
-                nextStationView.setVisibility(View.GONE);
-            } else {
+            /*Stop nextExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
+            if (nextExit == null) {*/
+            nextStationView.setVisibility(View.GONE);
+            /*} else {
                 nextStationView.setText(nextExit.getStation().getName());
                 nextStationView.setVisibility(View.VISIBLE);
-            }
+            }*/
             redrawCurrentStationLineIcons(station);
             curStationLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
