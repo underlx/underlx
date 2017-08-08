@@ -10,14 +10,17 @@ Integration with existing public transit open protocols is also being studied, b
 
 Both the app and the server backends are being designed with support for multiple transit networks in mind. However, certain components such as the UI and the location services would need to be adjusted to the reality of each network.
 
-![Home screen](https://cloud.githubusercontent.com/assets/984584/25486995/d1f93360-2b5a-11e7-9548-e77f5e7d3be7.png) 
-![Route planning](https://cloud.githubusercontent.com/assets/984584/25487016/e2b3c350-2b5a-11e7-8c0b-3d8d49eea14f.png)
+![Home screen](https://user-images.githubusercontent.com/984584/29083578-1c558d1c-7c61-11e7-950a-85601eee0139.png) 
+![Station info](https://user-images.githubusercontent.com/984584/29083600-32676e90-7c61-11e7-9b38-b4115f1f6299.png)
+![Route planning](https://user-images.githubusercontent.com/984584/29083613-3a81046a-7c61-11e7-846f-4a4d33665350.png)
 
 ## Installing and testing
 
-The app is still in an early development phase; don't expect much to work if at all.
+The app is still in development, but is already published on Google Play.
 
-The app is available on Google Play, for a "closed" beta testing group. To begin testing:
+[![UnderLX on Google Play](https://user-images.githubusercontent.com/984584/29083840-f2c43e7a-7c61-11e7-83ee-e6cbbe93f753.png)](https://play.google.com/store/apps/details?id=im.tny.segvault.disturbances&utm_source=github&utm_campaign=readme&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+
+You can also join the **beta-testing group**. Beta testers might get releases earlier or more often:
 
 1. Start by joining [this Google group](https://groups.google.com/forum/#!forum/disturbancesmlx) with the same Google account you use on Google Play.
 1. Enter the testing program by [going here](https://play.google.com/apps/testing/im.tny.segvault.disturbances/).
