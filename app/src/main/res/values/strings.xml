@@ -32,7 +32,7 @@
     <string name="frag_about_disclaimer">This app and associated service have no affiliation with Metropolitano de Lisboa, E.P.E.\nWe cannot guarantee the correctness of the displayed information.</string>
     <string name="frag_about_thirdparty">Included components</string>
     <string name="frag_about_thanks_title">Special thanks</string>
-    <string name="frag_about_thanks">SkyscraperCity Portuguese community\nJaime Silva - navigation drawer picture</string>
+    <string name="frag_about_thanks">SkyscraperCity Portuguese community\nbrazanet - field research, informational content and Discord server\nJaime Silva - navigation drawer picture</string>
     <string name="frag_about_aosp_legal">This software contains code derived from code developed by The Android Open Source Project</string>
     <string name="dataset_info_version">Version: %s</string>
     <string name="dataset_info_authors">Authors</string>
