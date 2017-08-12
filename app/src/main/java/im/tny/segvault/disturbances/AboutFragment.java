@@ -2,12 +2,17 @@ package im.tny.segvault.disturbances;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +63,7 @@ public class AboutFragment extends TopFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.frag_about_title), R.id.nav_about, false, false);
+        setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
@@ -187,6 +193,36 @@ public class AboutFragment extends TopFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.about, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_qr_code) {
+            ImageView image = new ImageView(getContext());
+            image.setImageResource(R.drawable.ic_gplay_qr_code);
+
+            AlertDialog.Builder builder =
+                    new AlertDialog.Builder(getContext()).
+                            setMessage(R.string.frag_about_qrcode_desc).
+                            setPositiveButton(R.string.frag_about_qrcode_close, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).
+                            setView(image);
+            builder.create().show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
@@ -207,6 +243,7 @@ public class AboutFragment extends TopFragment {
         Collection<Network> getNetworks();
 
         void updateNetworks(String... network_ids);
+
         void cacheAllExtras(String... network_ids);
     }
 
@@ -260,7 +297,7 @@ public class AboutFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(getActivity() == null) {
+            if (getActivity() == null) {
                 return;
             }
             switch (intent.getAction()) {

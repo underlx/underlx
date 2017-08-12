@@ -195,4 +195,7 @@
     <string name="frag_stats_last_disturbance_hours"><![CDATA[<big>%d hours</big> since last disturbance]]></string>
     <string name="act_main_nav_taptarget_title">Don\'t miss a thing</string>
     <string name="act_main_nav_taptarget_subtitle">Tap the menu icon to see all the sections</string>
+    <string name="frag_about_qrcode_desc">Easily share UnderLX by letting other people scan the following QR code:</string>
+    <string name="frag_about_qrcode_close">Close</string>
+    <string name="frag_about_qrcode">QR code</string>
 </resources>
