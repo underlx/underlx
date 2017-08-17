@@ -1,4 +1,4 @@
-# underlx
+# underlx [![Discord](https://img.shields.io/discord/334423823552217090.svg)](https://discord.gg/hhuC7fc) [![license](https://img.shields.io/github/license/gbl08ma/underlx.svg)](https://github.com/gbl08ma/underlx/blob/master/LICENSE)
 This is an app for Android devices that shows information about the [Lisbon Metro](http://www.metrolisboa.pt/), as collected by my other project, [disturbancesmlx](https://github.com/gbl08ma/disturbancesmlx).
 
 The long-term goal is to become **the only Lisbon Metro app users will ever need**, and perhaps most importantly, **the one they'll want to have**.
