@@ -217,6 +217,9 @@ public class AboutFragment extends TopFragment {
                             setView(image);
             builder.create().show();
             return true;
+        } else if (id == R.id.menu_github) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_project_url)));
+            startActivity(browserIntent);
         }
 
         return super.onOptionsItemSelected(item);

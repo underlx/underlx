@@ -198,4 +198,6 @@
     <string name="frag_about_qrcode_desc">Easily share UnderLX by letting other people scan the following QR code:</string>
     <string name="frag_about_qrcode_close">Close</string>
     <string name="frag_about_qrcode">QR code</string>
+    <string name="frag_about_github">Project on GitHub</string>
+    <string name="github_project_url" translatable="false">https://github.com/gbl08ma/underlx</string>
 </resources>

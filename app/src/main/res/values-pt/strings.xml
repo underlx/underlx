@@ -190,4 +190,5 @@
     <string name="frag_about_qrcode_desc">Partilhe facilmente o UnderLX através do seguinte código QR:</string>
     <string name="frag_about_qrcode_close">Fechar</string>
     <string name="frag_about_qrcode">Código QR</string>
+    <string name="frag_about_github">Projecto no GitHub</string>
 </resources>
