@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -149,6 +150,7 @@ public class ExtraContentCache {
                 }
                 try {
                     HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+                    h.setRequestProperty("Accept-Encoding", "gzip");
                     h.setRequestMethod("GET");
                     h.setDoInput(true);
 
@@ -165,6 +167,10 @@ public class ExtraContentCache {
                         is = h.getInputStream();
                     } else {
                         continue;
+                    }
+
+                    if ("gzip".equals(h.getContentEncoding())) {
+                        is = new GZIPInputStream(is);
                     }
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
@@ -289,6 +295,7 @@ public class ExtraContentCache {
                     }
                     try {
                         HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+                        h.setRequestProperty("Accept-Encoding", "gzip");
                         h.setRequestMethod("GET");
                         h.setDoInput(true);
 
@@ -305,6 +312,10 @@ public class ExtraContentCache {
                             is = h.getInputStream();
                         } else {
                             continue;
+                        }
+
+                        if ("gzip".equals(h.getContentEncoding())) {
+                            is = new GZIPInputStream(is);
                         }
 
                         BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
