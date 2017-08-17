@@ -18,11 +18,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
 
@@ -249,6 +248,7 @@ public class API {
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
             h.setRequestProperty("Accept", "application/msgpack");
+            h.setRequestProperty("Accept-Encoding", "gzip");
             if(authenticate && pairManager != null) {
                 String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
                 h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
@@ -270,6 +270,9 @@ public class API {
             } else {
                 is = h.getErrorStream();
             }
+            if ("gzip".equals(h.getContentEncoding())) {
+                return new GZIPInputStream(is);
+            }
             return is;
         } catch (MalformedURLException e) {
             throw new APIException(e).addInfo("Malformed URL on GET request");
@@ -285,6 +288,7 @@ public class API {
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
             h.setRequestProperty("Accept", "application/msgpack");
+            h.setRequestProperty("Accept-Encoding", "gzip");
             h.setRequestProperty("Content-Type", "application/msgpack");
             if(authenticate && pairManager != null) {
                 String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
@@ -313,6 +317,9 @@ public class API {
                 is = h.getInputStream();
             } else {
                 is = h.getErrorStream();
+            }
+            if ("gzip".equals(h.getContentEncoding())) {
+                return new GZIPInputStream(is);
             }
             return is;
         } catch (MalformedURLException e) {
