@@ -16,6 +16,4 @@
         android:icon="@drawable/ic_zoom_in_white_24dp"
         android:title="@string/frag_map_zoom_in"
         app:showAsAction="ifRoom" />
-
-
 </menu>
