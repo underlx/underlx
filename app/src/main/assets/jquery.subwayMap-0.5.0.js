@@ -438,6 +438,10 @@ THE SOFTWARE.
                 pos = "text-align: right; margin:" + offsetDiag + "px 0 0 -" + (150 + offsetDiag) + "px";
                 topOffset = offsetDiag;
                 break;
+            case "sw-alt":
+                pos = "text-align: right; margin:" + offsetDiag + "px 0 0 -" + (150 + offsetDiag) + "px";
+                topOffset = -offsetDiag;
+                break;
             case "nw":
                 pos = "text-align: right; margin: -" + offsetDiag + "px 0 0 -" + (150 + offsetDiag) + "px";
                 topOffset = offsetDiag;

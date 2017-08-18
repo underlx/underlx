@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,6 +34,7 @@ public class MapFragment extends TopFragment {
     private static final String ARG_NETWORK_ID = "networkId";
 
     private String networkId;
+    private boolean portraitMap = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -74,11 +76,18 @@ public class MapFragment extends TopFragment {
         webview.addJavascriptInterface(new MapWebInterface(this.getContext()), "android");
 
         webview.getSettings().setLoadWithOverviewMode(true);
-        webview.getSettings().setUseWideViewPort(true);
         webview.getSettings().setSupportZoom(true);
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
-        webview.loadUrl("file:///android_asset/map-" + networkId + ".html");
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        portraitMap = sharedPref.getBoolean("pref_portrait_map", false);
+        if(portraitMap) {
+            webview.getSettings().setUseWideViewPort(false);
+            webview.loadUrl("file:///android_asset/map-" + networkId + "-portrait.html");
+        } else {
+            webview.getSettings().setUseWideViewPort(true);
+            webview.loadUrl("file:///android_asset/map-" + networkId + ".html");
+        }
         return view;
     }
 
@@ -95,6 +104,20 @@ public class MapFragment extends TopFragment {
                 return true;
             case R.id.menu_zoom_in:
                 webview.zoomIn();
+                return true;
+            case R.id.menu_swap_map:
+                portraitMap = !portraitMap;
+                SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+                SharedPreferences.Editor e = sharedPref.edit();
+                e.putBoolean("pref_portrait_map", portraitMap);
+                e.apply();
+                if(portraitMap) {
+                    webview.getSettings().setUseWideViewPort(false);
+                    webview.loadUrl("file:///android_asset/map-" + networkId + "-portrait.html");
+                } else {
+                    webview.getSettings().setUseWideViewPort(true);
+                    webview.loadUrl("file:///android_asset/map-" + networkId + ".html");
+                }
                 return true;
         }
 
