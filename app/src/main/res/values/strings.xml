@@ -201,4 +201,6 @@
     <string name="frag_about_github">Project on GitHub</string>
     <string name="github_project_url" translatable="false">https://github.com/gbl08ma/underlx</string>
     <string name="frag_map_switch_type">Switch map type</string>
+    <string name="frag_map_switch_type_taptarget_title">Switch diagram types</string>
+    <string name="frag_map_switch_type_taptarget_subtitle">Tap to switch between a compact diagram and a more geographically-accurate one.</string>
 </resources>

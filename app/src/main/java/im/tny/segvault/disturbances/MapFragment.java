@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +19,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -79,7 +86,7 @@ public class MapFragment extends TopFragment {
         webview.getSettings().setSupportZoom(true);
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
-        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         portraitMap = sharedPref.getBoolean("pref_portrait_map", false);
         if(portraitMap) {
             webview.getSettings().setUseWideViewPort(false);
@@ -94,6 +101,13 @@ public class MapFragment extends TopFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.map, menu);
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                showTargetPrompt();
+            }
+        });
     }
 
     @Override
@@ -107,7 +121,7 @@ public class MapFragment extends TopFragment {
                 return true;
             case R.id.menu_swap_map:
                 portraitMap = !portraitMap;
-                SharedPreferences sharedPref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
                 SharedPreferences.Editor e = sharedPref.edit();
                 e.putBoolean("pref_portrait_map", portraitMap);
                 e.apply();
@@ -133,6 +147,35 @@ public class MapFragment extends TopFragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    private void showTargetPrompt() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+        boolean isFirstOpen = sharedPref.getBoolean("fuse_first_map_open", true);
+
+        if(!isFirstOpen) {
+            return;
+        }
+
+        new MaterialTapTargetPrompt.Builder(getActivity())
+                .setTarget(R.id.menu_swap_map)
+                .setPrimaryText(R.string.frag_map_switch_type_taptarget_title)
+                .setSecondaryText(R.string.frag_map_switch_type_taptarget_subtitle)
+                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
+                    @Override
+                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
+                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
+                            // User has pressed the prompt target
+                            SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+                            SharedPreferences.Editor e = sharedPref.edit();
+                            e.putBoolean("fuse_first_map_open", false);
+                            e.apply();
+                        }
+                    }
+                })
+                .setFocalColour(ContextCompat.getColor(getContext(), R.color.colorAccent))
+                .setBackgroundColour(ContextCompat.getColor(getContext(), R.color.colorPrimaryLight))
+                .show();
     }
 
     @Override
