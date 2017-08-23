@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -102,7 +103,7 @@ class WiFiChecker {
         for (String id : ids) {
             bssids.add(new BSSID(id));
         }
-        for(WiFiLocator w : locators.values()) {
+        for (WiFiLocator w : locators.values()) {
             w.updateCurrentBSSIDs(bssids);
         }
     }
@@ -128,7 +129,12 @@ class WiFiChecker {
         public void onReceive(Context c, Intent intent) {
             Log.d("WiFiChecker", "onReceive");
             SharedPreferences sharedPref = c.getSharedPreferences("settings", MODE_PRIVATE);
-            if(!sharedPref.getBoolean("pref_location_enable", true)) {
+            if (!sharedPref.getBoolean("pref_location_enable", true)) {
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    c.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+                // we don't have permission to getScanResults
                 return;
             }
             List<ScanResult> wifiList = wifiMan.getScanResults();
@@ -144,7 +150,7 @@ class WiFiChecker {
                 bssids.add(new BSSID(s.BSSID));
                 Log.d("WiFiChecker", s.BSSID);
             }
-            for(WiFiLocator w : locators.values()) {
+            for (WiFiLocator w : locators.values()) {
                 w.updateCurrentBSSIDs(bssids);
             }
         }
