@@ -89,7 +89,7 @@ public class LineStatusCache {
                 lines.put(l.getId(), l);
             }
             for (Status s : info.values()) {
-                if(!(s instanceof Status)) {
+                if (!(s instanceof Status)) {
                     throw new Exception();
                 }
                 s.line = lines.get(s.id);
@@ -140,6 +140,9 @@ public class LineStatusCache {
 
     public void markLineAsDown(Line line, Date since) {
         synchronized (lock) {
+            // ensure line statuses are loaded, otherwise our map will only contain this line
+            getLineStatus();
+
             lineStatuses.put(line.getId(), new Status(line, since));
             cacheLineStatus(lineStatuses);
         }
@@ -150,6 +153,9 @@ public class LineStatusCache {
 
     public void markLineAsUp(Line line) {
         synchronized (lock) {
+            // ensure line statuses are loaded, otherwise our map will only contain this line
+            getLineStatus();
+
             lineStatuses.put(line.getId(), new Status(line));
             cacheLineStatus(lineStatuses);
         }
