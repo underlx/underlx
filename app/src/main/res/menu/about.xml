@@ -5,10 +5,15 @@
         android:id="@+id/menu_qr_code"
         android:title="@string/frag_about_qrcode"
         android:icon="@drawable/ic_menu_qrcode"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/menu_github"
         android:title="@string/frag_about_github"
         android:icon="@drawable/ic_menu_github"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_discord"
+        android:title="@string/frag_about_discord"
+        android:icon="@drawable/ic_menu_discord"
+        app:showAsAction="always" />
 </menu>

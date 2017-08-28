@@ -199,6 +199,8 @@
     <string name="frag_about_qrcode_close">Close</string>
     <string name="frag_about_qrcode">QR code</string>
     <string name="frag_about_github">Project on GitHub</string>
+    <string name="frag_about_discord">Discord server</string>
     <string name="github_project_url" translatable="false">https://github.com/gbl08ma/underlx</string>
+    <string name="discord_server_url" translatable="false">https://discord.gg/hhuC7fc</string>
     <string name="frag_map_switch_type">Switch map type</string>
 </resources>

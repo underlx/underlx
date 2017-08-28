@@ -191,5 +191,6 @@
     <string name="frag_about_qrcode_close">Fechar</string>
     <string name="frag_about_qrcode">Código QR</string>
     <string name="frag_about_github">Projecto no GitHub</string>
+    <string name="frag_about_discord">Grupo no Discord</string>
     <string name="frag_map_switch_type">Trocar tipo de mapa</string>
 </resources>
