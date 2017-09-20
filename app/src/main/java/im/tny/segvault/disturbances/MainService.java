@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -305,14 +306,14 @@ public class MainService extends Service {
         }
     }
 
-    public List<Stop> getAllStations() {
-        List<Stop> stops = new ArrayList<>();
+    public List<Station> getAllStations() {
+        List<Station> stations = new ArrayList<>();
         synchronized (lock) {
             for (Network n : networks.values()) {
-                stops.addAll(n.vertexSet());
+                stations.addAll(n.getStations());
             }
         }
-        return stops;
+        return stations;
     }
 
     public List<Line> getAllLines() {
@@ -396,6 +397,10 @@ public class MainService extends Service {
         long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
         realm.close();
         return entryCount * 0.3 + exitCount + transferCount;
+    }
+
+    public List<ScanResult> getLastWiFiScanResults() {
+        return wfc.getLastScanResults();
     }
 
     // DEBUG:

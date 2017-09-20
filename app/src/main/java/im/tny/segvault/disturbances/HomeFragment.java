@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PorterDuff;
@@ -15,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -74,6 +76,7 @@ public class HomeFragment extends TopFragment {
     private TextView curStationNameView;
     private TextView nextStationView;
     private LinearLayout curTripActionsLayout;
+    private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
     private CardView unconfirmedTripsCard;
 
@@ -125,6 +128,7 @@ public class HomeFragment extends TopFragment {
         nextStationView = (TextView) view.findViewById(R.id.next_station_view);
         curTripActionsLayout = (LinearLayout) view.findViewById(R.id.cur_trip_actions_layout);
         curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
+        curTripIncorrectLocationButton = (Button) view.findViewById(R.id.cur_trip_incorrect_location);
 
         unconfirmedTripsCard = (CardView) view.findViewById(R.id.unconfirmed_trips_card);
 
@@ -245,7 +249,7 @@ public class HomeFragment extends TopFragment {
         if (mListener == null)
             return;
 
-        MainService m = mListener.getMainService();
+        final MainService m = mListener.getMainService();
         if (m == null)
             return;
 
@@ -271,6 +275,13 @@ public class HomeFragment extends TopFragment {
                     intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
                     intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MainService.PRIMARY_NETWORK_ID);
                     startActivity(intent);
+                }
+            });
+
+            curTripIncorrectLocationButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new FeedbackUtil.IncorrectLocation(getContext(), m, station).showReportWizard();
                 }
             });
 

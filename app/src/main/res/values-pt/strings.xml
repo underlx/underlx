@@ -193,4 +193,11 @@
     <string name="frag_about_github">Projecto no GitHub</string>
     <string name="frag_about_discord">Grupo no Discord</string>
     <string name="frag_map_switch_type">Trocar tipo de mapa</string>
+    <string name="frag_home_incorrect_location">Comunicar erro de localização</string>
+    <string name="feedback_location_title">Comunicação de erros de localização</string>
+    <string name="feedback_location_where_are_you">Onde está neste momento?</string>
+    <string name="feedback_location_in_subway">Numa estação de Metro</string>
+    <string name="feedback_location_outside">Fora de uma estação</string>
+    <string name="feedback_location_select_station">Seleccione a estação em que se encontra:</string>
+    <string name="feedback_location_action_select">Seleccionar</string>
 </resources>

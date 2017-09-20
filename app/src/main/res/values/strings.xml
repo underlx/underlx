@@ -203,4 +203,11 @@
     <string name="github_project_url" translatable="false">https://github.com/gbl08ma/underlx</string>
     <string name="discord_server_url" translatable="false">https://discord.gg/hhuC7fc</string>
     <string name="frag_map_switch_type">Switch map type</string>
+    <string name="frag_home_incorrect_location">Report incorrect station</string>
+    <string name="feedback_location_title">Location issue reporting</string>
+    <string name="feedback_location_where_are_you">Where are you now?</string>
+    <string name="feedback_location_in_subway">At a subway station</string>
+    <string name="feedback_location_outside">Not at a station</string>
+    <string name="feedback_location_select_station">Select the station you\'re at:</string>
+    <string name="feedback_location_action_select">Select</string>
 </resources>
