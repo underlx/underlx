@@ -227,6 +227,14 @@ public class API {
         public int avgDistDuration;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Feedback {
+        public String id;
+        public long[] timestamp;
+        public String type;
+        public String contents;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -583,4 +591,19 @@ public class API {
             throw new APIException(e).addInfo("IOException");
         }
     }
+
+    public Feedback postFeedback(Feedback request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("feedback"), content, true);
+            return mapper.readValue(is, Feedback.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
 }

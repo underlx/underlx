@@ -2,6 +2,8 @@ package im.tny.segvault.disturbances;
 
 import com.evernote.android.job.JobManager;
 
+import java.util.Date;
+
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.Realm;
@@ -56,6 +58,16 @@ public class Application extends android.app.Application {
             if (oldVersion == 3) {
                 schema.get("Trip")
                         .addField("submitted", boolean.class);
+                oldVersion++;
+            }
+
+            if (oldVersion == 4) {
+                schema.create("Feedback")
+                        .addField("id", String.class)
+                        .addField("synced", boolean.class)
+                        .addField("timestamp", Date.class)
+                        .addField("type", String.class)
+                        .addField("contents", String.class);
                 oldVersion++;
             }
         }

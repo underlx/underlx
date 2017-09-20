@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
+import im.tny.segvault.disturbances.model.Feedback;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
@@ -147,6 +148,8 @@ public class MainService extends Service {
         realmForListeners = Realm.getDefaultInstance();
         tripRealmResults = realmForListeners.where(Trip.class).findAll();
         tripRealmResults.addChangeListener(tripRealmChangeListener);
+        feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
+        feedbackRealmResults.addChangeListener(feedbackRealmChangeListener);
 
         pairManager = new PairManager(getApplicationContext());
         //pairManager.unpair();
@@ -164,6 +167,7 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
         tripRealmResults.removeChangeListener(tripRealmChangeListener);
+        feedbackRealmResults.removeChangeListener(feedbackRealmChangeListener);
         realmForListeners.close();
     }
 
@@ -537,7 +541,7 @@ public class MainService extends Service {
                             Stop stop = new Stop(station, line);
                             line.addVertex(stop);
                             station.addVertex(stop);
-                            if(isFirstStationInLine) {
+                            if (isFirstStationInLine) {
                                 line.setFirstStop(stop);
                                 isFirstStationInLine = false;
                             }
@@ -1059,6 +1063,18 @@ public class MainService extends Service {
         @Override
         public void onChange(RealmResults<Trip> element) {
             Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        }
+    };
+
+    public static final String ACTION_FEEDBACK_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.feedback.updated";
+
+    private RealmResults<Feedback> feedbackRealmResults;
+    private final RealmChangeListener<RealmResults<Feedback>> feedbackRealmChangeListener = new RealmChangeListener<RealmResults<Feedback>>() {
+        @Override
+        public void onChange(RealmResults<Feedback> element) {
+            Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }

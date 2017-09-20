@@ -16,8 +16,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import im.tny.segvault.disturbances.model.Feedback;
 import im.tny.segvault.subway.Station;
+import io.realm.Realm;
 
 /**
  * Created by gabriel on 9/19/17.
@@ -103,12 +106,9 @@ public class FeedbackUtil {
             dialog.show();
         }
 
-
         private void sendReport(@Nullable Station correctStation) {
             // build report
             Map<String, Object> map = new HashMap<>();
-            map.put("type", "s2ls-incorrect-detection");
-            map.put("timestamp", Util.encodeRFC3339(new Date()));
             map.put("incorrectStation", incorrectStation.getId());
             if (correctStation == null) {
                 map.put("correctStation", "none");
@@ -121,11 +121,19 @@ public class FeedbackUtil {
             try {
                 String jsonResult = mapper.writerWithDefaultPrettyPrinter()
                         .writeValueAsString(map);
-                Log.d("Feedback", jsonResult);
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                Feedback feedback = realm.createObject(Feedback.class, UUID.randomUUID().toString());
+                feedback.setSynced(false);
+                feedback.setTimestamp(new Date());
+                feedback.setType("s2ls-incorrect-detection");
+                feedback.setContents(jsonResult);
+                realm.copyToRealm(feedback);
+                realm.commitTransaction();
+                realm.close();
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }
