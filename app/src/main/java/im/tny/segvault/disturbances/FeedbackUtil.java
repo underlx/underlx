@@ -2,8 +2,10 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -131,9 +133,17 @@ public class FeedbackUtil {
                 realm.copyToRealm(feedback);
                 realm.commitTransaction();
                 realm.close();
+
+                Intent intent = new Intent(ACTION_FEEDBACK_PROVIDED);
+                intent.putExtra(EXTRA_FEEDBACK_PROVIDED_DELAYED, !Connectivity.isConnected(context));
+                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
+                bm.sendBroadcast(intent);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    public static final String ACTION_FEEDBACK_PROVIDED = "im.tny.segvault.disturbances.action.feedback.provided";
+    public static final String EXTRA_FEEDBACK_PROVIDED_DELAYED = "im.tny.segvault.disturbances.extra.feedback.provided.delayed";
 }

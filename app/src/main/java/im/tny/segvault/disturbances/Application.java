@@ -64,6 +64,7 @@ public class Application extends android.app.Application {
             if (oldVersion == 4) {
                 schema.create("Feedback")
                         .addField("id", String.class)
+                        .addPrimaryKey("id")
                         .addField("synced", boolean.class)
                         .addField("timestamp", Date.class)
                         .addField("type", String.class)

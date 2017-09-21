@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity
         filter.addAction(MainService.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
+        filter.addAction(FeedbackUtil.ACTION_FEEDBACK_PROVIDED);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -450,6 +451,15 @@ public class MainActivity extends AppCompatActivity
                         cacheExtrasSnackbar.show();
                         cacheExtrasSnackbar = null;
                     }
+                    break;
+                case FeedbackUtil.ACTION_FEEDBACK_PROVIDED:
+                    String msg3;
+                    if (intent.getBooleanExtra(FeedbackUtil.EXTRA_FEEDBACK_PROVIDED_DELAYED, false)) {
+                        msg3 = getString(R.string.feedback_provided_delayed);
+                    } else {
+                        msg3 = getString(R.string.feedback_provided);
+                    }
+                    Snackbar.make(findViewById(R.id.fab), msg3, Snackbar.LENGTH_LONG).show();
                     break;
             }
         }

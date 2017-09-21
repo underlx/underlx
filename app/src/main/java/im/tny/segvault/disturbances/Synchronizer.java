@@ -34,6 +34,7 @@ public class Synchronizer {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_FEEDBACK_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }

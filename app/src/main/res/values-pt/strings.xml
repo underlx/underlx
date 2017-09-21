@@ -200,4 +200,6 @@
     <string name="feedback_location_outside">Fora de uma estação</string>
     <string name="feedback_location_select_station">Seleccione a estação em que se encontra:</string>
     <string name="feedback_location_action_select">Seleccionar</string>
+    <string name="feedback_provided">Obrigado pela sua contribuição.</string>
+    <string name="feedback_provided_delayed">Obrigado pela sua contribuição; será submetida quando ficar online.</string>
 </resources>
