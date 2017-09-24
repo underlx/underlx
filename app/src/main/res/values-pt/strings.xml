@@ -202,8 +202,10 @@
     <string name="feedback_location_outside">Fora de uma estação</string>
     <string name="feedback_location_select_station">Seleccione a estação em que se encontra:</string>
     <string name="feedback_location_action_select">Seleccionar</string>
+    <string name="feedback_location_hint">Estação correcta</string>
     <string name="feedback_provided">Obrigado pela sua contribuição.</string>
     <string name="feedback_provided_delayed">Obrigado pela sua contribuição; será submetida quando ficar online.</string>
     <string name="frag_home_trip_direction">Sentido %s</string>
     <string name="frag_home_trip_next_station">Próxima estação: %s</string>
+    <string name="frag_home_menu_report_incorrect_location">Comunicar erro de localização</string>
 </resources>

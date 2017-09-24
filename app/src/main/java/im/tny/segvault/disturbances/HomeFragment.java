@@ -178,11 +178,19 @@ public class HomeFragment extends TopFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                refresh(true);
+                return true;
+            case R.id.menu_report_incorrect_location:
+                if (mListener == null)
+                    return true;
 
-        if (id == R.id.menu_refresh) {
-            refresh(true);
-            return true;
+                MainService m = mListener.getMainService();
+                if (m == null)
+                    return true;
+                new FeedbackUtil.IncorrectLocation(getContext(), m).showReportWizard();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

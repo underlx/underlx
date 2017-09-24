@@ -6,4 +6,8 @@
         android:title="@string/frag_home_menu_refresh"
         android:icon="@drawable/ic_refresh_white_24dp"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_report_incorrect_location"
+        android:title="@string/frag_home_menu_report_incorrect_location"
+        app:showAsAction="never" />
 </menu>

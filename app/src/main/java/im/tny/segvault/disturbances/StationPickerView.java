@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
@@ -123,6 +124,10 @@ public class StationPickerView extends LinearLayout {
         textView.setAdapter(adapter);
     }
 
+    public void setHint(@Nullable CharSequence hint) {
+        ((TextInputLayout) findViewById(R.id.input_station)).setHint(hint);
+    }
+
     /**
      * Inflates the views in the layout.
      *
@@ -203,7 +208,7 @@ public class StationPickerView extends LinearLayout {
     private void setHintFromAttrs(AttributeSet attrs) {
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.StationPickerView);
         String hint = ta.getString(R.styleable.StationPickerView_hint);
-        ((TextInputLayout) findViewById(R.id.input_station)).setHint(hint);
+        setHint(hint);
         ta.recycle();
     }
 

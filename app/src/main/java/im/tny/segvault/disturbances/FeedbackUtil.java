@@ -7,7 +7,6 @@ import android.net.wifi.ScanResult;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -32,17 +31,30 @@ public class FeedbackUtil {
     public static class IncorrectLocation {
         private Context context;
         private MainService mService;
-        private Station incorrectStation;
+
+        @Nullable
+        private Station incorrectStation = null;
+
         private List<ScanResult> scanResults;
 
         public IncorrectLocation(Context context, MainService mService, Station incorrectStation) {
+            this(context, mService);
+            this.incorrectStation = incorrectStation;
+        }
+
+        public IncorrectLocation(Context context, MainService mService) {
             this.context = context;
             this.mService = mService;
-            this.incorrectStation = incorrectStation;
             scanResults = mService.getLastWiFiScanResults();
         }
 
         public void showReportWizard() {
+            if (incorrectStation == null) {
+                // it makes no sense to not be at a station and send a report for not being at a station
+                // so, let's assume the user is at a station and skip the first step
+                askCurrentStation();
+                return;
+            }
             new AlertDialog.Builder(context)
                     .setTitle(R.string.feedback_location_title)
                     .setMessage(R.string.feedback_location_where_are_you)
@@ -65,8 +77,10 @@ public class FeedbackUtil {
             params.rightMargin = context.getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
             spv.setLayoutParams(params);
             FrameLayout container = new FrameLayout(context);
+            // avoid autofocus on StationPickerView, which immediately opens the dropdown
+            container.setFocusableInTouchMode(true);
             container.addView(spv);
-
+            spv.setHint(context.getString(R.string.feedback_location_hint));
             spv.setStations(mService.getAllStations());
             spv.setAllStationsSortStrategy(new StationPickerView.AZSortStrategy());
 
@@ -82,6 +96,12 @@ public class FeedbackUtil {
                                     } else {
                                         askCurrentStation();
                                     }
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
                                 }
                             })
                             .setView(container);
@@ -111,7 +131,11 @@ public class FeedbackUtil {
         private void sendReport(@Nullable Station correctStation) {
             // build report
             Map<String, Object> map = new HashMap<>();
-            map.put("incorrectStation", incorrectStation.getId());
+            if (incorrectStation == null) {
+                map.put("incorrectStation", "none");
+            } else {
+                map.put("incorrectStation", incorrectStation.getId());
+            }
             if (correctStation == null) {
                 map.put("correctStation", "none");
             } else {
