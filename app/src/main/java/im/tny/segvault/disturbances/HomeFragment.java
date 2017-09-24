@@ -74,6 +74,7 @@ public class HomeFragment extends TopFragment {
     private LinearLayout curStationLayout;
     private LinearLayout curStationIconsLayout;
     private TextView curStationNameView;
+    private TextView directionView;
     private TextView nextStationView;
     private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
@@ -124,6 +125,7 @@ public class HomeFragment extends TopFragment {
         curStationLayout = (LinearLayout) view.findViewById(R.id.cur_station_layout);
         curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
         curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
+        directionView = (TextView) view.findViewById(R.id.direction_view);
         nextStationView = (TextView) view.findViewById(R.id.next_station_view);
         curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
         curTripIncorrectLocationButton = (Button) view.findViewById(R.id.cur_trip_incorrect_location);
@@ -262,13 +264,30 @@ public class HomeFragment extends TopFragment {
         } else {
             final Station station = loc.getCurrentTrip().getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
-            /*Stop nextExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
-            if (nextExit == null) {*/
-            nextStationView.setVisibility(View.GONE);
-            /*} else {
-                nextStationView.setText(nextExit.getStation().getName());
+
+            Stop direction = loc.getCurrentTrip().getDirection();
+            Stop next = loc.getCurrentTrip().getNextStop();
+            if (direction != null && next != null) {
+                directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
+                nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
+
+                Stop likelyExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
+                int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
+                if (next == likelyExit) {
+                    resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    nextStationView.setTextAppearance(resId);
+                } else {
+                    nextStationView.setTextAppearance(getContext(), resId);
+                }
+
+                directionView.setVisibility(View.VISIBLE);
                 nextStationView.setVisibility(View.VISIBLE);
-            }*/
+            } else {
+                directionView.setVisibility(View.GONE);
+                nextStationView.setVisibility(View.GONE);
+            }
             redrawCurrentStationLineIcons(station);
             curStationLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -60,7 +60,7 @@ public class Path implements GraphPath<Stop, Connection> {
             this.endVertex = startVertex;
         }
         this.weight = weight;
-        this.exitedOnce = true;
+        this.leftFirstStation = true;
     }
 
     public Path(Path copy) {
@@ -71,7 +71,7 @@ public class Path implements GraphPath<Stop, Connection> {
         this.edgeList = new LinkedList<>(copy.edgeList);
         this.times = new ArrayList<>(copy.times);
         this.manualEntry = new ArrayList<>(copy.manualEntry);
-        this.exitedOnce = copy.exitedOnce;
+        this.leftFirstStation = copy.leftFirstStation;
         // this copy does not inherit the listeners
     }
 
@@ -108,6 +108,7 @@ public class Path implements GraphPath<Stop, Connection> {
         for (OnPathChangedListener l : listeners) {
             l.onPathChanged(this);
         }
+        leftFirstStation = false;
     }
 
     public void manualExtendStart(Stop vertex) {
@@ -240,10 +241,10 @@ public class Path implements GraphPath<Stop, Connection> {
         manualEntry.add(false);
     }
 
-    private boolean exitedOnce = false;
+    private boolean leftFirstStation = false;
 
     public void registerExitTime() {
-        exitedOnce = true;
+        leftFirstStation = true;
         Pair<Date, Date> p = times.get(times.size() - 1);
         times.set(times.size() - 1, new Pair<>(p.first, new Date()));
         for (OnPathChangedListener l : listeners) {
@@ -280,7 +281,7 @@ public class Path implements GraphPath<Stop, Connection> {
     }
 
     public boolean isWaitingFirstTrain() {
-        return getEdgeList().size() == 0 && !exitedOnce;
+        return getEdgeList().size() == 0 && !leftFirstStation;
     }
 
     private List<OnPathChangedListener> listeners = new ArrayList<>();

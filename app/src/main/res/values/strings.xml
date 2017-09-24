@@ -214,4 +214,6 @@
     <string name="feedback_location_action_select">Select</string>
     <string name="feedback_provided">Thanks for your feedback.</string>
     <string name="feedback_provided_delayed">Thanks for your feedback; it will be submitted once you go online.</string>
+    <string name="frag_home_trip_direction">Direction %s</string>
+    <string name="frag_home_trip_next_station">Next station: %s</string>
 </resources>
