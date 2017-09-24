@@ -63,7 +63,7 @@ public class InNetworkState extends State {
         if (getS2LS().getCurrentTrip() == null) {
             getS2LS().startNewTrip(stops[0]);
         } else {
-            getS2LS().getCurrentTrip().setEndVertex(stops[stops.length - 1]);
+            getS2LS().getCurrentTrip().setEndVertex(stops[0]);
         }
     }
 
