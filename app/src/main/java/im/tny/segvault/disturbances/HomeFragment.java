@@ -75,7 +75,6 @@ public class HomeFragment extends TopFragment {
     private LinearLayout curStationIconsLayout;
     private TextView curStationNameView;
     private TextView nextStationView;
-    private LinearLayout curTripActionsLayout;
     private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
     private CardView unconfirmedTripsCard;
@@ -126,7 +125,6 @@ public class HomeFragment extends TopFragment {
         curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
         curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
         nextStationView = (TextView) view.findViewById(R.id.next_station_view);
-        curTripActionsLayout = (LinearLayout) view.findViewById(R.id.cur_trip_actions_layout);
         curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
         curTripIncorrectLocationButton = (Button) view.findViewById(R.id.cur_trip_incorrect_location);
 
@@ -291,10 +289,10 @@ public class HomeFragment extends TopFragment {
 
             if (loc.getState() instanceof LeavingNetworkState) {
                 curTripEndButton.setVisibility(View.VISIBLE);
-                curTripActionsLayout.setVisibility(View.VISIBLE);
+                curTripIncorrectLocationButton.setVisibility(View.GONE);
             } else {
                 curTripEndButton.setVisibility(View.GONE);
-                curTripActionsLayout.setVisibility(View.GONE);
+                curTripIncorrectLocationButton.setVisibility(View.VISIBLE);
             }
             ongoingTripCard.setVisibility(View.VISIBLE);
         }
