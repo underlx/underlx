@@ -235,7 +235,11 @@ public class HomeFragment extends TopFragment {
         }
 
         Network net = m.getNetwork(MainService.PRIMARY_NETWORK_ID);
-        if (net == null || net.isOpen()) {
+        if (net == null) {
+            networkClosedCard.setVisibility(View.GONE);
+            unconfirmedTripsCard.setVisibility(View.GONE);
+            m.checkForTopologyUpdates();
+        } else if (net.isOpen()) {
             networkClosedCard.setVisibility(View.GONE);
         } else {
             Formatter f = new Formatter();

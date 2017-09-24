@@ -109,7 +109,11 @@ public class StationLobbyFragment extends Fragment {
             return;
 
         Network net = service.getNetwork(networkId);
+        if (net == null)
+            return;
         Station station = net.getStation(stationId);
+        if (station == null)
+            return;
 
         // Lobbies
         for (Lobby lobby : station.getLobbies()) {

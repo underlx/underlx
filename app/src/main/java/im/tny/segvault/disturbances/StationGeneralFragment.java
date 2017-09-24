@@ -114,7 +114,11 @@ public class StationGeneralFragment extends Fragment {
             return;
 
         Network net = service.getNetwork(networkId);
+        if (net == null)
+            return;
         final Station station = net.getStation(stationId);
+        if (station == null)
+            return;
 
         if (station.isAlwaysClosed()) {
             LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);

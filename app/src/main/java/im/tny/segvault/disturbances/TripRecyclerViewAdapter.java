@@ -122,7 +122,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         });
         holder.mView.setLongClickable(true);
 
-        if(homeScreenList) {
+        if (homeScreenList) {
             holder.confirmButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -172,7 +172,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             lineLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
             destinationLayout = (LinearLayout) view.findViewById(R.id.destination_layout);
             secondDotView = (ImageView) view.findViewById(R.id.second_dot_view);
-            if(homeScreenList) {
+            if (homeScreenList) {
                 confirmButton = (Button) view.findViewById(R.id.confirm_button);
                 correctButton = (Button) view.findViewById(R.id.correct_button);
             } else {
@@ -210,6 +210,22 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                     break;
                 }
             }
+            if (network == null) {
+                // we probably lost the network map
+                this.networkId = "";
+                this.originId = "";
+                this.originName = "";
+                this.originTime = new Date();
+                this.originColor = Color.BLACK;
+
+                this.destName = "";
+                this.destTime = new Date();
+                this.destColor = Color.BLACK;
+
+                this.lineColors = new ArrayList<>();
+                this.isVisit = true;
+                return;
+            }
             this.networkId = network.getId();
             this.originId = network.getStation(trip.getPath().get(0).getStation().getId()).getId();
             this.originName = network.getStation(trip.getPath().get(0).getStation().getId()).getName();
@@ -246,7 +262,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
     public interface OnListFragmentInteractionListener {
         void onListFragmentClick(TripRecyclerViewAdapter.TripItem item);
+
         void onListFragmentConfirmButtonClick(TripRecyclerViewAdapter.TripItem item);
+
         void onListFragmentCorrectButtonClick(TripRecyclerViewAdapter.TripItem item);
     }
 }

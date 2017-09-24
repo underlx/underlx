@@ -140,7 +140,15 @@ public class StationActivity extends AppCompatActivity
             bm.sendBroadcast(intent);
 
             Network net = locService.getNetwork(networkId);
+            if(net == null) {
+                StationActivity.this.finish();
+                return;
+            }
             Station station = net.getStation(stationId);
+            if(station == null) {
+                StationActivity.this.finish();
+                return;
+            }
             worldCoords = station.getWorldCoordinates();
 
             setTitle(station.getName());
