@@ -38,6 +38,7 @@ class WiFiChecker {
     private final WifiManager wifiMan;
     private final Handler handler = new Handler();
     private boolean isScanning;
+    List<ScanResult> wifiList = new ArrayList<>();
 
     public WiFiChecker(Context context, WifiManager manager) {
         wifiMan = manager;
@@ -96,6 +97,10 @@ class WiFiChecker {
         return scanInterval;
     }
 
+    public List<ScanResult> getLastScanResults() {
+        return new ArrayList<>(wifiList);
+    }
+
     // this method is for debugging only, meant to be called in an expression evaluator in a debugger
     public void updateBSSIDsDebug(String listString) {
         String[] ids = listString.split(",");
@@ -137,7 +142,7 @@ class WiFiChecker {
                 // we don't have permission to getScanResults
                 return;
             }
-            List<ScanResult> wifiList = wifiMan.getScanResults();
+            wifiList = wifiMan.getScanResults();
             List<BSSID> bssids = new ArrayList<>();
             // sort by descending signal strength
             Collections.sort(wifiList, Collections.<ScanResult>reverseOrder(new Comparator<ScanResult>() {

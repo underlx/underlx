@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
+import im.tny.segvault.disturbances.model.Feedback;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
@@ -146,6 +148,8 @@ public class MainService extends Service {
         realmForListeners = Realm.getDefaultInstance();
         tripRealmResults = realmForListeners.where(Trip.class).findAll();
         tripRealmResults.addChangeListener(tripRealmChangeListener);
+        feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
+        feedbackRealmResults.addChangeListener(feedbackRealmChangeListener);
 
         pairManager = new PairManager(getApplicationContext());
         //pairManager.unpair();
@@ -163,6 +167,7 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
         tripRealmResults.removeChangeListener(tripRealmChangeListener);
+        feedbackRealmResults.removeChangeListener(feedbackRealmChangeListener);
         realmForListeners.close();
     }
 
@@ -305,14 +310,14 @@ public class MainService extends Service {
         }
     }
 
-    public List<Stop> getAllStations() {
-        List<Stop> stops = new ArrayList<>();
+    public List<Station> getAllStations() {
+        List<Station> stations = new ArrayList<>();
         synchronized (lock) {
             for (Network n : networks.values()) {
-                stops.addAll(n.vertexSet());
+                stations.addAll(n.getStations());
             }
         }
-        return stops;
+        return stations;
     }
 
     public List<Line> getAllLines() {
@@ -396,6 +401,10 @@ public class MainService extends Service {
         long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
         realm.close();
         return entryCount * 0.3 + exitCount + transferCount;
+    }
+
+    public List<ScanResult> getLastWiFiScanResults() {
+        return wfc.getLastScanResults();
     }
 
     // DEBUG:
@@ -532,7 +541,7 @@ public class MainService extends Service {
                             Stop stop = new Stop(station, line);
                             line.addVertex(stop);
                             station.addVertex(stop);
-                            if(isFirstStationInLine) {
+                            if (isFirstStationInLine) {
                                 line.setFirstStop(stop);
                                 isFirstStationInLine = false;
                             }
@@ -1054,6 +1063,18 @@ public class MainService extends Service {
         @Override
         public void onChange(RealmResults<Trip> element) {
             Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        }
+    };
+
+    public static final String ACTION_FEEDBACK_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.feedback.updated";
+
+    private RealmResults<Feedback> feedbackRealmResults;
+    private final RealmChangeListener<RealmResults<Feedback>> feedbackRealmChangeListener = new RealmChangeListener<RealmResults<Feedback>>() {
+        @Override
+        public void onChange(RealmResults<Feedback> element) {
+            Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }

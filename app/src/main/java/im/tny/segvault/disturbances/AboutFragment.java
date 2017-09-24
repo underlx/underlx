@@ -220,6 +220,9 @@ public class AboutFragment extends TopFragment {
         } else if (id == R.id.menu_github) {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_project_url)));
             startActivity(browserIntent);
+        } else if (id == R.id.menu_discord) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.discord_server_url)));
+            startActivity(browserIntent);
         }
 
         return super.onOptionsItemSelected(item);

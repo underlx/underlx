@@ -34,6 +34,7 @@ public class Synchronizer {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_FEEDBACK_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -80,6 +81,17 @@ public class Synchronizer {
                             e.printStackTrace();
                         }
                     }
+
+                    RealmResults<im.tny.segvault.disturbances.model.Feedback> unsyncedFeedback = realm.where(im.tny.segvault.disturbances.model.Feedback.class).equalTo("synced", false).findAll();
+                    for (im.tny.segvault.disturbances.model.Feedback f : unsyncedFeedback) {
+                        API.Feedback request = feedbackToAPIRequest(f);
+                        try {
+                            API.getInstance().postFeedback(request);
+                            f.setSynced(true);
+                        } catch (APIException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
             realm.close();
@@ -113,6 +125,15 @@ public class Synchronizer {
         return apiUse;
     }
 
+    private API.Feedback feedbackToAPIRequest(im.tny.segvault.disturbances.model.Feedback f) {
+        API.Feedback request = new API.Feedback();
+        request.id = f.getId();
+        request.timestamp = new long[]{f.getTimestamp().getTime() / 1000, (f.getTimestamp().getTime() % 1000) * 1000000};
+        request.type = f.getType();
+        request.contents = f.getContents();
+        return request;
+    }
+
     private class SyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -127,6 +148,7 @@ public class Synchronizer {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case MainService.ACTION_TRIP_REALM_UPDATED:
+                case MainService.ACTION_FEEDBACK_REALM_UPDATED:
                     // TODO. this may cause cycles (we change the realm ourselves)
                     new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;

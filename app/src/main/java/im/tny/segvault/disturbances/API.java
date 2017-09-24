@@ -30,8 +30,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -225,6 +225,14 @@ public class API {
     static public class LineStats {
         public float availability;
         public int avgDistDuration;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Feedback {
+        public String id;
+        public long[] timestamp;
+        public String type;
+        public String contents;
     }
 
     private int timeoutMs;
@@ -583,4 +591,19 @@ public class API {
             throw new APIException(e).addInfo("IOException");
         }
     }
+
+    public Feedback postFeedback(Feedback request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("feedback"), content, true);
+            return mapper.readValue(is, Feedback.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
 }
