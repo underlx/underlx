@@ -152,7 +152,7 @@ public class HomeLinesFragment extends Fragment {
         recyclerView.invalidate();
         recyclerView.setVisibility(View.VISIBLE);
 
-        if(new Date().getTime() - mostRecentUpdate.getTime() > java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
+        if (new Date().getTime() - mostRecentUpdate.getTime() > java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
             recyclerView.setAlpha(0.6f);
             updateInformationView.setTypeface(null, Typeface.BOLD);
         } else {
@@ -184,7 +184,7 @@ public class HomeLinesFragment extends Fragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(getActivity() == null) {
+            if (getActivity() == null) {
                 return;
             }
             switch (intent.getAction()) {

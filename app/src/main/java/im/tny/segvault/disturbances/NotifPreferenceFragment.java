@@ -131,7 +131,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         List<CharSequence> labels = new ArrayList<>();
         for (String value : values) {
             int index = multilistPreference.findIndexOfValue(value);
-            if(index >= 0) {
+            if (index >= 0) {
                 labels.add(multilistPreference.getEntries()[index]);
             }
         }
@@ -188,6 +188,9 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (getActivity() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
