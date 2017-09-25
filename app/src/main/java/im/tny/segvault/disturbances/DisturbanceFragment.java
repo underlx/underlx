@@ -158,10 +158,11 @@ public class DisturbanceFragment extends TopFragment {
         }
 
         protected Boolean doInBackground(Void... v) {
-            if (getActivity() == null || getContext() == null) {
+            Context context = getContext();
+            if (getActivity() == null || context == null) {
                 return false;
             }
-            if (!Connectivity.isConnected(getContext())) {
+            if (!Connectivity.isConnected(context)) {
                 return false;
             }
             if (mListener == null || mListener.getMainService() == null) {
