@@ -47,10 +47,16 @@
     <string name="frag_disturbance_ongoing">Ongoing</string>
     <string name="frag_disturbance_line">%s line</string>
     <string name="frag_notif_title">Notifications</string>
-    <string name="frag_notif_filter_title">Disturbance notifications</string>
+    <string name="frag_notif_disturbance_title">Disturbance notifications</string>
     <string name="frag_notif_lines">Lines</string>
     <string name="frag_notif_summary_lines">Showing notifications for lines: %s</string>
     <string name="frag_notif_summary_no_lines">Disturbance notifications disabled</string>
+    <string name="frag_notif_announcement_title">Announcement notifications</string>
+    <string name="frag_notif_sources">Sources</string>
+    <string name="frag_notif_summary_sources">Showing notifications for announcements from: %s</string>
+    <string name="frag_notif_summary_no_sources">Announcement notifications disabled</string>
+    <string name="pref_notifs_announcement_source_pt_ml_rss">Metro Website</string>
+    <string name="pref_notifs_announcement_source_pt_ml_facebook">Metro Facebook page</string>
     <string name="frag_notif_alert_title">Alert settings</string>
     <string name="frag_notif_ringtone">Ringtone</string>
     <string name="frag_notif_vibrate">Vibrate</string>
@@ -97,6 +103,8 @@
         <item>pt-ml-azul</item>
         <item>pt-ml-verde</item>
         <item>pt-ml-vermelha</item>
+    </string-array>
+    <string-array name="default_announcement_sources" translatable="false">
     </string-array>
     <string name="activity_loading_title">Loading...</string>
     <string name="frag_station_more_information">More information</string>

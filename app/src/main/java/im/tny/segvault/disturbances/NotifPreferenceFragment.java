@@ -27,6 +27,9 @@ import rikka.materialpreference.MultiSelectListPreference;
 import rikka.materialpreference.Preference;
 import rikka.materialpreference.PreferenceFragment;
 
+import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_FACEBOOK;
+import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_RSS;
+
 public class NotifPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
 
@@ -70,11 +73,15 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
 
         setPreferencesFromResource(R.xml.notif_settings, null);
 
+        updatePreferences();
+    }
+
+    private void updatePreferences() {
         updateLinesPreference();
+        updateSourcesPreference();
     }
 
     private void updateLinesPreference() {
-        Log.d("updateLinesPreference", "enter");
         MultiSelectListPreference linesPreference;
         linesPreference = (MultiSelectListPreference) findPreference("pref_notifs_lines");
 
@@ -83,7 +90,6 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         List<Line> lines = new LinkedList<>();
         if (mListener != null && mListener.getMainService() != null) {
             for (Network n : mListener.getMainService().getNetworks()) {
-                Log.d("updateLinesPreference", "addAll");
                 lines.addAll(n.getLines());
             }
             Collections.sort(lines, new Comparator<Line>() {
@@ -100,7 +106,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
 
         linesPreference.setEntries(lineNames.toArray(new CharSequence[lineNames.size()]));
         linesPreference.setEntryValues(lineIDs.toArray(new CharSequence[lineIDs.size()]));
-        updateMultiSelectListPreferenceSummary(linesPreference, linesPreference.getValues());
+        updateLinesPreferenceSummary(linesPreference, linesPreference.getValues());
 
         linesPreference.setOnPreferenceChangeListener(
                 new Preference.OnPreferenceChangeListener() {
@@ -108,13 +114,13 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
                         MultiSelectListPreference multilistPreference = (MultiSelectListPreference) preference;
                         @SuppressWarnings("unchecked")
                         Set<String> values = (Set<String>) newValue;
-                        updateMultiSelectListPreferenceSummary(multilistPreference, values);
+                        updateLinesPreferenceSummary(multilistPreference, values);
                         return true;
                     }
                 });
     }
 
-    private void updateMultiSelectListPreferenceSummary(MultiSelectListPreference preference, Set<String> values) {
+    private void updateLinesPreferenceSummary(MultiSelectListPreference preference, Set<String> values) {
         List<String> sortedValues = new ArrayList<String>(values);
         Collections.sort(sortedValues);
 
@@ -124,6 +130,42 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
             preference.setSummary(String.format(getString(R.string.frag_notif_summary_lines), summary));
         } else {
             preference.setSummary(getString(R.string.frag_notif_summary_no_lines));
+        }
+    }
+
+    private void updateSourcesPreference() {
+        MultiSelectListPreference sourcesPreference;
+        sourcesPreference = (MultiSelectListPreference) findPreference("pref_notifs_announcement_sources");
+
+        sourcesPreference.setEntries(
+                new CharSequence[]{
+                        getString(R.string.pref_notifs_announcement_source_pt_ml_rss),
+                        getString(R.string.pref_notifs_announcement_source_pt_ml_facebook)});
+        sourcesPreference.setEntryValues(new CharSequence[]{SOURCE_RSS, SOURCE_FACEBOOK});
+        updateSourcesPreferenceSummary(sourcesPreference, sourcesPreference.getValues());
+
+        sourcesPreference.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        MultiSelectListPreference multilistPreference = (MultiSelectListPreference) preference;
+                        @SuppressWarnings("unchecked")
+                        Set<String> values = (Set<String>) newValue;
+                        updateSourcesPreferenceSummary(multilistPreference, values);
+                        return true;
+                    }
+                });
+    }
+
+    private void updateSourcesPreferenceSummary(MultiSelectListPreference preference, Set<String> values) {
+        List<String> sortedValues = new ArrayList<String>(values);
+        Collections.sort(sortedValues);
+
+        if (!values.isEmpty()) {
+            CharSequence summary = getSelectedEntries(sortedValues, preference).toString();
+            summary = summary.subSequence(1, summary.length() - 1);
+            preference.setSummary(String.format(getString(R.string.frag_notif_summary_sources), summary));
+        } else {
+            preference.setSummary(getString(R.string.frag_notif_summary_no_sources));
         }
     }
 
@@ -156,7 +198,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         super.onResume();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
-        updateLinesPreference();
+        updatePreferences();
     }
 
     @Override
@@ -194,7 +236,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    updateLinesPreference();
+                    updatePreferences();
                     break;
             }
         }

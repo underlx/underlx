@@ -168,10 +168,7 @@ public class DisturbanceFragment extends TopFragment {
             if (mListener == null || mListener.getMainService() == null) {
                 return false;
             }
-            List<Line> lines = new LinkedList<>();
-            for (Network n : mListener.getMainService().getNetworks()) {
-                lines.addAll(n.getLines());
-            }
+
             Collection<Network> networks = mListener.getMainService().getNetworks();
             try {
                 List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(14)));
