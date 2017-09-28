@@ -34,7 +34,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.subway.Network;
 
 /**
@@ -54,6 +56,9 @@ public class AnnouncementFragment extends TopFragment {
 
     private RecyclerView recyclerView = null;
     private TextView emptyView;
+
+    public static final String SOURCE_RSS = "pt-ml-rss";
+    public static final String SOURCE_FACEBOOK = "pt-ml-facebook";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -162,28 +167,27 @@ public class AnnouncementFragment extends TopFragment {
         }
 
         protected Boolean doInBackground(Void... v) {
-            if (!Connectivity.isConnected(getContext())) {
+            Context context = getContext();
+            if (getActivity() == null || context == null) {
+                return false;
+            }
+            if (!Connectivity.isConnected(context)) {
                 return false;
             }
             if (mListener == null || mListener.getMainService() == null) {
                 return false;
             }
 
-            Network net = mListener.getMainService().getNetwork(networkId);
-
-            if (net == null) {
-                return false;
-            }
-
             try {
-                URL url = new URL(net.getAnnouncementsURL());
-                InputStream inputStream = url.openConnection().getInputStream();
-                items = parseFeed(inputStream);
-            } catch (IOException ex) {
-                return false;
-            } catch (XmlPullParserException e) {
+                List<API.Announcement> announcements = API.getInstance().getAnnouncements();
+                for (API.Announcement a : announcements) {
+                    Date date = new Date(a.time[0] * 1000);
+                    items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, a.title, a.body, a.url, a.source));
+                }
+            } catch (APIException e) {
                 return false;
             }
+
             Collections.sort(items, Collections.reverseOrder(new Comparator<AnnouncementRecyclerViewAdapter.AnnouncementItem>() {
                 @Override
                 public int compare(AnnouncementRecyclerViewAdapter.AnnouncementItem announcementItem, AnnouncementRecyclerViewAdapter.AnnouncementItem t1) {
@@ -227,108 +231,6 @@ public class AnnouncementFragment extends TopFragment {
             }
         }
 
-        private List<AnnouncementRecyclerViewAdapter.AnnouncementItem> parseFeed(InputStream inputStream) throws XmlPullParserException, IOException {
-            String title = null;
-            String link = null;
-            String description = null;
-            String pubDate = null;
-            boolean isItem = false;
-            List<AnnouncementRecyclerViewAdapter.AnnouncementItem> items = new ArrayList<>();
-
-            try {
-                XmlPullParser xmlPullParser = Xml.newPullParser();
-                xmlPullParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-                xmlPullParser.setInput(inputStream, null);
-
-                while (xmlPullParser.next() != XmlPullParser.END_DOCUMENT) {
-                    int eventType = xmlPullParser.getEventType();
-
-                    String name = xmlPullParser.getName();
-                    if (name == null)
-                        continue;
-
-                    if (eventType == XmlPullParser.END_TAG) {
-                        if (name.equalsIgnoreCase("item")) {
-                            isItem = false;
-                        }
-                        continue;
-                    }
-
-                    if (eventType == XmlPullParser.START_TAG) {
-                        if (name.equalsIgnoreCase("item")) {
-                            isItem = true;
-                            continue;
-                        }
-                    }
-
-                    String result = "";
-                    if (xmlPullParser.next() == XmlPullParser.TEXT) {
-                        result = xmlPullParser.getText();
-                        xmlPullParser.nextTag();
-                    }
-
-                    if (name.equalsIgnoreCase("title")) {
-                        title = result;
-                    } else if (name.equalsIgnoreCase("link")) {
-                        link = result;
-                    } else if (name.equalsIgnoreCase("description")) {
-                        description = result;
-                    } else if (name.equalsIgnoreCase("pubDate")) {
-                        pubDate = result;
-                    }
-
-                    if (title != null && link != null && description != null) {
-                        if (isItem && pubDate != null) {
-                            DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-                            try {
-                                Date date = formatter.parse(pubDate);
-                                items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, title, parseDescription(description), link));
-                            } catch (ParseException e) {
-                                // oh well, skip this item
-                            }
-                        }
-
-                        title = null;
-                        link = null;
-                        description = null;
-                        isItem = false;
-                    }
-                }
-
-                return items;
-            } finally {
-                inputStream.close();
-            }
-        }
-    }
-
-    public String parseDescription(String rawDescription) {
-        String description = "";
-        try {
-            XmlPullParser xmlPullParser = Xml.newPullParser();
-            xmlPullParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            xmlPullParser.setInput(new StringReader(rawDescription));
-
-            while (xmlPullParser.next() != XmlPullParser.END_DOCUMENT) {
-                int eventType = xmlPullParser.getEventType();
-
-                if (eventType == XmlPullParser.END_TAG) {
-                    if (xmlPullParser.getName().equalsIgnoreCase("p")) {
-                        // we don't care about other paragraphs
-                        break;
-                    }
-                } else if (eventType == XmlPullParser.START_TAG) {
-                    if (xmlPullParser.getName().equalsIgnoreCase("br")) {
-                        description += "\n";
-                    }
-                } else if (eventType == XmlPullParser.TEXT) {
-                    description += xmlPullParser.getText().trim();
-                }
-            }
-        } catch (Exception ex) {
-            return rawDescription;
-        }
-        return description;
     }
 
     /**

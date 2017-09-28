@@ -208,4 +208,5 @@
     <string name="frag_home_trip_direction">Sentido %s</string>
     <string name="frag_home_trip_next_station">Próxima estação: %s</string>
     <string name="frag_home_menu_report_incorrect_location">Comunicar erro de localização</string>
+    <string name="frag_announcement_no_text">Esta entrada não contém informação textual.</string>
 </resources>

@@ -123,6 +123,7 @@
     <string name="frag_announcements_updated">Announcements updated</string>
     <string name="frag_announcement_action_more">Tap for more</string>
     <string name="frag_announcement_posted_on">Posted on %s</string>
+    <string name="frag_announcement_no_text">This post does not contain textual information.</string>
     <string name="frag_map_zoom_out">Zoom out</string>
     <string name="frag_map_zoom_in">Zoom in</string>
     <string name="act_station_tab_general">General</string>

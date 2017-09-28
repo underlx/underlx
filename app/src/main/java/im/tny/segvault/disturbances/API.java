@@ -30,14 +30,15 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
     }
 
     private PairManager pairManager;
+
     public void setPairManager(PairManager manager) {
         pairManager = manager;
     }
@@ -235,6 +236,16 @@ public class API {
         public String contents;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Announcement {
+        public long[] time;
+        public String network;
+        public String title;
+        public String body;
+        public String url;
+        public String source;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -257,7 +268,7 @@ public class API {
             h.setReadTimeout(timeoutMs);
             h.setRequestProperty("Accept", "application/msgpack");
             h.setRequestProperty("Accept-Encoding", "gzip");
-            if(authenticate && pairManager != null) {
+            if (authenticate && pairManager != null) {
                 String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
                 h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
             }
@@ -298,7 +309,7 @@ public class API {
             h.setRequestProperty("Accept", "application/msgpack");
             h.setRequestProperty("Accept-Encoding", "gzip");
             h.setRequestProperty("Content-Type", "application/msgpack");
-            if(authenticate && pairManager != null) {
+            if (authenticate && pairManager != null) {
                 String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
                 h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
             }
@@ -333,7 +344,7 @@ public class API {
         } catch (MalformedURLException e) {
             throw new APIException(e).addInfo("Malformed URL on " + method + " request");
         } catch (IOException e) {
-            throw new APIException(e).addInfo("IOException on " + method +" request");
+            throw new APIException(e).addInfo("IOException on " + method + " request");
         }
     }
 
@@ -606,4 +617,29 @@ public class API {
         }
     }
 
+    public List<Announcement> getAnnouncements() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("announcements"), false), new TypeReference<List<Announcement>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Announcement> getAnnouncementsFromSource(String source) throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("announcements/" + source), false), new TypeReference<List<Announcement>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
 }

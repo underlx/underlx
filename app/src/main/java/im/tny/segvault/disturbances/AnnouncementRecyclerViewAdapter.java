@@ -1,15 +1,22 @@
 package im.tny.segvault.disturbances;
 
+import android.content.Context;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_FACEBOOK;
+import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_RSS;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link AnnouncementItem} and makes a call to the
@@ -19,6 +26,7 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
 
     private final List<AnnouncementItem> mValues;
     private final AnnouncementFragment.OnListFragmentInteractionListener mListener;
+    private Context context;
 
     public AnnouncementRecyclerViewAdapter(List<AnnouncementItem> items, AnnouncementFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
@@ -27,7 +35,8 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        context = parent.getContext();
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.fragment_announcement, parent, false);
         return new ViewHolder(view);
     }
@@ -36,8 +45,36 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(holder.mItem.title);
+        if (holder.mItem.title.isEmpty()) {
+            holder.mTitleView.setVisibility(View.GONE);
+        }
         holder.mDateView.setText(String.format(holder.mView.getContext().getString(R.string.frag_announcement_posted_on), DateUtils.formatDateTime(holder.mView.getContext(), holder.mItem.pubDate.getTime(), DateUtils.FORMAT_SHOW_DATE)));
         holder.mDescriptionView.setText(holder.mItem.description);
+        int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
+        if (holder.mItem.description.length() > 0 && holder.mItem.description.length() <= 140) {
+            resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            holder.mDescriptionView.setTextAppearance(resId);
+        } else {
+            holder.mDescriptionView.setTextAppearance(context, resId);
+        }
+
+        if (holder.mItem.title.isEmpty() && holder.mItem.description.isEmpty()) {
+            holder.mDescriptionView.setText(R.string.frag_announcement_no_text);
+            holder.mDescriptionView.setTypeface(null, Typeface.ITALIC);
+        }
+
+        switch(holder.mItem.source) {
+            case SOURCE_RSS:
+                holder.mSourceView.setImageResource(R.drawable.ic_web_accent_24dp);
+                break;
+            case SOURCE_FACEBOOK:
+                holder.mSourceView.setImageResource(R.drawable.ic_facebook_box_natural_24dp);
+                break;
+        }
+
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,6 +96,7 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         public final View mView;
         public final TextView mTitleView;
         public final TextView mDateView;
+        public final ImageView mSourceView;
         public final TextView mDescriptionView;
         public AnnouncementItem mItem;
 
@@ -67,6 +105,7 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.title_view);
             mDateView = (TextView) view.findViewById(R.id.date_view);
+            mSourceView = (ImageView) view.findViewById(R.id.source_view);
             mDescriptionView = (TextView) view.findViewById(R.id.description_view);
         }
 
@@ -81,12 +120,14 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         public final String title;
         public final String description;
         public final String url;
+        public final String source;
 
-        public AnnouncementItem(Date pubDate, String title, String description, String url) {
+        public AnnouncementItem(Date pubDate, String title, String description, String url, String source) {
             this.pubDate = pubDate;
             this.title = title;
             this.description = description;
             this.url = url;
+            this.source = source;
         }
 
         @Override
