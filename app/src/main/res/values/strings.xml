@@ -227,4 +227,5 @@
     <string name="frag_home_trip_direction">Direction %s</string>
     <string name="frag_home_trip_next_station">Next station: %s</string>
     <string name="frag_home_menu_report_incorrect_location">Report station detection error</string>
+    <string name="notif_announcement_alt_title">New announcement on %s</string>
 </resources>

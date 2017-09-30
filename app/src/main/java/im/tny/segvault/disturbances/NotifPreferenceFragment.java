@@ -27,9 +27,6 @@ import rikka.materialpreference.MultiSelectListPreference;
 import rikka.materialpreference.Preference;
 import rikka.materialpreference.PreferenceFragment;
 
-import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_FACEBOOK;
-import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_RSS;
-
 public class NotifPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
 
@@ -137,11 +134,14 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         MultiSelectListPreference sourcesPreference;
         sourcesPreference = (MultiSelectListPreference) findPreference("pref_notifs_announcement_sources");
 
-        sourcesPreference.setEntries(
-                new CharSequence[]{
-                        getString(R.string.pref_notifs_announcement_source_pt_ml_rss),
-                        getString(R.string.pref_notifs_announcement_source_pt_ml_facebook)});
-        sourcesPreference.setEntryValues(new CharSequence[]{SOURCE_RSS, SOURCE_FACEBOOK});
+        List<CharSequence> entryValues = new ArrayList<>();
+        List<CharSequence> entries = new ArrayList<>();
+        for(Announcement.Source source : Announcement.getSources()) {
+            entryValues.add(source.id);
+            entries.add(getString(source.nameResourceId));
+        }
+        sourcesPreference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+        sourcesPreference.setEntries(entries.toArray(new CharSequence[entries.size()]));
         updateSourcesPreferenceSummary(sourcesPreference, sourcesPreference.getValues());
 
         sourcesPreference.setOnPreferenceChangeListener(
@@ -204,6 +204,11 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d("NotifPreferenceFrag", "onSharedPreferenceChanged " + key);
+        if (key.equals("pref_notifs_lines") || key.equals("pref_notifs_announcement_sources")) {
+            if (mListener != null && mListener.getMainService() != null) {
+                mListener.getMainService().reloadFCMsubscriptions();
+            }
+        }
     }
 
     @Override

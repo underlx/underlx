@@ -215,4 +215,5 @@
     <string name="frag_home_trip_next_station">Próxima estação: %s</string>
     <string name="frag_home_menu_report_incorrect_location">Comunicar erro de localização</string>
     <string name="frag_announcement_no_text">Esta entrada não contém informação textual.</string>
+    <string name="notif_announcement_alt_title">Nova notícia em %s</string>
 </resources>

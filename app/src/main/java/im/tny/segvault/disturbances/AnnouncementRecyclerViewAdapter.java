@@ -15,9 +15,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_FACEBOOK;
-import static im.tny.segvault.disturbances.AnnouncementFragment.SOURCE_RSS;
-
 /**
  * {@link RecyclerView.Adapter} that can display a {@link AnnouncementItem} and makes a call to the
  * specified {@link AnnouncementFragment.OnListFragmentInteractionListener}.
@@ -66,14 +63,7 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
             holder.mDescriptionView.setTypeface(null, Typeface.ITALIC);
         }
 
-        switch(holder.mItem.source) {
-            case SOURCE_RSS:
-                holder.mSourceView.setImageResource(R.drawable.ic_web_accent_24dp);
-                break;
-            case SOURCE_FACEBOOK:
-                holder.mSourceView.setImageResource(R.drawable.ic_facebook_box_natural_24dp);
-                break;
-        }
+        holder.mSourceView.setImageResource(holder.mItem.source.drawableResourceId);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,9 +110,9 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         public final String title;
         public final String description;
         public final String url;
-        public final String source;
+        public final Announcement.Source source;
 
-        public AnnouncementItem(Date pubDate, String title, String description, String url, String source) {
+        public AnnouncementItem(Date pubDate, String title, String description, String url, Announcement.Source source) {
             this.pubDate = pubDate;
             this.title = title;
             this.description = description;

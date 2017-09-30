@@ -63,8 +63,11 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
+import static android.R.attr.id;
+
 public class MainService extends Service {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
+
     private API api;
     private ConnectionWeighter cweighter = new ConnectionWeighter(this);
     private WiFiChecker wfc;
@@ -201,6 +204,16 @@ public class MainService extends Service {
                     handleDisturbanceNotification(network, line, id, status, downtime, msgtime);
                     break;
                 }
+                case ACTION_ANNOUNCEMENT_NOTIFICATION: {
+                    final String network = intent.getStringExtra(EXTRA_ANNOUNCEMENT_NETWORK);
+                    final String title = intent.getStringExtra(EXTRA_ANNOUNCEMENT_TITLE);
+                    final String body = intent.getStringExtra(EXTRA_ANNOUNCEMENT_BODY);
+                    final String url = intent.getStringExtra(EXTRA_ANNOUNCEMENT_URL);
+                    final String source = intent.getStringExtra(EXTRA_ANNOUNCEMENT_SOURCE);
+                    final long msgtime = intent.getLongExtra(EXTRA_ANNOUNCEMENT_MSGTIME, 0);
+                    handleAnnouncementNotification(network, title, body, url, source, msgtime);
+                    break;
+                }
                 case ACTION_END_TRIP: {
                     final String network = intent.getStringExtra(EXTRA_TRIP_NETWORK);
                     S2LS loc;
@@ -215,10 +228,7 @@ public class MainService extends Service {
             }
         }
 
-        FirebaseMessaging.getInstance().subscribeToTopic("disturbances");
-        if (BuildConfig.DEBUG) {
-            FirebaseMessaging.getInstance().subscribeToTopic("disturbances-debug");
-        }
+        reloadFCMsubscriptions();
 
         UpdateTopologyJob.schedule();
         SyncTripsJob.schedule();
@@ -260,6 +270,35 @@ public class MainService extends Service {
             } catch (CacheException e) {
                 // cache invalid, attempt to reload topology
                 updateTopology();
+            }
+        }
+    }
+
+    public void reloadFCMsubscriptions() {
+        FirebaseMessaging fcm = FirebaseMessaging.getInstance();
+        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
+        Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
+        if (linePref != null && linePref.size() != 0) {
+            fcm.subscribeToTopic("disturbances");
+            if (BuildConfig.DEBUG) {
+                fcm.subscribeToTopic("disturbances-debug");
+            }
+        } else {
+            fcm.unsubscribeFromTopic("disturbances");
+            fcm.unsubscribeFromTopic("disturbances-debug");
+        }
+
+        Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", null);
+
+        for (Announcement.Source possibleSource : Announcement.getSources()) {
+            if (sourcePref != null && sourcePref.contains(possibleSource.id)) {
+                fcm.subscribeToTopic("announcements-" + possibleSource.id);
+                if (BuildConfig.DEBUG) {
+                    fcm.subscribeToTopic("announcements-debug-" + possibleSource.id);
+                }
+            } else {
+                fcm.unsubscribeFromTopic("announcements-" + possibleSource.id);
+                fcm.unsubscribeFromTopic("announcements-debug-" + possibleSource.id);
             }
         }
     }
@@ -791,8 +830,8 @@ public class MainService extends Service {
     private static final String EXTRA_DISTURBANCE_DOWNTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.downtime";
     private static final String EXTRA_DISTURBANCE_MSGTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.msgtime";
 
-    public static void startForNotification(Context context, String network, String line,
-                                            String id, String status, boolean downtime, long messageTime) {
+    public static void startForDisturbanceNotification(Context context, String network, String line,
+                                                       String id, String status, boolean downtime, long messageTime) {
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(ACTION_DISTURBANCE_NOTIFICATION);
         intent.putExtra(EXTRA_DISTURBANCE_NETWORK, network);
@@ -865,6 +904,78 @@ public class MainService extends Service {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(id.hashCode(), notificationBuilder.build());
+    }
+
+    private static final String ACTION_ANNOUNCEMENT_NOTIFICATION = "im.tny.segvault.disturbances.action.notification.announcement";
+    private static final String EXTRA_ANNOUNCEMENT_NETWORK = "im.tny.segvault.disturbances.extra.notification.announcement.network";
+    private static final String EXTRA_ANNOUNCEMENT_TITLE = "im.tny.segvault.disturbances.extra.notification.announcement.title";
+    private static final String EXTRA_ANNOUNCEMENT_BODY = "im.tny.segvault.disturbances.extra.notification.announcement.body";
+    private static final String EXTRA_ANNOUNCEMENT_URL = "im.tny.segvault.disturbances.extra.notification.announcement.url";
+    private static final String EXTRA_ANNOUNCEMENT_SOURCE = "im.tny.segvault.disturbances.extra.notification.announcement.source";
+
+    private static final String EXTRA_ANNOUNCEMENT_MSGTIME = "im.tny.segvault.disturbances.extra.notification.announcement.msgtime";
+
+    public static void startForAnnouncementNotification(Context context, String network, String title,
+                                                        String body, String url, String source, long messageTime) {
+        Intent intent = new Intent(context, MainService.class);
+        intent.setAction(ACTION_ANNOUNCEMENT_NOTIFICATION);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_NETWORK, network);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_TITLE, title);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_BODY, body);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_URL, url);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_SOURCE, source);
+        intent.putExtra(EXTRA_ANNOUNCEMENT_MSGTIME, messageTime);
+        context.startService(intent);
+    }
+
+    private void handleAnnouncementNotification(String network, String title,
+                                                String body, String url, String sourceId,
+                                                long msgtime) {
+        Log.d("MainService", "handleAnnouncementNotification");
+        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
+        Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", null);
+
+        Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
+        notificationIntent.setData(Uri.parse(url));
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Announcement.Source source = Announcement.getSource(sourceId);
+        if (source == null) {
+            return;
+        }
+
+        if (title.isEmpty()) {
+            title = String.format(getString(R.string.notif_announcement_alt_title), getString(source.nameResourceId));
+        }
+
+        if (body.isEmpty()) {
+            body = getString(R.string.frag_announcement_no_text);
+        }
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(title);
+        bigTextStyle.bigText(body);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setStyle(bigTextStyle)
+                .setSmallIcon(R.drawable.ic_pt_ml_notif)
+                .setColor(source.color)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setSound(Uri.parse(sharedPref.getString("pref_notifs_ringtone", "content://settings/system/notification_sound")))
+                .setContentIntent(contentIntent);
+
+        if (sharedPref.getBoolean("pref_notifs_vibrate", false)) {
+            notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
+        } else {
+            notificationBuilder.setVibrate(new long[]{0l});
+        }
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(url.hashCode(), notificationBuilder.build());
     }
 
     private static final int ROUTE_NOTIFICATION_ID = -100;

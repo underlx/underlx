@@ -57,9 +57,6 @@ public class AnnouncementFragment extends TopFragment {
     private RecyclerView recyclerView = null;
     private TextView emptyView;
 
-    public static final String SOURCE_RSS = "pt-ml-rss";
-    public static final String SOURCE_FACEBOOK = "pt-ml-facebook";
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -182,7 +179,7 @@ public class AnnouncementFragment extends TopFragment {
                 List<API.Announcement> announcements = API.getInstance().getAnnouncements();
                 for (API.Announcement a : announcements) {
                     Date date = new Date(a.time[0] * 1000);
-                    items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, a.title, a.body, a.url, a.source));
+                    items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, a.title, a.body, a.url, Announcement.getSource(a.source)));
                 }
             } catch (APIException e) {
                 return false;
