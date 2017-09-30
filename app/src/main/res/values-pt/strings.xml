@@ -171,6 +171,10 @@
     <string name="intro_disturbances_select_lines_instruction">Escolha para que linhas quer receber notificações:</string>
     <string name="intro_disturbances_misc_error">Mapa de rede ainda não obtido. Tente de novo mais tarde.</string>
     <string name="intro_disturbances_connection_error">Mapa de rede ainda não obtido. Verifique a sua ligação à internet.</string>
+    <string name="intro_announcements_title">Notificações de notícias</string>
+    <string name="intro_announcements_desc">Seja notificado sobre novas publicações no website do Metro e na página oficial de Facebook</string>
+    <string name="intro_announcements_select_sources">Ligar notificações</string>
+    <string name="intro_announcements_select_lines_instruction">Mostrar notificações para notícias publicadas em:</string>
     <string name="intro_welcome_title">Bem-vindo ao &appname;</string>
     <string name="intro_welcome_desc">O seu companheiro no Metropolitano de Lisboa</string>
     <string name="intro_location_title">Nunca se perca</string>

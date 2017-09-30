@@ -184,6 +184,10 @@
     <string name="intro_disturbances_select_lines_instruction">Choose for which lines you want to see notifications:</string>
     <string name="intro_disturbances_misc_error">Network map not yet downloaded. Please try again later.</string>
     <string name="intro_disturbances_connection_error">Network map not yet downloaded. Check your network connection.</string>
+    <string name="intro_announcements_title">Announcement notifications</string>
+    <string name="intro_announcements_desc">Be notified about new posts on the Metro website and official Facebook page</string>
+    <string name="intro_announcements_select_sources">Enable notifications</string>
+    <string name="intro_announcements_select_lines_instruction">Show notifications for announcements on:</string>
     <string name="intro_welcome_title">Welcome to &appname;</string>
     <string name="intro_welcome_desc">Your companion in the Lisbon subway</string>
     <string name="intro_location_title">Never get lost</string>

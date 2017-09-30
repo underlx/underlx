@@ -59,6 +59,8 @@ public class IntroActivity extends AppIntro2 implements
 
         addSlide(DisturbancesIntroSlide.newInstance());
 
+        addSlide(AnnouncementsIntroSlide.newInstance());
+
         SliderPage thirdPage = new SliderPage();
 
         thirdPage.setTitle(getString(R.string.intro_location_title));
