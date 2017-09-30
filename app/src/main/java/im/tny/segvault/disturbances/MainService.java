@@ -761,6 +761,8 @@ public class MainService extends Service {
             switch (tag) {
                 case UpdateTopologyJob.TAG:
                     return new UpdateTopologyJob();
+                case SyncTripsJob.TAG:
+                    return new SyncTripsJob();
                 default:
                     return null;
             }
@@ -810,7 +812,7 @@ public class MainService extends Service {
         }
 
         public static void schedule(boolean updateCurrent) {
-            new JobRequest.Builder(UpdateTopologyJob.TAG)
+            new JobRequest.Builder(SyncTripsJob.TAG)
                     .setExecutionWindow(TimeUnit.HOURS.toMillis(24), TimeUnit.HOURS.toMillis(48))
                     .setBackoffCriteria(TimeUnit.HOURS.toMillis(1), JobRequest.BackoffPolicy.EXPONENTIAL)
                     .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
