@@ -50,6 +50,7 @@ public class TopologyCache {
             throw new CacheException(e).addInfo("Class not found");
         } catch (Exception e) {
             e.printStackTrace();
+            throw new CacheException(e).addInfo("Unforeseen exception");
         }
         return network;
     }

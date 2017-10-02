@@ -154,6 +154,7 @@ public class DisturbanceFragment extends TopFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
             getSwipeRefreshLayout().setRefreshing(true);
         }
 
@@ -241,6 +242,9 @@ public class DisturbanceFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (getActivity() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
