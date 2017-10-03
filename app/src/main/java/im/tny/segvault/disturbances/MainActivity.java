@@ -264,8 +264,10 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     protected void onPostExecute(String s) {
-                        DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
-                        newFragment.show(getSupportFragmentManager(), "debugtext");
+                        if(!isFinishing()) {
+                            DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
+                            newFragment.show(getSupportFragmentManager(), "debugtext");
+                        }
                     }
                 }.execute();
                 return true;
