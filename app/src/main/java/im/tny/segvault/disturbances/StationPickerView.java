@@ -258,6 +258,29 @@ public class StationPickerView extends LinearLayout {
                     if (distance < 3.0) {
                         filteredList.add(station);
                         distances.put(station, distance);
+                        continue;
+                    }
+
+                    for (String altName : station.getAltNames()) {
+                        norm = Normalizer
+                                .normalize(altName, Normalizer.Form.NFD)
+                                .replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+                        indexOf = norm.indexOf(filterPattern);
+                        if (indexOf >= 0) {
+                            filteredList.add(station);
+                            // add 1000 to make matches with alternative names go to the bottom
+                            distances.put(station, 1000.0 + indexOf);
+                            break;
+                        }
+
+                        norm = norm.substring(0, Math.min(filterPattern.length(), norm.length()));
+
+                        distance = sift4.distance(norm, filterPattern);
+                        if (distance < 2.0) {
+                            filteredList.add(station);
+                            distances.put(station, 2000.0 + distance);
+                            break;
+                        }
                     }
                 }
                 Collections.sort(filteredList, new Comparator<Station>() {

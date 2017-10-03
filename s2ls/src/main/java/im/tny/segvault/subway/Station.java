@@ -15,17 +15,18 @@ import im.tny.segvault.s2ls.wifi.BSSID;
  */
 
 public class Station extends Zone implements INameable, IIDable, Comparable<Station> {
-    public Station(Network network, Set<Stop> stops, String id, String name, Features features, Map<String, String> triviaURLs) {
+    public Station(Network network, Set<Stop> stops, String id, String name, List<String> altNames, Features features, Map<String, String> triviaURLs) {
         super(network, stops);
         setId(id);
         setName(name);
+        setAltNames(altNames);
         setFeatures(features);
         this.lines = new ArrayList<>();
         setTriviaURLs(triviaURLs);
     }
 
-    public Station(Network network, String id, String name, Features features, Map<String, String> triviaURLs) {
-        this(network, new HashSet<Stop>(), id, name, features, triviaURLs);
+    public Station(Network network, String id, String name, List<String> altNames, Features features, Map<String, String> triviaURLs) {
+        this(network, new HashSet<Stop>(), id, name, altNames, features, triviaURLs);
     }
 
     private String name;
@@ -38,6 +39,16 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    private List<String> altNames;
+
+    public List<String> getAltNames() {
+        return altNames;
+    }
+
+    public void setAltNames(List<String> altNames) {
+        this.altNames = altNames;
     }
 
     private String id;

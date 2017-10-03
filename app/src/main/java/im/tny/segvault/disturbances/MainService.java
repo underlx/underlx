@@ -556,7 +556,7 @@ public class MainService extends Service {
                                     connURLs.put(entry.getKey(), urls);
                                 }
 
-                                station = new Station(net, s.id, s.name,
+                                station = new Station(net, s.id, s.name, s.altNames,
                                         new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport),
                                         triviaURLs);
                                 station.setConnectionURLs(connURLs);
