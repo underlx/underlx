@@ -8,6 +8,11 @@
             android:key="pref_notifs_lines"
             android:title="@string/frag_notif_lines" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_notifs_service_resumed"
+            android:title="@string/frag_notif_show_service_resumed" />
+
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
             android:key="pref_notifs_ringtone"

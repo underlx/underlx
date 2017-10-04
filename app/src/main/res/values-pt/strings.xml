@@ -49,6 +49,7 @@
     <string name="frag_notif_alert_title">Definições de alerta</string>
     <string name="frag_notif_disturbance_title">Notificações de perturbações</string>
     <string name="frag_notif_lines">Linhas</string>
+    <string name="frag_notif_show_service_resumed">Mostrar circulação normalizada</string>
     <string name="frag_notif_announcement_title">Notificações de notícias</string>
     <string name="frag_notif_sources">Fontes</string>
     <string name="frag_notif_summary_sources">Notificações para notícias em: %s</string>

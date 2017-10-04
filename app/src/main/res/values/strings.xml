@@ -51,6 +51,7 @@
     <string name="frag_notif_lines">Lines</string>
     <string name="frag_notif_summary_lines">Showing notifications for lines: %s</string>
     <string name="frag_notif_summary_no_lines">Disturbance notifications disabled</string>
+    <string name="frag_notif_show_service_resumed">Show normal service resumed</string>
     <string name="frag_notif_announcement_title">Announcement notifications</string>
     <string name="frag_notif_sources">Sources</string>
     <string name="frag_notif_summary_sources">Showing notifications for announcements from: %s</string>

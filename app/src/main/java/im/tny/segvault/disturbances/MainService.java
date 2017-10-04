@@ -885,6 +885,15 @@ public class MainService extends Service {
             return;
         }
 
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (!downtime && !sharedPref.getBoolean("pref_notifs_service_resumed", true)) {
+            // notifications for normal service resumed disabled
+            notificationManager.cancel(id.hashCode());
+            return;
+        }
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
@@ -911,9 +920,6 @@ public class MainService extends Service {
         } else {
             notificationBuilder.setVibrate(new long[]{0l});
         }
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(id.hashCode(), notificationBuilder.build());
     }
