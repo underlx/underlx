@@ -8,11 +8,6 @@
             android:key="pref_notifs_lines"
             android:title="@string/frag_notif_lines" />
 
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="pref_notifs_service_resumed"
-            android:title="@string/frag_notif_show_service_resumed" />
-
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
             android:key="pref_notifs_ringtone"
@@ -27,6 +22,29 @@
             android:defaultValue="false"
             android:key="pref_notifs_vibrate"
             android:title="@string/frag_notif_vibrate" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_notifs_service_resumed"
+            android:title="@string/frag_notif_show_regularization"
+            android:summary="@string/frag_notif_show_regularization_summary"/>
+
+        <RingtonePreference
+            android:defaultValue="content://settings/system/notification_sound"
+            android:key="pref_notifs_regularization_ringtone"
+            android:dependency="pref_notifs_service_resumed"
+            android:ringtoneType="notification"
+            android:summary="%s"
+            android:title="@string/frag_notif_regularization_ringtone"
+            app:summaryNone="@string/frag_notif_ringtone_none">
+        </RingtonePreference>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="pref_notifs_service_resumed"
+            android:key="pref_notifs_regularization_vibrate"
+            android:title="@string/frag_notif_regularization_vibrate" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/frag_notif_announcement_title">

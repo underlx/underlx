@@ -46,10 +46,9 @@
     <string name="frag_notif_title">Notificações</string>
     <string name="frag_notif_summary_lines">Notificações para as linhas: %s</string>
     <string name="frag_notif_summary_no_lines">Notificações de perturbações desligadas</string>
-    <string name="frag_notif_alert_title">Definições de alerta</string>
     <string name="frag_notif_disturbance_title">Notificações de perturbações</string>
     <string name="frag_notif_lines">Linhas</string>
-    <string name="frag_notif_show_service_resumed">Mostrar circulação normalizada</string>
+    <string name="frag_notif_show_regularization">Mostrar reposição de serviço</string>
     <string name="frag_notif_announcement_title">Notificações de notícias</string>
     <string name="frag_notif_sources">Fontes</string>
     <string name="frag_notif_summary_sources">Notificações para notícias em: %s</string>
@@ -222,4 +221,7 @@
     <string name="frag_home_menu_report_incorrect_location">Comunicar erro de localização</string>
     <string name="frag_announcement_no_text">Esta entrada não contém informação textual.</string>
     <string name="notif_announcement_alt_title">Nova notícia em %s</string>
+    <string name="frag_notif_regularization_ringtone">Toque de notificação de reposição</string>
+    <string name="frag_notif_regularization_vibrate">Vibrar na reposição</string>
+    <string name="frag_notif_show_regularization_summary">Notificações de \"Circulação normal\"</string>
 </resources>

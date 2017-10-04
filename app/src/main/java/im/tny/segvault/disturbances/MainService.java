@@ -912,10 +912,10 @@ public class MainService extends Service {
                 .setContentTitle(title)
                 .setContentText(status)
                 .setAutoCancel(true)
-                .setSound(Uri.parse(sharedPref.getString("pref_notifs_ringtone", "content://settings/system/notification_sound")))
+                .setSound(Uri.parse(sharedPref.getString(downtime ? "pref_notifs_ringtone" : "pref_notifs_regularization_ringtone", "content://settings/system/notification_sound")))
                 .setContentIntent(pendingIntent);
 
-        if (sharedPref.getBoolean("pref_notifs_vibrate", false)) {
+        if (sharedPref.getBoolean(downtime ? "pref_notifs_vibrate" : "pref_notifs_regularization_vibrate", false)) {
             notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
         } else {
             notificationBuilder.setVibrate(new long[]{0l});
