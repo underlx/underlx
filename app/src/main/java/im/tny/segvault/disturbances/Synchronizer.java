@@ -78,7 +78,11 @@ public class Synchronizer {
                                 t.setSubmitted(true);
                             }
                         } catch (APIException e) {
-                            e.printStackTrace();
+                            t.registerSyncFailure();
+                            if(t.isFailedToSync()) {
+                                // give up on this one
+                                t.setSynced(true);
+                            }
                         }
                     }
 

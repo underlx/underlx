@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances.model;
 
+import android.text.format.DateUtils;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class Trip extends RealmObject {
     private boolean userConfirmed;
 
     private boolean submitted;
+
+    private int syncFailures;
 
     public String getId() {
         return id;
@@ -75,6 +78,14 @@ public class Trip extends RealmObject {
 
     public void setSubmitted(boolean submitted) {
         this.submitted = submitted;
+    }
+
+    public boolean isFailedToSync() {
+        return syncFailures >= 5 && new Date().getTime() - path.first().getEntryDate().getTime() > TimeUnit.DAYS.toMillis(7);
+    }
+
+    public void registerSyncFailure() {
+        this.syncFailures++;
     }
 
     public Path toConnectionPath(Network network) {
