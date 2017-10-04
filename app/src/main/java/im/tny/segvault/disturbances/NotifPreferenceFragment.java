@@ -17,15 +17,19 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import rikka.materialpreference.CheckBoxPreference;
 import rikka.materialpreference.MultiSelectListPreference;
 import rikka.materialpreference.Preference;
 import rikka.materialpreference.PreferenceFragment;
+import rikka.materialpreference.PreferenceManager;
+import rikka.materialpreference.PreferenceScreen;
 
 public class NotifPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
@@ -128,6 +132,13 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         } else {
             preference.setSummary(getString(R.string.frag_notif_summary_no_lines));
         }
+
+        Preference notifsDistServiceResumed = findPreference("pref_notifs_service_resumed");
+        Preference notifsDistRingtone = findPreference("pref_notifs_ringtone");
+        Preference notifsDistVibrate = findPreference("pref_notifs_vibrate");
+        notifsDistServiceResumed.setEnabled(values.size() != 0);
+        notifsDistRingtone.setEnabled(values.size() != 0);
+        notifsDistVibrate.setEnabled(values.size() != 0);
     }
 
     private void updateSourcesPreference() {
@@ -136,7 +147,7 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
 
         List<CharSequence> entryValues = new ArrayList<>();
         List<CharSequence> entries = new ArrayList<>();
-        for(Announcement.Source source : Announcement.getSources()) {
+        for (Announcement.Source source : Announcement.getSources()) {
             entryValues.add(source.id);
             entries.add(getString(source.nameResourceId));
         }
@@ -167,6 +178,11 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         } else {
             preference.setSummary(getString(R.string.frag_notif_summary_no_sources));
         }
+
+        Preference notifsAnnRingtone = findPreference("pref_notifs_announcement_ringtone");
+        Preference notifsAnnVibrate = findPreference("pref_notifs_announcement_vibrate");
+        notifsAnnRingtone.setEnabled(values.size() != 0);
+        notifsAnnVibrate.setEnabled(values.size() != 0);
     }
 
     private List<CharSequence> getSelectedEntries(List<String> values, MultiSelectListPreference multilistPreference) {
@@ -209,6 +225,8 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
                 mListener.getMainService().reloadFCMsubscriptions();
             }
         }
+
+
     }
 
     @Override
