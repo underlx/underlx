@@ -7,23 +7,14 @@
             android:defaultValue="@array/default_notif_lines"
             android:key="pref_notifs_lines"
             android:title="@string/frag_notif_lines" />
-    </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/frag_notif_announcement_title">
-        <MultiSelectListPreference
-            android:defaultValue="@array/default_announcement_sources"
-            android:key="pref_notifs_announcement_sources"
-            android:title="@string/frag_notif_sources" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/frag_notif_alert_title">
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
             android:key="pref_notifs_ringtone"
             android:ringtoneType="notification"
             android:summary="%s"
             android:title="@string/frag_notif_ringtone"
-            app:summaryNone="None">
+            app:summaryNone="@string/frag_notif_ringtone_none">
 
         </RingtonePreference>
 
@@ -31,7 +22,28 @@
             android:defaultValue="false"
             android:key="pref_notifs_vibrate"
             android:title="@string/frag_notif_vibrate" />
+    </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/frag_notif_announcement_title">
+        <MultiSelectListPreference
+            android:defaultValue="@array/default_announcement_sources"
+            android:key="pref_notifs_announcement_sources"
+            android:title="@string/frag_notif_sources" />
+
+        <RingtonePreference
+            android:defaultValue="content://settings/system/notification_sound"
+            android:key="pref_notifs_announcement_ringtone"
+            android:ringtoneType="notification"
+            android:summary="%s"
+            android:title="@string/frag_notif_ringtone"
+            app:summaryNone="@string/frag_notif_ringtone_none">
+
+        </RingtonePreference>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_notifs_announcement_vibrate"
+            android:title="@string/frag_notif_vibrate" />
     </PreferenceCategory>
 
 </PreferenceScreen>

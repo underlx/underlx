@@ -56,6 +56,7 @@
     <string name="pref_notifs_announcement_source_pt_ml_rss">Site do Metro</string>
     <string name="pref_notifs_announcement_source_pt_ml_facebook">Página de Facebook do Metro</string>
     <string name="frag_notif_ringtone">Toque de notificação</string>
+    <string name="frag_notif_ringtone_none">Nada</string>
     <string name="frag_notif_vibrate">Vibrar</string>
     <string name="frag_route_destination_station">Estação de destino</string>
     <string name="frag_route_origin_station">Estação de origem</string>

@@ -304,31 +304,41 @@ public class MainService extends Service {
     }
 
     public void updateTopology() {
-        cancelTopologyUpdate();
-        currentUpdateTopologyTask = new UpdateTopologyTask();
-        currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
+        synchronized (lock) {
+            cancelTopologyUpdate();
+            currentUpdateTopologyTask = new UpdateTopologyTask();
+            currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
+        }
     }
 
     public void updateTopology(String... network_ids) {
-        cancelTopologyUpdate();
-        currentUpdateTopologyTask = new UpdateTopologyTask();
-        currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
+        synchronized (lock) {
+            cancelTopologyUpdate();
+            currentUpdateTopologyTask = new UpdateTopologyTask();
+            currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
+        }
     }
 
     public void cancelTopologyUpdate() {
-        if (currentUpdateTopologyTask != null) {
-            currentUpdateTopologyTask.cancel(true);
+        synchronized (lock) {
+            if (currentUpdateTopologyTask != null) {
+                currentUpdateTopologyTask.cancel(true);
+            }
         }
     }
 
     public void checkForTopologyUpdates() {
-        currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-        currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
+        synchronized (lock) {
+            currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
+            currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
+        }
     }
 
     public void checkForTopologyUpdates(boolean autoUpdate) {
-        currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-        currentCheckTopologyUpdatesTask.execute(autoUpdate);
+        synchronized (lock) {
+            currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
+            currentCheckTopologyUpdatesTask.execute(autoUpdate);
+        }
     }
 
     public Collection<Network> getNetworks() {
@@ -965,10 +975,10 @@ public class MainService extends Service {
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
-                .setSound(Uri.parse(sharedPref.getString("pref_notifs_ringtone", "content://settings/system/notification_sound")))
+                .setSound(Uri.parse(sharedPref.getString("pref_notifs_announcement_ringtone", "content://settings/system/notification_sound")))
                 .setContentIntent(contentIntent);
 
-        if (sharedPref.getBoolean("pref_notifs_vibrate", false)) {
+        if (sharedPref.getBoolean("pref_notifs_announcement_vibrate", false)) {
             notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
         } else {
             notificationBuilder.setVibrate(new long[]{0l});

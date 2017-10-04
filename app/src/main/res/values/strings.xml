@@ -59,6 +59,7 @@
     <string name="pref_notifs_announcement_source_pt_ml_facebook">Metro Facebook page</string>
     <string name="frag_notif_alert_title">Alert settings</string>
     <string name="frag_notif_ringtone">Ringtone</string>
+    <string name="frag_notif_ringtone_none">None</string>
     <string name="frag_notif_vibrate">Vibrate</string>
     <string name="frag_route_title">Plan route</string>
     <string name="frag_route_origin_station">Starting station</string>
