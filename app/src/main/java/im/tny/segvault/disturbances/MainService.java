@@ -232,6 +232,7 @@ public class MainService extends Service {
 
         UpdateTopologyJob.schedule();
         SyncTripsJob.schedule();
+
         return Service.START_STICKY;
     }
 
@@ -896,8 +897,7 @@ public class MainService extends Service {
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
 
@@ -913,6 +913,7 @@ public class MainService extends Service {
                 .setContentText(status)
                 .setAutoCancel(true)
                 .setSound(Uri.parse(sharedPref.getString(downtime ? "pref_notifs_ringtone" : "pref_notifs_regularization_ringtone", "content://settings/system/notification_sound")))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent);
 
         if (sharedPref.getBoolean(downtime ? "pref_notifs_vibrate" : "pref_notifs_regularization_vibrate", false)) {
@@ -982,6 +983,7 @@ public class MainService extends Service {
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setSound(Uri.parse(sharedPref.getString("pref_notifs_announcement_ringtone", "content://settings/system/notification_sound")))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(contentIntent);
 
         if (sharedPref.getBoolean("pref_notifs_announcement_vibrate", false)) {
@@ -1040,6 +1042,7 @@ public class MainService extends Service {
                 .setContentText(status.replace("\n", " | "))
                 .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setOngoing(true);
 
         if (loc.getState() instanceof LeavingNetworkState) {
