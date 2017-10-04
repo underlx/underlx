@@ -912,6 +912,7 @@ public class MainService extends Service {
                 .setContentTitle(title)
                 .setContentText(status)
                 .setAutoCancel(true)
+                .setWhen(msgtime)
                 .setSound(Uri.parse(sharedPref.getString(downtime ? "pref_notifs_ringtone" : "pref_notifs_regularization_ringtone", "content://settings/system/notification_sound")))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent);
@@ -982,6 +983,7 @@ public class MainService extends Service {
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
+                .setWhen(msgtime)
                 .setSound(Uri.parse(sharedPref.getString("pref_notifs_announcement_ringtone", "content://settings/system/notification_sound")))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(contentIntent);
