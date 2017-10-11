@@ -144,7 +144,8 @@ public class LobbyView extends LinearLayout {
     }
 
     private boolean compareSchedule(Lobby.Schedule s1, Lobby.Schedule s2) {
-        return s1.open == s2.open && s1.openTime == s2.openTime && s1.duration == s2.duration;
+        return (!s1.open && !s2.open) ||
+                (s1.open == s2.open && s1.openTime == s2.openTime && s1.duration == s2.duration);
     }
 
     private String scheduleToString(Lobby.Schedule s) {
