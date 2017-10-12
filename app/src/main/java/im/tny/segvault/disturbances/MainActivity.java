@@ -175,13 +175,16 @@ public class MainActivity extends AppCompatActivity
                 .show();
     }
 
+    private boolean isVisible = false;
     @Override
     protected void onStart() {
         super.onStart();
+        isVisible = true;
     }
 
     @Override
     protected void onStop() {
+        isVisible = false;
         super.onStop();
     }
 
@@ -264,7 +267,7 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     protected void onPostExecute(String s) {
-                        if(!isFinishing()) {
+                        if(!isFinishing() && isVisible) {
                             DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
                             newFragment.show(getSupportFragmentManager(), "debugtext");
                         }
