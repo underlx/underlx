@@ -3,9 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_share"
-        android:title="@string/act_station_share"
         android:icon="@drawable/ic_share_white_24dp"
-        app:showAsAction="ifRoom" />
+        android:title="@string/act_station_share"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/menu_share_location"
+                android:title="@string/act_station_share_location" />
+            <item
+                android:id="@+id/menu_share_webprofile"
+                android:title="@string/act_station_share_web_profile" />
+        </menu>
+    </item>
     <item
         android:id="@+id/menu_favorite"
         android:title=""

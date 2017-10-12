@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -244,13 +245,25 @@ public class StationActivity extends AppCompatActivity
             case android.R.id.home:
                 super.onBackPressed();
                 return true;
-            case R.id.menu_share:
+            case R.id.menu_share_location:
                 Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                         Uri.parse(String.format(
                                 Locale.ROOT, "geo:0,0?q=%f,%f(%s)",
                                 worldCoords[0], worldCoords[1], getTitle())));
 
-                startActivity(intent);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
+                }
+                return true;
+            case R.id.menu_share_webprofile:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://perturbacoes.gbl08ma.com/s/" + stationId));
+                try {
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
+                }
                 return true;
             case R.id.menu_favorite:
                 Realm realm = Realm.getDefaultInstance();

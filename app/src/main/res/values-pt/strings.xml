@@ -197,7 +197,9 @@
     <string name="act_main_nav_taptarget_title">Não perca nada</string>
     <string name="act_main_nav_taptarget_subtitle">Toque no ícone de menu para ver todas as secções</string>
     <string name="debug_info">Informação de depuração</string>
-    <string name="act_station_share">Partilhar localização</string>
+    <string name="act_station_share">Partilhar</string>
+    <string name="act_station_share_location">Localização</string>
+    <string name="act_station_share_web_profile">Página no Perturbações</string>
     <string name="frag_about_qrcode_desc">Partilhe facilmente o UnderLX através do seguinte código QR:</string>
     <string name="frag_about_qrcode_close">Fechar</string>
     <string name="frag_about_qrcode">Código QR</string>
