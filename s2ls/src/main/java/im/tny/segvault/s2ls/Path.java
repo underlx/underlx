@@ -98,6 +98,9 @@ public class Path implements GraphPath<Stop, Connection> {
             // the same line)
             if (i == size - 1 && cs.get(i) instanceof Transfer) {
                 this.endVertex = cs.get(i).getSource();
+                for (OnPathChangedListener l : listeners) {
+                    l.onPathChanged(this);
+                }
                 return;
             }
 

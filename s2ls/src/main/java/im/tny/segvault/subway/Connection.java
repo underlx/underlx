@@ -44,4 +44,9 @@ public class Connection extends DefaultWeightedEdge {
         }
         return (Stop) super.getTarget();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

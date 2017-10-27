@@ -49,6 +49,7 @@ import im.tny.segvault.s2ls.OffNetworkState;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
+import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -478,6 +479,10 @@ public class MainService extends Service {
                 if (loc.getCurrentTrip() != null) {
                     for (Connection c : loc.getCurrentTrip().getEdgeList()) {
                         s += String.format("\t\t%s -> %s\n", c.getSource().toString(), c.getTarget().toString());
+                    }
+                    if(loc.getCurrentTargetRoute() != null) {
+                        s += String.format("\t\tCurrent path complies? %b\n",
+                                loc.getCurrentTargetRoute().checkPathCompliance(loc.getCurrentTrip()));
                     }
                 }
             }
@@ -1133,6 +1138,29 @@ public class MainService extends Service {
                 intent.putExtra(TripCorrectionActivity.EXTRA_IS_STANDALONE, true);
                 startActivity(intent);
             }
+        }
+
+        @Override
+        public void onRouteStarted(S2LS s2ls, Path path, Route route) {
+            Log.d("onRouteStarted", "Route started");
+        }
+
+        @Override
+        public void onRouteMistake(S2LS s2ls, Path path, Route route) {
+            Log.d("onRouteMistake", "Route mistake");
+            // recalculate route with current station as origin station
+            s2ls.setCurrentTargetRoute(
+                    Route.calculate(
+                            s2ls.getNetwork(),
+                            path.getEndVertex().getStation(),
+                            route.getTarget().getStation()));
+
+        }
+
+        @Override
+        public void onRouteCompleted(S2LS s2ls, Path path, Route route) {
+            Log.d("onRouteCompleted", "Route completed");
+            s2ls.setCurrentTargetRoute(null);
         }
 
         private void doTick(final State state) {

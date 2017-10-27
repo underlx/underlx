@@ -43,7 +43,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile project(':s2ls')
+    debugCompile project(path: ':s2ls', configuration: "debug")
+    releaseCompile project(path: ':s2ls', configuration: "release")
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8.1'
     compile 'org.msgpack:jackson-dataformat-msgpack:0.8.13'
     compile 'com.evernote:android-job:1.1.9'

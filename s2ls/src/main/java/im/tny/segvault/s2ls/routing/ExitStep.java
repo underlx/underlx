@@ -11,4 +11,9 @@ public class ExitStep extends Step {
     public ExitStep(Station station, Line line) {
         super(station, line);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) && obj instanceof ExitStep;
+    }
 }

@@ -215,7 +215,7 @@ public class RouteFragment extends TopFragment {
             return;
         }
 
-        showRoute(Route.create(network, originPicker.getSelection(), destinationPicker.getSelection()));
+        showRoute(Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection()));
     }
 
     private void hideRoute() {
@@ -227,6 +227,12 @@ public class RouteFragment extends TopFragment {
     }
 
     private void showRoute(Route route) {
+        if (mListener != null && mListener.getMainService() != null) {
+            S2LS loc = mListener.getMainService().getS2LS(networkId);
+            if (loc != null) {
+                loc.setCurrentTargetRoute(route);
+            }
+        }
         layoutRoute.removeAllViews();
         if (originPicker.getSelection().isAlwaysClosed()) {
             viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), originPicker.getSelection().getName()));

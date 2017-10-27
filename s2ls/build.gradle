@@ -16,6 +16,9 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        defaultPublishConfig 'release'
+        publishNonDefault true
+
     }
     buildTypes {
         release {

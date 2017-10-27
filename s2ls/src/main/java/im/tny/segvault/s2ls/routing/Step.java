@@ -23,4 +23,12 @@ public abstract class Step {
     public Line getLine() {
         return line;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) &&
+                (obj instanceof Step) &&
+                ((Step) obj).getStation().equals(getStation()) &&
+                ((Step) obj).getLine().equals(getLine());
+    }
 }

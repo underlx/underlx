@@ -18,4 +18,11 @@ public class EnterStep extends Step {
     public Station getDirection() {
         return direction;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) &&
+                (obj instanceof EnterStep) &&
+                ((EnterStep) obj).getDirection().equals(getDirection());
+    }
 }

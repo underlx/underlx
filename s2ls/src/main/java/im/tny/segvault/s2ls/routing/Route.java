@@ -19,7 +19,7 @@ import im.tny.segvault.subway.Transfer;
  */
 
 public class Route extends ArrayList<Step> {
-    public static Route create(Network network, Station source, Station target) {
+    public static Route calculate(Network network, Station source, Station target) {
         // 1st part: find the shortest path
 
         AStarShortestPath as = new AStarShortestPath(network);
@@ -80,9 +80,9 @@ public class Route extends ArrayList<Step> {
         return new Route(path);
     }
 
-    private GraphPath path;
+    private GraphPath<Stop, Connection> path;
 
-    private Route(GraphPath path) {
+    public Route(GraphPath<Stop, Connection> path) {
         this.path = path;
 
         List<Connection> el = path.getEdgeList();
@@ -118,7 +118,7 @@ public class Route extends ArrayList<Step> {
         }
     }
 
-    public GraphPath getPath() {
+    public GraphPath<Stop, Connection> getPath() {
         return path;
     }
 
@@ -129,5 +129,60 @@ public class Route extends ArrayList<Step> {
             }
         }
         return false;
+    }
+
+    public Stop getTarget() {
+        return getPath().getEdgeList().get(getPath().getEdgeList().size() - 1).getTarget();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o) || !(o instanceof Route)) {
+            return false;
+        }
+        Route other = (Route) o;
+        int size;
+        if ((size = this.size()) != other.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (!this.get(i).equals(other.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkEdgeCompliance(Connection toCheck) {
+        for (Connection c : path.getEdgeList()) {
+            // let's hope reference comparison is OK here,
+            // as this stuff doesn't implement equals...
+            if (toCheck == c) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkPathCompliance(GraphPath<Stop, Connection> otherPath) {
+        if (otherPath.getEdgeList().size() == 0) {
+            return false;
+        }
+        Connection lastConnection = otherPath.getEdgeList().get(otherPath.getEdgeList().size() - 1);
+        return checkEdgeCompliance(lastConnection);
+    }
+
+    public boolean checkPathStartsRoute(GraphPath<Stop, Connection> otherPath) {
+        Stop current = otherPath.getEndVertex();
+        for (Connection c : path.getEdgeList()) {
+            if (c.getSource() == current || c.getTarget() == current) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkPathEndsRoute(GraphPath<Stop, Connection> otherPath) {
+        return otherPath.getEndVertex() == path.getEdgeList().get(path.getEdgeList().size() - 1).getTarget();
     }
 }

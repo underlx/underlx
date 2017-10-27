@@ -24,4 +24,12 @@ public class ChangeLineStep extends Step {
     public Station getDirection() {
         return direction;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) &&
+                (obj instanceof ChangeLineStep) &&
+                ((ChangeLineStep) obj).getTarget().equals(getTarget()) &&
+                ((ChangeLineStep) obj).getDirection().equals(getDirection());
+    }
 }
