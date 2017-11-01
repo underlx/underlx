@@ -243,6 +243,10 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return openToday || openYesterday;
     }
 
+    public Stop getDirectionForConnection(Connection c) {
+        return c.getSource().getLine().getDirectionForConnection(c);
+    }
+
     @Override
     public String toString() {
         return String.format("Network: %s", getName());

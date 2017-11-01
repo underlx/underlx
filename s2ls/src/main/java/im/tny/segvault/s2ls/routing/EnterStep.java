@@ -10,7 +10,7 @@ import im.tny.segvault.subway.Station;
 public class EnterStep extends Step {
     private Station direction;
 
-    public EnterStep(Station station, Line line, Station direction) {
+    EnterStep(Station station, Line line, Station direction) {
         super(station, line);
         this.direction = direction;
     }

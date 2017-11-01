@@ -11,7 +11,7 @@ public abstract class Step {
     private Station station;
     private Line line;
 
-    public Step(Station station, Line line) {
+    Step(Station station, Line line) {
         this.station = station;
         this.line = line;
     }

@@ -5,8 +5,11 @@ import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -81,6 +84,7 @@ public class Route extends ArrayList<Step> {
     }
 
     private GraphPath<Stop, Connection> path;
+    private Map<Integer, Step> pathIndexToStep = new HashMap<>();
 
     public Route(GraphPath<Stop, Connection> path) {
         this.path = path;
@@ -95,25 +99,30 @@ public class Route extends ArrayList<Step> {
                 continue;
             }
             if (isFirst) {
-                this.add(new EnterStep(
+                Step step = new EnterStep(
                         c.getSource().getStation(),
                         c.getSource().getLine(),
-                        c.getTarget().getLine().getDirectionForConnection(c).getStation()));
+                        c.getTarget().getLine().getDirectionForConnection(c).getStation());
+                this.add(step);
                 isFirst = false;
             }
 
             if (i == el.size() - 1) {
-                this.add(new ExitStep(c.getTarget().getStation(), c.getTarget().getLine()));
+                Step step = new ExitStep(c.getTarget().getStation(), c.getTarget().getLine());
+                this.add(step);
+                this.pathIndexToStep.put(i, step);
             } else if (c instanceof Transfer) {
                 Connection c2 = el.get(i + 1);
 
                 final Line targetLine = c.getTarget().getLine();
 
-                this.add(new ChangeLineStep(
+                Step step = new ChangeLineStep(
                         c.getSource().getStation(),
                         c.getSource().getLine(),
                         c.getTarget().getLine(),
-                        c2.getTarget().getLine().getDirectionForConnection(c2).getStation()));
+                        c2.getTarget().getLine().getDirectionForConnection(c2).getStation());
+                this.add(step);
+                this.pathIndexToStep.put(i, step);
             }
         }
     }
@@ -129,6 +138,10 @@ public class Route extends ArrayList<Step> {
             }
         }
         return false;
+    }
+
+    public Stop getSource() {
+        return getPath().getEdgeList().get(0).getSource();
     }
 
     public Stop getTarget() {
@@ -184,5 +197,37 @@ public class Route extends ArrayList<Step> {
 
     public boolean checkPathEndsRoute(GraphPath<Stop, Connection> otherPath) {
         return otherPath.getEndVertex() == path.getEdgeList().get(path.getEdgeList().size() - 1).getTarget();
+    }
+
+    public Step getNextStep(Path currentPath) {
+        if (currentPath == null) {
+            return get(0);
+        }
+        List<Connection> cur = currentPath.getEdgeList();
+        List<Connection> tar = path.getEdgeList();
+        // iterate over currentPath until the beginning of the route path is found
+        int curIdx, tarIdx = 0;
+        for (curIdx = 0; curIdx < cur.size(); curIdx++) {
+            if(cur.get(curIdx).getSource() == getSource()) {
+                break;
+            }
+        }
+        if (curIdx >= cur.size()) {
+            // current path doesn't even touch the target one...
+            // next step is actually starting to follow instructions
+            return get(0);
+        }
+        // iterate over both paths until the end of the current path is reached
+        for (tarIdx = 0; curIdx < cur.size() && tarIdx < tar.size(); tarIdx++, curIdx++) {
+            // TODO: check if paths actually match from now on?
+            // or assume mistake-handling code will have taken care of that?
+        }
+        // find next step
+        for (--tarIdx; tarIdx < tar.size(); tarIdx++) {
+            if(pathIndexToStep.get(tarIdx) != null) {
+                return pathIndexToStep.get(tarIdx);
+            }
+        }
+        return null;
     }
 }

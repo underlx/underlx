@@ -1,5 +1,7 @@
 package im.tny.segvault.subway;
 
+import android.text.TextUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,20 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     @Override
     public String getName() {
         return name;
+    }
+
+    public String getName(int targetLength) {
+        if (name.length() <= targetLength) {
+            return name;
+        }
+        String[] parts = name.split(" de | do | da | dos | das ");
+        String result = TextUtils.join(" ", parts);
+        if (result.length() <= targetLength) {
+            return result;
+        }
+        parts = result.split(" ");
+        parts[0] = parts[0].charAt(0) + ".";
+        return TextUtils.join(" ", parts);
     }
 
     @Override

@@ -49,7 +49,11 @@ import im.tny.segvault.s2ls.OffNetworkState;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
+import im.tny.segvault.s2ls.routing.ChangeLineStep;
+import im.tny.segvault.s2ls.routing.EnterStep;
+import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.Route;
+import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -480,7 +484,7 @@ public class MainService extends Service {
                     for (Connection c : loc.getCurrentTrip().getEdgeList()) {
                         s += String.format("\t\t%s -> %s\n", c.getSource().toString(), c.getTarget().toString());
                     }
-                    if(loc.getCurrentTargetRoute() != null) {
+                    if (loc.getCurrentTargetRoute() != null) {
                         s += String.format("\t\tCurrent path complies? %b\n",
                                 loc.getCurrentTargetRoute().checkPathCompliance(loc.getCurrentTrip()));
                     }
@@ -1006,45 +1010,91 @@ public class MainService extends Service {
     }
 
     private static final int ROUTE_NOTIFICATION_ID = -100;
+    public static final String ACTION_END_NAVIGATION = "im.tny.segvault.disturbances.action.route.current.end";
     public static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
     public static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
 
-    private Notification buildRouteNotification(String networkId) {
+    private Notification buildRouteNotification(S2LS loc) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_home);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
                 intent, 0);
 
-        S2LS loc;
-        synchronized (lock) {
-            loc = locServices.get(networkId);
-        }
         Path currentPath = loc.getCurrentTrip();
+        Route currentRoute = loc.getCurrentTargetRoute();
 
-        Stop curStop = currentPath.getCurrentStop();
-        String title = curStop.getStation().getName();
-        String status;
-        if (currentPath.isWaitingFirstTrain()) {
-            status = getString(R.string.notif_route_waiting);
-        } else {
-            Stop direction = currentPath.getDirection();
-            Stop next = currentPath.getNextStop();
-            if (direction != null && next != null) {
-                status = String.format(getString(R.string.notif_route_next_station) + "\n", next.getStation().getName());
-                status += String.format(getString(R.string.notif_route_direction), direction.getStation().getName());
-            } else {
-                status = getString(R.string.notif_route_left_station);
+        if (currentPath == null && currentRoute == null) {
+            Log.e("MainService", "Attempt to create notification when there's no path or planned route");
+            return null;
+        }
+
+        String status = "", title = "";
+        int color = 0;
+        if (currentRoute != null) {
+            Step nextStep = currentRoute.getNextStep(currentPath);
+            if (nextStep instanceof EnterStep) {
+                if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                    title = String.format("Catch a train to %s", ((EnterStep) nextStep).getDirection().getName(12));
+                } else {
+                    title = String.format("Enter station %s", nextStep.getStation().getName(15));
+                }
+                // TODO: show "encurtamentos" warnings here if applicable
+                status += String.format("Catch a train to %s", ((EnterStep) nextStep).getDirection().getName()) + "\n";
+                color = currentRoute.getSource().getLine().getColor();
+            } else if (nextStep instanceof ChangeLineStep) {
+                ChangeLineStep clStep = (ChangeLineStep) nextStep;
+                if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                    title = String.format("Catch a train to %s", clStep.getDirection().getName(12));
+                } else {
+                    title = String.format("At %s, change to %s line", nextStep.getStation().getName(10), clStep.getTarget().getName());
+                }
+                // TODO: show "encurtamentos" warnings here if applicable
+                status += String.format("Change to %s line and catch a train to %s",
+                        clStep.getTarget().getName(), clStep.getDirection().getName()) + "\n";
+                // if all goes as planned, the following color won't be used (the color of the current Stop will be used instead)
+                color = currentRoute.getSource().getLine().getColor();
+            } else if (nextStep instanceof ExitStep) {
+                title = String.format("Leave at %s", nextStep.getStation().getName(20));
+                // if all goes as planned, the following color won't be used (the color of the current Stop will be used instead)
+                color = currentRoute.getSource().getLine().getColor();
             }
         }
 
+        if (currentPath != null) {
+            Stop curStop = currentPath.getCurrentStop();
+            color = curStop.getLine().getColor();
+            if (currentRoute != null) {
+                status += String.format("At station: %s", curStop.getStation().getName()) + "\n";
+            } else {
+                title = curStop.getStation().getName();
+            }
+            if (currentPath.isWaitingFirstTrain()) {
+                status += getString(R.string.notif_route_waiting) + "\n";
+            } else {
+                Stop direction = currentPath.getDirection();
+                Stop next = currentPath.getNextStop();
+                if (direction != null && next != null) {
+                    status += String.format(getString(R.string.notif_route_next_station), next.getStation().getName()) + "\n";
+                    status += String.format(getString(R.string.notif_route_direction), direction.getStation().getName()) + "\n";
+                } else {
+                    status += getString(R.string.notif_route_left_station) + "\n";
+                }
+            }
+        }
+
+        if (currentRoute != null) {
+            // TODO: show the ETA for arrival here once that's possible
+            status += String.format("Navigating to %s", currentRoute.getTarget().getStation().getName());
+        }
+
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(curStop.getStation().getName());
+        bigTextStyle.setBigContentTitle(title);
         bigTextStyle.bigText(status);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
                 .setSmallIcon(R.drawable.ic_trip_notif)
-                .setColor(curStop.getLine().getColor())
+                .setColor(color)
                 .setContentTitle(title)
                 .setContentText(status.replace("\n", " | "))
                 .setAutoCancel(false)
@@ -1055,10 +1105,19 @@ public class MainService extends Service {
         if (loc.getState() instanceof LeavingNetworkState) {
             Intent stopIntent = new Intent(this, MainService.class);
             stopIntent.setAction(ACTION_END_TRIP);
-            stopIntent.putExtra(EXTRA_TRIP_NETWORK, networkId);
+            stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
             PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                     stopIntent, 0);
             notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
+        }
+
+        if (currentRoute != null) {
+            Intent stopIntent = new Intent(this, MainService.class);
+            stopIntent.setAction(ACTION_END_NAVIGATION);
+            stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
+            PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
+                    stopIntent, 0);
+            notificationBuilder.addAction(R.drawable.ic_close_black_24dp, "Exit navigation", pendingStopIntent);
         }
 
         return notificationBuilder.build();
@@ -1083,19 +1142,19 @@ public class MainService extends Service {
                     wfc.startScanning();
                 }
                 if (loc.getCurrentTrip() != null) {
-                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(loc.getNetwork().getId()));
+                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(loc));
                 }
             } else if (loc.getState() instanceof NearNetworkState) {
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 if (locationEnabled)
                     wfc.startScanningIfWiFiEnabled();
-                stopForeground(true);
+                checkStopForeground(loc);
             } else if (loc.getState() instanceof OffNetworkState) {
                 // wfc.stopScanning(); // TODO only enable this when there are locators besides WiFi
                 wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
                 if (locationEnabled)
                     wfc.startScanningIfWiFiEnabled();
-                stopForeground(true);
+                checkStopForeground(loc);
             }
 
             Intent intent = new Intent(ACTION_S2LS_STATUS_CHANGED);
@@ -1110,14 +1169,14 @@ public class MainService extends Service {
                 @Override
                 public void onPathChanged(Path path) {
                     Log.d("onPathChanged", "Path changed");
-                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
+                    startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
 
                     Intent intent = new Intent(ACTION_CURRENT_TRIP_UPDATED);
                     LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
                     bm.sendBroadcast(intent);
                 }
             });
-            startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls.getNetwork().getId()));
+            startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
         }
 
         @Override
@@ -1141,6 +1200,11 @@ public class MainService extends Service {
         }
 
         @Override
+        public void onRouteProgrammed(S2LS s2ls, Route route) {
+            startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+        }
+
+        @Override
         public void onRouteStarted(S2LS s2ls, Path path, Route route) {
             Log.d("onRouteStarted", "Route started");
         }
@@ -1153,14 +1217,14 @@ public class MainService extends Service {
                     Route.calculate(
                             s2ls.getNetwork(),
                             path.getEndVertex().getStation(),
-                            route.getTarget().getStation()));
+                            route.getTarget().getStation()), true);
 
         }
 
         @Override
         public void onRouteCompleted(S2LS s2ls, Path path, Route route) {
             Log.d("onRouteCompleted", "Route completed");
-            s2ls.setCurrentTargetRoute(null);
+            checkStopForeground(s2ls);
         }
 
         private void doTick(final State state) {
@@ -1171,6 +1235,12 @@ public class MainService extends Service {
                     state.tick();
                 }
             }, state.getPreferredTickIntervalMillis());
+        }
+
+        private void checkStopForeground(S2LS loc) {
+            if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
+                stopForeground(true);
+            }
         }
     }
 

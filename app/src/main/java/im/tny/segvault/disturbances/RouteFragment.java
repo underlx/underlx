@@ -230,7 +230,7 @@ public class RouteFragment extends TopFragment {
         if (mListener != null && mListener.getMainService() != null) {
             S2LS loc = mListener.getMainService().getS2LS(networkId);
             if (loc != null) {
-                loc.setCurrentTargetRoute(route);
+                loc.setCurrentTargetRoute(route, false);
             }
         }
         layoutRoute.removeAllViews();

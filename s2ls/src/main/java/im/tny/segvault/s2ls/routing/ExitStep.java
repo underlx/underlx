@@ -8,7 +8,7 @@ import im.tny.segvault.subway.Station;
  */
 
 public class ExitStep extends Step {
-    public ExitStep(Station station, Line line) {
+    ExitStep(Station station, Line line) {
         super(station, line);
     }
 
