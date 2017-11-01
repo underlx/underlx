@@ -38,6 +38,10 @@ public abstract class TopFragment extends Fragment {
         return (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
     }
 
+    public boolean isScrollable() {
+        return true;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

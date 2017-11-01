@@ -101,9 +101,7 @@ public class MainActivity extends AppCompatActivity
             if (newFragment == null) {
                 newFragment = new HomeFragment();
             }
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.main_fragment_container, newFragment);
-            transaction.commit();
+            replaceFragment(newFragment, false);
         }
 
         IntentFilter filter = new IntentFilter();
@@ -176,6 +174,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private boolean isVisible = false;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -249,6 +248,29 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void replaceFragment(Fragment newFragment, boolean addToBackStack) {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
+        if (currentFragment == null || !currentFragment.isAdded()) {
+            currentFragment = getSupportFragmentManager().findFragmentById(R.id.alt_fragment_container);
+        }
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if (currentFragment != null) {
+            transaction.remove(currentFragment);
+        }
+        int destContainer = R.id.main_fragment_container;
+        if (newFragment instanceof TopFragment) {
+            TopFragment newFrag = (TopFragment) newFragment;
+            if (!newFrag.isScrollable()) {
+                destContainer = R.id.alt_fragment_container;
+            }
+        }
+        transaction.replace(destContainer, newFragment);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Action bar menu item selected
@@ -267,7 +289,7 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     protected void onPostExecute(String s) {
-                        if(!isFinishing() && isVisible) {
+                        if (!isFinishing() && isVisible) {
                             DialogFragment newFragment = HtmlDialogFragment.newInstance(s, false);
                             newFragment.show(getSupportFragmentManager(), "debugtext");
                         }
@@ -285,13 +307,7 @@ public class MainActivity extends AppCompatActivity
         Fragment newFragment = getNewFragment(item.getItemId());
 
         if (newFragment != null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack
-            transaction.replace(R.id.main_fragment_container, newFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            replaceFragment(newFragment, true);
         } else {
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }

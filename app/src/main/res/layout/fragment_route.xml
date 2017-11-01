@@ -1,151 +1,194 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/route_fragment"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
     tools:context="im.tny.segvault.disturbances.RouteFragment">
 
-    <LinearLayout
+    <RelativeLayout
+        android:layout_alignParentBottom="true"
+        android:id="@+id/bottom_sheet_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal">
+        android:background="@color/colorBottomBarBackground"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:elevation="20sp"
+        android:visibility="gone">
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/route_eta_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/navigation_start_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Start"
+            android:drawableLeft="@drawable/ic_navigation_white_24dp"
+            android:drawablePadding="5dp"
+            android:theme="@style/AppTheme.ColoredButton"/>
+    </RelativeLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_above="@id/bottom_sheet_layout"
+        android:id="@+id/route_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_pickers"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin">
 
-            <!-- Dummy item to prevent StationPickerView from receiving focus at start -->
-            <View
-                android:layout_width="0px"
-                android:layout_height="0px"
-                android:focusableInTouchMode="true" />
-
-            <!-- :nextFocusUp and :nextFocusLeft have been set to the id of this component
-            to prevent the dummy from receiving focus again -->
-            <im.tny.segvault.disturbances.StationPickerView
-                android:id="@+id/origin_picker"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nextFocusLeft="@id/origin_picker"
-                android:nextFocusUp="@id/origin_picker"
-                app:hint="@string/frag_route_origin_station" />
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
 
-            <im.tny.segvault.disturbances.StationPickerView
-                android:id="@+id/destination_picker"
+                <LinearLayout
+                    android:id="@+id/layout_pickers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <!-- Dummy item to prevent StationPickerView from receiving focus at start -->
+                    <View
+                        android:layout_width="0px"
+                        android:layout_height="0px"
+                        android:focusableInTouchMode="true" />
+
+                    <!-- :nextFocusUp and :nextFocusLeft have been set to the id of this component
+                    to prevent the dummy from receiving focus again -->
+                    <im.tny.segvault.disturbances.StationPickerView
+                        android:id="@+id/origin_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/origin_picker"
+                        android:nextFocusUp="@id/origin_picker"
+                        app:hint="@string/frag_route_origin_station" />
+
+                    <im.tny.segvault.disturbances.StationPickerView
+                        android:id="@+id/destination_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:hint="@string/frag_route_destination_station" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/swap_button"
+                    style="@style/Widget.AppCompat.Button"
+                    android:layout_width="45dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:hint="Swap origin and destination"
+                    android:src="@drawable/ic_swap_vert_black_24dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_instructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:hint="@string/frag_route_destination_station" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/frag_route_instructions"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/network_closed_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_warning_black_24dp"
+                    android:tint="@color/colorWarning" />
+
+                <TextView
+                    android:id="@+id/network_closed_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/colorWarning" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/origin_station_closed_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_error_black_24dp"
+                    android:tint="@color/colorError" />
+
+                <TextView
+                    android:id="@+id/origin_station_closed_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/colorError" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"></LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/destination_station_closed_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_error_black_24dp"
+                    android:tint="@color/colorError" />
+
+                <TextView
+                    android:id="@+id/destination_station_closed_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/colorError" />
+            </LinearLayout>
+
         </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/swap_button"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="45dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="Swap origin and destination"
-            android:src="@drawable/ic_swap_vert_black_24dp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_instructions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/frag_route_instructions"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/network_closed_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="2dp"
-            android:src="@drawable/ic_warning_black_24dp"
-            android:tint="@color/colorWarning" />
-
-        <TextView
-            android:id="@+id/network_closed_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textColor="@color/colorWarning" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/origin_station_closed_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="2dp"
-            android:src="@drawable/ic_error_black_24dp"
-            android:tint="@color/colorError" />
-
-        <TextView
-            android:id="@+id/origin_station_closed_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textColor="@color/colorError" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_route"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"></LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/destination_station_closed_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="2dp"
-            android:src="@drawable/ic_error_black_24dp"
-            android:tint="@color/colorError" />
-
-        <TextView
-            android:id="@+id/destination_station_closed_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textColor="@color/colorError" />
-    </LinearLayout>
-
-</LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+</RelativeLayout>

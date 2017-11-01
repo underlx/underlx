@@ -8,4 +8,5 @@
     <color name="colorSuccess">#4CAF50</color>
     <color name="colorInfo">#0D47A1</color>
     <color name="colorPrimaryLight">#5591CD</color>
+    <color name="colorBottomBarBackground">#FAFAFA</color>
 </resources>

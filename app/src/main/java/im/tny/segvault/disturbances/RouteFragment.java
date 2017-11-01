@@ -18,15 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.AStarShortestPath;
-import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -39,12 +37,10 @@ import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
-import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import im.tny.segvault.subway.Transfer;
 
 
 /**
@@ -93,6 +89,7 @@ public class RouteFragment extends TopFragment {
     private StationPickerView originPicker;
     private StationPickerView destinationPicker;
     private ImageButton swapButton;
+    private Button navigationStartButton;
 
     private LinearLayout layoutNetworkClosed;
     private TextView viewNetworkClosed;
@@ -103,6 +100,7 @@ public class RouteFragment extends TopFragment {
     private TextView viewDestinationStationClosed;
     private LinearLayout layoutRoute;
     private LinearLayout layoutInstructions;
+    private RelativeLayout layoutBottomSheet;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -120,6 +118,7 @@ public class RouteFragment extends TopFragment {
         viewOriginStationClosed = (TextView) view.findViewById(R.id.origin_station_closed_view);
         viewDestinationStationClosed = (TextView) view.findViewById(R.id.destination_station_closed_view);
         layoutInstructions = (LinearLayout) view.findViewById(R.id.layout_instructions);
+        layoutBottomSheet = (RelativeLayout) view.findViewById(R.id.bottom_sheet_layout);
         swapButton = (ImageButton) view.findViewById(R.id.swap_button);
         swapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,6 +127,17 @@ public class RouteFragment extends TopFragment {
                 originPicker.setSelection(destinationPicker.getSelection());
                 destinationPicker.setSelection(o);
                 tryPlanRoute();
+            }
+        });
+        navigationStartButton = (Button) view.findViewById(R.id.navigation_start_button);
+        navigationStartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                S2LS loc = mListener.getMainService().getS2LS(networkId);
+                if (loc != null) {
+                    Route route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
+                    loc.setCurrentTargetRoute(route, false);
+                }
             }
         });
 
@@ -150,6 +160,12 @@ public class RouteFragment extends TopFragment {
             }
         }
         return view;
+    }
+
+    @Override
+    public boolean isScrollable() {
+        // we handle scrolling ourselves because of bottom sheet
+        return false;
     }
 
     private void populatePickers() {
@@ -224,15 +240,10 @@ public class RouteFragment extends TopFragment {
         layoutDestinationStationClosed.setVisibility(View.GONE);
         swapButton.setVisibility(View.GONE);
         layoutInstructions.setVisibility(View.VISIBLE);
+        layoutBottomSheet.setVisibility(View.GONE);
     }
 
     private void showRoute(Route route) {
-        if (mListener != null && mListener.getMainService() != null) {
-            S2LS loc = mListener.getMainService().getS2LS(networkId);
-            if (loc != null) {
-                loc.setCurrentTargetRoute(route, false);
-            }
-        }
         layoutRoute.removeAllViews();
         if (originPicker.getSelection().isAlwaysClosed()) {
             viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), originPicker.getSelection().getName()));
@@ -248,7 +259,7 @@ public class RouteFragment extends TopFragment {
             layoutDestinationStationClosed.setVisibility(View.GONE);
         }
 
-        for(Step step : route) {
+        for (Step step : route) {
             View view = null;
             if (step instanceof EnterStep) {
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_enter_network, layoutRoute, false);
@@ -292,7 +303,7 @@ public class RouteFragment extends TopFragment {
                 TextView directionView = (TextView) view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
-                                ((EnterStep)step).getDirection().getName())));
+                                ((EnterStep) step).getDirection().getName())));
 
                 if (line.getUsualCarCount() < network.getUsualCarCount()) {
                     LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
@@ -308,7 +319,7 @@ public class RouteFragment extends TopFragment {
                     }
                 }
             } else if (step instanceof ChangeLineStep) {
-                final ChangeLineStep lStep = (ChangeLineStep)step;
+                final ChangeLineStep lStep = (ChangeLineStep) step;
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
                 int prevLineColor = lStep.getLine().getColor();
@@ -404,6 +415,7 @@ public class RouteFragment extends TopFragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
+        layoutBottomSheet.setVisibility(View.VISIBLE);
     }
 
     public static void populateStationView(final Context context, final Network network, final Station station, View view) {
