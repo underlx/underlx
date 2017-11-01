@@ -76,10 +76,21 @@
     <string name="frag_route_line_name">%s line</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_station_closed_extended">Station %s is closed for an extended period. An alternative station was suggested.</string>
+    <string name="frag_route_start_navigation">Start</string>
+    <string name="notif_route_catch_train_title">Catch a train to %s</string>
+    <string name="notif_route_enter_station_title">Enter station %s</string>
+    <string name="notif_route_catch_train_status">Catch a train to %s</string>
+    <string name="notif_route_catch_train_line_change_title">Catch a train to %s</string>
+    <string name="notif_route_line_change_title">At %1$s, change to %2$s line</string>
+    <string name="notif_route_line_change_status">Change to %1$s line and catch a train to %2$s</string>
+    <string name="notif_route_leave_train">Leave at %s</string>
+    <string name="notif_route_current_station">Currently at %s</string>
+    <string name="notif_route_navigating_status">Navigating to %s</string>
     <string name="notif_route_left_station">Left station…</string>
     <string name="notif_route_direction">Direction %s</string>
     <string name="notif_route_next_station">Next station: %s</string>
     <string name="notif_route_waiting">Waiting for train…</string>
+    <string name="notif_route_end_navigation">Exit navigation</string>
     <string name="frag_disturbance_menu_refresh">Refresh</string>
     <string name="frag_disturbance_updated">Disturbance list updated</string>
     <string name="frag_home_menu_refresh">Refresh</string>

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -41,6 +42,8 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -415,7 +418,12 @@ public class RouteFragment extends TopFragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
-        layoutBottomSheet.setVisibility(View.VISIBLE);
+
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+        boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+        if (locationEnabled) {
+            layoutBottomSheet.setVisibility(View.VISIBLE);
+        }
     }
 
     public static void populateStationView(final Context context, final Network network, final Station station, View view) {

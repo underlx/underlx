@@ -226,4 +226,15 @@
     <string name="frag_notif_regularization_ringtone">Toque de notificação de reposição</string>
     <string name="frag_notif_regularization_vibrate">Vibrar na reposição</string>
     <string name="frag_notif_show_regularization_summary">Notificações de \"Circulação normal\"</string>
+    <string name="frag_route_start_navigation">Começar</string>
+    <string name="notif_route_catch_train_title">Apanhe comboio para %s</string>
+    <string name="notif_route_enter_station_title">Entre em %s</string>
+    <string name="notif_route_catch_train_status">Apanhe um comboio para %s</string>
+    <string name="notif_route_catch_train_line_change_title">Apanhe comboio para %s</string>
+    <string name="notif_route_line_change_title">Em %1$s, mude para a %2$s</string>
+    <string name="notif_route_line_change_status">Mude para a linha %1$s e apanhe um comboio para %2$s</string>
+    <string name="notif_route_leave_train">Saia em %s</string>
+    <string name="notif_route_current_station">Estação actual: %s</string>
+    <string name="notif_route_navigating_status">A caminho de %s</string>
+    <string name="notif_route_end_navigation">Sair de navegação</string>
 </resources>

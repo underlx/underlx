@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="Start"
+            android:text="@string/frag_route_start_navigation"
             android:drawableLeft="@drawable/ic_navigation_white_24dp"
             android:drawablePadding="5dp"
             android:theme="@style/AppTheme.ColoredButton"/>
