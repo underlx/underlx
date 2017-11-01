@@ -1107,7 +1107,6 @@ public class MainService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setStyle(bigTextStyle)
-                .setSmallIcon(R.drawable.ic_trip_notif)
                 .setColor(color)
                 .setContentTitle(title)
                 .setContentText(status.replace("\n", " | "))
@@ -1126,12 +1125,15 @@ public class MainService extends Service {
         }
 
         if (currentRoute != null) {
+            notificationBuilder.setSmallIcon(R.drawable.ic_navigation_white_24dp);
             Intent stopIntent = new Intent(this, MainService.class);
             stopIntent.setAction(ACTION_END_NAVIGATION);
             stopIntent.putExtra(EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
             PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                     stopIntent, 0);
             notificationBuilder.addAction(R.drawable.ic_close_black_24dp, "Exit navigation", pendingStopIntent);
+        } else {
+            notificationBuilder.setSmallIcon(R.drawable.ic_trip_notif);
         }
 
         return notificationBuilder.build();

@@ -4,7 +4,7 @@
     <group android:id="@+id/main_group" android:checkableBehavior="single">
         <item android:id="@+id/nav_home" android:icon="@drawable/ic_menu_home"
             android:title="@string/nav_home" />
-        <item android:id="@+id/nav_plan_route" android:icon="@drawable/ic_menu_directions_subway"
+        <item android:id="@+id/nav_plan_route" android:icon="@drawable/ic_directions_black_24dp"
             android:title="@string/nav_plan_route" />
         <item android:id="@+id/nav_trip_history" android:icon="@drawable/ic_history_black_24dp"
             android:title="@string/nav_trip_history" />
