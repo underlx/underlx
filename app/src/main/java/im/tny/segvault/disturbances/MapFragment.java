@@ -150,8 +150,14 @@ public class MapFragment extends TopFragment {
     }
 
     private void showTargetPrompt() {
-        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-        boolean isFirstOpen = sharedPref.getBoolean("fuse_first_map_open", true);
+        Context context = getContext();
+        boolean isFirstOpen = false;
+        if (context != null) {
+            SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+            if (sharedPref != null) {
+                isFirstOpen = sharedPref.getBoolean("fuse_first_map_open", true);
+            }
+        }
 
         if(!isFirstOpen) {
             return;
@@ -166,10 +172,13 @@ public class MapFragment extends TopFragment {
                     public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
                         if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
                             // User has pressed the prompt target
-                            SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-                            SharedPreferences.Editor e = sharedPref.edit();
-                            e.putBoolean("fuse_first_map_open", false);
-                            e.apply();
+                            Context context = getContext();
+                            if (context != null) {
+                                SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+                                SharedPreferences.Editor e = sharedPref.edit();
+                                e.putBoolean("fuse_first_map_open", false);
+                                e.apply();
+                            }
                         }
                     }
                 })
