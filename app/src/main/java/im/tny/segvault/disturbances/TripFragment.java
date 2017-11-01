@@ -328,8 +328,10 @@ public class TripFragment extends BottomSheetDialogFragment {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-        trip.getPath().deleteAllFromRealm();
-        trip.deleteFromRealm();
+        if (trip != null) {
+            trip.getPath().deleteAllFromRealm();
+            trip.deleteFromRealm();
+        }
         realm.commitTransaction();
         realm.close();
         dismiss();
