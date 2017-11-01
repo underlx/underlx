@@ -230,6 +230,17 @@ public class MainService extends Service {
                     }
                     break;
                 }
+                case ACTION_END_NAVIGATION: {
+                    final String network = intent.getStringExtra(EXTRA_NAVIGATION_NETWORK);
+                    S2LS loc;
+                    synchronized (lock) {
+                        loc = locServices.get(network);
+                    }
+                    if (loc != null) {
+                        loc.setCurrentTargetRoute(null, false);
+                    }
+                    break;
+                }
             }
         }
 
@@ -1011,6 +1022,7 @@ public class MainService extends Service {
 
     private static final int ROUTE_NOTIFICATION_ID = -100;
     public static final String ACTION_END_NAVIGATION = "im.tny.segvault.disturbances.action.route.current.end";
+    public static final String EXTRA_NAVIGATION_NETWORK = "im.tny.segvault.disturbances.extra.route.current.end.network";
     public static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
     public static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
 
@@ -1087,6 +1099,8 @@ public class MainService extends Service {
             status += String.format("Navigating to %s", currentRoute.getTarget().getStation().getName());
         }
 
+        status = status.trim();
+
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
         bigTextStyle.setBigContentTitle(title);
         bigTextStyle.bigText(status);
@@ -1114,7 +1128,7 @@ public class MainService extends Service {
         if (currentRoute != null) {
             Intent stopIntent = new Intent(this, MainService.class);
             stopIntent.setAction(ACTION_END_NAVIGATION);
-            stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
+            stopIntent.putExtra(EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
             PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                     stopIntent, 0);
             notificationBuilder.addAction(R.drawable.ic_close_black_24dp, "Exit navigation", pendingStopIntent);
@@ -1186,6 +1200,10 @@ public class MainService extends Service {
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
 
+            if(!checkStopForeground(s2ls)) {
+                startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+            }
+
             SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
             boolean openTripCorrection = sharedPref.getBoolean("pref_auto_open_trip_correction", false);
             boolean openVisitCorrection = sharedPref.getBoolean("pref_auto_open_visit_correction", false);
@@ -1207,6 +1225,9 @@ public class MainService extends Service {
         @Override
         public void onRouteStarted(S2LS s2ls, Path path, Route route) {
             Log.d("onRouteStarted", "Route started");
+            if(!checkStopForeground(s2ls)) {
+                startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+            }
         }
 
         @Override
@@ -1218,13 +1239,25 @@ public class MainService extends Service {
                             s2ls.getNetwork(),
                             path.getEndVertex().getStation(),
                             route.getTarget().getStation()), true);
+            if(!checkStopForeground(s2ls)) {
+                startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+            }
+        }
 
+        @Override
+        public void onRouteCancelled(S2LS s2ls, Route route) {
+            Log.d("onRouteCancelled", "Route cancelled");
+            if(!checkStopForeground(s2ls)) {
+                startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+            }
         }
 
         @Override
         public void onRouteCompleted(S2LS s2ls, Path path, Route route) {
             Log.d("onRouteCompleted", "Route completed");
-            checkStopForeground(s2ls);
+            if(!checkStopForeground(s2ls)) {
+                startForeground(ROUTE_NOTIFICATION_ID, buildRouteNotification(s2ls));
+            }
         }
 
         private void doTick(final State state) {
@@ -1237,10 +1270,12 @@ public class MainService extends Service {
             }, state.getPreferredTickIntervalMillis());
         }
 
-        private void checkStopForeground(S2LS loc) {
+        private boolean checkStopForeground(S2LS loc) {
             if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
                 stopForeground(true);
+                return true;
             }
+            return false;
         }
     }
 

@@ -143,16 +143,25 @@ public class S2LS implements OnStatusChangeListener {
     }
 
     public void setCurrentTargetRoute(Route route, boolean isReroute) {
-        if (route.size() == 0) {
+        if (route != null && route.size() == 0) {
             // useless route
+            setCurrentTargetRoute(null, isReroute);
             return;
         }
+        Route prevRoute;
         synchronized (this) {
+            prevRoute = targetRoute;
             targetRoute = route;
-            routePathChecker.onNewTargetRoute();
-            if (!isReroute) {
-                listener.onRouteProgrammed(this, targetRoute);
+            if (route != null) {
+                routePathChecker.onNewTargetRoute();
+
+                if (!isReroute) {
+                    listener.onRouteProgrammed(this, targetRoute);
+                }
             }
+        }
+        if (route == null && prevRoute != null) {
+            listener.onRouteCancelled(this, prevRoute);
         }
     }
 
@@ -232,6 +241,8 @@ public class S2LS implements OnStatusChangeListener {
         void onRouteStarted(S2LS s2ls, Path path, Route route);
 
         void onRouteMistake(S2LS s2ls, Path path, Route route);
+
+        void onRouteCancelled(S2LS s2ls, Route route);
 
         void onRouteCompleted(S2LS s2ls, Path path, Route route);
     }
