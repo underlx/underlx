@@ -96,7 +96,10 @@ public class MainActivity extends AppCompatActivity
             // show initial fragment
             Fragment newFragment = null;
             if (getIntent() != null) {
-                newFragment = getNewFragment(getIntent().getIntExtra(EXTRA_INITIAL_FRAGMENT, R.id.nav_home));
+                String id = getIntent().getStringExtra(EXTRA_INITIAL_FRAGMENT);
+                if (id != null) {
+                    newFragment = getNewFragment(pageStringToResourceId(id));
+                }
             }
             if (newFragment == null) {
                 newFragment = new HomeFragment();
@@ -216,7 +219,7 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         boolean devMode = sharedPref.getBoolean("pref_developer_mode", false);
-        if(!devMode) {
+        if (!devMode) {
             menu.findItem(R.id.menu_debug).setVisible(false);
         }
 
@@ -252,6 +255,33 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private static int pageStringToResourceId(String id) {
+        switch (id) {
+            case "nav_home":
+                return R.id.nav_home;
+            case "nav_plan_route":
+                return R.id.nav_plan_route;
+            case "nav_trip_history":
+                return R.id.nav_trip_history;
+            case "nav_map":
+                return R.id.nav_map;
+            case "nav_announcements":
+                return R.id.nav_announcements;
+            case "nav_disturbances":
+                return R.id.nav_disturbances;
+            case "nav_notif":
+                return R.id.nav_notif;
+            case "nav_settings":
+                return R.id.nav_settings;
+            case "nav_help":
+                return R.id.nav_help;
+            case "nav_about":
+                return R.id.nav_about;
+            default:
+                return R.id.nav_home;
         }
     }
 

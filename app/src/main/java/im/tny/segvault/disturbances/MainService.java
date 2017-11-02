@@ -915,7 +915,7 @@ public class MainService extends Service {
         }
 
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_disturbances);
+        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
@@ -1031,7 +1031,7 @@ public class MainService extends Service {
 
     private void updateRouteNotification(S2LS loc, boolean highPriorityNotification) {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, R.id.nav_home);
+        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_home");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
                 intent, 0);
 
