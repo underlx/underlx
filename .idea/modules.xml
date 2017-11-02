@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/Disturbances.iml" filepath="$PROJECT_DIR$/Disturbances.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/s2ls/s2ls.iml" filepath="$PROJECT_DIR$/s2ls/s2ls.iml" />
-      <module fileurl="file://$PROJECT_DIR$/underlx.iml" filepath="$PROJECT_DIR$/underlx.iml" />
     </modules>
   </component>
 </project>

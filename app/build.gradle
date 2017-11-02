@@ -14,7 +14,7 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
@@ -43,8 +43,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    debugCompile project(path: ':s2ls', configuration: "debug")
-    releaseCompile project(path: ':s2ls', configuration: "release")
+    implementation project(':s2ls')
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8.1'
     compile 'org.msgpack:jackson-dataformat-msgpack:0.8.13'
     compile 'com.evernote:android-job:1.1.9'
