@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -36,6 +38,7 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
 import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
+import im.tny.segvault.s2ls.routing.NeturalWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Line;
@@ -93,6 +96,7 @@ public class RouteFragment extends TopFragment {
     private StationPickerView destinationPicker;
     private ImageButton swapButton;
     private Button navigationStartButton;
+    private CheckBox useRealtimeCheckbox;
 
     private LinearLayout layoutNetworkClosed;
     private TextView viewNetworkClosed;
@@ -142,6 +146,13 @@ public class RouteFragment extends TopFragment {
                 if (loc != null && route != null) {
                     loc.setCurrentTargetRoute(route, false);
                 }
+            }
+        });
+        useRealtimeCheckbox = (CheckBox) view.findViewById(R.id.use_realtime_check);
+        useRealtimeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                tryPlanRoute();
             }
         });
 
@@ -236,8 +247,12 @@ public class RouteFragment extends TopFragment {
         }
 
         route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
+        Route realtimeRoute = route;
+        if(!useRealtimeCheckbox.isChecked()) {
+            route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(), new NeturalWeighter());
+        }
 
-        showRoute();
+        showRoute(realtimeRoute.isSameAsNeutral());
     }
 
     private void hideRoute() {
@@ -247,9 +262,10 @@ public class RouteFragment extends TopFragment {
         swapButton.setVisibility(View.GONE);
         layoutInstructions.setVisibility(View.VISIBLE);
         layoutBottomSheet.setVisibility(View.GONE);
+        useRealtimeCheckbox.setVisibility(View.GONE);
     }
 
-    private void showRoute() {
+    private void showRoute(boolean realtimeEqualsNeutral) {
         if (route == null) {
             return;
         }
@@ -424,6 +440,11 @@ public class RouteFragment extends TopFragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
+        if(realtimeEqualsNeutral) {
+            useRealtimeCheckbox.setVisibility(View.GONE);
+        } else {
+            useRealtimeCheckbox.setVisibility(View.VISIBLE);
+        }
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);

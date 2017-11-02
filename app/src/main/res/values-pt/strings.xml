@@ -237,4 +237,6 @@
     <string name="notif_route_current_station">Estação actual: %s</string>
     <string name="notif_route_navigating_status">A caminho de %s</string>
     <string name="notif_route_end_navigation">Sair de navegação</string>
+    <string name="frag_route_adapt_realtime">Adaptar percurso às condições actuais</string>
+    <string name="frag_route_swap_choices">Trocar origem e destino</string>
 </resources>

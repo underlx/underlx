@@ -6,40 +6,40 @@
     tools:context="im.tny.segvault.disturbances.RouteFragment">
 
     <RelativeLayout
-        android:layout_alignParentBottom="true"
         android:id="@+id/bottom_sheet_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="@color/colorBottomBarBackground"
+        android:elevation="20sp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:elevation="20sp"
         android:visibility="gone">
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/route_eta_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/navigation_start_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="@string/frag_route_start_navigation"
             android:drawableLeft="@drawable/ic_navigation_white_24dp"
             android:drawablePadding="5dp"
-            android:theme="@style/AppTheme.ColoredButton"/>
+            android:text="@string/frag_route_start_navigation"
+            android:theme="@style/AppTheme.ColoredButton" />
     </RelativeLayout>
 
     <android.support.v4.widget.NestedScrollView
-        android:layout_above="@id/bottom_sheet_layout"
         android:id="@+id/route_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/bottom_sheet_layout"
         android:fillViewport="true"
         android:scrollbars="vertical">
 
@@ -95,10 +95,19 @@
                     android:layout_width="45dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:hint="Swap origin and destination"
+                    android:hint="@string/frag_route_swap_choices"
                     android:src="@drawable/ic_swap_vert_black_24dp"
                     android:visibility="gone" />
             </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/use_realtime_check"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:checked="true"
+                android:text="@string/frag_route_adapt_realtime"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/layout_instructions"

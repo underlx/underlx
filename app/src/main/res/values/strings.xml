@@ -77,6 +77,8 @@
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_station_closed_extended">Station %s is closed for an extended period. An alternative station was suggested.</string>
     <string name="frag_route_start_navigation">Start</string>
+    <string name="frag_route_adapt_realtime">Adapt route to current conditions</string>
+    <string name="frag_route_swap_choices">Swap origin and destination</string>
     <string name="notif_route_catch_train_title">Catch a train to %s</string>
     <string name="notif_route_enter_station_title">Enter station %s</string>
     <string name="notif_route_catch_train_status">Catch a train to %s</string>
