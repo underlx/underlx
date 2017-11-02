@@ -193,10 +193,6 @@ public class LineStatusCache {
                     if (!foundDisturbance) {
                         statuses.put(l.getId(), new LineStatusCache.Status(l));
                     }
-                    // TODO XXX
-                    if(l.getId().equals("pt-ml-vermelha")) {
-                        statuses.put(l.getId(), new LineStatusCache.Status(l, new Date(new Date().getTime() - 60 * 60 * 1000)));
-                    }
                 }
             } catch (APIException e) {
                 return false;
