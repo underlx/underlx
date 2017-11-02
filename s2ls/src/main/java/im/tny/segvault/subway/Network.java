@@ -187,6 +187,10 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     private transient IEdgeWeighter edgeWeighter = null;
 
+    public IEdgeWeighter getEdgeWeighter() {
+        return edgeWeighter;
+    }
+
     public void setEdgeWeighter(IEdgeWeighter edgeWeighter) {
         this.edgeWeighter = edgeWeighter;
     }
@@ -202,18 +206,6 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     public double getDefaultEdgeWeight(Connection connection) {
         return super.getEdgeWeight(connection);
-    }
-
-    public GraphPath<Stop, Connection> getAnyPathBetween(Stop source, Stop target) {
-        AStarShortestPath as = new AStarShortestPath(this);
-        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
-            @Override
-            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
-                return 0;
-            }
-        };
-
-        return as.getShortestPath(source, target, heuristic);
     }
 
     public boolean isOpen() {

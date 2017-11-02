@@ -1,5 +1,7 @@
 package im.tny.segvault.s2ls.routing;
 
+import android.support.annotation.Nullable;
+
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.IEdgeWeighter;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -23,20 +26,20 @@ import im.tny.segvault.subway.Transfer;
 
 public class Route extends ArrayList<Step> {
     public static Route calculate(Network network, Station source, Station target) {
+        return calculate(network, source, target, null);
+    }
+
+    public static Route calculate(Network network, Station source, Station target, @Nullable ConnectionWeighter weighter) {
         // 1st part: find the shortest path
+        GraphPath path = getShortestPath(network, source, target, weighter);
 
-        AStarShortestPath as = new AStarShortestPath(network);
-        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
-            @Override
-            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
-                return 0;
-            }
-        };
+        // 2nd part: turn the path into a Route
+        return new Route(path);
+    }
 
+    public static GraphPath getShortestPath(Network network, Station source, Station target, @Nullable IEdgeWeighter weighter) {
         // given that we want to treat stations with transfers as a single station,
         // consider all the possibilities and choose the one with the shortest path:
-
-        List<GraphPath> paths = new ArrayList<>();
 
         List<Stop> possibleSources = new ArrayList<>();
         if (source.isAlwaysClosed()) {
@@ -55,10 +58,33 @@ public class Route extends ArrayList<Step> {
         } else {
             possibleTargets.addAll(target.getStops());
         }
+        return getShortestPath(network, possibleSources, possibleTargets, weighter);
+    }
 
+    public static GraphPath getShortestPath(Network network, Stop source, Stop target, @Nullable IEdgeWeighter weighter) {
+        List<Stop> possibleSources = new ArrayList<>(1);
+        possibleSources.add(source);
+        List<Stop> possibleTargets = new ArrayList<>(1);
+        possibleTargets.add(target);
+        return getShortestPath(network, possibleSources, possibleTargets, weighter);
+    }
+
+    public static GraphPath getShortestPath(Network network, List<Stop> possibleSources, List<Stop> possibleTargets, @Nullable IEdgeWeighter weighter) {
+        AStarShortestPath as = new AStarShortestPath(network);
+        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
+            @Override
+            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
+                return 0;
+            }
+        };
+        List<GraphPath> paths = new ArrayList<>();
         // assume that only this class can perform this trick with the "hackish" annotations
         // lock on class so that if this method is called concurrently the annotations won't be messed up
         synchronized (Route.class) {
+            IEdgeWeighter prevWeighter = network.getEdgeWeighter();
+            if(weighter != null) {
+                network.setEdgeWeighter(weighter);
+            }
             for (Stop pSource : possibleSources) {
                 for (Stop pTarget : possibleTargets) {
                     // hackish "annotations" for the connection weighter
@@ -70,6 +96,7 @@ public class Route extends ArrayList<Step> {
                     pTarget.putMeta("is_route_target", null);
                 }
             }
+            network.setEdgeWeighter(prevWeighter);
         }
 
         GraphPath path = null;
@@ -78,16 +105,21 @@ public class Route extends ArrayList<Step> {
                 path = p;
             }
         }
-
-        // 2nd part: turn the path into a Route
-        return new Route(path);
+        return path;
     }
 
     private GraphPath<Stop, Connection> path;
     private Map<Integer, Step> pathIndexToStep = new HashMap<>();
+    private boolean matchesNeutralPath = false;
 
     public Route(GraphPath<Stop, Connection> path) {
         this.path = path;
+
+        GraphPath neutralPath = getShortestPath(
+                (Network)path.getGraph(),
+                path.getStartVertex().getStation(),
+                path.getEndVertex().getStation(), new NeturalWeighter());
+        matchesNeutralPath = path.getEdgeList().equals(neutralPath.getEdgeList());
 
         List<Connection> el = path.getEdgeList();
 
@@ -140,6 +172,10 @@ public class Route extends ArrayList<Step> {
         return false;
     }
 
+    public boolean isSameAsNeutral() {
+        return matchesNeutralPath;
+    }
+
     public Stop getSource() {
         return getPath().getEdgeList().get(0).getSource();
     }
@@ -152,16 +188,6 @@ public class Route extends ArrayList<Step> {
     public boolean equals(Object o) {
         if (!super.equals(o) || !(o instanceof Route)) {
             return false;
-        }
-        Route other = (Route) o;
-        int size;
-        if ((size = this.size()) != other.size()) {
-            return false;
-        }
-        for (int i = 0; i < size; i++) {
-            if (!this.get(i).equals(other.get(i))) {
-                return false;
-            }
         }
         return true;
     }

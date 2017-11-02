@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import im.tny.segvault.s2ls.routing.NeturalWeighter;
+import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Stop;
@@ -186,7 +188,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
         // now go from the program-made end
         Date time = times.get(times.size() - 1).second;
-        List<Connection> cs = graph.getAnyPathBetween(endVertex, vertex).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeturalWeighter()).getEdgeList();
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on

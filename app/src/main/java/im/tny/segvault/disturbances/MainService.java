@@ -50,6 +50,7 @@ import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
+import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.Route;
@@ -72,7 +73,7 @@ public class MainService extends Service {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
 
     private API api;
-    private ConnectionWeighter cweighter = new ConnectionWeighter(this);
+    private ConnectionWeighter cweighter = new DisturbanceAwareWeighter(this);
     private WiFiChecker wfc;
     private LineStatusCache lineStatusCache = new LineStatusCache(this);
     private StatsCache statsCache = new StatsCache(this);

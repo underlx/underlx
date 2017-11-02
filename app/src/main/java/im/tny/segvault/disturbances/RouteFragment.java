@@ -105,6 +105,8 @@ public class RouteFragment extends TopFragment {
     private LinearLayout layoutInstructions;
     private RelativeLayout layoutBottomSheet;
 
+    private Route route = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -137,8 +139,7 @@ public class RouteFragment extends TopFragment {
             @Override
             public void onClick(View view) {
                 S2LS loc = mListener.getMainService().getS2LS(networkId);
-                if (loc != null) {
-                    Route route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
+                if (loc != null && route != null) {
                     loc.setCurrentTargetRoute(route, false);
                 }
             }
@@ -234,7 +235,9 @@ public class RouteFragment extends TopFragment {
             return;
         }
 
-        showRoute(Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection()));
+        route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
+
+        showRoute();
     }
 
     private void hideRoute() {
@@ -246,7 +249,10 @@ public class RouteFragment extends TopFragment {
         layoutBottomSheet.setVisibility(View.GONE);
     }
 
-    private void showRoute(Route route) {
+    private void showRoute() {
+        if (route == null) {
+            return;
+        }
         layoutRoute.removeAllViews();
         if (originPicker.getSelection().isAlwaysClosed()) {
             viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), originPicker.getSelection().getName()));

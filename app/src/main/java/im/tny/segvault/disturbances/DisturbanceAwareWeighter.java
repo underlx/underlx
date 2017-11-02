@@ -1,19 +1,19 @@
 package im.tny.segvault.disturbances;
 
+import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.subway.Connection;
-import im.tny.segvault.subway.IEdgeWeighter;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 
 /**
  * Created by gabriel on 4/27/17.
  */
 
-public class ConnectionWeighter implements IEdgeWeighter {
+public class DisturbanceAwareWeighter extends ConnectionWeighter {
     private MainService mainService;
 
-    public ConnectionWeighter(MainService mainService) {
+
+    public DisturbanceAwareWeighter(MainService mainService) {
         this.mainService = mainService;
     }
 
@@ -29,13 +29,5 @@ public class ConnectionWeighter implements IEdgeWeighter {
             }
         }
         return weight;
-    }
-
-    private boolean isSource(Stop stop) {
-        return stop.getMeta("is_route_source") != null;
-    }
-
-    private boolean isTarget(Stop stop) {
-        return stop.getMeta("is_route_target") != null;
     }
 }
