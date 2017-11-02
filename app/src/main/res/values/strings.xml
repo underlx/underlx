@@ -161,6 +161,9 @@
     <string name="frag_settings_auto_open_trip_correction_summary">Open the log correction screen as soon as trips end</string>
     <string name="frag_settings_auto_open_visit_correction">Correct visits immediately</string>
     <string name="frag_settings_auto_open_visit_correction_summary">Also open log correction when apparently only one station has been visited</string>
+    <string name="frag_settings_other_title">Other</string>
+    <string name="frag_settings_developer_mode">Developer mode</string>
+    <string name="frag_settings_developer_mode_summary">Enable debugging features</string>
     <string name="frag_settings_title">Settings</string>
     <string name="frag_station_wifi">Wi-Fi</string>
     <string name="frag_station_services">Services</string>

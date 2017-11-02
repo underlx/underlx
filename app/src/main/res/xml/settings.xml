@@ -23,4 +23,11 @@
             android:summary="@string/frag_settings_auto_open_visit_correction_summary"
             android:title="@string/frag_settings_auto_open_visit_correction" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/frag_settings_other_title">
+     <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_developer_mode"
+            android:summary="@string/frag_settings_developer_mode_summary"
+            android:title="@string/frag_settings_developer_mode" />
+    </PreferenceCategory>
 </PreferenceScreen>
