@@ -63,6 +63,7 @@
     <string name="frag_notif_regularization_ringtone">Regularization ringtone</string>
     <string name="frag_notif_ringtone_none">None</string>
     <string name="frag_notif_vibrate">Vibrate</string>
+    <string name="frag_notif_summary_silent">Silent</string>
     <string name="frag_notif_regularization_vibrate">Vibrate on regularization</string>
     <string name="frag_route_title">Plan route</string>
     <string name="frag_route_origin_station">Starting station</string>

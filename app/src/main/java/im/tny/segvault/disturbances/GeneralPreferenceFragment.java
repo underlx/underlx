@@ -6,17 +6,18 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.preference.XpPreferenceFragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import rikka.materialpreference.PreferenceFragment;
-
-public class GeneralPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class GeneralPreferenceFragment extends XpPreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
 
     public GeneralPreferenceFragment() {
@@ -44,10 +45,7 @@ public class GeneralPreferenceFragment extends PreferenceFragment implements Sha
         return view;
     }
 
-    @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
-        getPreferenceManager().setDefaultPackages(new String[]{"im.tny.segvault.disturbances."});
-
+    public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
         getPreferenceManager().setSharedPreferencesName("settings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 
@@ -55,8 +53,15 @@ public class GeneralPreferenceFragment extends PreferenceFragment implements Sha
     }
 
     @Override
-    public DividerDecoration onCreateItemDecoration() {
-        return new CategoryDivideDividerDecoration();
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // this solves the "preference screen background is a darker gray" problem:
+        // https://github.com/consp1racy/android-support-preference/issues/22
+        super.onViewCreated(view, savedInstanceState);
+
+        final RecyclerView listView = getListView();
+
+        // We don't want this. The children are still focusable.
+        listView.setFocusable(false);
     }
 
     @Override

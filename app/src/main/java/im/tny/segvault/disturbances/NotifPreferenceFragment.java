@@ -5,14 +5,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.preference.XpPreferenceFragment;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import net.xpece.android.support.preference.ListPreference;
+import net.xpece.android.support.preference.MultiSelectListPreference;
+import net.xpece.android.support.preference.RingtonePreference;
+import net.xpece.android.support.preference.SeekBarPreference;
+import net.xpece.android.support.preference.SharedPreferencesCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,14 +39,8 @@ import java.util.Set;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import rikka.materialpreference.CheckBoxPreference;
-import rikka.materialpreference.MultiSelectListPreference;
-import rikka.materialpreference.Preference;
-import rikka.materialpreference.PreferenceFragment;
-import rikka.materialpreference.PreferenceManager;
-import rikka.materialpreference.PreferenceScreen;
 
-public class NotifPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class NotifPreferenceFragment extends XpPreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private OnFragmentInteractionListener mListener;
 
     public NotifPreferenceFragment() {
@@ -66,15 +75,28 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
     }
 
     @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
-        getPreferenceManager().setDefaultPackages(new String[]{"im.tny.segvault.disturbances."});
-
+    public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
         getPreferenceManager().setSharedPreferencesName("notifsettings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 
         setPreferencesFromResource(R.xml.notif_settings, null);
 
         updatePreferences();
+        bindPreferenceSummaryToValue(findPreference("pref_notifs_ringtone"));
+        bindPreferenceSummaryToValue(findPreference("pref_notifs_regularization_ringtone"));
+        bindPreferenceSummaryToValue(findPreference("pref_notifs_announcement_ringtone"));
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // this solves the "preference screen background is a darker gray" problem:
+        // https://github.com/consp1racy/android-support-preference/issues/22
+        super.onViewCreated(view, savedInstanceState);
+
+        final RecyclerView listView = getListView();
+
+        // We don't want this. The children are still focusable.
+        listView.setFocusable(false);
     }
 
     private void updatePreferences() {
@@ -196,12 +218,6 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
         return labels;
     }
 
-
-    @Override
-    public DividerDecoration onCreateItemDecoration() {
-        return new CategoryDivideDividerDecoration();
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -264,4 +280,86 @@ public class NotifPreferenceFragment extends PreferenceFragment implements Share
             }
         }
     };
+
+    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object value) {
+            String stringValue = value.toString();
+
+            if (preference instanceof SeekBarPreference) {
+                SeekBarPreference pref = (SeekBarPreference) preference;
+                int progress = (int) value;
+                pref.setInfo(progress + "%");
+            } else if (preference instanceof ListPreference) {
+                // For list preferences, look up the correct display value in
+                // the preference's 'entries' list.
+                ListPreference listPreference = (ListPreference) preference;
+                int index = listPreference.findIndexOfValue(stringValue);
+
+                // Set the summary to reflect the new value.
+                preference.setSummary(
+                        index >= 0
+                                ? listPreference.getEntries()[index]
+                                : null);
+            } else if (preference instanceof MultiSelectListPreference) {
+                String summary = stringValue.trim().substring(1, stringValue.length() - 1); // strip []
+                preference.setSummary(summary);
+            } else if (preference instanceof RingtonePreference) {
+                // For ringtone preferences, look up the correct display value using RingtoneManager.
+                if (TextUtils.isEmpty(stringValue)) {
+                    // Empty values correspond to 'silent' (no ringtone).
+                    preference.setSummary(R.string.frag_notif_summary_silent);
+                } else {
+                    final Uri selectedUri = Uri.parse(stringValue);
+                    try {
+                        final Ringtone ringtone = RingtoneManager.getRingtone(
+                                preference.getContext(), selectedUri);
+                        if (ringtone == null) {
+                            // Clear the summary if there was a lookup error, i.e. does not exist.
+                            preference.setSummary(null);
+                        } else {
+                            // Set the summary to reflect the new ringtone display name.
+                            final String name = ringtone.getTitle(preference.getContext());
+                            preference.setSummary(name);
+                        }
+                    } catch (SecurityException ex) {
+                        // The user has selected a ringtone from external storage
+                        // and then revoked READ_EXTERNAL_STORAGE permission.
+                        // We have no way of guessing the ringtone title.
+                        // We'd have to store the title of selected ringtone in prefs as well.
+                        preference.setSummary("???");
+                    }
+                }
+
+            } else {
+                // For all other preferences, set the summary to the value's
+                // simple string representation.
+                preference.setSummary(stringValue);
+            }
+            return true;
+        }
+    };
+
+    private static void bindPreferenceSummaryToValue(Preference preference) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        final String key = preference.getKey();
+        if (preference instanceof MultiSelectListPreference) {
+            Set<String> summary = SharedPreferencesCompat.getStringSet(
+                    PreferenceManager.getDefaultSharedPreferences(preference.getContext()),
+                    key, new HashSet<String>());
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, summary);
+        } else if (preference instanceof SeekBarPreference) {
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, ((SeekBarPreference) preference).getValue());
+        } else {
+            String value = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getString(key, "");
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, value);
+        }
+    }
+
 }
