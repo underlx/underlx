@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import android.webkit.WebView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import im.tny.segvault.subway.Network;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -42,6 +44,8 @@ public class MapFragment extends TopFragment {
 
     private String networkId;
     private boolean portraitMap = false;
+
+    private boolean mockLocationMode = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -88,7 +92,7 @@ public class MapFragment extends TopFragment {
         webview.getSettings().setDisplayZoomControls(false);
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         portraitMap = sharedPref.getBoolean("pref_portrait_map", false);
-        if(portraitMap) {
+        if (portraitMap) {
             webview.getSettings().setUseWideViewPort(false);
             webview.loadUrl("file:///android_asset/map-" + networkId + "-portrait.html");
         } else {
@@ -102,6 +106,13 @@ public class MapFragment extends TopFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.map, menu);
 
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+        if (sharedPref != null) {
+            if (BuildConfig.DEBUG && sharedPref.getBoolean("pref_developer_mode", false)) {
+                menu.findItem(R.id.menu_mock_location).setVisible(true);
+            }
+        }
+
         new Handler().post(new Runnable() {
             @Override
             public void run() {
@@ -112,7 +123,7 @@ public class MapFragment extends TopFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.menu_zoom_out:
                 webview.zoomOut();
                 return true;
@@ -125,13 +136,17 @@ public class MapFragment extends TopFragment {
                 SharedPreferences.Editor e = sharedPref.edit();
                 e.putBoolean("pref_portrait_map", portraitMap);
                 e.apply();
-                if(portraitMap) {
+                if (portraitMap) {
                     webview.getSettings().setUseWideViewPort(false);
                     webview.loadUrl("file:///android_asset/map-" + networkId + "-portrait.html");
                 } else {
                     webview.getSettings().setUseWideViewPort(true);
                     webview.loadUrl("file:///android_asset/map-" + networkId + ".html");
                 }
+                return true;
+            case R.id.menu_mock_location:
+                mockLocationMode = !item.isChecked();
+                item.setChecked(mockLocationMode);
                 return true;
         }
 
@@ -159,7 +174,7 @@ public class MapFragment extends TopFragment {
             }
         }
 
-        if(!isFirstOpen) {
+        if (!isFirstOpen) {
             return;
         }
 
@@ -197,17 +212,31 @@ public class MapFragment extends TopFragment {
         Context mContext;
         ObjectMapper mapper = new ObjectMapper();
 
-        /** Instantiate the interface and set the context */
+        /**
+         * Instantiate the interface and set the context
+         */
         MapWebInterface(Context c) {
             mContext = c;
         }
 
         @JavascriptInterface
         public void onStationClicked(String id) {
-            Intent intent = new Intent(getContext(), StationActivity.class);
-            intent.putExtra(StationActivity.EXTRA_STATION_ID, id);
-            intent.putExtra(StationActivity.EXTRA_NETWORK_ID, networkId);
-            startActivity(intent);
+            if (mockLocationMode) {
+                if (mListener == null)
+                    return;
+                MainService service = mListener.getMainService();
+                if (service == null)
+                    return;
+                Network net = service.getNetwork(networkId);
+                if (net != null) {
+                    service.mockLocation(net.getStation(id));
+                }
+            } else {
+                Intent intent = new Intent(getContext(), StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, id);
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, networkId);
+                startActivity(intent);
+            }
         }
     }
 

@@ -472,6 +472,13 @@ public class MainService extends Service {
         return wfc.getLastScanResults();
     }
 
+    public void mockLocation(Station station) {
+        if (BuildConfig.DEBUG && station.getStops().size() > 0) {
+            List<BSSID> bssids = WiFiLocator.getBSSIDsForStop(station.getStops().iterator().next());
+            wfc.updateBSSIDsDebug(bssids);
+        }
+    }
+
     // DEBUG:
     protected String dumpDebugInfo() {
         String s = "Service created on " + creationDate.toString();
@@ -619,7 +626,7 @@ public class MainService extends Service {
                             for (API.WiFiAP w : s.wiFiAPs) {
                                 // take line affinity into account
                                 if (w.line.equals(line.getId())) {
-                                    WiFiChecker.addBSSIDforStop(stop, new BSSID(w.bssid));
+                                    WiFiLocator.addBSSIDforStop(stop, new BSSID(w.bssid));
                                 }
                             }
                         }

@@ -11,7 +11,6 @@ import im.tny.segvault.s2ls.ILocator;
 import im.tny.segvault.s2ls.IProximityDetector;
 import im.tny.segvault.s2ls.OnStatusChangeListener;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
@@ -21,7 +20,7 @@ import im.tny.segvault.subway.Zone;
 
 public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILocator {
     // TODO many of the results of methods in this class can be cached and only invalidated on updateCurrentBSSIDs
-    private static final String STATION_META_WIFICHECKER_KEY = "WiFiChecker";
+    private static final String STOP_META_WIFICHECKER_KEY = "WiFiChecker";
 
     private List<BSSID> currentBSSIDs = new ArrayList<>();
 
@@ -38,7 +37,7 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
     }
 
     private boolean checkBSSIDs(Stop stop) {
-        Object o = stop.getMeta(STATION_META_WIFICHECKER_KEY);
+        Object o = stop.getMeta(STOP_META_WIFICHECKER_KEY);
         if (o == null || !(o instanceof List) || stop.getStation().isAlwaysClosed()) {
             return false;
         }
@@ -88,7 +87,7 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
         // assumes currentBSSIDs are sorted by decreasing signal strength
         for (BSSID b : currentBSSIDs) {
             for (Stop s : stops) {
-                Object o = s.getMeta(STATION_META_WIFICHECKER_KEY);
+                Object o = s.getMeta(STOP_META_WIFICHECKER_KEY);
                 if (o == null || !(o instanceof List)) {
                     continue;
                 }
@@ -140,5 +139,22 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
                 break;
             }
         }
+    }
+
+    public static void addBSSIDforStop(Stop stop, BSSID bssid) {
+        List<BSSID> stationBSSID = getBSSIDsForStop(stop);
+        stationBSSID.add(bssid);
+        stop.putMeta(STOP_META_WIFICHECKER_KEY, stationBSSID);
+    }
+
+    public static List<BSSID> getBSSIDsForStop(Stop stop) {
+        Object o = stop.getMeta(STOP_META_WIFICHECKER_KEY);
+        List<BSSID> stationBSSID;
+        if (o == null || !(o instanceof List)) {
+            stationBSSID = new ArrayList<>();
+        } else {
+            stationBSSID = (List<BSSID>) o;
+        }
+        return stationBSSID;
     }
 }

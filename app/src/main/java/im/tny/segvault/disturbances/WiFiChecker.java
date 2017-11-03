@@ -31,8 +31,6 @@ import static android.content.Context.MODE_PRIVATE;
  */
 
 class WiFiChecker {
-    private static final String STOP_META_WIFICHECKER_KEY = "WiFiChecker";
-
     private Map<String, WiFiLocator> locators = new HashMap<>();
     private long scanInterval = 30000;
     private final WifiManager wifiMan;
@@ -108,21 +106,14 @@ class WiFiChecker {
         for (String id : ids) {
             bssids.add(new BSSID(id));
         }
+        updateBSSIDsDebug(bssids);
+    }
+
+    // used by MainService for mocking locations in debug builds
+    public void updateBSSIDsDebug(List<BSSID> bssids) {
         for (WiFiLocator w : locators.values()) {
             w.updateCurrentBSSIDs(bssids);
         }
-    }
-
-    public static void addBSSIDforStop(Stop stop, BSSID bssid) {
-        Object o = stop.getMeta(STOP_META_WIFICHECKER_KEY);
-        List<BSSID> stationBSSID;
-        if (o == null || !(o instanceof List)) {
-            stationBSSID = new ArrayList<>();
-        } else {
-            stationBSSID = (List<BSSID>) o;
-        }
-        stationBSSID.add(bssid);
-        stop.putMeta(STOP_META_WIFICHECKER_KEY, stationBSSID);
     }
 
     public void setLocatorForNetwork(Network network, WiFiLocator locator) {

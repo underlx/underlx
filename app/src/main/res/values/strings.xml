@@ -42,6 +42,7 @@
     <string name="frag_lines_updated">Updated %s</string>
     <string name="frag_lines_duration">for %d minutes</string>
     <string name="frag_map_title">Map</string>
+    <string name="frag_map_mock_location">Mock location</string>
     <string name="frag_disturbances_title">Disturbances</string>
     <string name="frag_disturbances_empty">Information not available</string>
     <string name="frag_disturbance_ongoing">Ongoing</string>

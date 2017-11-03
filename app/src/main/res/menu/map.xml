@@ -16,4 +16,11 @@
         android:icon="@drawable/ic_zoom_in_white_24dp"
         android:title="@string/frag_map_zoom_in"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_mock_location"
+        android:checkable="true"
+        android:icon="@drawable/ic_beenhere_black_24dp"
+        android:title="@string/frag_map_mock_location"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 </menu>

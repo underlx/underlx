@@ -243,4 +243,5 @@
     <string name="frag_settings_developer_mode">Modo de programador</string>
     <string name="frag_settings_developer_mode_summary">Ligar funcionalidades de depuração</string>
     <string name="frag_notif_summary_silent">Silencioso</string>
+    <string name="frag_map_mock_location">Falsificar localização</string>
 </resources>
