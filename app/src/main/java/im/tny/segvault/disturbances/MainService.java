@@ -474,7 +474,10 @@ public class MainService extends Service {
 
     public void mockLocation(Station station) {
         if (BuildConfig.DEBUG && station.getStops().size() > 0) {
-            List<BSSID> bssids = WiFiLocator.getBSSIDsForStop(station.getStops().iterator().next());
+            List<BSSID> bssids = new ArrayList<>();
+            for (Stop s : station.getStops()) {
+                bssids.addAll(WiFiLocator.getBSSIDsForStop(s));
+            }
             wfc.updateBSSIDsDebug(bssids);
         }
     }
@@ -1055,7 +1058,7 @@ public class MainService extends Service {
         if (currentRoute != null) {
             Step nextStep = currentRoute.getNextStep(currentPath);
             if (nextStep instanceof EnterStep) {
-                if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
                     title = String.format(getString(R.string.notif_route_catch_train_title), ((EnterStep) nextStep).getDirection().getName(12));
                 } else {
                     title = String.format(getString(R.string.notif_route_enter_station_title), nextStep.getStation().getName(15));

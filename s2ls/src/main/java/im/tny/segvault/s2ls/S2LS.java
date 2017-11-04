@@ -205,15 +205,11 @@ public class S2LS implements OnStatusChangeListener {
                 if (!beganFollowingRoute && targetRoute.checkPathStartsRoute(path)) {
                     beganFollowingRoute = true;
                     listener.onRouteStarted(S2LS.this, path, targetRoute);
-                } else if (beganFollowingRoute &&
-                        !(
-                                targetRoute.checkPathCompliance(path) ||
-                                        (path.getEdgeList().size() == 0 && targetRoute.checkPathStartsRoute(path))
-                        )) {
+                } else if (beganFollowingRoute && !targetRoute.checkPathCompliance(path)) {
                     listener.onRouteMistake(S2LS.this, path, targetRoute);
                 }
 
-                if (beganFollowingRoute && targetRoute.checkPathEndsRoute(path)) {
+                if (targetRoute.checkPathEndsRoute(path)) {
                     listener.onRouteCompleted(S2LS.this, path, targetRoute);
                     targetRoute = null;
                 }

@@ -82,7 +82,7 @@ public class Route extends ArrayList<Step> {
         // lock on class so that if this method is called concurrently the annotations won't be messed up
         synchronized (Route.class) {
             IEdgeWeighter prevWeighter = network.getEdgeWeighter();
-            if(weighter != null) {
+            if (weighter != null) {
                 network.setEdgeWeighter(weighter);
             }
             for (Stop pSource : possibleSources) {
@@ -116,7 +116,7 @@ public class Route extends ArrayList<Step> {
         this.path = path;
 
         GraphPath neutralPath = getShortestPath(
-                (Network)path.getGraph(),
+                (Network) path.getGraph(),
                 path.getStartVertex().getStation(),
                 path.getEndVertex().getStation(), new NeturalWeighter());
         matchesNeutralPath = path.getEdgeList().equals(neutralPath.getEdgeList());
@@ -193,9 +193,8 @@ public class Route extends ArrayList<Step> {
     }
 
     private boolean checkEdgeCompliance(Connection toCheck) {
+        // returns true if the connection toCheck is part of the target path
         for (Connection c : path.getEdgeList()) {
-            // let's hope reference comparison is OK here,
-            // as this stuff doesn't implement equals...
             if (toCheck == c) {
                 return true;
             }
@@ -205,7 +204,7 @@ public class Route extends ArrayList<Step> {
 
     public boolean checkPathCompliance(GraphPath<Stop, Connection> otherPath) {
         if (otherPath.getEdgeList().size() == 0) {
-            return false;
+            return checkPathStartsRoute(otherPath);
         }
         Connection lastConnection = otherPath.getEdgeList().get(otherPath.getEdgeList().size() - 1);
         return checkEdgeCompliance(lastConnection);
@@ -231,26 +230,38 @@ public class Route extends ArrayList<Step> {
         }
         List<Connection> cur = currentPath.getEdgeList();
         List<Connection> tar = path.getEdgeList();
-        // iterate over currentPath until the beginning of the route path is found
-        int curIdx, tarIdx = 0;
-        for (curIdx = 0; curIdx < cur.size(); curIdx++) {
-            if(cur.get(curIdx).getSource() == getSource()) {
+        if (cur.size() == 0) {
+            return get(0);
+        }
+
+        // iterate over the target path until the last edge of the current path is found
+        Connection lastCur = cur.get(cur.size() - 1);
+        int tarIdx;
+        for (tarIdx = 0; tarIdx < tar.size(); tarIdx++) {
+            if (tar.get(tarIdx) == lastCur) {
                 break;
             }
         }
-        if (curIdx >= cur.size()) {
-            // current path doesn't even touch the target one...
-            // next step is actually starting to follow instructions
+        if (tarIdx >= tar.size()) {
+            // last leg of the current path isn't part of the target path,
+            // so at the moment the user is not following the instructions
+            if (get(0) instanceof EnterStep) {
+                // if user is already on a path on the right direction, do not tell him to "catch a train" he is already in
+                Stop direction = null;
+                if (path.getGraph() instanceof Network) {
+                    direction = ((Network) path.getGraph()).getDirectionForConnection(lastCur);
+                } else if (path.getGraph() instanceof Line) {
+                    direction = ((Line) path.getGraph()).getDirectionForConnection(lastCur);
+                }
+                if (direction != null && ((EnterStep) get(0)).getDirection() == direction.getStation()) {
+                    return get(1);
+                }
+            }
             return get(0);
         }
-        // iterate over both paths until the end of the current path is reached
-        for (tarIdx = 0; curIdx < cur.size() && tarIdx < tar.size(); tarIdx++, curIdx++) {
-            // TODO: check if paths actually match from now on?
-            // or assume mistake-handling code will have taken care of that?
-        }
         // find next step
-        for (--tarIdx; tarIdx < tar.size(); tarIdx++) {
-            if(pathIndexToStep.get(tarIdx) != null) {
+        for (; tarIdx < tar.size(); tarIdx++) {
+            if (pathIndexToStep.get(tarIdx) != null) {
                 return pathIndexToStep.get(tarIdx);
             }
         }
