@@ -447,9 +447,9 @@ THE SOFTWARE.
                 topOffset = offsetDiag;
                 break;
         }
-        style = (textClass != "" ? "class='" + textClass + "' " : "") + "style='" + (textClass == "" ? "font-size:8pt;font-family:Verdana,Arial,Helvetica,Sans Serif;" : "") + "width:150px;" + (pos != "" ? pos : "") + ";position:absolute;top:" + (y + el.offset().top - (topOffset > 0 ? topOffset : 0)) + "px;left:" + (x + el.offset().left) + "px;z-index:3000;'";
+        style = (textClass != "" ? "class='" + textClass + "' " : "") + "style='pointer-events:none;" + (textClass == "" ? "font-size:8pt;font-family:Verdana,Arial,Helvetica,Sans Serif;" : "") + "width:150px;" + (pos != "" ? pos : "") + ";position:absolute;top:" + (y + el.offset().top - (topOffset > 0 ? topOffset : 0)) + "px;left:" + (x + el.offset().left) + "px;z-index:3000;'";
         if (data.link != "")
-            $("<span " + style + "><a class='" + textClass + "' style='text-decoration:none' title='" + data.title.replace(/\\n/g,"<br />") + "' href='" + data.link + "'>" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
+            $("<span " + style + "><a class='" + textClass + "' style='pointer-events:auto;text-decoration:none' title='" + data.title.replace(/\\n/g,"<br />") + "' href='" + data.link + "'>" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
         else
             $("<span " + style + ">" + data.label.replace(/\\n/g,"<br />") + "</span>").appendTo(el);
     },
