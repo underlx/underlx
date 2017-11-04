@@ -269,6 +269,10 @@ public class Path implements GraphPath<Stop, Connection> {
         return getEndVertex();
     }
 
+    public Date getCurrentStopEntryTime() {
+        return times.get(times.size() - 1).first;
+    }
+
     public Stop getNextStop() {
         if (getEdgeList().size() > 0) {
             Connection latest = getEdgeList().get(getEdgeList().size() - 1);

@@ -19,6 +19,11 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 
 import com.evernote.android.job.Job;
@@ -1053,9 +1058,12 @@ public class MainService extends Service {
             return;
         }
 
-        String status = "", title = "";
-        int color = 0;
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        CharSequence title = "";
+        List<CharSequence> statusLines = new ArrayList<>();
+        int color = -1;
         if (currentRoute != null) {
+            inboxStyle.setSummaryText(String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getStation().getName()));
             Step nextStep = currentRoute.getNextStep(currentPath);
             if (nextStep instanceof EnterStep) {
                 if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
@@ -1064,84 +1072,94 @@ public class MainService extends Service {
                     title = String.format(getString(R.string.notif_route_enter_station_title), nextStep.getStation().getName(15));
                 }
                 // TODO: show "encurtamentos" warnings here if applicable
-                status += String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()) + "\n";
+                statusLines.add(String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()));
                 color = currentRoute.getSource().getLine().getColor();
             } else if (nextStep instanceof ChangeLineStep) {
                 ChangeLineStep clStep = (ChangeLineStep) nextStep;
+                String lineName = clStep.getTarget().getName();
+                String titleStr;
                 if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                    title = String.format(getString(R.string.notif_route_catch_train_line_change_title), clStep.getDirection().getName(12));
+                    titleStr = String.format(getString(R.string.notif_route_catch_train_line_change_title),
+                            clStep.getTarget().getName());
                 } else {
-                    title = String.format(getString(R.string.notif_route_line_change_title), nextStep.getStation().getName(10), clStep.getTarget().getName());
+                    titleStr = String.format(getString(R.string.notif_route_line_change_title),
+                            nextStep.getStation().getName(10),
+                            lineName);
                 }
+                int lStart = titleStr.indexOf(lineName);
+                int lEnd = lStart + lineName.length();
+                Spannable sb = new SpannableString(titleStr);
+                sb.setSpan(new ForegroundColorSpan(clStep.getTarget().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                title = sb;
+
                 // TODO: show "encurtamentos" warnings here if applicable
-                status += String.format(getString(R.string.notif_route_line_change_status),
-                        clStep.getTarget().getName(), clStep.getDirection().getName()) + "\n";
-                // if all goes as planned, the following color won't be used (the color of the current Stop will be used instead)
-                color = currentRoute.getSource().getLine().getColor();
+                sb = new SpannableString(
+                        String.format(getString(R.string.notif_route_catch_train_status),
+                                clStep.getDirection().getName())
+                );
+                sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                statusLines.add(sb);
+                color = clStep.getTarget().getColor();
             } else if (nextStep instanceof ExitStep) {
-                title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
-                // if all goes as planned, the following color won't be used (the color of the current Stop will be used instead)
-                color = currentRoute.getSource().getLine().getColor();
+                if (currentPath != null &&
+                        new Date().getTime() - currentPath.getCurrentStopEntryTime().getTime() > 30 * 1000 &&
+                        nextStep.getStation() == currentPath.getNextStop().getStation()) {
+                    title = getString(R.string.notif_route_leave_train_next);
+                } else if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                    title = getString(R.string.notif_route_leave_train_now);
+                } else {
+                    title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
+                }
             }
         }
 
         if (currentPath != null) {
             Stop curStop = currentPath.getCurrentStop();
-            color = curStop.getLine().getColor();
+            if (color == -1) {
+                color = curStop.getLine().getColor();
+            }
             if (currentRoute != null) {
-                status += String.format(getString(R.string.notif_route_current_station), curStop.getStation().getName()) + "\n";
+                statusLines.add(String.format(getString(R.string.notif_route_current_station), curStop.getStation().getName()));
             } else {
                 title = curStop.getStation().getName();
             }
             if (currentPath.isWaitingFirstTrain()) {
-                status += getString(R.string.notif_route_waiting) + "\n";
+                statusLines.add(getString(R.string.notif_route_waiting));
             } else {
                 Stop direction = currentPath.getDirection();
                 Stop next = currentPath.getNextStop();
                 if (direction != null && next != null) {
-                    status += String.format(getString(R.string.notif_route_next_station), next.getStation().getName()) + "\n";
-                    status += String.format(getString(R.string.notif_route_direction), direction.getStation().getName()) + "\n";
+                    statusLines.add(String.format(getString(R.string.notif_route_next_station), next.getStation().getName()));
+                    if (currentRoute == null) {
+                        statusLines.add(String.format(getString(R.string.notif_route_direction), direction.getStation().getName()));
+                    }
                 } else {
-                    status += getString(R.string.notif_route_left_station) + "\n";
+                    statusLines.add(getString(R.string.notif_route_left_station));
                 }
             }
         }
 
-        if (currentRoute != null) {
-            // TODO: show the ETA for arrival here once that's possible
-            status += String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getStation().getName());
+        CharSequence singleLineStatus = "";
+        for (CharSequence s : statusLines) {
+            inboxStyle.addLine(s);
+            singleLineStatus = TextUtils.concat(singleLineStatus, s) + " | ";
         }
-
-        status = status.trim();
-
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(title);
-        bigTextStyle.bigText(status);
+        singleLineStatus = singleLineStatus.subSequence(0, singleLineStatus.length() - 3);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setStyle(bigTextStyle)
+                .setStyle(inboxStyle)
                 .setColor(color)
                 .setContentTitle(title)
-                .setContentText(status.replace("\n", " | "))
+                .setContentText(singleLineStatus)
                 .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setOngoing(true);
 
         if (highPriorityNotification) {
-            Log.d("HPNOTIF", "high priority notification, stopping foreground");
             stopForeground(true);
             notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
             notificationBuilder.setDefaults(NotificationCompat.DEFAULT_VIBRATE);
-        }
-
-        if (loc.getState() instanceof LeavingNetworkState) {
-            Intent stopIntent = new Intent(this, MainService.class);
-            stopIntent.setAction(ACTION_END_TRIP);
-            stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
-            PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
-                    stopIntent, 0);
-            notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
         }
 
         if (currentRoute != null) {
@@ -1154,6 +1172,14 @@ public class MainService extends Service {
             notificationBuilder.addAction(R.drawable.ic_close_black_24dp, getString(R.string.notif_route_end_navigation), pendingStopIntent);
         } else {
             notificationBuilder.setSmallIcon(R.drawable.ic_trip_notif);
+            if (loc.canRequestEndOfTrip()) {
+                Intent stopIntent = new Intent(this, MainService.class);
+                stopIntent.setAction(ACTION_END_TRIP);
+                stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
+                PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
+                        stopIntent, 0);
+                notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
+            }
         }
 
         startForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
@@ -1310,6 +1336,7 @@ public class MainService extends Service {
             }
             return false;
         }
+
     }
 
     public void cacheAllExtras(String... network_ids) {

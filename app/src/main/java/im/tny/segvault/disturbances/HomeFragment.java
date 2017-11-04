@@ -314,7 +314,7 @@ public class HomeFragment extends TopFragment {
                 }
             });
 
-            if (loc.getState() instanceof LeavingNetworkState) {
+            if (loc.canRequestEndOfTrip()) {
                 curTripEndButton.setVisibility(View.VISIBLE);
                 curTripIncorrectLocationButton.setVisibility(View.GONE);
             } else {

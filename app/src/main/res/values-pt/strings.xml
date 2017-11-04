@@ -230,7 +230,7 @@
     <string name="notif_route_catch_train_title">Apanhe comboio para %s</string>
     <string name="notif_route_enter_station_title">Entre em %s</string>
     <string name="notif_route_catch_train_status">Apanhe um comboio para %s</string>
-    <string name="notif_route_catch_train_line_change_title">Apanhe comboio para %s</string>
+    <string name="notif_route_catch_train_line_change_title">Mude para a linha %s</string>
     <string name="notif_route_line_change_title">Em %1$s, mude para a %2$s</string>
     <string name="notif_route_line_change_status">Mude para a linha %1$s e apanhe um comboio para %2$s</string>
     <string name="notif_route_leave_train">Saia em %s</string>
@@ -244,4 +244,6 @@
     <string name="frag_settings_developer_mode_summary">Ligar funcionalidades de depuração</string>
     <string name="frag_notif_summary_silent">Silencioso</string>
     <string name="frag_map_mock_location">Falsificar localização</string>
+    <string name="notif_route_leave_train_next">Saia na próxima estação</string>
+    <string name="notif_route_leave_train_now">Saia do comboio</string>
 </resources>

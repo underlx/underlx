@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Network;
@@ -183,6 +184,20 @@ public class S2LS implements OnStatusChangeListener {
         listener.onTripEnded(this, p);
     }
 
+    public boolean canRequestEndOfTrip() {
+        if (getCurrentTrip() == null) {
+            return false;
+        }
+        if (getState() instanceof LeavingNetworkState) {
+            return true;
+        }
+        // on some phones it takes too long for wifi networks to disappear from the search results,
+        // or the user could be near a station, but at a shop or somesuch.
+        // allow for ending trip if more than five minutes have passed since the user entered the network
+        // TODO
+        return false;
+    }
+
     public void endCurrentTrip() {
         if (detectNearNetwork()) {
             setState(new NearNetworkState(this));
@@ -195,6 +210,7 @@ public class S2LS implements OnStatusChangeListener {
 
     private class RoutePathChecker implements Path.OnPathChangedListener {
         private boolean beganFollowingRoute = false;
+        private boolean reachedDestination = false;
 
         @Override
         public void onPathChanged(Path path) {
@@ -205,19 +221,25 @@ public class S2LS implements OnStatusChangeListener {
                 if (!beganFollowingRoute && targetRoute.checkPathStartsRoute(path)) {
                     beganFollowingRoute = true;
                     listener.onRouteStarted(S2LS.this, path, targetRoute);
-                } else if (beganFollowingRoute && !targetRoute.checkPathCompliance(path)) {
+                } else if (beganFollowingRoute && !reachedDestination && !targetRoute.checkPathCompliance(path)) {
                     listener.onRouteMistake(S2LS.this, path, targetRoute);
                 }
 
-                if (targetRoute.checkPathEndsRoute(path)) {
-                    listener.onRouteCompleted(S2LS.this, path, targetRoute);
-                    targetRoute = null;
+                if (targetRoute.checkPathEndsRoute(path) || reachedDestination) {
+                    reachedDestination = true;
+                    if (!(getState() instanceof InNetworkState) ||
+                            path.getCurrentStop().getStation() != targetRoute.getTarget().getStation() ||
+                            new Date().getTime() - path.getCurrentStopEntryTime().getTime() > 30 * 1000) {
+                        listener.onRouteCompleted(S2LS.this, path, targetRoute);
+                        targetRoute = null;
+                    }
                 }
             }
         }
 
         void onNewTargetRoute() {
             beganFollowingRoute = false;
+            reachedDestination = false;
         }
     }
 
