@@ -165,18 +165,6 @@ public class StationGeneralFragment extends Fragment {
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
-        Button parkButton = (Button) view.findViewById(R.id.connections_park_button);
-        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_PARK)) {
-            parkButton.setVisibility(View.VISIBLE);
-            parkButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_PARK, station);
-                }
-            });
-            connectionsTitleView.setVisibility(View.VISIBLE);
-        }
-
         // icons
         LinearLayout busLayout = (LinearLayout) view.findViewById(R.id.feature_bus_layout);
         if (station.getFeatures().bus) {
@@ -212,9 +200,28 @@ public class StationGeneralFragment extends Fragment {
 
         // Services
         TextView servicesTitleView = (TextView) view.findViewById(R.id.services_title_view);
+
+        Button parkButton = (Button) view.findViewById(R.id.connections_park_button);
+        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_PARK)) {
+            parkButton.setVisibility(View.VISIBLE);
+            parkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_PARK, station);
+                }
+            });
+            servicesTitleView.setVisibility(View.VISIBLE);
+        }
+
         LinearLayout wifiLayout = (LinearLayout) view.findViewById(R.id.service_wifi_layout);
         if (station.getFeatures().wifi) {
             wifiLayout.setVisibility(View.VISIBLE);
+            servicesTitleView.setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout parkLayout = (LinearLayout) view.findViewById(R.id.service_park_layout);
+        if (station.getFeatures().parking) {
+            parkLayout.setVisibility(View.VISIBLE);
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 

@@ -170,6 +170,7 @@
     <string name="frag_settings_developer_mode_summary">Enable debugging features</string>
     <string name="frag_settings_title">Settings</string>
     <string name="frag_station_wifi">Wi-Fi</string>
+    <string name="frag_station_parking">Parking</string>
     <string name="frag_station_services">Services</string>
     <string name="act_station_tab_trivia">Trivia</string>
     <string name="frag_station_info_unavailable">Information not available.</string>
