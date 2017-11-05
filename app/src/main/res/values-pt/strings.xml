@@ -246,4 +246,5 @@
     <string name="frag_map_mock_location">Falsificar localização</string>
     <string name="notif_route_leave_train_next">Saia na próxima estação</string>
     <string name="notif_route_leave_train_now">Saia do comboio</string>
+    <string name="frag_station_car_parking">Parques de estacionamento</string>
 </resources>

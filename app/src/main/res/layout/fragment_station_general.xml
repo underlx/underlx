@@ -80,6 +80,14 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <Button
+            android:id="@+id/connections_park_button"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/frag_station_car_parking"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/feature_bus_layout"
             android:layout_width="match_parent"

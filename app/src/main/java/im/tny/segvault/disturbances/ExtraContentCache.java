@@ -40,10 +40,11 @@ public class ExtraContentCache {
     }
 
     public static void cacheAllExtras(final Context context, final OnCacheAllListener listener, Network network) {
-        String[] types = new String[3];
+        String[] types = new String[4];
         types[0] = Station.CONNECTION_TYPE_BOAT;
         types[1] = Station.CONNECTION_TYPE_BUS;
         types[2] = Station.CONNECTION_TYPE_TRAIN;
+        types[3] = Station.CONNECTION_TYPE_PARK;
         Locale l = Util.getCurrentLocale(context);
         int total = 0;
         Collection<Station> stations = network.getStations();

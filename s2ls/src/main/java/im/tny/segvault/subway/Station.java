@@ -228,6 +228,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     public static final String CONNECTION_TYPE_BOAT = "boat";
     public static final String CONNECTION_TYPE_BUS = "bus";
     public static final String CONNECTION_TYPE_TRAIN = "train";
+    public static final String CONNECTION_TYPE_PARK = "park";
 
     public Map<String, Map<String, String>> getConnectionURLs() {
         return connURLs;
