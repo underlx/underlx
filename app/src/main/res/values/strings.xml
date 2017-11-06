@@ -129,6 +129,7 @@
     </string-array>
     <string name="activity_loading_title">Loading...</string>
     <string name="frag_station_more_information">More information</string>
+    <string name="frag_trip_stats">%1$d m in %2$s, average speed %3$.01f km/h</string>
     <string name="frag_trip_correct">Correct</string>
     <string name="frag_trip_delete">Delete</string>
     <string name="frag_trip_delete_confirm_title">Delete trip?</string>

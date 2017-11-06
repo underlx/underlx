@@ -664,6 +664,8 @@ public class MainService extends Service {
                         if (from != null && to != null) {
                             Connection newConnection = net.addEdge(from, to);
                             from.getLine().addEdge(from, to);
+                            newConnection.setTimes(new Connection.Times(c.typWaitS, c.typStopS, c.typS));
+                            newConnection.setWorldLength(c.worldLength);
                             net.setEdgeWeight(newConnection, c.typS + 1); // TODO remove constant
                         }
                     }
@@ -681,6 +683,7 @@ public class MainService extends Service {
                                 if (from.getLine().getId().equals(t.from) && to.getLine().getId().equals(t.to)) {
                                     net.addEdge(from, to, newTransfer);
                                     net.setEdgeWeight(newTransfer, t.typS + 3); // TODO remove constant
+                                    newTransfer.setTimes(new Connection.Times(0, 0, t.typS));
                                 }
                             }
 

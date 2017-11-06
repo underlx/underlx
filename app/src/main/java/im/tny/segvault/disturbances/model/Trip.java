@@ -140,8 +140,9 @@ public class Trip extends RealmObject {
                             // where closed stations only have their outbound edges
                             // (but the user may have travelled through a no longer existing
                             // inbound edge, before the station closed)
-                            if (e == null && network.getEdge(s2, s) != null) {
-                                e = new Connection(true, s, s2);
+                            Connection otherDir = network.getEdge(s2, s);
+                            if (e == null && otherDir != null) {
+                                e = new Connection(true, s, s2, otherDir.getTimes(), otherDir.getWorldLength());
                             }
                             if (e != null) {
                                 edges.add(e);

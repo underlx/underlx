@@ -1,5 +1,6 @@
 package im.tny.segvault.s2ls;
 
+import android.util.Log;
 import android.util.Pair;
 
 import org.jgrapht.Graph;
@@ -291,6 +292,46 @@ public class Path implements GraphPath<Stop, Connection> {
 
     public boolean isWaitingFirstTrain() {
         return getEdgeList().size() == 0 && !leftFirstStation;
+    }
+
+    public int getPhysicalLength() {
+        int total = 0;
+        for(Connection c : getEdgeList()) {
+            total += c.getWorldLength();
+        }
+        return total;
+    }
+
+    public int getTimeablePhysicalLength() {
+        int total = 0;
+        List<Connection> conns = getEdgeList();
+        for(int i = 0; i < conns.size(); i++) {
+            if(!getManualEntry(i)) {
+                total += conns.get(i).getWorldLength();
+            }
+        }
+        return total;
+    }
+
+    public long getMovementMilliseconds() {
+        List<Connection> conns = getEdgeList();
+        long startTime = -1;
+        long endTime = -1;
+        long typTime = 0;
+        for(int i = 0; i < conns.size(); i++) {
+            if(!getManualEntry(i)) {
+                if (startTime < 0) {
+                    startTime = (long)(getExitTime(i).getTime() * 0.7 + getEntryTime(i).getTime() * 0.3);
+                }
+                endTime = getEntryTime(i).getTime();
+                typTime += conns.get(i) instanceof Transfer ? 0 : conns.get(i).getTimes().typSeconds;
+            }
+        }
+        if (endTime - startTime < typTime * 600) { // * 600 = * 1000 * 0.6
+            // this was too fast, something strange happened
+            return typTime * 600;
+        }
+        return endTime - startTime;
     }
 
     private List<OnPathChangedListener> listeners = new ArrayList<>();

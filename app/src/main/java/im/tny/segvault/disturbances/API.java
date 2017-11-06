@@ -120,7 +120,10 @@ public class API {
     static public class Connection {
         public String from;
         public String to;
+        public int typWaitS;
+        public int typStopS;
         public int typS;
+        public int worldLength;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

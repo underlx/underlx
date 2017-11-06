@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,9 @@ public class TripFragment extends BottomSheetDialogFragment {
     private TextView dateView;
     private Button correctButton;
     private Button deleteButton;
+
+    private LinearLayout statsLayout;
+    private TextView statsView;
 
     private LinearLayout layoutRoute;
 
@@ -93,6 +97,8 @@ public class TripFragment extends BottomSheetDialogFragment {
         dateView = (TextView) view.findViewById(R.id.date_view);
         correctButton = (Button) view.findViewById(R.id.correct_button);
         deleteButton = (Button) view.findViewById(R.id.delete_button);
+        statsLayout = (LinearLayout) view.findViewById(R.id.layout_stats);
+        statsView = (TextView) view.findViewById(R.id.stats_view);
 
         if (mListener == null)
             return view;
@@ -172,6 +178,17 @@ public class TripFragment extends BottomSheetDialogFragment {
                 DateUtils.formatDateTime(getContext(),
                         path.getEntryTime(0).getTime(),
                         DateUtils.FORMAT_SHOW_DATE));
+
+        int length = path.getTimeablePhysicalLength();
+        long time = path.getMovementMilliseconds();
+        if (length == 0 || time == 0) {
+            statsLayout.setVisibility(View.GONE);
+        } else {
+            statsView.setText(String.format(getString(R.string.frag_trip_stats),
+                    length,
+                    DateUtils.formatElapsedTime(time / 1000),
+                    (((double)length / (double)(time / 1000)) * 3.6)));
+        }
 
         populatePathView(getContext(), inflater, network, path, layoutRoute);
 
