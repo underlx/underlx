@@ -187,6 +187,7 @@
     <string name="intro_finish_done_title">L\'app est prête à commencer.  Appréciez &appname;.</string>
     <string name="intro_finish_done_desc">En utilisant &appname;, n'oubliez pas que l'app est:\n- encore en développement\n- c'est pas une app officielle ou officiellement reconnue \n- c'est un projet collaboratif sans but lucratif</string>
     <string name="intro_finish_get_started">Commencer</string>
+    <string name="frag_stats_updated">Mis à jour %s</string>
     <string name="frag_stats_title">Statistiques</string>
     <string name="frag_stats_line_availability">Disponibilité</string>
     <string name="frag_stats_week">Semaine</string>
