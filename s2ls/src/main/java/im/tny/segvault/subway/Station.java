@@ -168,6 +168,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         public boolean airport;
         public boolean wifi;
         public boolean parking;
+        public boolean bike;
 
         public Features(boolean lift, boolean bus, boolean boat, boolean train, boolean airport) {
             this.lift = lift;
@@ -193,8 +194,9 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
                 break;
             }
         }
-        // TODO parking: un-mock this and use info from server
+        // TODO parking, bike: un-mock this and use info from server
         features.parking = hasConnectionUrl(CONNECTION_TYPE_PARK);
+        features.bike = hasConnectionUrl(CONNECTION_TYPE_BIKE);
         return features;
     }
 
@@ -232,6 +234,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
     public static final String CONNECTION_TYPE_BUS = "bus";
     public static final String CONNECTION_TYPE_TRAIN = "train";
     public static final String CONNECTION_TYPE_PARK = "park";
+    public static final String CONNECTION_TYPE_BIKE = "bike";
 
     public Map<String, Map<String, String>> getConnectionURLs() {
         return connURLs;

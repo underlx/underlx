@@ -213,6 +213,18 @@ public class StationGeneralFragment extends Fragment {
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 
+        Button bikeButton = (Button) view.findViewById(R.id.connections_bike_button);
+        if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BIKE)) {
+            bikeButton.setVisibility(View.VISIBLE);
+            bikeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BIKE, station);
+                }
+            });
+            servicesTitleView.setVisibility(View.VISIBLE);
+        }
+
         LinearLayout wifiLayout = (LinearLayout) view.findViewById(R.id.service_wifi_layout);
         if (station.getFeatures().wifi) {
             wifiLayout.setVisibility(View.VISIBLE);
@@ -222,6 +234,12 @@ public class StationGeneralFragment extends Fragment {
         LinearLayout parkLayout = (LinearLayout) view.findViewById(R.id.service_park_layout);
         if (station.getFeatures().parking) {
             parkLayout.setVisibility(View.VISIBLE);
+            servicesTitleView.setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout bikeLayout = (LinearLayout) view.findViewById(R.id.service_bike_layout);
+        if (station.getFeatures().bike) {
+            bikeLayout.setVisibility(View.VISIBLE);
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 
