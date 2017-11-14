@@ -489,6 +489,18 @@ public class RouteFragment extends TopFragment {
             separatorView.setVisibility(View.VISIBLE);
         }
 
+        ImageView parkingView = (ImageView) view.findViewById(R.id.feature_parking_view);
+        if (station.getFeatures().parking) {
+            parkingView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView bikeView = (ImageView) view.findViewById(R.id.feature_bike_view);
+        if (station.getFeatures().bike) {
+            bikeView.setVisibility(View.VISIBLE);
+            separatorView.setVisibility(View.VISIBLE);
+        }
+
         LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
 
         stationLayout.setOnClickListener(new View.OnClickListener() {
