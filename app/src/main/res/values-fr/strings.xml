@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "UnderLX">
-    ]>
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "UnderLX">]>
 <resources>
     <string name="app_name">&appname;</string>
     <string name="action_settings">Paramètres</string>
@@ -58,16 +55,16 @@
     <string name="frag_notif_ringtone">Sonnerie des notifications</string>
     <string name="frag_notif_ringtone_none">Pas de sonnerie</string>
     <string name="frag_notif_vibrate">Vibrer</string>
-    <string name="frag_route_destination_station">De</string>
-    <string name="frag_route_origin_station">À</string>
+    <string name="frag_route_destination_station">À</string>
+    <string name="frag_route_origin_station">De</string>
     <string name="frag_route_instructions">Choisissez une station de départ et une station d\'arrivée pour voir l'itinéraire recommandé.</string>
     <string name="frag_route_title">Planifier un trajet</string>
     <string name="frag_route_line_name">Ligne %s</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
-    <string name="frag_route_short_cars_warning">Dans cette ligne, les trains sont plus courts. Cherchez les écrans CCTV dans la bord du quai et utilisez cette moitié du quai.</string>
+    <string name="frag_route_short_cars_warning">Dans cette ligne, les trains sont plus courts. Cherchez les écrans CCTV à la fin du quai et utilisez cette moitié du quai.</string>
     <string name="frag_route_disturbances_warning">Perturbations en cours. Le temps d\'attente peut être supérieur à la durée habituelle.</string>
-    <string name="frag_route_station_short_cars_warning">Dans cette station, il y a des lignes avec trains plus courts. Cherchez les écrans CCTV dans la bord du quai et utilisez cette moitié du quai.</string>
-    <string name="frag_route_station_closed_extended">La station %s est fermée pour une période prolongée. Une station alternative a été suggérée.</string>
+    <string name="frag_route_station_short_cars_warning">Dans cette station, il y a des lignes avec des trains plus courts. Cherchez les écrans CCTV à la fin du quai et utilisez cette moitié du quai.</string>
+    <string name="frag_route_station_closed_extended">La station %s est fermée pour une période indeterminée. Une station alternative a été suggérée.</string>
     <string name="frag_map_title">Plan</string>
     <string name="frag_disturbances_empty">Information indisponible</string>
     <string name="notif_route_left_station">Vous avez quitté la station…</string>
@@ -90,11 +87,11 @@
     <string name="frag_station_accessibility">Accessibilité</string>
     <string name="frag_station_lift">Ascenseur</string>
     <string name="frag_station_statistics">Statistiques</string>
-    <string name="frag_station_stats_intro">Dans cette station…</string>
-    <string name="frag_station_stats_entry">Vous avez entré le réseau %d fois</string>
-    <string name="frag_station_stats_exit">Vous avez quitté le réseau %d fois</string>
-    <string name="frag_station_stats_gone_through">Vous avez traversé %d fois</string>
-    <string name="frag_station_stats_transfer">Vous avez changé de ligne %d fois</string>
+    <string name="frag_station_stats_intro">Dans cette station, vous…</string>
+    <string name="frag_station_stats_entry">Avez entré le réseau %d fois</string>
+    <string name="frag_station_stats_exit">Avez quitté le réseau %d fois</string>
+    <string name="frag_station_stats_gone_through">Avez traversé %d fois</string>
+    <string name="frag_station_stats_transfer">Avez changé de ligne %d fois</string>
     <string name="frag_station_more_information">Plus d\'info</string>
     <string name="activity_loading_title">Chargement en cours</string>
     <string name="frag_trip_delete">Effacer</string>
@@ -131,7 +128,7 @@
     <string name="frag_settings_auto_open_trip_correction">Modifier immédiatement</string>
     <string name="frag_settings_auto_open_trip_correction_summary">Ouvrir l\'écran de modification d\'enregistrement donc les trajets sont finis</string>
     <string name="frag_settings_auto_open_visit_correction">Modifier les visites immédiatement</string>
-    <string name="frag_settings_auto_open_visit_correction_summary">Aussi ouvrir l\'écran de modification d\'enregistrement quand il paraît que vous avez visité une seule station.</string>
+    <string name="frag_settings_auto_open_visit_correction_summary">Aussi ouvrir l\'écran de modification d\'enregistrement quand il paraît que vous avez visité une seule station</string>
     <string name="frag_settings_title">Paramètres</string>
     <string name="frag_station_wifi">Wi-Fi</string>
     <string name="frag_station_services">Services</string>
@@ -146,7 +143,7 @@
     <string name="frag_station_rail_services">Trains</string>
     <string name="frag_station_conn_info_loading">Chargement en cours</string>
     <string name="frag_help_title">Aide et commentaires</string>
-    <string name="frag_station_closed_extended">Cette station est fermée pour une période prolongée.</string>
+    <string name="frag_station_closed_extended">Cette station est fermée pour une période indeterminée.</string>
     <string name="cache_extras_success">Contenu additionnel téléchargé</string>
     <string name="cache_extras_failure">Erreur lors de l\'obtention du contenu additionnel</string>
     <string name="cache_extras_progress">En obtenant le contenu additionnel %d%%</string>
@@ -160,7 +157,7 @@
     <string name="act_trip_correction_save">Sauvegarder les modifications</string>
     <string name="act_trip_correction_correct">Confirmer des modification</string>
     <string name="frag_trip_correct">Modifier</string>
-    <string name="act_line_title">Lignes %1$s</string>
+    <string name="act_line_title">Ligne %1$s</string>
     <string name="act_line_disturbances_warning">Il y a des perturbations en cours dans cette ligne. Le temps d\'attente peut être supérieur à la durée habituelle.</string>
     <string name="frag_unconfirmed_trips_title">Trajets sans confirmation</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmer</string>
@@ -199,7 +196,7 @@
     <string name="debug_info">Information de débogage</string>
     <string name="act_station_share">Partager</string>
     <string name="act_station_share_location">Localisation</string>
-    <string name="act_station_share_web_profile">Page sur Perturbations</string>
+    <string name="act_station_share_web_profile">Page à Perturbações.pt</string>
     <string name="frag_about_qrcode_desc">Partagez UnderLX facilement par le code QR suivante:</string>
     <string name="frag_about_qrcode_close">Fermer</string>
     <string name="frag_about_qrcode">Code QR</string>
@@ -235,7 +232,7 @@
     <string name="notif_route_line_change_status">Changer pour la ligne %1$s et prenez un train pour %2$s</string>
     <string name="notif_route_leave_train">Descendez à %s</string>
     <string name="notif_route_current_station">Station actuelle: %s</string>
-    <string name="notif_route_navigating_status">Sur le chemin de %s</string>
+    <string name="notif_route_navigating_status">Votre destination est %s</string>
     <string name="notif_route_end_navigation">Quitter la navigation</string>
     <string name="frag_route_adapt_realtime">Adapter l\'itinéraire aux conditions actuelles</string>
     <string name="frag_route_swap_choices">Changer départ et destination</string>
@@ -245,7 +242,7 @@
     <string name="frag_notif_summary_silent">Silencieux</string>
     <string name="frag_map_mock_location">Falsifier localisation</string>
     <string name="notif_route_leave_train_next">Descendez au prochain arrêt</string>
-    <string name="notif_route_leave_train_now">Quittez le train</string>
+    <string name="notif_route_leave_train_now">Descendez du train</string>
     <string name="frag_station_car_parking">Parking</string>
     <string name="frag_station_parking">Parking</string>
     <string name="frag_trip_stats">%1$d m en %2$s, vitesse moyenne %3$.01f km/h</string>
