@@ -94,7 +94,7 @@ public class Path implements GraphPath<Stop, Connection> {
     }
 
     public void setEndVertex(Stop vertex) {
-        List<Connection> cs = getPathBetweenAvoidingExisting(endVertex, vertex).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeturalWeighter()).getEdgeList();
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on
@@ -134,7 +134,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
         // now go from the program-made start
         Date time = times.get(0).first;
-        List<Connection> cs = getPathBetweenAvoidingExisting(vertex, startVertex).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, vertex, startVertex, new NeturalWeighter()).getEdgeList();
         int size = cs.size();
         int insertPos = 0;
         for (int i = 0; i < size; i++) {
@@ -151,25 +151,6 @@ public class Path implements GraphPath<Stop, Connection> {
         for (OnPathChangedListener l : listeners) {
             l.onPathChanged(this);
         }
-    }
-
-    private GraphPath<Stop, Connection> getPathBetweenAvoidingExisting(Stop source, Stop target) {
-        AStarShortestPath as = new AStarShortestPath(graph);
-        AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
-            @Override
-            public double getCostEstimate(Stop sourceVertex, Stop targetVertex) {
-                // let's assume users rarely go through edges they have already visited elsewhere in the trip
-                // (in the same direction or not)
-                for (Connection c : edgeList) {
-                    if ((c.getSource() == sourceVertex && c.getTarget() == targetVertex) || (c.getSource() == targetVertex && c.getTarget() == sourceVertex)) {
-                        return 10000;
-                    }
-                }
-                return 0;
-            }
-        };
-
-        return as.getShortestPath(source, target, heuristic);
     }
 
     public void manualExtendEnd(Stop vertex) {
