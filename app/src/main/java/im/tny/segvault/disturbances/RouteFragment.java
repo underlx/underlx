@@ -38,7 +38,7 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
 import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
-import im.tny.segvault.s2ls.routing.NeturalWeighter;
+import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Line;
@@ -249,7 +249,7 @@ public class RouteFragment extends TopFragment {
         route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
         Route realtimeRoute = route;
         if(!useRealtimeCheckbox.isChecked()) {
-            route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(), new NeturalWeighter());
+            route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(), new NeutralWeighter());
         }
 
         showRoute(realtimeRoute.isSameAsNeutral());

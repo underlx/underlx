@@ -1,19 +1,16 @@
 package im.tny.segvault.s2ls;
 
-import android.util.Log;
 import android.util.Pair;
 
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.AStarShortestPath;
-import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import im.tny.segvault.s2ls.routing.NeturalWeighter;
+import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
@@ -94,7 +91,7 @@ public class Path implements GraphPath<Stop, Connection> {
     }
 
     public void setEndVertex(Stop vertex) {
-        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeturalWeighter()).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeutralWeighter()).getEdgeList();
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on
@@ -134,7 +131,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
         // now go from the program-made start
         Date time = times.get(0).first;
-        List<Connection> cs = Route.getShortestPath(graph, vertex, startVertex, new NeturalWeighter()).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, vertex, startVertex, new NeutralWeighter()).getEdgeList();
         int size = cs.size();
         int insertPos = 0;
         for (int i = 0; i < size; i++) {
@@ -170,7 +167,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
         // now go from the program-made end
         Date time = times.get(times.size() - 1).second;
-        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeturalWeighter()).getEdgeList();
+        List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new NeutralWeighter()).getEdgeList();
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on

@@ -1,6 +1,6 @@
 package im.tny.segvault.disturbances;
 
-import im.tny.segvault.s2ls.routing.ConnectionWeighter;
+import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Transfer;
@@ -9,7 +9,7 @@ import im.tny.segvault.subway.Transfer;
  * Created by gabriel on 4/27/17.
  */
 
-public class DisturbanceAwareWeighter extends ConnectionWeighter {
+public class DisturbanceAwareWeighter extends NeutralWeighter {
     private MainService mainService;
 
 
@@ -19,7 +19,7 @@ public class DisturbanceAwareWeighter extends ConnectionWeighter {
 
     @Override
     public double getEdgeWeight(Network network, Connection connection) {
-        double weight = network.getDefaultEdgeWeight(connection);
+        double weight = super.getEdgeWeight(network, connection);
         // make transferring to lines with disturbances much "heavier"
         LineStatusCache.Status s = mainService.getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
         if (connection instanceof Transfer || isSource(connection.getSource())) {

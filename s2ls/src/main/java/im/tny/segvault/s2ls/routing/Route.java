@@ -118,7 +118,7 @@ public class Route extends ArrayList<Step> {
         GraphPath neutralPath = getShortestPath(
                 (Network) path.getGraph(),
                 path.getStartVertex().getStation(),
-                path.getEndVertex().getStation(), new NeturalWeighter());
+                path.getEndVertex().getStation(), new NeutralWeighter());
         matchesNeutralPath = path.getEdgeList().equals(neutralPath.getEdgeList());
 
         List<Connection> el = path.getEdgeList();
