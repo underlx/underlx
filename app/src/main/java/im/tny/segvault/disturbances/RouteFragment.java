@@ -97,6 +97,7 @@ public class RouteFragment extends TopFragment {
     private ImageButton swapButton;
     private Button navigationStartButton;
     private CheckBox useRealtimeCheckbox;
+    private TextView routeEtaView;
 
     private LinearLayout layoutNetworkClosed;
     private TextView viewNetworkClosed;
@@ -155,6 +156,7 @@ public class RouteFragment extends TopFragment {
                 tryPlanRoute();
             }
         });
+        routeEtaView = (TextView) view.findViewById(R.id.route_eta_view);
 
         originPicker = (StationPickerView) view.findViewById(R.id.origin_picker);
         destinationPicker = (StationPickerView) view.findViewById(R.id.destination_picker);
@@ -445,6 +447,8 @@ public class RouteFragment extends TopFragment {
         } else {
             useRealtimeCheckbox.setVisibility(View.VISIBLE);
         }
+
+        routeEtaView.setText(DateUtils.formatElapsedTime((int)route.getPath().getWeight()));
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);

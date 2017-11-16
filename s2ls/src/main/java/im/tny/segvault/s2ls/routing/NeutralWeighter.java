@@ -10,6 +10,13 @@ import im.tny.segvault.subway.Network;
 public class NeutralWeighter extends ConnectionWeighter {
     @Override
     public double getEdgeWeight(Network network, Connection connection) {
-        return network.getDefaultEdgeWeight(connection);
+        Connection.Times times = connection.getTimes();
+        double weight = times.typSeconds;
+        if(isSource(connection.getSource())) {
+            weight += times.typWaitingSeconds;
+        } else {
+            weight += times.typStopSeconds;
+        }
+        return weight;
     }
 }
