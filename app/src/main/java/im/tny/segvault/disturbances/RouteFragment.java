@@ -41,6 +41,7 @@ import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
+import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -448,7 +449,21 @@ public class RouteFragment extends TopFragment {
             useRealtimeCheckbox.setVisibility(View.VISIBLE);
         }
 
-        routeEtaView.setText(DateUtils.formatElapsedTime((int)route.getPath().getWeight()));
+        int length = 0;
+        for(Connection c : route.getPath().getEdgeList()) {
+            length += c.getWorldLength();
+        }
+        if (length < 1000) {
+            routeEtaView.setText(
+                    String.format("%s (%d m)",
+                            DateUtils.formatElapsedTime((int) route.getPath().getWeight()),
+                            length));
+        } else {
+            routeEtaView.setText(
+                    String.format("%s (%.01f km)",
+                            DateUtils.formatElapsedTime((int) route.getPath().getWeight()),
+                            length / 1000.0));
+        }
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
