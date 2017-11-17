@@ -151,6 +151,10 @@ public class TripFragment extends BottomSheetDialogFragment {
     }
 
     private void refreshUI() {
+        Network network = this.network;
+        if(network == null) {
+            return;
+        }
         Realm realm = Realm.getDefaultInstance();
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
 

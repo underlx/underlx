@@ -107,7 +107,11 @@ public class StationActivity extends AppCompatActivity
         inflater.inflate(R.menu.station, menu);
 
         Realm realm = Realm.getDefaultInstance();
-        boolean isFavorite = realm.where(RStation.class).equalTo("id", stationId).findFirst().isFavorite();
+        RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
+        boolean isFavorite = false;
+        if (rstation != null) {
+            isFavorite = rstation.isFavorite();
+        }
         realm.close();
         MenuItem favItem = menu.findItem(R.id.menu_favorite);
         if(isFavorite) {

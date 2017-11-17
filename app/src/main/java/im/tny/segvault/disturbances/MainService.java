@@ -113,21 +113,23 @@ public class MainService extends Service {
 
     }
 
-    private void putNetwork(Network net) {
+    private void putNetwork(final Network net) {
         synchronized (lock) {
             // create Realm stations for the network if they don't exist already
             Realm realm = Realm.getDefaultInstance();
-            realm.beginTransaction();
-            for (Station s : net.getStations()) {
-                if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
-                    RStation rs = new RStation();
-                    rs.setStop(s);
-                    rs.setNetwork(net.getId());
-                    realm.copyToRealm(rs);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    for (Station s : net.getStations()) {
+                        if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
+                            RStation rs = new RStation();
+                            rs.setStop(s);
+                            rs.setNetwork(net.getId());
+                            realm.copyToRealm(rs);
+                        }
+                    }
                 }
-            }
-            realm.commitTransaction();
-            realm.close();
+            });
 
             net.setEdgeWeighter(cweighter);
             networks.put(net.getId(), net);
@@ -260,25 +262,6 @@ public class MainService extends Service {
         synchronized (lock) {
             try {
                 Network net = TopologyCache.loadNetwork(this, PRIMARY_NETWORK_ID);
-                /*for (Line l : net.getLines()) {
-                    Log.d("UpdateTopologyTask", "Line: " + l.getName());
-                    for (Stop s : l.vertexSet()) {
-                        Log.d("UpdateTopologyTask", s.toString());
-                    }
-                }*/
-                Log.d("loadNetworks", "INTERCHANGES");
-                for (Connection c : net.edgeSet()) {
-                    if (c instanceof Transfer) {
-                        Log.d("loadNetworks", " INTERCHANGE");
-                        for (Stop s : c.getStops()) {
-                            Log.d("loadNetworks", String.format("  %s", s.toString()));
-                        }
-                        for (Line l : ((Transfer) c).getLines()) {
-                            Log.d("loadNetworks", String.format("  %s", l.toString()));
-                        }
-                    }
-                }
-
                 putNetwork(net);
 
                 S2LS loc = locServices.get(PRIMARY_NETWORK_ID);

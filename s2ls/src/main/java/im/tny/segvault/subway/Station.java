@@ -47,6 +47,14 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         if (result.length() <= targetLength) {
             return result;
         }
+        parts = result.split("-");
+        if(parts.length > 1) {
+            parts[0] = parts[0].charAt(0) + ".";
+        }
+        result = TextUtils.join("-", parts);
+        if (result.length() <= targetLength) {
+            return result;
+        }
         parts = result.split(" ");
         parts[0] = parts[0].charAt(0) + ".";
         return TextUtils.join(" ", parts);

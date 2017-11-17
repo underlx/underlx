@@ -113,7 +113,7 @@ public class Util {
 
         public Thread newThread(@NonNull Runnable r) {
             ThreadGroup group = new ThreadGroup("threadGroup");
-            return new Thread(group, r, "LargeCallStackThread", 20000);
+            return new Thread(group, r, "LargeCallStackThread", 50000);
         }
     };
 
