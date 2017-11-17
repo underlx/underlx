@@ -131,15 +131,13 @@ public class WiFiLocator implements IInNetworkDetector, IProximityDetector, ILoc
                 listener.onLeftNetwork(this);
             }
         }
-        // only switch to a different station once its Wi-Fi signal is stronger
-        // than that of the current station
-        if (curLocation.size() > 0) {
-            Stop s = curLocation.get(0);
 
+        for (Stop s : curLocation) {
             if ((lastEntered != s || !prevLocation.contains(s)) && !blacklistedStations.contains(s)) {
                 listener.onEnteredStations(this, s);
                 lastEntered = s;
                 blacklistedStations.add(s);
+                break;
             }
         }
     }
