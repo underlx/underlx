@@ -158,7 +158,7 @@ public class MainService extends Service {
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
-        if(new Date().getTime() - sharedPref.getLong("pref_last_auto_topology_update_check", 0) > TimeUnit.HOURS.toMillis(2)) {
+        if (new Date().getTime() - sharedPref.getLong("pref_last_auto_topology_update_check", 0) > TimeUnit.HOURS.toMillis(2)) {
             SharedPreferences.Editor e = sharedPref.edit();
             e.putLong("pref_last_auto_topology_update_check", new Date().getTime());
             e.apply();
@@ -314,18 +314,22 @@ public class MainService extends Service {
     }
 
     public void updateTopology() {
-        synchronized (lock) {
-            cancelTopologyUpdate();
-            currentUpdateTopologyTask = new UpdateTopologyTask();
-            currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
+        if (!isTopologyUpdateInProgress()) {
+            synchronized (lock) {
+                cancelTopologyUpdate();
+                currentUpdateTopologyTask = new UpdateTopologyTask();
+                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
+            }
         }
     }
 
     public void updateTopology(String... network_ids) {
-        synchronized (lock) {
-            cancelTopologyUpdate();
-            currentUpdateTopologyTask = new UpdateTopologyTask();
-            currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
+        if (!isTopologyUpdateInProgress()) {
+            synchronized (lock) {
+                cancelTopologyUpdate();
+                currentUpdateTopologyTask = new UpdateTopologyTask();
+                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
+            }
         }
     }
 
@@ -337,17 +341,25 @@ public class MainService extends Service {
         }
     }
 
+    public boolean isTopologyUpdateInProgress() {
+        return currentUpdateTopologyTask != null;
+    }
+
     public void checkForTopologyUpdates() {
-        synchronized (lock) {
-            currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-            currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
+        if (!isTopologyUpdateInProgress()) {
+            synchronized (lock) {
+                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
+                currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
+            }
         }
     }
 
     public void checkForTopologyUpdates(boolean autoUpdate) {
-        synchronized (lock) {
-            currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-            currentCheckTopologyUpdatesTask.execute(autoUpdate);
+        if (!isTopologyUpdateInProgress()) {
+            synchronized (lock) {
+                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
+                currentCheckTopologyUpdatesTask.execute(autoUpdate);
+            }
         }
     }
 
