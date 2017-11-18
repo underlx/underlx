@@ -14,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -44,7 +45,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Network {
+    static public class Network implements Serializable {
         public String id;
         public String name;
         public int typCars;
@@ -58,7 +59,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Line {
+    static public class Line implements Serializable {
         public String id;
         public String name;
         public String color;
@@ -68,7 +69,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Station {
+    static public class Station implements Serializable {
         public String id;
         public String name;
         public List<String> altNames;
@@ -82,7 +83,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class StationFeatures {
+    static public class StationFeatures implements Serializable {
         public boolean lift;
         public boolean bus;
         public boolean boat;
@@ -91,7 +92,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Lobby {
+    static public class Lobby implements Serializable {
         public String id;
         public String name;
         public String network;
@@ -101,14 +102,14 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Exit {
+    static public class Exit implements Serializable {
         public int id;
         public float[] worldCoord;
         public List<String> streets;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Schedule {
+    static public class Schedule implements Serializable {
         public boolean holiday;
         public int day;
         public boolean open;
@@ -117,7 +118,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Connection {
+    static public class Connection implements Serializable {
         public String from;
         public String to;
         public int typWaitS;
@@ -127,7 +128,7 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class Transfer {
+    static public class Transfer implements Serializable {
         public String station;
         public String from;
         public String to;
@@ -135,14 +136,14 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class DatasetInfo {
+    static public class DatasetInfo implements Serializable {
         public String network;
         public String version;
         public List<String> authors;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static public class WiFiAP {
+    static public class WiFiAP implements Serializable {
         public String bssid;
         public String line;
     }

@@ -267,7 +267,7 @@ public class MainService extends Service {
     private void loadNetworks() {
         synchronized (lock) {
             try {
-                Network net = TopologyCache.loadNetwork(this, PRIMARY_NETWORK_ID);
+                Network net = TopologyCache.loadNetwork(this, PRIMARY_NETWORK_ID, api.getEndpoint().toString());
                 putNetwork(net);
 
                 S2LS loc = locServices.get(PRIMARY_NETWORK_ID);
@@ -553,9 +553,8 @@ public class MainService extends Service {
 
                     float netPart = (float) (cur_net + 1) / (float) net_count;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
-                    Network net = new Network(n.id, n.name, n.typCars, n.holidays, n.openTime * 1000, n.duration * 1000, n.timezone, n.newsURL);
 
-                    Map<String, API.Station> apiStations = new HashMap<>();
+                    HashMap<String, API.Station> apiStations = new HashMap<>();
                     for (API.Station s : api.getStations()) {
                         if (s.network.equals(n.id)) {
                             apiStations.put(s.id, s);
@@ -565,7 +564,7 @@ public class MainService extends Service {
                     publishProgress(20);
                     if (isCancelled()) break;
 
-                    Map<String, API.Lobby> apiLobbies = new HashMap<>();
+                    HashMap<String, API.Lobby> apiLobbies = new HashMap<>();
                     for (API.Lobby l : api.getLobbies()) {
                         if (l.network.equals(n.id)) {
                             apiLobbies.put(l.id, l);
@@ -577,67 +576,10 @@ public class MainService extends Service {
 
                     int line_count = n.lines.size();
                     int cur_line = 0;
+                    HashMap<String, API.Line> apiLines = new HashMap<>();
                     for (String lineid : n.lines) {
                         API.Line l = api.getLine(lineid);
-                        Line line = new Line(net, new HashSet<Stop>(), l.id, l.name, l.typCars);
-                        line.setColor(Color.parseColor("#" + l.color));
-                        boolean isFirstStationInLine = true;
-                        for (String sid : l.stations) {
-                            API.Station s = apiStations.get(sid);
-                            Station station = net.getStation(s.id);
-                            if (station == null) {
-                                Map<String, String> triviaURLs = new HashMap<>();
-                                for (Map.Entry<String, String> entry : s.triviaURLs.entrySet()) {
-                                    triviaURLs.put(entry.getKey(), api.getEndpoint().toString() + entry.getValue());
-                                }
-
-                                Map<String, Map<String, String>> connURLs = new HashMap<>();
-                                for (Map.Entry<String, Map<String, String>> entry : s.connURLs.entrySet()) {
-                                    Map<String, String> urls = new HashMap<>();
-                                    for (Map.Entry<String, String> localeEntry : entry.getValue().entrySet()) {
-                                        urls.put(localeEntry.getKey(), api.getEndpoint().toString() + localeEntry.getValue());
-                                    }
-                                    connURLs.put(entry.getKey(), urls);
-                                }
-
-                                station = new Station(net, s.id, s.name, s.altNames,
-                                        new Station.Features(s.features.lift, s.features.bus, s.features.boat, s.features.train, s.features.airport),
-                                        triviaURLs);
-                                station.setConnectionURLs(connURLs);
-
-                                // Lobbies
-                                for (String id : s.lobbies) {
-                                    API.Lobby alobby = apiLobbies.get(id);
-                                    Lobby lobby = new Lobby(alobby.id, alobby.name);
-                                    for (API.Exit aexit : alobby.exits) {
-                                        Lobby.Exit exit = new Lobby.Exit(aexit.id, aexit.worldCoord, aexit.streets);
-                                        lobby.addExit(exit);
-                                    }
-                                    for (API.Schedule asched : alobby.schedule) {
-                                        Lobby.Schedule sched = new Lobby.Schedule(
-                                                asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
-                                        lobby.addSchedule(sched);
-                                    }
-                                    station.addLobby(lobby);
-                                }
-                            }
-                            Stop stop = new Stop(station, line);
-                            line.addVertex(stop);
-                            station.addVertex(stop);
-                            if (isFirstStationInLine) {
-                                line.setFirstStop(stop);
-                                isFirstStationInLine = false;
-                            }
-
-                            // WiFi APs
-                            for (API.WiFiAP w : s.wiFiAPs) {
-                                // take line affinity into account
-                                if (w.line.equals(line.getId())) {
-                                    WiFiLocator.addBSSIDforStop(stop, new BSSID(w.bssid));
-                                }
-                            }
-                        }
-                        net.addLine(line);
+                        apiLines.put(lineid, l);
                         cur_line++;
                         publishProgress(40 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
                         if (cur_line < line_count) {
@@ -647,57 +589,21 @@ public class MainService extends Service {
                     }
                     if (isCancelled()) break;
 
-                    // Connections are within stations in the same line
-                    for (API.Connection c : api.getConnections()) {
-                        Set<Stop> sFrom = net.getStation(c.from).vertexSet();
-                        Set<Stop> sTo = net.getStation(c.to).vertexSet();
-                        Stop from = null, to = null;
-                        for (Stop s : sFrom) {
-                            for (Stop s2 : sTo) {
-                                if (s.getLine().getId().equals(s2.getLine().getId())) {
-                                    from = s;
-                                    to = s2;
-                                }
-                            }
-                        }
-                        if (from != null && to != null) {
-                            Connection newConnection = net.addEdge(from, to);
-                            from.getLine().addEdge(from, to);
-                            newConnection.setTimes(new Connection.Times(c.typWaitS, c.typStopS, c.typS));
-                            newConnection.setWorldLength(c.worldLength);
-                            net.setEdgeWeight(newConnection, c.typS + 1); // TODO remove constant
-                        }
-                    }
+                    List<API.Connection> connections = api.getConnections();
 
                     publishProgress(80);
                     if (isCancelled()) break;
 
-                    for (API.Transfer t : api.getTransfers()) {
-                        if (isCancelled()) break;
-                        Transfer newTransfer = new Transfer();
-                        // find stations with the right IDs for each line
-                        Station station = net.getStation(t.station);
-                        for (Stop from : station.vertexSet()) {
-                            for (Stop to : station.vertexSet()) {
-                                if (from.getLine().getId().equals(t.from) && to.getLine().getId().equals(t.to)) {
-                                    net.addEdge(from, to, newTransfer);
-                                    net.setEdgeWeight(newTransfer, t.typS + 3); // TODO remove constant
-                                    newTransfer.setTimes(new Connection.Times(0, 0, t.typS));
-                                }
-                            }
-
-                        }
-                    }
+                    List<API.Transfer> transfers = api.getTransfers();
 
                     publishProgress(100);
 
-                    API.DatasetInfo info = api.getDatasetInfo(net.getId());
-                    net.setDatasetAuthors(info.authors);
-                    net.setDatasetVersion(info.version);
+                    API.DatasetInfo info = api.getDatasetInfo(n.id);
                     lineStatusCache.clear();
                     statsCache.clear();
-                    putNetwork(net);
-                    TopologyCache.saveNetwork(MainService.this, net);
+
+                    TopologyCache.saveNetwork(MainService.this, n, apiStations, apiLobbies, apiLines, connections, transfers, info);
+                    putNetwork(TopologyCache.loadNetwork(MainService.this, n.id, api.getEndpoint().toString()));
                     if (isCancelled()) break;
                 }
             } catch (APIException e) {
