@@ -22,6 +22,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -154,10 +155,15 @@ public class MainService extends Service {
         if (networks.size() == 0) {
             loadNetworks();
         }
-        checkForTopologyUpdates();
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
+        if(new Date().getTime() - sharedPref.getLong("pref_last_auto_topology_update_check", 0) > TimeUnit.HOURS.toMillis(2)) {
+            SharedPreferences.Editor e = sharedPref.edit();
+            e.putLong("pref_last_auto_topology_update_check", new Date().getTime());
+            e.apply();
+            checkForTopologyUpdates();
+        }
 
         realmForListeners = Realm.getDefaultInstance();
         tripRealmResults = realmForListeners.where(Trip.class).findAll();
@@ -560,13 +566,11 @@ public class MainService extends Service {
                     int line_count = n.lines.size();
                     int cur_line = 0;
                     for (String lineid : n.lines) {
-                        Log.d("UpdateTopologyTask", " Line: " + lineid);
                         API.Line l = api.getLine(lineid);
                         Line line = new Line(net, new HashSet<Stop>(), l.id, l.name, l.typCars);
                         line.setColor(Color.parseColor("#" + l.color));
                         boolean isFirstStationInLine = true;
                         for (String sid : l.stations) {
-                            Log.d("UpdateTopologyTask", "  Stop: " + sid);
                             API.Station s = apiStations.get(sid);
                             Station station = net.getStation(s.id);
                             if (station == null) {
