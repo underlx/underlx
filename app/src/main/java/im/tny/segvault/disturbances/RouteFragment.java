@@ -450,18 +450,24 @@ public class RouteFragment extends TopFragment {
         }
 
         int length = 0;
+        double realWeight = 0;
+        // TODO: switch to using route.getPath().getWeight() directly once DisturbanceAwareWeighter
+        // can actually provide proper weights for lines with disturbances, and not just some
+        // extremely large number
+        NeutralWeighter weighter = new NeutralWeighter();
         for(Connection c : route.getPath().getEdgeList()) {
             length += c.getWorldLength();
+            realWeight += weighter.getEdgeWeight(network, c);
         }
         if (length < 1000) {
             routeEtaView.setText(
                     String.format("%s (%d m)",
-                            DateUtils.formatElapsedTime((int) route.getPath().getWeight()),
+                            DateUtils.formatElapsedTime((int) realWeight),
                             length));
         } else {
             routeEtaView.setText(
                     String.format("%s (%.01f km)",
-                            DateUtils.formatElapsedTime((int) route.getPath().getWeight()),
+                            DateUtils.formatElapsedTime((int) realWeight),
                             length / 1000.0));
         }
 

@@ -2,7 +2,6 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
