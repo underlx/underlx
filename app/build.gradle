@@ -8,7 +8,7 @@ repositories {
         url "https://jitpack.io"
     }
     maven {
-        url 'https://github.com/uPhyca/stetho-realm/raw/master/maven-repo'
+        url 'https://github.com/WickeDev/stetho-realm/raw/master/maven-repo'
     }
 }
 
@@ -64,7 +64,7 @@ dependencies {
     compile "com.android.support:preference-v7:$supportLibsVersion"
     testCompile 'junit:junit:4.12'
     debugCompile 'com.facebook.stetho:stetho:1.5.0'
-    debugCompile 'com.uphyca:stetho_realm:2.0.0'
+    debugImplementation 'com.uphyca:stetho_realm:2.2.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
