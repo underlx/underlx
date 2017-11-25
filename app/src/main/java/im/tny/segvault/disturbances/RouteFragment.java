@@ -206,7 +206,7 @@ public class RouteFragment extends TopFragment {
         });
 
         if (loc.getCurrentTrip() != null) {
-            originPicker.setWeakSelection(loc.getCurrentTrip().getStartVertex().getStation());
+            originPicker.setWeakSelection(loc.getCurrentTrip().getEndVertex().getStation());
         }
 
         destinationPicker.setStations(stations);
