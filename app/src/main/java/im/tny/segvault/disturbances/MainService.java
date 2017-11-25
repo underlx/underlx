@@ -966,7 +966,7 @@ public class MainService extends Service {
         List<CharSequence> statusLines = new ArrayList<>();
         int color = -1;
         if (currentRoute != null) {
-            inboxStyle.setSummaryText(String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getStation().getName()));
+            inboxStyle.setSummaryText(String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getName()));
             Step nextStep = currentRoute.getNextStep(currentPath);
             if (nextStep instanceof EnterStep) {
                 if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
@@ -976,7 +976,7 @@ public class MainService extends Service {
                 }
                 // TODO: show "encurtamentos" warnings here if applicable
                 statusLines.add(String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()));
-                color = currentRoute.getSource().getLine().getColor();
+                color = currentRoute.getSourceStop().getLine().getColor();
             } else if (nextStep instanceof ChangeLineStep) {
                 ChangeLineStep clStep = (ChangeLineStep) nextStep;
                 String lineName = clStep.getTarget().getName();
@@ -1145,8 +1145,7 @@ public class MainService extends Service {
                     if (s2ls.getCurrentTargetRoute() != null) {
                         Step nextStep = s2ls.getCurrentTargetRoute().getNextStep(path);
                         highPrioNotif = path.getEndVertex().getStation() != prevEndStation &&
-                                path.getEndVertex().getStation() == nextStep.getStation() &&
-                                !(nextStep instanceof EnterStep);
+                                path.getEndVertex().getStation() == nextStep.getStation();
                     }
                     prevEndStation = path.getEndVertex().getStation();
                     updateRouteNotification(s2ls, highPrioNotif);
@@ -1200,7 +1199,7 @@ public class MainService extends Service {
                     Route.calculate(
                             s2ls.getNetwork(),
                             path.getEndVertex().getStation(),
-                            route.getTarget().getStation()), true);
+                            route.getTarget()), true);
             if (!checkStopForeground(s2ls)) {
                 updateRouteNotification(s2ls);
             }

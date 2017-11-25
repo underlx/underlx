@@ -154,9 +154,10 @@ public class S2LS implements OnStatusChangeListener {
             prevRoute = targetRoute;
             targetRoute = route;
             if (route != null) {
-                routePathChecker.onNewTargetRoute();
-
-                if (!isReroute) {
+                if (isReroute) {
+                    routePathChecker.onReroute();
+                } else {
+                    routePathChecker.onNewTargetRoute();
                     listener.onRouteProgrammed(this, targetRoute);
                 }
             }
@@ -218,30 +219,34 @@ public class S2LS implements OnStatusChangeListener {
                 if (targetRoute == null) {
                     return;
                 }
-                if (!beganFollowingRoute && targetRoute.checkPathStartsRoute(path)) {
-                    beganFollowingRoute = true;
-                    listener.onRouteStarted(S2LS.this, path, targetRoute);
-                    if (path.getEndVertex() != targetRoute.getSource()) {
-                        listener.onRouteMistake(S2LS.this, path, targetRoute);
-                    }
-                } else if (beganFollowingRoute && !reachedDestination && !targetRoute.checkPathCompliance(path)) {
-                    listener.onRouteMistake(S2LS.this, path, targetRoute);
-                }
-
                 if (targetRoute.checkPathEndsRoute(path) || reachedDestination) {
                     reachedDestination = true;
                     if (!(getState() instanceof InNetworkState) ||
-                            path.getCurrentStop().getStation() != targetRoute.getTarget().getStation() ||
+                            path.getCurrentStop().getStation() != targetRoute.getTarget() ||
                             new Date().getTime() - path.getCurrentStopEntryTime().getTime() > 30 * 1000) {
                         listener.onRouteCompleted(S2LS.this, path, targetRoute);
                         targetRoute = null;
                     }
+                } else if (!beganFollowingRoute && targetRoute.checkPathStartsRoute(path)) {
+                    beganFollowingRoute = true;
+                    listener.onRouteStarted(S2LS.this, path, targetRoute);
+                    if (path.getEndVertex().getStation() != targetRoute.getSource()) {
+                        // note: onRouteMistake can change targetRoute (it can even become null)
+                        listener.onRouteMistake(S2LS.this, path, targetRoute);
+                    }
+                } else if (beganFollowingRoute && !reachedDestination && !targetRoute.checkPathCompliance(path)) {
+                    // note: onRouteMistake can change targetRoute (it can even become null)
+                    listener.onRouteMistake(S2LS.this, path, targetRoute);
                 }
             }
         }
 
         void onNewTargetRoute() {
             beganFollowingRoute = false;
+            reachedDestination = false;
+        }
+
+        void onReroute() {
             reachedDestination = false;
         }
     }

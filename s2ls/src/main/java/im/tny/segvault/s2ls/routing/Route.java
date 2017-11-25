@@ -176,11 +176,19 @@ public class Route extends ArrayList<Step> {
         return matchesNeutralPath;
     }
 
-    public Stop getSource() {
+    public Station getSource() {
+        return getSourceStop().getStation();
+    }
+
+    public Stop getSourceStop() {
         return getPath().getEdgeList().get(0).getSource();
     }
 
-    public Stop getTarget() {
+    public Station getTarget() {
+        return getTargetStop().getStation();
+    }
+
+    public Stop getTargetStop() {
         return getPath().getEdgeList().get(getPath().getEdgeList().size() - 1).getTarget();
     }
 
@@ -211,9 +219,9 @@ public class Route extends ArrayList<Step> {
     }
 
     public boolean checkPathStartsRoute(GraphPath<Stop, Connection> otherPath) {
-        Stop current = otherPath.getEndVertex();
+        Station current = otherPath.getEndVertex().getStation();
         for (Connection c : path.getEdgeList()) {
-            if (c.getSource() == current || c.getTarget() == current) {
+            if (c.getSource().getStation() == current || c.getTarget().getStation() == current) {
                 return true;
             }
         }
@@ -221,7 +229,7 @@ public class Route extends ArrayList<Step> {
     }
 
     public boolean checkPathEndsRoute(GraphPath<Stop, Connection> otherPath) {
-        return otherPath.getEndVertex() == path.getEdgeList().get(path.getEdgeList().size() - 1).getTarget();
+        return otherPath.getEndVertex().getStation() == getTarget();
     }
 
     public Step getNextStep(Path currentPath) {
