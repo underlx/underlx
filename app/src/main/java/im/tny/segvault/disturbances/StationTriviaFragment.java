@@ -137,7 +137,9 @@ public class StationTriviaFragment extends Fragment {
         ExtraContentCache.getTrivia(getContext(), new ExtraContentCache.OnTriviaReadyListener() {
             @Override
             public void onSuccess(List<String> trivia) {
-                triviaView.setHtml(trivia.get(0));
+                if (isAdded()) {
+                    triviaView.setHtml(trivia.get(0));
+                }
             }
 
             @Override
@@ -147,7 +149,9 @@ public class StationTriviaFragment extends Fragment {
 
             @Override
             public void onFailure() {
-                triviaView.setHtml(getString(R.string.frag_station_info_unavailable));
+                if (isAdded()) {
+                    triviaView.setHtml(getString(R.string.frag_station_info_unavailable));
+                }
             }
         }, station);
     }
@@ -165,6 +169,7 @@ public class StationTriviaFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         MainService getMainService();
+
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

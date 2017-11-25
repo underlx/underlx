@@ -277,12 +277,12 @@ public class StationGeneralFragment extends Fragment {
 
         @Override
         public void onSuccess(List<String> connectionInfo) {
-            if (snackbar != null) {
-                snackbar.dismiss();
-            }
             if (getActivity() == null) {
                 // our activity went away while we worked...
                 return;
+            }
+            if (snackbar != null) {
+                snackbar.dismiss();
             }
             DialogFragment newFragment = HtmlDialogFragment.newInstance(connectionInfo.get(0));
             newFragment.show(getActivity().getSupportFragmentManager(), "conninfo");
@@ -298,12 +298,12 @@ public class StationGeneralFragment extends Fragment {
 
         @Override
         public void onFailure() {
-            if (snackbar != null) {
-                snackbar.dismiss();
-            }
             if (getActivity() == null) {
                 // our activity went away while we worked...
                 return;
+            }
+            if (snackbar != null) {
+                snackbar.dismiss();
             }
             DialogFragment newFragment = HtmlDialogFragment.newInstance(getString(R.string.frag_station_info_unavailable));
             newFragment.show(getActivity().getSupportFragmentManager(), "conninfo");
