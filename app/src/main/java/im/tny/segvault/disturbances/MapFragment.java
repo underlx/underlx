@@ -108,7 +108,7 @@ public class MapFragment extends TopFragment {
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         if (sharedPref != null) {
-            if (BuildConfig.DEBUG && sharedPref.getBoolean("pref_developer_mode", false)) {
+            if (/*BuildConfig.DEBUG &&*/ sharedPref.getBoolean("pref_developer_mode", false)) {
                 menu.findItem(R.id.menu_mock_location).setVisible(true);
             }
         }
