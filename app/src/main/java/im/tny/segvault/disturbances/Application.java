@@ -1,5 +1,7 @@
 package im.tny.segvault.disturbances;
 
+import android.content.Context;
+
 import com.evernote.android.job.JobManager;
 
 import java.util.Date;
@@ -20,9 +22,13 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         StethoUtils.install(this);
+        initRealm(this);
         JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());
+    }
+
+    public static void initRealm(Context context) {
         // Initialize Realm. Should only be done once when the application starts.
-        Realm.init(this);
+        Realm.init(context);
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .schemaVersion(6) // Must be bumped when the schema changes
                 .migration(new MyMigration())
@@ -30,7 +36,7 @@ public class Application extends android.app.Application {
         Realm.setDefaultConfiguration(config);
     }
 
-    class MyMigration implements RealmMigration {
+    static class MyMigration implements RealmMigration {
         @Override
         public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {
 
