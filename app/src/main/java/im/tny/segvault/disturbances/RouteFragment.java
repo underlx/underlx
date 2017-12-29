@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -30,6 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -237,7 +239,7 @@ public class RouteFragment extends TopFragment {
             layoutNetworkClosed.setVisibility(View.GONE);
         } else {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, network.getOpenTime(), network.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, network.getNextOpenTime(), network.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             viewNetworkClosed.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             layoutNetworkClosed.setVisibility(View.VISIBLE);
         }
@@ -433,7 +435,7 @@ public class RouteFragment extends TopFragment {
 
         if (network.isAboutToClose() && route.hasLineChange()) {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, network.getOpenTime() + network.getOpenDuration(), network.getOpenTime() + network.getOpenDuration(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, network.getNextCloseTime(), network.getNextCloseTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             viewNetworkClosed.setText(
                     String.format(getString(R.string.warning_network_about_to_close_transfers),
                             f.toString(), destinationPicker.getSelection().getName()));
@@ -481,6 +483,10 @@ public class RouteFragment extends TopFragment {
     public static void populateStationView(final Context context, final Network network, final Station station, View view) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
+
+        if(station.isExceptionallyClosed(network, new Date())) {
+            stationView.setTextColor(Color.GRAY);
+        }
 
         View separatorView = (View) view.findViewById(R.id.feature_separator_view);
 

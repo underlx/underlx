@@ -1,6 +1,9 @@
 package im.tny.segvault.subway;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,6 +16,7 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         setId(id);
         setName(name);
         setUsualCarCount(usualCarCount);
+        this.schedules = new HashMap<>();
     }
 
     private int color;
@@ -139,5 +143,47 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
     @Override
     public int compareTo(final Line o) {
         return this.getId().compareTo(o.getId());
+    }
+
+    private Map<Integer, Schedule> schedules = null;
+
+    public void addSchedule(Schedule schedule) {
+        Schedule.addSchedule(schedules, schedule);
+    }
+
+    public boolean isOpen() {
+        return isOpen(new Date());
+    }
+
+    public boolean isAboutToClose() {
+        return isAboutToClose(new Date());
+    }
+
+    public boolean isAboutToClose(Date at) {
+        return isOpen(at) && !isOpen(new Date(at.getTime() + 15*60*1000));
+    }
+
+    public boolean isOpen(Date at) {
+        return Schedule.isOpen(getNetwork(), schedules, at);
+    }
+
+    public boolean isExceptionallyClosed(Date at) {
+        return getNetwork().isOpen(at) && !isOpen(at);
+    }
+
+    public long getNextOpenTime() {
+        return Schedule.getNextOpenTime(getNetwork(), schedules, new Date());
+    }
+
+    public long getNextOpenTime(Date curDate) {
+        return Schedule.getNextOpenTime(getNetwork(), schedules, curDate);
+    }
+
+    public long getNextCloseTime() {
+        return Schedule.getNextCloseTime(getNetwork(), schedules, new Date());
+    }
+
+    public long getNextCloseTime(Date curDate) {
+        return Schedule.getNextCloseTime(getNetwork(), schedules, curDate);
     }
 }

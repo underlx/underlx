@@ -193,6 +193,17 @@ public class LineActivity extends AppCompatActivity {
                 stations.add(curStop.getStation());
                 break;
             }
+            boolean loop = true;
+            for (Connection inedge : line.incomingEdgesOf(curStop)) {
+                if (!visited.contains(inedge.getSource())) {
+                    c = new Connection(true, inedge.getTarget(), inedge.getSource(), null, 0);
+                    loop = false;
+                    break;
+                }
+            }
+            if(!loop) {
+                continue;
+            }
             for (Connection outedge : line.outgoingEdgesOf(curStop)) {
                 if (!visited.contains(outedge.getTarget())) {
                     c = outedge;

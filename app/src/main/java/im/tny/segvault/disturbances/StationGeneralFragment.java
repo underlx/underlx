@@ -9,6 +9,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 
 import im.tny.segvault.disturbances.model.StationUse;
@@ -121,6 +125,14 @@ public class StationGeneralFragment extends Fragment {
             return;
 
         if (station.isAlwaysClosed()) {
+            LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);
+            closedLayout.setVisibility(View.VISIBLE);
+        } else if (station.isExceptionallyClosed(net, new Date())) {
+            TextView closedView = (TextView) view.findViewById(R.id.closed_info_view);
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(getContext(), f, station.getNextOpenTime(net), station.getNextOpenTime(net), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            closedView.setText(String.format(getString(R.string.frag_station_closed_schedule), f.toString()));
+
             LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);
             closedLayout.setVisibility(View.VISIBLE);
         }

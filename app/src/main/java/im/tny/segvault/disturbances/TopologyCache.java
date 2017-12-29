@@ -23,6 +23,7 @@ import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Schedule;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
@@ -43,13 +44,13 @@ public class TopologyCache {
     }
 
     static public void saveNetwork(Context context,
-                                      API.Network network,
-                                      HashMap<String, API.Station> stations,
-                                      HashMap<String, API.Lobby> lobbies,
-                                      HashMap<String, API.Line> lines,
-                                      List<API.Connection> connections,
-                                      List<API.Transfer> transfers,
-                                      API.DatasetInfo info) throws CacheException {
+                                   API.Network network,
+                                   HashMap<String, API.Station> stations,
+                                   HashMap<String, API.Lobby> lobbies,
+                                   HashMap<String, API.Line> lines,
+                                   List<API.Connection> connections,
+                                   List<API.Transfer> transfers,
+                                   API.DatasetInfo info) throws CacheException {
         Topology t = new Topology();
         t.network = network;
         t.stations = stations;
@@ -94,8 +95,7 @@ public class TopologyCache {
             throw new CacheException(e).addInfo("Unforeseen exception");
         }
         Network net = new Network(t.network.id, t.network.name, t.network.typCars,
-                t.network.holidays, t.network.openTime * 1000, t.network.duration * 1000,
-                t.network.timezone, t.network.newsURL);
+                t.network.holidays, t.network.timezone, t.network.newsURL);
 
         for (String lineid : t.network.lines) {
             API.Line l = t.lines.get(lineid);
@@ -134,7 +134,7 @@ public class TopologyCache {
                             lobby.addExit(exit);
                         }
                         for (API.Schedule asched : alobby.schedule) {
-                            Lobby.Schedule sched = new Lobby.Schedule(
+                            Schedule sched = new Schedule(
                                     asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
                             lobby.addSchedule(sched);
                         }
@@ -156,6 +156,12 @@ public class TopologyCache {
                         WiFiLocator.addBSSIDforStop(stop, new BSSID(w.bssid));
                     }
                 }
+            }
+
+            for (API.Schedule asched : l.schedule) {
+                Schedule sched = new Schedule(
+                        asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
+                line.addSchedule(sched);
             }
             net.addLine(line);
         }
@@ -196,6 +202,12 @@ public class TopologyCache {
                 }
 
             }
+        }
+
+        for (API.Schedule asched : t.network.schedule) {
+            Schedule sched = new Schedule(
+                    asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
+            net.addSchedule(sched);
         }
 
         net.setDatasetAuthors(t.info.authors);

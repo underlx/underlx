@@ -41,6 +41,7 @@
     <string name="frag_lines_error_updating">Failed to update line status</string>
     <string name="frag_lines_updated">Updated %s</string>
     <string name="frag_lines_duration">for %d minutes</string>
+    <string name="frag_lines_until">until %s</string>
     <string name="frag_map_title">Map</string>
     <string name="frag_map_mock_location">Mock location</string>
     <string name="frag_disturbances_title">Disturbances</string>
@@ -190,6 +191,7 @@
     <string name="frag_station_conn_info_loading">Loading…</string>
     <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
     <string name="frag_station_closed_extended">This station is closed for an extended period.</string>
+    <string name="frag_station_closed_schedule">This station is currently closed. It will open at %s.</string>
     <string name="cache_extras_success">Extra content downloaded successfully</string>
     <string name="cache_extras_failure">Error downloading extra content</string>
     <string name="cache_extras_progress">Downloading extra content %d%%</string>

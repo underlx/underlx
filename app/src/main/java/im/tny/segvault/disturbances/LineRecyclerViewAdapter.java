@@ -1,9 +1,12 @@
 package im.tny.segvault.disturbances;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 
 import im.tny.segvault.disturbances.HomeLinesFragment.OnListFragmentInteractionListener;
@@ -25,6 +29,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
 
     private final List<LineItem> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private Context context;
 
     public LineRecyclerViewAdapter(List<LineItem> values, OnListFragmentInteractionListener listener) {
         mValues = values;
@@ -35,6 +40,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_line, parent, false);
+        context = parent.getContext();
         return new ViewHolder(view);
     }
 
@@ -50,18 +56,18 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(holder.mItem.name);
         if(holder.mItem.down) {
-            GradientDrawable gd = new GradientDrawable(
-                    GradientDrawable.Orientation.LEFT_RIGHT,
-                    new int[] {holder.mItem.color, darkerColor(holder.mItem.color)});
-            if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                holder.mView.setBackgroundDrawable(gd);
-            } else {
-                holder.mView.setBackground(gd);
-            }
-            long downMinutes = (((new Date()).getTime()/60000) - (holder.mItem.downSince.getTime()/60000));
+
+            long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
             holder.mStatusView.setImageResource(R.drawable.ic_warning_white);
+            setDownGradient(holder);
+        } else if (holder.mItem.exceptionallyClosed) {
+            setDownGradient(holder);
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(context, f, holder.mItem.closedUntil, holder.mItem.closedUntil, DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_until), f.toString()));
+            holder.mStatusView.setImageResource(R.drawable.ic_close_white_24dp);
         } else {
             holder.mView.setBackgroundColor(holder.mItem.color);
             holder.mStatusDescView.setVisibility(View.GONE);
@@ -78,6 +84,17 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
                 }
             }
         });
+    }
+
+    private void setDownGradient(final ViewHolder holder) {
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{holder.mItem.color, darkerColor(holder.mItem.color)});
+        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            holder.mView.setBackgroundDrawable(gd);
+        } else {
+            holder.mView.setBackground(gd);
+        }
     }
 
     @Override
@@ -112,6 +129,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final int color;
         public final boolean down;
         public final Date downSince;
+        public final boolean exceptionallyClosed;
+        public final long closedUntil;
 
         public LineItem(Line line) {
             this.id = line.getId();
@@ -119,6 +138,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.color = line.getColor();
             this.down = false;
             this.downSince = new Date();
+            this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
+            this.closedUntil = line.getNextOpenTime(new Date());
         }
 
         public LineItem(Line line, Date downSince) {
@@ -127,6 +148,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.color = line.getColor();
             this.down = true;
             this.downSince = downSince;
+            this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
+            this.closedUntil = line.getNextOpenTime(new Date());
         }
 
         @Override

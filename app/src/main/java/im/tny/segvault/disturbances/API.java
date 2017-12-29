@@ -50,12 +50,11 @@ public class API {
         public String name;
         public int typCars;
         public List<Integer> holidays;
-        public int openTime;
-        public int duration;
         public String timezone;
         public String newsURL;
         public List<String> lines;
         public List<String> stations;
+        public List<Schedule> schedule;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -66,6 +65,7 @@ public class API {
         public String network;
         public int typCars;
         public List<String> stations;
+        public List<Schedule> schedule;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -2,10 +2,13 @@ package im.tny.segvault.subway;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by gabriel on 4/5/17.
@@ -44,7 +47,36 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
     }
 
     public void addSchedule(Schedule schedule) {
-        schedules.put(schedule.holiday ? -1 : schedule.day, schedule);
+        Schedule.addSchedule(schedules, schedule);
+    }
+
+    public boolean isAlwaysClosed() {
+        for (Schedule s : getSchedules()) {
+            if (s.open) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isOpen(Network network, Date at) {
+        return Schedule.isOpen(network, schedules, at);
+    }
+
+    public long getNextOpenTime(Network network) {
+        return Schedule.getNextOpenTime(network, schedules, new Date());
+    }
+
+    public long getNextOpenTime(Network network, Date curDate) {
+        return Schedule.getNextOpenTime(network, schedules, curDate);
+    }
+
+    public long getNextCloseTime(Network network) {
+        return Schedule.getNextCloseTime(network, schedules, new Date());
+    }
+
+    public long getNextCloseTime(Network network, Date curDate) {
+        return Schedule.getNextCloseTime(network, schedules, curDate);
     }
 
     private String name;
@@ -96,21 +128,4 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
             this.streets = streets;
         }
     }
-
-    static public class Schedule implements Serializable {
-        public boolean holiday;
-        public int day;
-        public boolean open;
-        public long openTime;
-        public long duration;
-
-        public Schedule(boolean holiday, int day, boolean open, long openTime, long duration) {
-            this.holiday = holiday;
-            this.day = day;
-            this.open = open;
-            this.openTime = openTime;
-            this.duration = duration;
-        }
-    }
-
 }

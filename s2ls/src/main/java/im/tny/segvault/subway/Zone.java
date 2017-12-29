@@ -15,6 +15,10 @@ public class Zone extends DirectedWeightedSubgraph<Stop, Connection> {
         super(network, stops, new HashSet<Connection>());
     }
 
+    public Network getNetwork() {
+        return (Network)getBase();
+    }
+
     public void intersect(Zone zone) {
         // retainAll throws UnsupportedOperationException if used directly on vertex sets
         // vertexSet().retainAll(zone.vertexSet());

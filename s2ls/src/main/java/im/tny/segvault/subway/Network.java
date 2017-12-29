@@ -5,6 +5,7 @@ import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -19,7 +20,7 @@ import java.util.TimeZone;
  */
 
 public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements INameable, IIDable {
-    public Network(String id, String name, int usualCarCount, List<Integer> holidays, long openTime, long duration, String timezone, String announcementsURL) {
+    public Network(String id, String name, int usualCarCount, List<Integer> holidays, String timezone, String announcementsURL) {
         /*super(new ConnectionFactory());
         ((ConnectionFactory)this.getEdgeFactory()).setNetwork(this);*/
         super(Connection.class);
@@ -27,10 +28,9 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         setName(name);
         setUsualCarCount(usualCarCount);
         setHolidays(holidays);
-        setOpenTime(openTime);
-        setOpenDuration(duration);
         setTimezone(timezone);
         setAnnouncementsURL(announcementsURL);
+        this.schedules = new HashMap<>();
     }
 
     private String name;
@@ -95,26 +95,6 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     public void setHolidays(List<Integer> holidays) {
         this.holidays = holidays;
-    }
-
-    private long openTime;
-
-    public long getOpenTime() {
-        return openTime;
-    }
-
-    public void setOpenTime(long openTime) {
-        this.openTime = openTime;
-    }
-
-    private long openDuration;
-
-    public long getOpenDuration() {
-        return openDuration;
-    }
-
-    public void setOpenDuration(long openDuration) {
-        this.openDuration = openDuration;
     }
 
     private TimeZone timezone;
@@ -208,6 +188,21 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return super.getEdgeWeight(connection);
     }
 
+    public Stop getDirectionForConnection(Connection c) {
+        return c.getSource().getLine().getDirectionForConnection(c);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Network: %s", getName());
+    }
+
+    private Map<Integer, Schedule> schedules = null;
+
+    public void addSchedule(Schedule schedule) {
+        Schedule.addSchedule(schedules, schedule);
+    }
+
     public boolean isOpen() {
         return isOpen(new Date());
     }
@@ -221,26 +216,22 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     }
 
     public boolean isOpen(Date at) {
-        Calendar c = Calendar.getInstance(getTimezone());
-        long now = at.getTime();
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        long passed = now - c.getTimeInMillis();
-        boolean openToday = passed >= getOpenTime() && passed < getOpenTime() + getOpenDuration();
-        c.add(Calendar.DATE, -1);
-        passed = now - c.getTimeInMillis();
-        boolean openYesterday = passed >= getOpenTime() && passed < getOpenTime() + getOpenDuration();
-        return openToday || openYesterday;
+        return Schedule.isOpen(this, schedules, at);
     }
 
-    public Stop getDirectionForConnection(Connection c) {
-        return c.getSource().getLine().getDirectionForConnection(c);
+    public long getNextOpenTime() {
+        return Schedule.getNextOpenTime(this, schedules, new Date());
     }
 
-    @Override
-    public String toString() {
-        return String.format("Network: %s", getName());
+    public long getNextOpenTime(Date curDate) {
+        return Schedule.getNextOpenTime(this, schedules, curDate);
+    }
+
+    public long getNextCloseTime() {
+        return Schedule.getNextCloseTime(this, schedules, new Date());
+    }
+
+    public long getNextCloseTime(Date curDate) {
+        return Schedule.getNextCloseTime(this, schedules, curDate);
     }
 }

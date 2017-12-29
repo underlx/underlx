@@ -108,7 +108,6 @@
     <string name="lobby_schedule_all_days">Todos os dias: %s</string>
     <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
     <string name="lobby_exit_view_map">Ver mapa</string>
-    <string name="warning_network_closed">A rede de Metro encontra-se encerrada. O serviço reabre às %s.</string>
     <string name="warning_network_about_to_close_transfers">A rede de Metro está prestes a encerrar, às %1$s. Poderá não conseguir realizar todas as mudanças de linha e assim não conseguir chegar a %2$s.</string>
     <string name="frag_announcements_title">Notícias</string>
     <string name="nav_announcements">Notícias</string>
@@ -149,6 +148,7 @@
     <string name="cache_extras_progress">A obter conteúdo adicional %d%%</string>
     <string name="dataset_info_cache_all_extras">Descarregar conteúdo adicional</string>
     <string name="notif_route_end_trip">Terminar viagem</string>
+    <string name="warning_network_closed">A rede de Metro encontra-se encerrada. O serviço reabre às %s.</string>
     <string name="frag_home_end_trip">Terminar viagem</string>
     <string name="act_trip_correction_start_station">Estação inicial</string>
     <string name="act_trip_correction_end_station">Estação final</string>
@@ -247,4 +247,6 @@
     <string name="frag_station_parking">Estacionamento</string>
     <string name="frag_trip_stats">%1$d m em %2$s, velocidade média %3$.01f km/h</string>
     <string name="frag_station_shared_bikes">Bicicletas partilhadas</string>
+    <string name="frag_station_closed_schedule">Esta estação encontra-se encerrada. Reabre às %s.</string>
+    <string name="frag_lines_until">até às %s</string>
 </resources>

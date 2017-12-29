@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +49,7 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
             return result;
         }
         parts = result.split("-");
-        if(parts.length > 1) {
+        if (parts.length > 1) {
             parts[0] = parts[0].charAt(0) + ".";
         }
         result = TextUtils.join("-", parts);
@@ -149,13 +150,59 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public boolean isAlwaysClosed() {
         for (Lobby l : getLobbies()) {
-            for (Lobby.Schedule s : l.getSchedules()) {
-                if (s.open) {
-                    return false;
-                }
+            if (!l.isAlwaysClosed()) {
+                return false;
             }
         }
         return true;
+    }
+
+    public boolean isExceptionallyClosed(Network network, Date at) {
+        boolean allLobiesClosed = true;
+        for (Lobby l : getLobbies()) {
+            if (l.isOpen(network, at)) {
+                allLobiesClosed = false;
+                break;
+            }
+        }
+        return network.isOpen(at) && allLobiesClosed;
+    }
+
+    public boolean isOpen(Network network, Date at) {
+        for (Lobby l : getLobbies()) {
+            if (!l.isOpen(network, at)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public long getNextOpenTime(Network network) {
+        return getNextOpenTime(network, new Date());
+    }
+
+    public long getNextOpenTime(Network network, Date curDate) {
+        long earliest = Long.MAX_VALUE;
+        for(Lobby l : getLobbies()) {
+            if(l.getNextOpenTime(network, curDate) < earliest) {
+                earliest = l.getNextOpenTime(network, curDate);
+            }
+        }
+        return earliest;
+    }
+
+    public long getNextCloseTime(Network network) {
+        return getNextCloseTime(network, new Date());
+    }
+
+    public long getNextCloseTime(Network network, Date curDate) {
+        long latest = Long.MIN_VALUE;
+        for(Lobby l : getLobbies()) {
+            if(l.getNextCloseTime(network, curDate) > latest) {
+                latest = l.getNextCloseTime(network, curDate);
+            }
+        }
+        return latest;
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import im.tny.segvault.subway.Lobby;
+import im.tny.segvault.subway.Schedule;
 
 public class LobbyView extends LinearLayout {
     private TextView nameView;
@@ -65,14 +66,14 @@ public class LobbyView extends LinearLayout {
 
         boolean weekdaysAllTheSame = true;
         for(int i = 2; i < 6; i++) {
-            if(!compareSchedule(lobby.getSchedule(1), lobby.getSchedule(i))) {
+            if(!lobby.getSchedule(1).compare(lobby.getSchedule(i))) {
                 weekdaysAllTheSame = false;
             }
         }
 
-        boolean holidaysAllTheSame = compareSchedule(lobby.getSchedule(-1), lobby.getSchedule(0)) && compareSchedule(lobby.getSchedule(6), lobby.getSchedule(0));
+        boolean holidaysAllTheSame = lobby.getSchedule(-1).compare(lobby.getSchedule(0)) && lobby.getSchedule(6).compare(lobby.getSchedule(0));
 
-        boolean allDaysTheSame = weekdaysAllTheSame && holidaysAllTheSame && compareSchedule(lobby.getSchedule(-1), lobby.getSchedule(2));
+        boolean allDaysTheSame = weekdaysAllTheSame && holidaysAllTheSame && lobby.getSchedule(-1).compare(lobby.getSchedule(2));
 
         if(allDaysTheSame) {
             TextView tv = new TextView(context);
@@ -143,12 +144,7 @@ public class LobbyView extends LinearLayout {
         }
     }
 
-    private boolean compareSchedule(Lobby.Schedule s1, Lobby.Schedule s2) {
-        return (!s1.open && !s2.open) ||
-                (s1.open == s2.open && s1.openTime == s2.openTime && s1.duration == s2.duration);
-    }
-
-    private String scheduleToString(Lobby.Schedule s) {
+    private String scheduleToString(Schedule s) {
         if(!s.open) {
             return getContext().getString(R.string.lobby_schedule_closed);
         }

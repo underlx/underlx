@@ -32,6 +32,7 @@
     <string name="frag_about_aosp_legal">Este software contiene código derivado de código desarrollado por The Android Open Source Project</string>
     <string name="frag_lines_updated">Actualizado %s</string>
     <string name="frag_lines_duration">desde hace %d min</string>
+    <string name="frag_lines_until">hasta %s</string>
     <string name="update_topology_available">Actualización del plano de la red disponible</string>
     <string name="update_topology_update_action">Actualizar</string>
     <string name="navigation_drawer_open">Abrir panel de navegación</string>
@@ -143,7 +144,8 @@
     <string name="frag_station_rail_services">Trenes</string>
     <string name="frag_station_conn_info_loading">Cargando…</string>
     <string name="frag_help_title">Ayuda y comentarios</string>
-    <string name="frag_station_closed_extended">Esta estación %s se encuentra cerrada por tiempo indeterminado.</string>
+    <string name="frag_station_closed_extended">Esta estación se encuentra cerrada por tiempo indeterminado.</string>
+    <string name="frag_station_closed_schedule">Esta estación se encuentra cerrada. Se abrirá a las %s.</string>
     <string name="cache_extras_success">Contenido adicional descargado</string>
     <string name="cache_extras_failure">Error al obtenir contenido adicional</string>
     <string name="cache_extras_progress">Obteniendo contenido adicional %d%%</string>

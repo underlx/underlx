@@ -251,7 +251,7 @@ public class HomeFragment extends TopFragment {
             networkClosedCard.setVisibility(View.GONE);
         } else {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, net.getOpenTime(), net.getOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, net.getNextOpenTime(), net.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
         }
