@@ -476,7 +476,7 @@ public class MainService extends Service {
     }
 
     public void mockLocation(Station station) {
-        if (/*BuildConfig.DEBUG &&*/ station.getStops().size() > 0) {
+        if (BuildConfig.DEBUG && station.getStops().size() > 0) {
             List<BSSID> bssids = new ArrayList<>();
             for (Stop s : station.getStops()) {
                 bssids.addAll(WiFiLocator.getBSSIDsForStop(s));
