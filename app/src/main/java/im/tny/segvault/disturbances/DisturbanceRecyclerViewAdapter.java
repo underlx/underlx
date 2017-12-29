@@ -57,7 +57,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         holder.mItem = mValues.get(position);
         holder.mLineNameView.setText(String.format(holder.mView.getContext().getString(R.string.frag_disturbance_line), holder.mItem.lineName));
         holder.mLineNameView.setTextColor(holder.mItem.lineColor);
-        holder.mDateView.setText(DateUtils.formatDateTime(holder.mView.getContext(), holder.mItem.startTime.getTime(), DateUtils.FORMAT_SHOW_DATE));
+        holder.mDateView.setText(DateUtils.formatDateTime(holder.mView.getContext(), holder.mItem.startTime.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR));
 
         Drawable drawable = ContextCompat.getDrawable(holder.mView.getContext(), Util.getDrawableResourceIdForLineId(holder.mItem.lineId));
         drawable.setColorFilter(holder.mItem.lineColor, PorterDuff.Mode.SRC_ATOP);
