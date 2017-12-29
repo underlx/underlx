@@ -112,9 +112,17 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
             return null;
         }
 
-        for (Connection outedge : outgoingEdgesOf(c.getTarget())) {
-            if (outedge.getTarget() != c.getSource()) {
-                return outedge.getTarget();
+        while(outgoingEdgesOf(c.getTarget()).size() > 1) {
+            for (Connection outedge : outgoingEdgesOf(c.getTarget())) {
+                if (outedge.getTarget() != c.getSource() && !outedge.getTarget().getStation().isExceptionallyClosed(getNetwork(), new Date())) {
+                    return outedge.getTarget();
+                }
+            }
+            for (Connection outedge : outgoingEdgesOf(c.getTarget())) {
+                if(outedge.getTarget() != c.getSource()) {
+                    c = outedge;
+                    break;
+                }
             }
         }
         return null;

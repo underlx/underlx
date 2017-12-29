@@ -7,6 +7,7 @@ import org.jgrapht.alg.AStarShortestPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,24 +27,41 @@ import im.tny.segvault.subway.Transfer;
 
 public class Route extends ArrayList<Step> {
     public static Route calculate(Network network, Station source, Station target) {
-        return calculate(network, source, target, null);
+        return calculate(network, source, target, null, null);
     }
 
     public static Route calculate(Network network, Station source, Station target, @Nullable ConnectionWeighter weighter) {
+        return calculate(network, source, target, weighter, null);
+    }
+
+    public static Route calculate(Network network, Station source, Station target, @Nullable ConnectionWeighter weighter, @Nullable IAlternativeQualifier qualifier) {
         // 1st part: find the shortest path
-        GraphPath path = getShortestPath(network, source, target, weighter);
+        GraphPath path = getShortestPath(network, source, target, weighter, qualifier);
 
         // 2nd part: turn the path into a Route
         return new Route(path);
     }
 
-    public static GraphPath getShortestPath(Network network, Station source, Station target, @Nullable IEdgeWeighter weighter) {
+    public static GraphPath getShortestPath(final Network network, Station source, Station target, @Nullable IEdgeWeighter weighter) {
+        return getShortestPath(network, source, target, weighter, null);
+    }
+
+    public static GraphPath getShortestPath(final Network network, Station source, Station target, @Nullable IEdgeWeighter weighter, @Nullable IAlternativeQualifier qualifier) {
         // given that we want to treat stations with transfers as a single station,
         // consider all the possibilities and choose the one with the shortest path:
 
+        if (qualifier == null) {
+            qualifier = new IAlternativeQualifier() {
+                @Override
+                public boolean acceptable(Station station) {
+                    return !station.isAlwaysClosed() && !station.isExceptionallyClosed(network, new Date());
+                }
+            };
+        }
+
         List<Stop> possibleSources = new ArrayList<>();
-        if (source.isAlwaysClosed()) {
-            for (Station neighbor : source.getImmediateNeighbors()) {
+        if (!qualifier.acceptable(source)) {
+            for (Station neighbor : source.getAlternatives(qualifier, 1)) {
                 possibleSources.addAll(neighbor.getStops());
             }
         } else {
@@ -51,8 +69,8 @@ public class Route extends ArrayList<Step> {
         }
 
         List<Stop> possibleTargets = new ArrayList<>();
-        if (target.isAlwaysClosed()) {
-            for (Station neighbor : target.getImmediateNeighbors()) {
+        if (!qualifier.acceptable(target)) {
+            for (Station neighbor : target.getAlternatives(qualifier, 1)) {
                 possibleTargets.addAll(neighbor.getStops());
             }
         } else {
@@ -110,16 +128,9 @@ public class Route extends ArrayList<Step> {
 
     private GraphPath<Stop, Connection> path;
     private Map<Integer, Step> pathIndexToStep = new HashMap<>();
-    private boolean matchesNeutralPath = false;
 
     public Route(GraphPath<Stop, Connection> path) {
         this.path = path;
-
-        GraphPath neutralPath = getShortestPath(
-                (Network) path.getGraph(),
-                path.getStartVertex().getStation(),
-                path.getEndVertex().getStation(), new NeutralWeighter());
-        matchesNeutralPath = path.getEdgeList().equals(neutralPath.getEdgeList());
 
         List<Connection> el = path.getEdgeList();
 
@@ -170,10 +181,6 @@ public class Route extends ArrayList<Step> {
             }
         }
         return false;
-    }
-
-    public boolean isSameAsNeutral() {
-        return matchesNeutralPath;
     }
 
     public Station getSource() {

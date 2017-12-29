@@ -2,8 +2,12 @@ package im.tny.segvault.subway;
 
 import android.text.TextUtils;
 
+import org.jgrapht.alg.BellmanFordShortestPath;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import im.tny.segvault.s2ls.wifi.BSSID;
+import im.tny.segvault.s2ls.routing.IAlternativeQualifier;
 
 /**
  * Created by gabriel on 5/25/17.
@@ -148,6 +152,28 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         return neighbors;
     }
 
+    public List<Station> getAlternatives(IAlternativeQualifier qualifier, int maxAmount) {
+        final HashMap<Station, Double> stationCost = new HashMap<>();
+        for (Stop source : getStops()) {
+            BellmanFordShortestPath<Stop, Connection> bf = new BellmanFordShortestPath<Stop, Connection>(getNetwork(), source);
+            for (Stop sink : getNetwork().vertexSet()) {
+                if (sink != source && qualifier.acceptable(sink.getStation()) &&
+                        bf.getCost(sink) < (stationCost.get(sink.getStation()) == null ? Double.MAX_VALUE : stationCost.get(sink.getStation()))) {
+                    stationCost.put(sink.getStation(), bf.getCost(sink));
+                }
+            }
+
+        }
+        List<Station> alternatives = new ArrayList<>(stationCost.keySet());
+        Collections.sort(alternatives, new Comparator<Station>() {
+            @Override
+            public int compare(Station station, Station t1) {
+                return stationCost.get(station).compareTo(stationCost.get(t1));
+            }
+        });
+        return alternatives.subList(0, maxAmount > alternatives.size() ? alternatives.size() : maxAmount);
+    }
+
     public boolean isAlwaysClosed() {
         for (Lobby l : getLobbies()) {
             if (!l.isAlwaysClosed()) {
@@ -183,8 +209,8 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public long getNextOpenTime(Network network, Date curDate) {
         long earliest = Long.MAX_VALUE;
-        for(Lobby l : getLobbies()) {
-            if(l.getNextOpenTime(network, curDate) < earliest) {
+        for (Lobby l : getLobbies()) {
+            if (l.getNextOpenTime(network, curDate) < earliest) {
                 earliest = l.getNextOpenTime(network, curDate);
             }
         }
@@ -197,8 +223,8 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     public long getNextCloseTime(Network network, Date curDate) {
         long latest = Long.MIN_VALUE;
-        for(Lobby l : getLobbies()) {
-            if(l.getNextCloseTime(network, curDate) > latest) {
+        for (Lobby l : getLobbies()) {
+            if (l.getNextCloseTime(network, curDate) > latest) {
                 latest = l.getNextCloseTime(network, curDate);
             }
         }

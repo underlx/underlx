@@ -40,10 +40,12 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
 import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
+import im.tny.segvault.s2ls.routing.NeutralQualifier;
 import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.s2ls.routing.IAlternativeQualifier;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -251,13 +253,16 @@ public class RouteFragment extends TopFragment {
             return;
         }
 
-        route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
-        Route realtimeRoute = route;
-        if(!useRealtimeCheckbox.isChecked()) {
-            route = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(), new NeutralWeighter());
+        Route realtimeRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
+        Route neutralRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(),
+                new NeutralWeighter(), new NeutralQualifier());
+        if(useRealtimeCheckbox.isChecked()) {
+            route = realtimeRoute;
+        } else {
+            route = neutralRoute;
         }
 
-        showRoute(realtimeRoute.isSameAsNeutral());
+        showRoute(realtimeRoute.getPath().getEdgeList().equals(neutralRoute.getPath().getEdgeList()));
     }
 
     private void hideRoute() {
@@ -278,12 +283,18 @@ public class RouteFragment extends TopFragment {
         if (originPicker.getSelection().isAlwaysClosed()) {
             viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), originPicker.getSelection().getName()));
             layoutOriginStationClosed.setVisibility(View.VISIBLE);
+        } else if (originPicker.getSelection().isExceptionallyClosed(network, new Date()) && useRealtimeCheckbox.isChecked()) {
+            viewOriginStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_schedule), originPicker.getSelection().getName()));
+            layoutOriginStationClosed.setVisibility(View.VISIBLE);
         } else {
             layoutOriginStationClosed.setVisibility(View.GONE);
         }
 
         if (destinationPicker.getSelection().isAlwaysClosed()) {
             viewDestinationStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_extended), destinationPicker.getSelection().getName()));
+            layoutDestinationStationClosed.setVisibility(View.VISIBLE);
+        } else if (destinationPicker.getSelection().isExceptionallyClosed(network, new Date()) && useRealtimeCheckbox.isChecked()) {
+            viewDestinationStationClosed.setText(String.format(getString(R.string.frag_route_station_closed_schedule), destinationPicker.getSelection().getName()));
             layoutDestinationStationClosed.setVisibility(View.VISIBLE);
         } else {
             layoutDestinationStationClosed.setVisibility(View.GONE);
