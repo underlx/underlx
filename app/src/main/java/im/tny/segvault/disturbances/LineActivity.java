@@ -18,6 +18,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -29,6 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Formatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +154,19 @@ public class LineActivity extends AppCompatActivity {
                 disturbancesWarningLayout.setVisibility(View.VISIBLE);
             } else {
                 disturbancesWarningLayout.setVisibility(View.GONE);
+            }
+
+            LinearLayout closedLayout = (LinearLayout) findViewById(R.id.closed_info_layout);
+            if (line.isExceptionallyClosed(new Date())) {
+                TextView closedView = (TextView) findViewById(R.id.closed_info_view);
+                Formatter f = new Formatter();
+                DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+                closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
+
+
+                closedLayout.setVisibility(View.VISIBLE);
+            } else {
+                closedLayout.setVisibility(View.GONE);
             }
 
             populateLineView(LineActivity.this, getLayoutInflater(), net, line, lineLayout);

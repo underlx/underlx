@@ -207,6 +207,7 @@
     <string name="act_trip_correction_correct">Confirm correctness</string>
     <string name="act_line_title">%1$s line</string>
     <string name="act_line_disturbances_warning">Ongoing disturbances in this line. The waiting time may be longer than usual.</string>
+    <string name="act_line_closed_schedule">This line is currently closed. It will open at %s.</string>
     <string name="frag_unconfirmed_trips_title">Unconfirmed trips</string>
     <string name="frag_unconfirmed_trip_confirm">Confirm</string>
     <string name="frag_unconfirmed_trip_correct">Correct</string>

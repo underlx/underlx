@@ -66,6 +66,7 @@
     <string name="frag_route_disturbances_warning">Circulación lenta. El tiempo de espera puede ser superior al normal.</string>
     <string name="frag_route_station_short_cars_warning">En esta estación, algunas líneas tienem trenes más cortos. Busca las pantallas CCTV en la punta del andén y utiliza esa mitad del andén.</string>
     <string name="frag_route_station_closed_extended">La estación %s se encuentra cerrada por tiempo indeterminado. Ha sido sugerida una estación alternativa.</string>
+    <string name="frag_route_station_closed_schedule">En este momento, la estación %s está cerrada. Ha sido sugerida una estación alternativa.</string>
     <string name="frag_map_title">Plano</string>
     <string name="frag_disturbances_empty">Información indisponible</string>
     <string name="notif_route_left_station">Has abandonado la estación…</string>
@@ -161,6 +162,7 @@
     <string name="frag_trip_correct">Corregir</string>
     <string name="act_line_title">Línea %1$s</string>
     <string name="act_line_disturbances_warning">Circulación lenta en esta línea. El tiempo de espera puede ser superior al normal.</string>
+    <string name="act_line_closed_schedule">En este momento, esta linea se encuentra cerrada. Se abrirá a las %s.</string>
     <string name="frag_unconfirmed_trips_title">Trayectos aún no confirmados</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmar</string>
     <string name="frag_unconfirmed_trip_correct">Corregir</string>

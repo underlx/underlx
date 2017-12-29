@@ -65,6 +65,7 @@
     <string name="frag_route_disturbances_warning">Perturbations en cours. Le temps d\'attente peut être supérieur à la durée habituelle.</string>
     <string name="frag_route_station_short_cars_warning">Dans cette station, il y a des lignes avec des trains plus courts. Cherchez les écrans CCTV à la fin du quai et utilisez cette moitié du quai.</string>
     <string name="frag_route_station_closed_extended">La station %s est fermée pour une période indeterminée. Une station alternative a été suggérée.</string>
+    <string name="frag_route_station_closed_schedule">La station %s est fermée. Une station alternative a été suggérée.</string>
     <string name="frag_map_title">Plan</string>
     <string name="frag_disturbances_empty">Information indisponible</string>
     <string name="notif_route_left_station">Vous avez quitté la station…</string>
@@ -159,6 +160,7 @@
     <string name="frag_trip_correct">Modifier</string>
     <string name="act_line_title">Ligne %1$s</string>
     <string name="act_line_disturbances_warning">Il y a des perturbations en cours dans cette ligne. Le temps d\'attente peut être supérieur à la durée habituelle.</string>
+    <string name="act_line_closed_schedule">Cette ligne est actuellement fermée. Il ouvrira à %s.</string>
     <string name="frag_unconfirmed_trips_title">Trajets sans confirmation</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmer</string>
     <string name="frag_unconfirmed_trip_correct">Modifier</string>
