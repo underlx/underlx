@@ -151,6 +151,7 @@ public class RouteFragment extends TopFragment {
                 S2LS loc = mListener.getMainService().getS2LS(networkId);
                 if (loc != null && route != null) {
                     loc.setCurrentTargetRoute(route, false);
+                    switchToPage("nav_home");
                 }
             }
         });

@@ -537,6 +537,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void switchToPage(String pageString) {
+        Fragment newFragment = getNewFragment(pageStringToResourceId(pageString));
+
+        if (newFragment != null) {
+            replaceFragment(newFragment, true);
+        } else {
+            Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
     public Collection<Network> getNetworks() {
         if (locBound) {
             return locService.getNetworks();

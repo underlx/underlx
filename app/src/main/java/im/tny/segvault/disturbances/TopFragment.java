@@ -38,6 +38,12 @@ public abstract class TopFragment extends Fragment {
         return (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
     }
 
+    protected void switchToPage(String pageString) {
+        if(mListener != null) {
+            mListener.switchToPage(pageString);
+        }
+    }
+
     public boolean isScrollable() {
         return true;
     }
@@ -57,5 +63,6 @@ public abstract class TopFragment extends Fragment {
         MainService getMainService();
         LineStatusCache getLineStatusCache();
         void checkNavigationDrawerItem(int id);
+        void switchToPage(String pageString);
     }
 }
