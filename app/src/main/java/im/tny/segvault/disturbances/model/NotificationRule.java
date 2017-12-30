@@ -7,6 +7,7 @@ import android.text.format.Time;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
@@ -108,5 +109,26 @@ public class NotificationRule extends RealmObject {
                 startString,
                 endString,
                 getEndTime() >= TimeUnit.HOURS.toMillis(24) ? context.getString(R.string.act_notif_schedule_next_day) : "");
+    }
+
+    public boolean applies(Date at) {
+        long now = at.getTime();
+        for(int day : getWeekDays()) {
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(now);
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            while(c.get(Calendar.DAY_OF_WEEK) != day) {
+                c.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            long todayPassed = now - c.getTimeInMillis();
+            // todayPassed might actually be longer than 24 hours, which is what we want
+            if(todayPassed >= getStartTime() && todayPassed < getEndTime()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.Feedback;
+import im.tny.segvault.disturbances.model.NotificationRule;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
@@ -832,6 +833,13 @@ public class MainService extends Service {
             // notifications for normal service resumed disabled
             notificationManager.cancel(id.hashCode());
             return;
+        }
+
+        Realm realm = Realm.getDefaultInstance();
+        for(NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
+            if(rule.isEnabled() && rule.applies(new Date(msgtime))) {
+                return;
+            }
         }
 
         Intent intent = new Intent(this, MainActivity.class);
