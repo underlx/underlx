@@ -251,5 +251,17 @@
     <string name="frag_station_parking">Parking</string>
     <string name="frag_trip_stats">%1$d m en %2$s, vitesse moyenne %3$.01f km/h</string>
     <string name="frag_station_shared_bikes">Partage de vélo</string>
+    <string name="act_notif_schedule_title">Temps des notifications</string>
+    <string name="act_notif_schedule_help">Aux temps suivants, il n\'y aura pas des notifications sur perturbations:</string>
+    <string name="act_notif_schedule_rule_format">%1$s: %2$s - %3$s%4$s</string>
+    <string name="act_notif_schedule_next_day">&#160;lendemain</string>
+    <string name="act_notif_schedule_rule_disabled">Disposition désactivée</string>
+    <string name="act_edit_notif_schedule_title">Modifier la disposition</string>
+    <string name="act_edit_notif_schedule_days">Jours</string>
+    <string name="act_edit_notif_schedule_start_time">Heure de début</string>
+    <string name="act_edit_notif_schedule_end_time">Heure de fin</string>
+    <string name="act_edit_notif_schedule_days_none">Aucun (Disposition désactivée)</string>
+    <string name="frag_notif_schedule">Temps</string>
+    <string name="act_notif_schedule_empty">Commencez par appuyer sur le bouton du coin inférieur droit pour ajouter une disposition.</string>
     <string name="act_edit_notif_schedule_delete">Effacer</string>
 </resources>
