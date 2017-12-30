@@ -146,6 +146,12 @@ public class AboutFragment extends TopFragment {
         mtp.put("url", "https://github.com/sjwall/MaterialTapTargetPrompt");
         data.add(mtp);
 
+        Map<String, String> pickers = new HashMap<>(3);
+        pickers.put("name", "android-betterpickers");
+        pickers.put("license", "© Derek Brameyer, Code-Troopers - Apache License 2.0");
+        pickers.put("url", "https://github.com/code-troopers/android-betterpickers");
+        data.add(pickers);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");

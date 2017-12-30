@@ -251,4 +251,17 @@
     <string name="frag_station_shared_bikes">Bicicletas partilhadas</string>
     <string name="frag_station_closed_schedule">Esta estação encontra-se encerrada. Reabrirá às %s.</string>
     <string name="frag_lines_until">até às %s</string>
+    <string name="act_notif_schedule_title">Horário de notificações</string>
+    <string name="act_notif_schedule_help">Dentro dos horários seguintes, não irão aparecer notificações de perturbações:</string>
+    <string name="act_notif_schedule_rule_format">%1$s: %2$s - %3$s%4$s</string>
+    <string name="act_notif_schedule_next_day">&#160;do dia seguinte</string>
+    <string name="act_notif_schedule_rule_disabled">Regra desligada</string>
+    <string name="act_edit_notif_schedule_title">Editar regra de horário</string>
+    <string name="act_edit_notif_schedule_days">Dias</string>
+    <string name="act_edit_notif_schedule_start_time">Hora de início</string>
+    <string name="act_edit_notif_schedule_end_time">Hora de fim</string>
+    <string name="act_edit_notif_schedule_days_none">Nenhum (regra desligada)</string>
+    <string name="act_edit_notif_schedule_delete">Apagar</string>
+    <string name="frag_notif_schedule">Horário</string>
+    <string name="act_notif_schedule_empty">Comece por tocar no botão no canto inferior direito para adicionar uma regra.</string>
 </resources>

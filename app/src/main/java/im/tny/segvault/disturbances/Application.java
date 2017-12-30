@@ -30,7 +30,7 @@ public class Application extends android.app.Application {
         // Initialize Realm. Should only be done once when the application starts.
         Realm.init(context);
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(6) // Must be bumped when the schema changes
+                .schemaVersion(8) // Must be bumped when the schema changes
                 .migration(new MyMigration())
                 .build();
         Realm.setDefaultConfiguration(config);
@@ -84,6 +84,25 @@ public class Application extends android.app.Application {
             if (oldVersion == 5) {
                 schema.get("Trip")
                         .addField("syncFailures", int.class);
+                oldVersion++;
+            }
+
+            if (oldVersion == 6) {
+                schema.create("NotificationRule")
+                        .addField("name", String.class)
+                        .setRequired("name", true)
+                        .addField("enabled", boolean.class)
+                        .addField("startTime", long.class)
+                        .addField("endTime", long.class)
+                        .addRealmListField("weekDays", Integer.class)
+                        .setRequired("weekDays", true);
+                oldVersion++;
+            }
+
+            if (oldVersion == 7) {
+                schema.get("NotificationRule")
+                        .addField("id", String.class)
+                        .addPrimaryKey("id");
                 oldVersion++;
             }
         }

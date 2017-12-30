@@ -67,7 +67,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-
         <activity
             android:name=".LineActivity"
             android:label="@string/activity_loading_title"
@@ -77,7 +76,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-
         <activity
             android:name=".TripCorrectionActivity"
             android:label="@string/act_trip_correction_title"
@@ -87,11 +85,29 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-
         <activity
             android:name=".IntroActivity"
             android:label="@string/act_intro_title"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".NotifScheduleActivity"
+            android:label="@string/act_notif_schedule_title"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".EditNotifScheduleActivity"
+            android:label="@string/act_edit_notif_schedule_title"
+            android:parentActivityName=".NotifScheduleActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="NotifScheduleActivity" />
+        </activity>
     </application>
 
 </manifest>

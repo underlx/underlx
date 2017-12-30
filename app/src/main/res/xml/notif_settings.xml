@@ -8,6 +8,13 @@
             android:key="pref_notifs_lines"
             android:title="@string/frag_notif_lines" />
 
+        <PreferenceScreen android:title="@string/frag_notif_schedule">
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetClass="im.tny.segvault.disturbances.NotifScheduleActivity"
+                android:targetPackage="im.tny.segvault.disturbances" />
+        </PreferenceScreen>
+
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
             android:key="pref_notifs_ringtone"

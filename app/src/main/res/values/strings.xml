@@ -51,6 +51,7 @@
     <string name="frag_notif_title">Notifications</string>
     <string name="frag_notif_disturbance_title">Disturbance notifications</string>
     <string name="frag_notif_lines">Lines</string>
+    <string name="frag_notif_schedule">Schedule</string>
     <string name="frag_notif_summary_lines">Showing notifications for lines: %s</string>
     <string name="frag_notif_summary_no_lines">Disturbance notifications disabled</string>
     <string name="frag_notif_show_regularization">Show regularization notifications</string>
@@ -127,8 +128,7 @@
         <item>pt-ml-verde</item>
         <item>pt-ml-vermelha</item>
     </string-array>
-    <string-array name="default_announcement_sources" translatable="false">
-    </string-array>
+    <string-array name="default_announcement_sources" translatable="false"></string-array>
     <string name="activity_loading_title">Loading...</string>
     <string name="frag_station_more_information">More information</string>
     <string name="frag_trip_stats">%1$d m in %2$s, average speed %3$.01f km/h</string>
@@ -266,4 +266,16 @@
     <string name="frag_home_trip_next_station">Next station: %s</string>
     <string name="frag_home_menu_report_incorrect_location">Report station detection error</string>
     <string name="notif_announcement_alt_title">New announcement on %s</string>
+    <string name="act_notif_schedule_title">Notification schedule</string>
+    <string name="act_notif_schedule_help">Within the following times, no disturbance notifications will appear:</string>
+    <string name="act_notif_schedule_rule_format">%1$s: %2$s - %3$s%4$s</string>
+    <string name="act_notif_schedule_next_day">&#160;next day</string>
+    <string name="act_notif_schedule_rule_disabled">Disabled rule</string>
+    <string name="act_notif_schedule_empty">Start by touching the button on the bottom right corner to add a rule.</string>
+    <string name="act_edit_notif_schedule_title">Edit schedule rule</string>
+    <string name="act_edit_notif_schedule_days">Days</string>
+    <string name="act_edit_notif_schedule_start_time">Start time</string>
+    <string name="act_edit_notif_schedule_end_time">End time</string>
+    <string name="act_edit_notif_schedule_days_none">None (rule disabled)</string>
+    <string name="act_edit_notif_schedule_delete">Delete</string>
 </resources>

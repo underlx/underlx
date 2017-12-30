@@ -251,4 +251,5 @@
     <string name="frag_station_parking">Aparcamiento</string>
     <string name="frag_trip_stats">%1$d m em %2$s, velocidad media %3$.01f km/h</string>
     <string name="frag_station_shared_bikes">Bicicletas compartidas</string>
+    <string name="act_edit_notif_schedule_delete">Borrar</string>
 </resources>
