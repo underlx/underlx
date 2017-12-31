@@ -152,7 +152,7 @@ public class TripFragment extends BottomSheetDialogFragment {
 
     private void refreshUI() {
         Network network = this.network;
-        if(network == null) {
+        if (network == null) {
             return;
         }
         Realm realm = Realm.getDefaultInstance();
@@ -191,7 +191,7 @@ public class TripFragment extends BottomSheetDialogFragment {
             statsView.setText(String.format(getString(R.string.frag_trip_stats),
                     length,
                     DateUtils.formatElapsedTime(time / 1000),
-                    (((double)length / (double)(time / 1000)) * 3.6)));
+                    (((double) length / (double) (time / 1000)) * 3.6)));
         }
 
         populatePathView(getContext(), inflater, network, path, layoutRoute);
@@ -347,13 +347,16 @@ public class TripFragment extends BottomSheetDialogFragment {
 
     private void deleteTrip() {
         Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-        if (trip != null) {
-            trip.getPath().deleteAllFromRealm();
-            trip.deleteFromRealm();
-        }
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+                if (trip != null) {
+                    trip.getPath().deleteAllFromRealm();
+                    trip.deleteFromRealm();
+                }
+            }
+        });
         realm.close();
         dismiss();
     }

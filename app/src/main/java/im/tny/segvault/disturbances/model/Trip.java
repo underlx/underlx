@@ -162,7 +162,7 @@ public class Trip extends RealmObject {
                     break;
             }
         }
-        if(startVertex == null) {
+        if (startVertex == null) {
             startVertex = edges.get(0).getSource();
         }
         return new Path(network, startVertex, edges, times, manualEntry, 0);
@@ -272,14 +272,17 @@ public class Trip extends RealmObject {
         return trip.getId();
     }
 
-    public static void confirm(String id) {
+    public static void confirm(final String id) {
         Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        Trip trip = realm.where(Trip.class).equalTo("id", id).findFirst();
-        trip.setUserConfirmed(true);
-        trip.setSynced(false);
-        realm.copyToRealm(trip);
-        realm.commitTransaction();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Trip trip = realm.where(Trip.class).equalTo("id", id).findFirst();
+                trip.setUserConfirmed(true);
+                trip.setSynced(false);
+                realm.copyToRealm(trip);
+            }
+        });
         realm.close();
     }
 

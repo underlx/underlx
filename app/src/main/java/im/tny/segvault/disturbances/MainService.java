@@ -838,9 +838,11 @@ public class MainService extends Service {
         Realm realm = Realm.getDefaultInstance();
         for(NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
             if(rule.isEnabled() && rule.applies(new Date(msgtime))) {
+                realm.close();
                 return;
             }
         }
+        realm.close();
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");
