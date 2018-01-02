@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity
                 String id = getIntent().getStringExtra(EXTRA_INITIAL_FRAGMENT);
                 if (id != null) {
                     newFragment = getNewFragment(pageStringToResourceId(id));
+                    planRouteTo = getIntent().getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
                 }
             }
             if (newFragment == null) {
@@ -547,6 +548,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private String planRouteTo = null;
+    @Override
+    public String getRouteDestination() {
+        String s = planRouteTo;
+        planRouteTo = null;
+        return s;
+    }
+
     @Override
     public Collection<Network> getNetworks() {
         if (locBound) {
@@ -645,4 +654,6 @@ public class MainActivity extends AppCompatActivity
     public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.mainservicebound";
 
     public static final String EXTRA_INITIAL_FRAGMENT = "im.tny.segvault.disturbances.extra.MainActivity.initialfragment";
+
+    public static final String EXTRA_PLAN_ROUTE_TO_STATION = "im.tny.segvault.disturbances.extra.MainActivity.planroute.to.station";
 }

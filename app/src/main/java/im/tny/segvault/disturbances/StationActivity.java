@@ -30,6 +30,7 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -87,8 +88,8 @@ public class StationActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.hide();
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
@@ -99,6 +100,27 @@ public class StationActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(pager);
 
         bm = LocalBroadcastManager.getInstance(this);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(StationActivity.this, MainActivity.class);
+                intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_plan_route");
+                intent.putExtra(MainActivity.EXTRA_PLAN_ROUTE_TO_STATION, stationId);
+                startActivity(intent);
+            }
+        });
+
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+            @Override
+            public void onStateChanged(AppBarLayout appBarLayout, State state) {
+                if(state == State.COLLAPSED) {
+                    fab.hide();
+                } else {
+                    fab.show();
+                }
+            }
+        });
     }
 
     @Override

@@ -235,6 +235,11 @@ public class RouteFragment extends TopFragment {
                 hideRoute();
             }
         });
+
+        String destId = mListener.getRouteDestination();
+        if(destId != null) {
+            destinationPicker.setSelectionById(destId);
+        }
     }
 
     private void updateClosedWarning() {
@@ -612,6 +617,7 @@ public class RouteFragment extends TopFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
+        String getRouteDestination();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

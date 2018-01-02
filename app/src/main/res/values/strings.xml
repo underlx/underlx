@@ -267,7 +267,7 @@
     <string name="frag_home_menu_report_incorrect_location">Report station detection error</string>
     <string name="notif_announcement_alt_title">New announcement on %s</string>
     <string name="act_notif_schedule_title">Notification schedule</string>
-    <string name="act_notif_schedule_help">Within the following times, no disturbance notifications will appear:</string>
+    <string name="act_notif_schedule_help">Within the following periods, no disturbance notifications will appear:</string>
     <string name="act_notif_schedule_rule_format">%1$s: %2$s - %3$s%4$s</string>
     <string name="act_notif_schedule_next_day">&#160;next day</string>
     <string name="act_notif_schedule_rule_disabled">Disabled rule</string>
