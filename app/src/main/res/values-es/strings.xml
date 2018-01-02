@@ -9,7 +9,7 @@
     <string name="update_topology_success">Plano de la red actualizado</string>
     <string name="dataset_info_authors">Autores</string>
     <string name="dataset_info_update">Actualizar</string>
-    <string name="frag_about_copyright">Copyright © Segvault 2017</string>
+    <string name="frag_about_copyright">Copyright © Segvault 2017-2018</string>
     <string name="frag_about_datasets">Planos de la red</string>
     <string name="frag_about_disclaimer">Esta app y el servicio asociado no tienen cualquier conexión a la Metropolitano de Lisboa, E.P.E.\nNo es posible garantizar la corrección de la información suministrada.</string>
     <string name="frag_about_thanks">Comunidad portuguesa de SkyscraperCity\nbrazanet - trabajo de campo, contenidos informativos y grupo en Discord\nJaime Silva - imagen del panel de navegación</string>
