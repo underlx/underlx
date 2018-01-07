@@ -152,6 +152,12 @@ public class StationPickerView extends LinearLayout {
                 }
             }
         });
+        textView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.showDropDown();
+            }
+        });
         clearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
