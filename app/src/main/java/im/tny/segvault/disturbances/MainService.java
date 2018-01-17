@@ -836,8 +836,8 @@ public class MainService extends Service {
         }
 
         Realm realm = Realm.getDefaultInstance();
-        for(NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
-            if(rule.isEnabled() && rule.applies(new Date(msgtime))) {
+        for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
+            if (rule.isEnabled() && rule.applies(new Date(msgtime))) {
                 realm.close();
                 return;
             }
@@ -1016,12 +1016,12 @@ public class MainService extends Service {
                 statusLines.add(sb);
                 color = clStep.getTarget().getColor();
             } else if (nextStep instanceof ExitStep) {
-                if (currentPath != null &&
+                if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                    title = getString(R.string.notif_route_leave_train_now);
+                } else if (currentPath != null && currentPath.getNextStop() != null &&
                         new Date().getTime() - currentPath.getCurrentStopEntryTime().getTime() > 30 * 1000 &&
                         nextStep.getStation() == currentPath.getNextStop().getStation()) {
                     title = getString(R.string.notif_route_leave_train_next);
-                } else if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                    title = getString(R.string.notif_route_leave_train_now);
                 } else {
                     title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
                 }
