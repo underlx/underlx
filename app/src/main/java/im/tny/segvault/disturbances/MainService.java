@@ -112,8 +112,6 @@ public class MainService extends Service {
 
     private void putNetwork(final Network net) {
         synchronized (lock) {
-            // Make sure Realm is initialized, as, somehow, in some devices it seems Application.onCreate is not always called before we get here...
-            Realm.init(getApplicationContext());
             // create Realm stations for the network if they don't exist already
             Realm realm = Realm.getDefaultInstance();
             realm.executeTransaction(new Realm.Transaction() {
@@ -129,6 +127,7 @@ public class MainService extends Service {
                     }
                 }
             });
+            realm.close();
 
             net.setEdgeWeighter(cweighter);
             networks.put(net.getId(), net);
