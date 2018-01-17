@@ -194,7 +194,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                     (((double) length / (double) (time / 1000)) * 3.6)));
         }
 
-        populatePathView(getContext(), inflater, network, path, layoutRoute);
+        populatePathView(getContext(), inflater, network, path, layoutRoute, true);
 
         if (!trip.canBeCorrected()) {
             correctButton.setVisibility(View.GONE);
@@ -203,7 +203,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         realm.close();
     }
 
-    public static void populatePathView(final Context context, final LayoutInflater inflater, final Network network, final Path path, ViewGroup root) {
+    public static void populatePathView(final Context context, final LayoutInflater inflater, final Network network, final Path path, ViewGroup root, boolean showInfoIcons) {
         root.removeAllViews();
 
         List<Connection> el = path.getEdgeList();
@@ -226,7 +226,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                                 DateUtils.FORMAT_SHOW_TIME));
             }
 
-            RouteFragment.populateStationView(context, network, path.getStartVertex(), stepview);
+            RouteFragment.populateStationView(context, network, path.getStartVertex(), stepview, showInfoIcons);
 
             root.addView(stepview);
             return;
@@ -287,7 +287,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 }
             }
 
-            RouteFragment.populateStationView(context, network, c.getSource(), stepview);
+            RouteFragment.populateStationView(context, network, c.getSource(), stepview, showInfoIcons);
 
             ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
             if (c.getSource().getStation().isAlwaysClosed()) {
@@ -323,7 +323,7 @@ public class TripFragment extends BottomSheetDialogFragment {
             crossView.setVisibility(View.VISIBLE);
         }
 
-        RouteFragment.populateStationView(context, network, c.getTarget(), stepview);
+        RouteFragment.populateStationView(context, network, c.getTarget(), stepview, showInfoIcons);
 
         root.addView(stepview);
     }

@@ -274,7 +274,7 @@ public class Path implements GraphPath<Stop, Connection> {
 
     public int getPhysicalLength() {
         int total = 0;
-        for(Connection c : getEdgeList()) {
+        for (Connection c : getEdgeList()) {
             total += c.getWorldLength();
         }
         return total;
@@ -283,8 +283,8 @@ public class Path implements GraphPath<Stop, Connection> {
     public int getTimeablePhysicalLength() {
         int total = 0;
         List<Connection> conns = getEdgeList();
-        for(int i = 0; i < conns.size(); i++) {
-            if(!getManualEntry(i)) {
+        for (int i = 0; i < conns.size(); i++) {
+            if (!getManualEntry(i)) {
                 total += conns.get(i).getWorldLength();
             }
         }
@@ -296,10 +296,10 @@ public class Path implements GraphPath<Stop, Connection> {
         long startTime = -1;
         long endTime = -1;
         long typTime = 0;
-        for(int i = 0; i < conns.size(); i++) {
-            if(!getManualEntry(i)) {
+        for (int i = 0; i < conns.size(); i++) {
+            if (!getManualEntry(i)) {
                 if (startTime < 0) {
-                    startTime = (long)(getExitTime(i).getTime() * 0.7 + getEntryTime(i).getTime() * 0.3);
+                    startTime = (long) (getExitTime(i).getTime() * 0.7 + getEntryTime(i).getTime() * 0.3);
                 }
                 endTime = getEntryTime(i).getTime();
                 typTime += conns.get(i) instanceof Transfer ? 0 : conns.get(i).getTimes().typSeconds;

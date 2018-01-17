@@ -62,12 +62,29 @@
                 app:hint="@string/act_trip_correction_start_station" />
 
             <LinearLayout
-                android:id="@+id/path_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical"></LinearLayout>
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/buttons_layout"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical">
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/path_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"></LinearLayout>
+            </LinearLayout>
 
             <im.tny.segvault.disturbances.StationPickerView
                 android:id="@+id/end_picker"

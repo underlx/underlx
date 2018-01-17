@@ -497,7 +497,7 @@ public class RouteFragment extends TopFragment {
         }
     }
 
-    public static void populateStationView(final Context context, final Network network, final Station station, View view) {
+    public static void populateStationView(final Context context, final Network network, final Station station, View view, boolean showInfoIcons) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
@@ -505,48 +505,50 @@ public class RouteFragment extends TopFragment {
             stationView.setTextColor(Color.GRAY);
         }
 
-        View separatorView = (View) view.findViewById(R.id.feature_separator_view);
+        if(showInfoIcons) {
+            View separatorView = (View) view.findViewById(R.id.feature_separator_view);
 
-        ImageView liftView = (ImageView) view.findViewById(R.id.feature_lift_view);
-        if (station.getFeatures().lift) {
-            liftView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView liftView = (ImageView) view.findViewById(R.id.feature_lift_view);
+            if (station.getFeatures().lift) {
+                liftView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView busView = (ImageView) view.findViewById(R.id.feature_bus_view);
-        if (station.getFeatures().bus) {
-            busView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView busView = (ImageView) view.findViewById(R.id.feature_bus_view);
+            if (station.getFeatures().bus) {
+                busView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView boatView = (ImageView) view.findViewById(R.id.feature_boat_view);
-        if (station.getFeatures().boat) {
-            boatView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView boatView = (ImageView) view.findViewById(R.id.feature_boat_view);
+            if (station.getFeatures().boat) {
+                boatView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView trainView = (ImageView) view.findViewById(R.id.feature_train_view);
-        if (station.getFeatures().train) {
-            trainView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView trainView = (ImageView) view.findViewById(R.id.feature_train_view);
+            if (station.getFeatures().train) {
+                trainView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView airportView = (ImageView) view.findViewById(R.id.feature_airport_view);
-        if (station.getFeatures().airport) {
-            airportView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView airportView = (ImageView) view.findViewById(R.id.feature_airport_view);
+            if (station.getFeatures().airport) {
+                airportView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView parkingView = (ImageView) view.findViewById(R.id.feature_parking_view);
-        if (station.getFeatures().parking) {
-            parkingView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
-        }
+            ImageView parkingView = (ImageView) view.findViewById(R.id.feature_parking_view);
+            if (station.getFeatures().parking) {
+                parkingView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
 
-        ImageView bikeView = (ImageView) view.findViewById(R.id.feature_bike_view);
-        if (station.getFeatures().bike) {
-            bikeView.setVisibility(View.VISIBLE);
-            separatorView.setVisibility(View.VISIBLE);
+            ImageView bikeView = (ImageView) view.findViewById(R.id.feature_bike_view);
+            if (station.getFeatures().bike) {
+                bikeView.setVisibility(View.VISIBLE);
+                separatorView.setVisibility(View.VISIBLE);
+            }
         }
 
         LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
@@ -564,8 +566,16 @@ public class RouteFragment extends TopFragment {
         });
     }
 
+    public static void populateStationView(final Context context, final Network network, final Station station, View view) {
+        populateStationView(context, network, station, view, true);
+    }
+
+    public static void populateStationView(final Context context, final Network network, final Stop stop, View view, boolean showInfoIcons) {
+        populateStationView(context, network, stop.getStation(), view, showInfoIcons);
+    }
+
     public static void populateStationView(final Context context, final Network network, final Stop stop, View view) {
-        populateStationView(context, network, stop.getStation(), view);
+        populateStationView(context, network, stop.getStation(), view, true);
     }
 
     @Override

@@ -12,16 +12,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.Path;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 
 public class TripCorrectionActivity extends AppCompatActivity {
@@ -38,10 +43,13 @@ public class TripCorrectionActivity extends AppCompatActivity {
     private StationPickerView startPicker;
     private StationPickerView endPicker;
     private LinearLayout pathLayout;
+    private LinearLayout buttonsLayout;
     private Button saveButton;
 
+    private Trip trip;
     private Path originalPath;
     private Path newPath;
+    private boolean partsDeleted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +80,14 @@ public class TripCorrectionActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if(isStandalone) {
+        if (isStandalone) {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
         }
 
         startPicker = (StationPickerView) findViewById(R.id.start_picker);
         endPicker = (StationPickerView) findViewById(R.id.end_picker);
         pathLayout = (LinearLayout) findViewById(R.id.path_layout);
+        buttonsLayout = (LinearLayout) findViewById(R.id.buttons_layout);
         saveButton = (Button) findViewById(R.id.save_button);
 
         if (savedInstanceState != null) {
@@ -113,12 +122,12 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     private void populateUI() {
         Realm realm = Realm.getDefaultInstance();
-        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-
-        originalPath = trip.toConnectionPath(network);
+        trip = realm.copyFromRealm(realm.where(Trip.class).equalTo("id", tripId).findFirst());
         realm.close();
 
-        if(!trip.canBeCorrected()) {
+        originalPath = trip.toConnectionPath(network);
+
+        if (!trip.canBeCorrected()) {
             finish();
         }
 
@@ -163,7 +172,7 @@ public class TripCorrectionActivity extends AppCompatActivity {
 
     private void redrawPath() {
         newPath = new Path(originalPath);
-        boolean hasChanges = false;
+        boolean hasChanges = partsDeleted;
         if (startPicker.getSelection() != null && !startPicker.getSelection().isAlwaysClosed() && startPicker.getSelection() != originalPath.getStartVertex().getStation()) {
             newPath.manualExtendStart(startPicker.getSelection().getStops().iterator().next());
             hasChanges = true;
@@ -173,13 +182,103 @@ public class TripCorrectionActivity extends AppCompatActivity {
             hasChanges = true;
         }
 
-        TripFragment.populatePathView(this, getLayoutInflater(), network, newPath, pathLayout);
+        TripFragment.populatePathView(this, getLayoutInflater(), network, newPath, pathLayout, false);
+
+        final ViewTreeObserver vto = pathLayout.getViewTreeObserver();
+        if (vto.isAlive()) {
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                public void onGlobalLayout() {
+                    buttonsLayout.removeAllViews();
+
+                    int manualOffset = 0;
+                    for (int i = 0; i < pathLayout.getChildCount(); i++) {
+                        View stepview = getLayoutInflater().inflate(R.layout.path_button, buttonsLayout, false);
+
+                        if(newPath.getManualEntry(i)) {
+                            manualOffset++;
+                        } else {
+                            final int idxOnTrip = i - manualOffset;
+                            if (canRemoveVertex(idxOnTrip)) {
+                                stepview.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
+                                stepview.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        removeVertex(idxOnTrip);
+                                    }
+                                });
+                            }
+                        }
+
+                        stepview.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, pathLayout.getChildAt(i).getHeight()));
+
+                        buttonsLayout.addView(stepview);
+                    }
+                    // remove the listener... or we'll be doing this a lot.
+                    ViewTreeObserver obs = pathLayout.getViewTreeObserver();
+                    obs.removeGlobalOnLayoutListener(this);
+                }
+            });
+        }
 
         if (hasChanges) {
             saveButton.setText(getString(R.string.act_trip_correction_save));
         } else {
             saveButton.setText(getString(R.string.act_trip_correction_correct));
         }
+    }
+
+    private boolean canRemoveVertex(int indexToRemove) {
+        List<StationUse> uses = trip.getPath();
+        if (indexToRemove <= 0 || indexToRemove >= uses.size() - 1) {
+            return false;
+        }
+        return uses.get(indexToRemove - 1).getStation().getId().equals(uses.get(indexToRemove + 1).getStation().getId())
+                && uses.get(indexToRemove).getType() == StationUse.UseType.GONE_THROUGH;
+    }
+
+    private void removeVertex(int i) {
+        if (!canRemoveVertex(i)) {
+            return;
+        }
+        List<StationUse> uses = trip.getPath();
+        uses.get(i - 1).setLeaveDate(trip.getPath().get(i + 1).getLeaveDate());
+        uses.remove(i);
+        // the next one to remove might be an interchange, if yes, save its src/dest line as it may be needed later
+        String srcLineId = uses.get(i).getSourceLine();
+        String dstLineId = uses.get(i).getTargetLine();
+        uses.remove(i);
+        if (uses.size() == 1) {
+            uses.get(0).setType(StationUse.UseType.VISIT);
+        } else {
+            uses.get(0).setType(StationUse.UseType.NETWORK_ENTRY);
+            uses.get(trip.getPath().size() - 1).setType(StationUse.UseType.NETWORK_EXIT);
+
+            if (i < uses.size() && i > 1) {
+                Station src = network.getStation(uses.get(i - 2).getStation().getId());
+                Station dst = network.getStation(uses.get(i).getStation().getId());
+
+                boolean foundSameLine = false;
+                for (Stop srcStop : src.getStops()) {
+                    for (Line dstLine : dst.getLines()) {
+                        if (dstLine.containsVertex(srcStop)) {
+                            foundSameLine = true;
+                        }
+                    }
+                }
+                if (!foundSameLine) {
+                    if (uses.get(i - 1).getType() != StationUse.UseType.INTERCHANGE) {
+                        uses.get(i - 1).setType(StationUse.UseType.INTERCHANGE);
+                        uses.get(i - 1).setSourceLine(srcLineId);
+                        uses.get(i - 1).setTargetLine(dstLineId);
+                    }
+                } else {
+                    uses.get(i - 1).setType(StationUse.UseType.GONE_THROUGH);
+                }
+            }
+        }
+        originalPath = trip.toConnectionPath(network);
+        partsDeleted = true;
+        redrawPath();
     }
 
     private void saveChanges() {
