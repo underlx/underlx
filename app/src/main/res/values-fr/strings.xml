@@ -264,4 +264,12 @@
     <string name="frag_notif_schedule">Temps</string>
     <string name="act_notif_schedule_empty">Commencez par appuyer sur le bouton du coin inférieur droit pour ajouter une disposition.</string>
     <string name="act_edit_notif_schedule_delete">Effacer</string>
+    <string name="frag_trip_history_stats_count">trajets</string>
+    <string name="frag_trip_history_stats_length">parcourus</string>
+    <string name="frag_trip_history_stats_time">écoulées</string>
+    <string name="frag_trip_history_stats_speed">vitesse moyenne</string>
+    <string name="frag_trip_history_duration_no_days">%1$dh %2$dm</string>
+    <string name="frag_trip_history_duration_with_days">%1$dj %2$dh %3$dm</string>
+    <string name="frag_trip_history_speed_value">%.01f km/h</string>
+    <string name="frag_trip_history_length_value">%.01f km</string>
 </resources>

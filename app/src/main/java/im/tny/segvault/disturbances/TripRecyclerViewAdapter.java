@@ -199,6 +199,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final int destColor;
         public final List<Integer> lineColors;
         public final boolean isVisit;
+        public final int length;
+        public final int timeableLength;
+        public final long movementMilliseconds;
 
         public TripItem(Trip trip, Collection<Network> networks) {
             this.id = trip.getId();
@@ -224,6 +227,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
                 this.lineColors = new ArrayList<>();
                 this.isVisit = true;
+                this.length = 0;
+                this.timeableLength = 0;
+                this.movementMilliseconds = 0;
                 return;
             }
             this.networkId = network.getId();
@@ -252,6 +258,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             } else {
                 isVisit = true;
             }
+            this.length = path.getPhysicalLength();
+            this.timeableLength = path.getTimeablePhysicalLength();
+            this.movementMilliseconds = path.getMovementMilliseconds();
         }
 
         @Override

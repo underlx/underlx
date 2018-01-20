@@ -249,7 +249,7 @@
     <string name="notif_route_leave_train_now">Sal del tren</string>
     <string name="frag_station_car_parking">Aparcamiento</string>
     <string name="frag_station_parking">Aparcamiento</string>
-    <string name="frag_trip_stats">%1$d m em %2$s, velocidad media %3$.01f km/h</string>
+    <string name="frag_trip_stats">%1$d m en %2$s, velocidad media %3$.01f km/h</string>
     <string name="frag_station_shared_bikes">Bicicletas compartidas</string>
     <string name="act_notif_schedule_title">Horario de Notificaciones</string>
     <string name="act_notif_schedule_help">Dentro de los siguientes horarios, no aparecerán notificaciones de perturbaciones:</string>
@@ -264,4 +264,12 @@
     <string name="act_edit_notif_schedule_delete">Borrar</string>
     <string name="frag_notif_schedule">Horario</string>
     <string name="act_notif_schedule_empty">Empieza tocando en el botón en la esquina inferior derecha para añadir una norma.</string>
+    <string name="frag_trip_history_stats_count">trayectos</string>
+    <string name="frag_trip_history_stats_length">recorridos</string>
+    <string name="frag_trip_history_stats_time">pasados</string>
+    <string name="frag_trip_history_stats_speed">velocidad media</string>
+    <string name="frag_trip_history_duration_no_days">%1$dh %2$dm</string>
+    <string name="frag_trip_history_duration_with_days">%1$dd %2$dh %3$dm</string>
+    <string name="frag_trip_history_speed_value">%.01f km/h</string>
+    <string name="frag_trip_history_length_value">%.01f km</string>
 </resources>

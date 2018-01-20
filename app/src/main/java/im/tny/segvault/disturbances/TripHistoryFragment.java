@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,11 +19,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.subway.Network;
@@ -43,6 +49,11 @@ public class TripHistoryFragment extends TopFragment {
 
     private RecyclerView recyclerView = null;
     private TextView emptyView;
+
+    private TextView tripCountView;
+    private TextView tripTotalLengthView;
+    private TextView tripTotalTimeView;
+    private TextView tripAverageSpeedView;
 
     private boolean showVisits = false;
     private Menu menu;
@@ -86,6 +97,10 @@ public class TripHistoryFragment extends TopFragment {
         // Set the adapter
         Context context = view.getContext();
         emptyView = (TextView) view.findViewById(R.id.no_trips_view);
+        tripCountView = (TextView) view.findViewById(R.id.trip_count_view);
+        tripTotalLengthView = (TextView) view.findViewById(R.id.trip_total_length_view);
+        tripTotalTimeView = (TextView) view.findViewById(R.id.trip_total_time_view);
+        tripAverageSpeedView = (TextView) view.findViewById(R.id.trip_average_speed_view);
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -159,6 +174,11 @@ public class TripHistoryFragment extends TopFragment {
 
     private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
         private List<TripRecyclerViewAdapter.TripItem> items = new ArrayList<>();
+        private int tripCount = 0;
+        private int tripTotalLength = 0;
+        private int tripTotalTimeableLength = 0;
+        private long tripTotalTime = 0;
+        private long tripTotalMovementTime = 0;
 
         @Override
         protected void onPreExecute() {
@@ -176,6 +196,13 @@ public class TripHistoryFragment extends TopFragment {
             Realm realm = Realm.getDefaultInstance();
             for (Trip t : realm.where(Trip.class).findAll()) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
+                if(!item.isVisit) {
+                    tripCount++;
+                    tripTotalLength += item.length;
+                    tripTotalTimeableLength += item.timeableLength;
+                    tripTotalTime += item.destTime.getTime() - item.originTime.getTime();
+                    tripTotalMovementTime += item.movementMilliseconds;
+                }
                 if (showVisits || !item.isVisit) {
                     items.add(item);
                 }
@@ -202,10 +229,27 @@ public class TripHistoryFragment extends TopFragment {
                 // prevent onPostExecute from doing anything if no longer attached to an activity
                 return;
             }
+            tripCountView.setText(Integer.toString(tripCount));
+            tripTotalLengthView.setText(String.format(getString(R.string.frag_trip_history_length_value), (double)tripTotalLength / 1000f));
+
+            long days = tripTotalTime / TimeUnit.DAYS.toMillis(1);
+            long hours = (tripTotalTime % TimeUnit.DAYS.toMillis(1)) / TimeUnit.HOURS.toMillis(1);
+            long minutes = (tripTotalTime % TimeUnit.HOURS.toMillis(1)) / TimeUnit.MINUTES.toMillis(1);
+            if (days == 0) {
+                tripTotalTimeView.setText(String.format(getString(R.string.frag_trip_history_duration_no_days), hours, minutes));
+            } else {
+                tripTotalTimeView.setText(String.format(getString(R.string.frag_trip_history_duration_with_days), days, hours, minutes));
+            }
+            tripAverageSpeedView.setText("--");
             if (result && recyclerView != null && mListener != null) {
                 recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
                 emptyView.setVisibility(View.GONE);
+
+                if (tripTotalMovementTime > 0) {
+                    tripAverageSpeedView.setText(String.format(getString(R.string.frag_trip_history_speed_value),
+                            ((double) tripTotalTimeableLength / (double) (tripTotalMovementTime / 1000)) * 3.6));
+                }
             } else {
                 emptyView.setVisibility(View.VISIBLE);
             }
