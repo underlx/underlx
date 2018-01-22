@@ -100,6 +100,7 @@ public class Path implements GraphPath<Stop, Connection> {
                 this.endVertex = cs.get(i).getSource();
                 for (OnPathChangedListener l : listeners) {
                     l.onPathChanged(this);
+                    l.onNewStationEnteredNow(this);
                 }
                 return;
             }
@@ -110,6 +111,7 @@ public class Path implements GraphPath<Stop, Connection> {
         this.endVertex = vertex;
         for (OnPathChangedListener l : listeners) {
             l.onPathChanged(this);
+            l.onNewStationEnteredNow(this);
         }
         leftFirstStation = false;
     }
@@ -320,5 +322,6 @@ public class Path implements GraphPath<Stop, Connection> {
 
     public interface OnPathChangedListener {
         void onPathChanged(Path path);
+        void onNewStationEnteredNow(Path path);
     }
 }

@@ -1161,7 +1161,19 @@ public class MainService extends Service {
                     prevEndStation = path.getEndVertex().getStation();
                     updateRouteNotification(s2ls, highPrioNotif);
                 }
+
+                @Override
+                public void onNewStationEnteredNow(Path path) {
+                    if (path.getDirection() == null) {
+                        new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
+                    } else {
+                        new SubmitRealtimeLocationTask().execute(
+                                path.getCurrentStop().getStation().getId(),
+                                path.getDirection().getStation().getId());
+                    }
+                }
             });
+            new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
             updateRouteNotification(s2ls);
         }
 
@@ -1250,6 +1262,24 @@ public class MainService extends Service {
             return false;
         }
 
+    }
+
+    private class SubmitRealtimeLocationTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            API.RealtimeLocationRequest r = new API.RealtimeLocationRequest();
+            r.s = strings[0];
+            if (strings.length > 1) {
+                r.d = strings[1];
+            }
+            try {
+                api.postRealtimeLocation(r);
+            } catch (APIException e) {
+                // oh well...
+            }
+            return null;
+        }
     }
 
     public void cacheAllExtras(String... network_ids) {

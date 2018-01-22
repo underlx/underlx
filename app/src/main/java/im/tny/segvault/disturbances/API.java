@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -249,6 +250,13 @@ public class API {
         public String body;
         public String url;
         public String source;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class RealtimeLocationRequest {
+        public String s; // current station ID
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public String d; // current direction ID, or null if none
     }
 
     private int timeoutMs;
@@ -639,6 +647,20 @@ public class API {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("announcements/" + source), false), new TypeReference<List<Announcement>>() {
             });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Feedback postRealtimeLocation(RealtimeLocationRequest request) throws APIException {
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("rt"), content, true);
+            return mapper.readValue(is, Feedback.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

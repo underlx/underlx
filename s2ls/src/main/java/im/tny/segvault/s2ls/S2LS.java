@@ -241,6 +241,11 @@ public class S2LS implements OnStatusChangeListener {
             }
         }
 
+        @Override
+        public void onNewStationEnteredNow(Path path) {
+
+        }
+
         void onNewTargetRoute() {
             beganFollowingRoute = false;
             reachedDestination = false;
