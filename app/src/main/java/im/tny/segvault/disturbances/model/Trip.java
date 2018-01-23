@@ -185,7 +185,9 @@ public class Trip extends RealmObject {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         RealmList<StationUse> uses = new RealmList<>();
-        int size = path.getEdgeList().size();
+
+        List<Connection> edgeList = path.getEdgeList();
+        int size = edgeList.size();
         if (size == 0) {
             StationUse use = new StationUse();
             use.setType(StationUse.UseType.VISIT);
@@ -194,8 +196,8 @@ public class Trip extends RealmObject {
             use.setLeaveDate(path.getEntryExitTimes(0).second);
             use.setManualEntry(path.getManualEntry(0));
             uses.add(realm.copyToRealm(use));
-        } else if (size == 1 && path.getEdgeList().get(0) instanceof Transfer) {
-            Connection c = path.getEdgeList().get(0);
+        } else if (size == 1 && edgeList.get(0) instanceof Transfer) {
+            Connection c = edgeList.get(0);
             StationUse use = new StationUse();
             use.setType(StationUse.UseType.VISIT);
             use.setSourceLine(c.getSource().getLine().getId());
@@ -217,13 +219,13 @@ public class Trip extends RealmObject {
 
             int i = 1;
             timeIdx++;
-            if (path.getEdgeList().get(0) instanceof Transfer) {
+            if (edgeList.get(0) instanceof Transfer) {
                 i = 2;
                 timeIdx++;
             }
 
             for (; i < size; i++) {
-                Connection c = path.getEdgeList().get(i);
+                Connection c = edgeList.get(i);
                 StationUse use = new StationUse();
                 if (c instanceof Transfer) {
                     if (i == size - 1) break;

@@ -191,7 +191,10 @@ public class Path implements GraphPath<Stop, Connection> {
 
     @Override
     public List<Connection> getEdgeList() {
-        return edgeList;
+        // decouple the internal list from the one we return so external code can't modify our list
+        // also take the opportunity to go from LinkedList to ArrayList as the ArrayList is
+        // typically more performant for the kind of stuff external code does with this list
+        return new ArrayList<>(edgeList);
     }
 
     @Override
