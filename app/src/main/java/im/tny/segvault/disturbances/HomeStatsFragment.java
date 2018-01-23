@@ -43,6 +43,7 @@ public class HomeStatsFragment extends Fragment {
     private ProgressBar progressBar = null;
     private HtmlTextView lastDisturbanceView = null;
     private TextView updateInformationView = null;
+    private TextView usersOnlineView = null;
     private TableLayout lineStatsLayout = null;
 
     private static final String ARG_NETWORK_ID = "networkId";
@@ -82,6 +83,7 @@ public class HomeStatsFragment extends Fragment {
         lineStatsLayout = (TableLayout) view.findViewById(R.id.line_stats_layout);
         progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);
         lastDisturbanceView = (HtmlTextView) view.findViewById(R.id.last_disturbance_view);
+        usersOnlineView = (TextView) view.findViewById(R.id.users_online_view);
         progressBar.setVisibility(View.VISIBLE);
         updateInformationView = (TextView) view.findViewById(R.id.update_information);
 
@@ -145,6 +147,12 @@ public class HomeStatsFragment extends Fragment {
         lastDisturbance.set(Calendar.MINUTE, 0);
         lastDisturbance.set(Calendar.SECOND, 0);
         lastDisturbance.set(Calendar.MILLISECOND, 0);
+
+        if(stats.curOnInTransit == 0) {
+            usersOnlineView.setText(R.string.frag_stats_few_users_in_network);
+        } else {
+            usersOnlineView.setText(String.format(getString(R.string.frag_stats_users_in_network), stats.curOnInTransit));
+        }
 
         long days = (today.getTime().getTime() - lastDisturbance.getTime().getTime()) / (24 * 60 * 60 * 1000);
 

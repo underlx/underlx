@@ -20,6 +20,13 @@
         android:layout_marginRight="@dimen/text_margin"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/users_online_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="5dp"/>
+
         <org.sufficientlysecure.htmltextview.HtmlTextView
             android:id="@+id/last_disturbance_view"
             android:layout_width="wrap_content"

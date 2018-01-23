@@ -272,4 +272,6 @@
     <string name="frag_trip_history_duration_with_days">%1$dj %2$dh %3$dm</string>
     <string name="frag_trip_history_speed_value">%.01f km/h</string>
     <string name="frag_trip_history_length_value">%.01f km</string>
+    <string name="frag_stats_few_users_in_network">Très peu utilisateurs en ligne en déplacement</string>
+    <string name="frag_stats_users_in_network">Environ %d utilisateurs en ligne en déplacement</string>
 </resources>

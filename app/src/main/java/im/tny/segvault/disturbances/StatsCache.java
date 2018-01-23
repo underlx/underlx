@@ -41,6 +41,7 @@ public class StatsCache {
         public HashMap<String, LineStats> weekLineStats = new HashMap<>();
         public HashMap<String, LineStats> monthLineStats = new HashMap<>();
         public Date lastDisturbance;
+        public int curOnInTransit;
         public Date updated;
     }
 
@@ -161,6 +162,7 @@ public class StatsCache {
                     }
 
                     netStats.lastDisturbance = new Date(apiStats.lastDisturbance[0] * 1000);
+                    netStats.curOnInTransit = apiStats.curOnInTransit;
 
                     apiStats = api.getStats(n.getId(), weekAgo, now);
                     for(Map.Entry<String, API.LineStats> apiLineStats : apiStats.lineStats.entrySet()) {

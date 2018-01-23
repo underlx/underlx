@@ -226,6 +226,7 @@ public class API {
     static public class Stats {
         public Map<String, LineStats> lineStats;
         public long[] lastDisturbance;
+        public int curOnInTransit;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
