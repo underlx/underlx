@@ -31,7 +31,6 @@ public abstract class TopActivity extends AppCompatActivity {
     static void initializeLocale(Context context) {
         Resources res = context.getResources();
         Configuration config = res.getConfiguration();
-        //Locale locale = new Locale("fr", "FR"); // get preferred locale from shared preferences or something
         Locale locale = getCurrentLocale(context);
         if(locale == null) {
             return;
