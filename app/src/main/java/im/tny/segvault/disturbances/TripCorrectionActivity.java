@@ -29,7 +29,7 @@ import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 
-public class TripCorrectionActivity extends AppCompatActivity {
+public class TripCorrectionActivity extends TopActivity {
 
     private String networkId;
     private String tripId;

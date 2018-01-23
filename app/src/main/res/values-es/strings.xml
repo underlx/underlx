@@ -274,4 +274,13 @@
     <string name="frag_trip_history_length_value">%.01f km</string>
     <string name="frag_stats_few_users_in_network">Muy pocos usuarios en línea en camino</string>
     <string name="frag_stats_users_in_network">Aproximadamente %d usuarios en línea en camino</string>
+    <string name="frag_settings_locale_title">Idioma y región</string>
+    <string name="frag_settings_app_language">Idioma de la aplicación</string>
+    <string-array name="frag_settings_languages">
+        <item>Defecto del sistema</item>
+        <item>English</item>
+        <item>Español</item>
+        <item>Français</item>
+        <item>Português</item>
+    </string-array>
 </resources>

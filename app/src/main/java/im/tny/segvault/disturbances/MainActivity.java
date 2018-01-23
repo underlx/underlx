@@ -40,7 +40,7 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends TopActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         HomeFragment.OnFragmentInteractionListener,
         RouteFragment.OnFragmentInteractionListener,

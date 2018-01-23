@@ -23,6 +23,14 @@
             android:summary="@string/frag_settings_auto_open_visit_correction_summary"
             android:title="@string/frag_settings_auto_open_visit_correction" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/frag_settings_locale_title">
+        <ListPreference
+            android:defaultValue="auto"
+            android:key="pref_locale"
+            android:title="@string/frag_settings_app_language"
+            android:entries="@array/frag_settings_languages"
+            android:entryValues="@array/frag_settings_language_values"/>
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/frag_settings_other_title">
      <CheckBoxPreference
             android:defaultValue="false"

@@ -50,7 +50,7 @@ dependencies {
     compile 'info.debatty:java-string-similarity:0.23'
     compile 'org.sufficientlysecure:html-textview:3.4'
     compile 'com.github.apl-devs:appintro:v4.2.2'
-    compile 'uk.co.samuelwall:material-tap-target-prompt:1.11.0'
+    compile 'uk.co.samuelwall:material-tap-target-prompt:2.6.0'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

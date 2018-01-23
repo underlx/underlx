@@ -40,7 +40,7 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 
-public class EditNotifScheduleActivity extends AppCompatActivity implements RadialTimePickerDialogFragment.OnTimeSetListener {
+public class EditNotifScheduleActivity extends TopActivity implements RadialTimePickerDialogFragment.OnTimeSetListener {
     private Realm realm;
     private NotificationRule rule;
     private String ruleId;

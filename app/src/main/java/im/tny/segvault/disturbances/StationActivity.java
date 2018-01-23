@@ -46,7 +46,7 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
 
-public class StationActivity extends AppCompatActivity
+public class StationActivity extends TopActivity
         implements StationGeneralFragment.OnFragmentInteractionListener,
         StationLobbyFragment.OnFragmentInteractionListener,
         StationTriviaFragment.OnFragmentInteractionListener {

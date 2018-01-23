@@ -44,7 +44,7 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 
-public class LineActivity extends AppCompatActivity {
+public class LineActivity extends TopActivity {
 
     private String networkId;
     private String lineId;

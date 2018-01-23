@@ -76,6 +76,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
 
     @Override
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
+        TopActivity.initializeLocale(getContext());
         getPreferenceManager().setSharedPreferencesName("notifsettings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 

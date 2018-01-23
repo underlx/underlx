@@ -272,6 +272,15 @@
     <string name="frag_trip_history_duration_with_days">%1$dj %2$dh %3$dm</string>
     <string name="frag_trip_history_speed_value">%.01f km/h</string>
     <string name="frag_trip_history_length_value">%.01f km</string>
-    <string name="frag_stats_few_users_in_network">Très peu utilisateurs en ligne en déplacement</string>
-    <string name="frag_stats_users_in_network">Environ %d utilisateurs en ligne en déplacement</string>
+    <string name="frag_stats_few_users_in_network">Très peu d\'utilisateurs en ligne en déplacement</string>
+    <string name="frag_stats_users_in_network">Environ %d d\'utilisateurs en ligne en déplacement</string>
+    <string name="frag_settings_locale_title">Langue et région</string>
+    <string name="frag_settings_app_language">Langue de l\'application</string>
+    <string-array name="frag_settings_languages">
+        <item>Défaut du système</item>
+        <item>English</item>
+        <item>Español</item>
+        <item>Français</item>
+        <item>Português</item>
+    </string-array>
 </resources>

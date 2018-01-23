@@ -33,6 +33,7 @@ public class IntroActivity extends AppIntro2 implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TopActivity.initializeLocale(this);
 
         Object conn = getLastCustomNonConfigurationInstance();
         if (conn != null) {

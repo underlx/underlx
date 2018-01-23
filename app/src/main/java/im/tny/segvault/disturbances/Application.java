@@ -21,6 +21,7 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        TopActivity.initializeLocale(getApplicationContext());
         StethoUtils.install(this);
         initRealm(this);
         JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());

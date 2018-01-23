@@ -24,7 +24,7 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class NotifScheduleActivity extends AppCompatActivity {
+public class NotifScheduleActivity extends TopActivity {
     private Realm realmForListeners;
     private RealmResults<NotificationRule> results;
     private ListView listView;

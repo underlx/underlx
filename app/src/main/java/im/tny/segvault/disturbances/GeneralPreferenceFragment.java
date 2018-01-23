@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import net.xpece.android.support.preference.ListPreference;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.XpPreferenceFragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,10 +48,13 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     }
 
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
+        TopActivity.initializeLocale(getContext());
         getPreferenceManager().setSharedPreferencesName("settings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 
         setPreferencesFromResource(R.xml.settings, null);
+
+        updateLanguagePreferenceSummary();
     }
 
     @Override
@@ -88,6 +93,10 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
                     ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
             }
+        } else if (key.equals("pref_locale")) {
+            updateLanguagePreferenceSummary();
+            TopActivity.flagLocaleNeedsReloading();
+            getActivity().recreate();
         }
     }
 
@@ -106,6 +115,11 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private void updateLanguagePreferenceSummary() {
+        ListPreference languagePreference = (ListPreference) findPreference("pref_locale");
+        languagePreference.setSummary(languagePreference.getEntry());
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
