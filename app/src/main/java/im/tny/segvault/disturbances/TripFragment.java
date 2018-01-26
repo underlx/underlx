@@ -158,6 +158,10 @@ public class TripFragment extends BottomSheetDialogFragment {
         Realm realm = Realm.getDefaultInstance();
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
 
+        if(trip == null) {
+            return;
+        }
+
         Path path = trip.toConnectionPath(network);
 
         Station origin = path.getStartVertex().getStation();
