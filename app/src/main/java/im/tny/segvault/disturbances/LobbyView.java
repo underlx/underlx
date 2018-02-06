@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -132,7 +133,11 @@ public class LobbyView extends LinearLayout {
                             Uri.parse(String.format(
                                     Locale.ROOT, "https://www.google.com/maps/search/?api=1&query=%f,%f",
                                     exit.worldCoord[0], exit.worldCoord[1])));
-                    context.startActivity(intent);
+                    try {
+                        context.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        // oh well
+                    }
                 }
             });
             lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0);

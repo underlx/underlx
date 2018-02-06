@@ -55,7 +55,9 @@
             android:layout_height="?actionBarSize"
             android:layout_gravity="bottom"
             app:tabGravity="fill"
-            app:tabMode="fixed"
+            app:tabMode="scrollable"
+            android:requiresFadingEdge="horizontal"
+            android:fadingEdgeLength="80dp"
             app:tabTextAppearance="@style/AppTheme.TextProtectionScrim" />
     </android.support.design.widget.AppBarLayout>
 

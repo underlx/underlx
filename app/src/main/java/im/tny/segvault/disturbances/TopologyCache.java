@@ -23,6 +23,7 @@ import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Schedule;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
@@ -40,6 +41,7 @@ public class TopologyCache {
         public HashMap<String, API.Line> lines;
         public List<API.Connection> connections;
         public List<API.Transfer> transfers;
+        public List<API.POI> pois;
         public API.DatasetInfo info;
     }
 
@@ -50,6 +52,7 @@ public class TopologyCache {
                                    HashMap<String, API.Line> lines,
                                    List<API.Connection> connections,
                                    List<API.Transfer> transfers,
+                                   List<API.POI> pois,
                                    API.DatasetInfo info) throws CacheException {
         Topology t = new Topology();
         t.network = network;
@@ -58,6 +61,7 @@ public class TopologyCache {
         t.lines = lines;
         t.connections = connections;
         t.transfers = transfers;
+        t.pois = pois;
         t.info = info;
 
         String filename = "net-" + network.id;
@@ -96,6 +100,10 @@ public class TopologyCache {
         }
         Network net = new Network(t.network.id, t.network.name, t.network.typCars,
                 t.network.holidays, t.network.timezone, t.network.newsURL);
+
+        for (API.POI poi : t.pois) {
+            net.addPOI(new POI(poi.id, poi.type, poi.worldCoord, poi.webURL, poi.mainLocale, poi.names));
+        }
 
         for (String lineid : t.network.lines) {
             API.Line l = t.lines.get(lineid);
@@ -139,6 +147,14 @@ public class TopologyCache {
                             lobby.addSchedule(sched);
                         }
                         station.addLobby(lobby);
+                    }
+
+                    // POIs
+                    for(String poiId : s.pois) {
+                        POI poi = net.getPOI(poiId);
+                        if (poi != null) {
+                            station.addPOI(poi);
+                        }
                     }
                 }
                 Stop stop = new Stop(station, line);

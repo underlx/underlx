@@ -145,6 +145,16 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return stations.values();
     }
 
+    private Map<String, POI> pois = new HashMap<>();
+
+    public POI getPOI(String id) {
+        return pois.get(id);
+    }
+
+    public void addPOI(POI poi) {
+        pois.put(poi.getId(), poi);
+    }
+
     @Override
     public boolean addVertex(Stop stop) {
         Station s = stations.get(stop.getStation().getId());
@@ -212,7 +222,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     }
 
     public boolean isAboutToClose(Date at) {
-        return isOpen(at) && !isOpen(new Date(at.getTime() + 15*60*1000));
+        return isOpen(at) && !isOpen(new Date(at.getTime() + 15 * 60 * 1000));
     }
 
     public boolean isOpen(Date at) {

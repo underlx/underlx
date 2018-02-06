@@ -10,24 +10,29 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
-import org.sufficientlysecure.htmltextview.HtmlTextView;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
+import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Station;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link StationTriviaFragment.OnFragmentInteractionListener} interface
+ * {@link StationPOIFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link StationTriviaFragment#newInstance} factory method to
+ * Use the {@link StationPOIFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StationTriviaFragment extends Fragment {
+public class StationPOIFragment extends Fragment {
     private static final String ARG_STATION_ID = "stationId";
     private static final String ARG_NETWORK_ID = "networkId";
 
@@ -36,9 +41,9 @@ public class StationTriviaFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private HtmlTextView triviaView;
+    private LinearLayout poisLayout;
 
-    public StationTriviaFragment() {
+    public StationPOIFragment() {
         // Required empty public constructor
     }
 
@@ -50,8 +55,8 @@ public class StationTriviaFragment extends Fragment {
      * @param stationId Station ID
      * @return A new instance of fragment StationLobbyFragment.
      */
-    public static StationTriviaFragment newInstance(String networkId, String stationId) {
-        StationTriviaFragment fragment = new StationTriviaFragment();
+    public static StationPOIFragment newInstance(String networkId, String stationId) {
+        StationPOIFragment fragment = new StationPOIFragment();
         Bundle args = new Bundle();
         args.putString(ARG_NETWORK_ID, networkId);
         args.putString(ARG_STATION_ID, stationId);
@@ -72,16 +77,15 @@ public class StationTriviaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_station_trivia, container, false);
+        View view = inflater.inflate(R.layout.fragment_station_poi, container, false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(StationActivity.ACTION_MAIN_SERVICE_BOUND);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        triviaView = (HtmlTextView) view.findViewById(R.id.trivia_view);
+        poisLayout = (LinearLayout) view.findViewById(R.id.pois_layout);
 
-        triviaView.setHtml(getString(R.string.status_loading));
         update();
 
         return view;
@@ -118,28 +122,24 @@ public class StationTriviaFragment extends Fragment {
         if (station == null)
             return;
 
-        ExtraContentCache.getTrivia(getContext(), new ExtraContentCache.OnTriviaReadyListener() {
-            @Override
-            public void onSuccess(List<String> trivia) {
-                if (isAdded()) {
-                    triviaView.setHtml(trivia.get(0));
-                }
-            }
+        Locale l = Util.getCurrentLocale(getContext());
+        final String lang = l.getLanguage();
 
-            @Override
-            public void onProgress(int current) {
+        // POIs
+        List<POI> pois = station.getPOIs();
 
-            }
-
+        Collections.sort(pois, new Comparator<POI>() {
             @Override
-            public void onFailure() {
-                if (isAdded()) {
-                    triviaView.setHtml(getString(R.string.frag_station_info_unavailable));
-                }
+            public int compare(POI o1, POI o2) {
+                return o1.getNames(lang)[0].compareTo(o2.getNames(lang)[0]);
             }
-        }, station);
+        });
+
+        for (POI poi: pois) {
+            POIView v = new POIView(getContext(), poi);
+            poisLayout.addView(v);
+        }
     }
-
 
     /**
      * This interface must be implemented by activities that contain this
@@ -153,7 +153,6 @@ public class StationTriviaFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         MainService getMainService();
-
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

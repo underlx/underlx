@@ -593,13 +593,18 @@ public class MainService extends Service {
 
                     List<API.Transfer> transfers = api.getTransfers();
 
+                    publishProgress(90);
+                    if (isCancelled()) break;
+
+                    List<API.POI> pois = api.getPOIs();
+
                     publishProgress(100);
 
                     API.DatasetInfo info = api.getDatasetInfo(n.id);
                     lineStatusCache.clear();
                     statsCache.clear();
 
-                    TopologyCache.saveNetwork(MainService.this, n, apiStations, apiLobbies, apiLines, connections, transfers, info);
+                    TopologyCache.saveNetwork(MainService.this, n, apiStations, apiLobbies, apiLines, connections, transfers, pois, info);
                     putNetwork(TopologyCache.loadNetwork(MainService.this, n.id, api.getEndpoint().toString()));
                     if (isCancelled()) break;
                 }

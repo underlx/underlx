@@ -98,6 +98,16 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         return lines;
     }
 
+    private List<POI> pois = new ArrayList<>();
+
+    public List<POI> getPOIs() {
+        return new ArrayList<>(pois);
+    }
+
+    public void addPOI(POI poi) {
+        pois.add(poi);
+    }
+
     @Override
     public boolean addVertex(Stop stop) {
         boolean contained = getBase().addVertex(stop);

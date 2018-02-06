@@ -49,6 +49,7 @@ import io.realm.Realm;
 public class StationActivity extends TopActivity
         implements StationGeneralFragment.OnFragmentInteractionListener,
         StationLobbyFragment.OnFragmentInteractionListener,
+        StationPOIFragment.OnFragmentInteractionListener,
         StationTriviaFragment.OnFragmentInteractionListener {
 
     private String networkId;
@@ -114,7 +115,7 @@ public class StationActivity extends TopActivity
         appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener() {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                if(state == State.COLLAPSED) {
+                if (state == State.COLLAPSED) {
                     fab.hide();
                 } else {
                     fab.show();
@@ -136,7 +137,7 @@ public class StationActivity extends TopActivity
         }
         realm.close();
         MenuItem favItem = menu.findItem(R.id.menu_favorite);
-        if(isFavorite) {
+        if (isFavorite) {
             favItem.setTitle(R.string.act_station_favorite);
             favItem.setIcon(R.drawable.ic_star_white_24dp);
         } else {
@@ -167,12 +168,12 @@ public class StationActivity extends TopActivity
             bm.sendBroadcast(intent);
 
             Network net = locService.getNetwork(networkId);
-            if(net == null) {
+            if (net == null) {
                 StationActivity.this.finish();
                 return;
             }
             Station station = net.getStation(stationId);
-            if(station == null) {
+            if (station == null) {
                 StationActivity.this.finish();
                 return;
             }
@@ -301,7 +302,7 @@ public class StationActivity extends TopActivity
                 realm.copyToRealm(rstation);
                 realm.commitTransaction();
                 realm.close();
-                if(isFavorite) {
+                if (isFavorite) {
                     item.setTitle(R.string.act_station_favorite);
                     item.setIcon(R.drawable.ic_star_white_24dp);
                 } else {
@@ -314,7 +315,7 @@ public class StationActivity extends TopActivity
     }
 
     public static class StationPagerAdapter extends FragmentPagerAdapter {
-        private static int NUM_ITEMS = 3;
+        private static int NUM_ITEMS = 4;
 
         private String networkId;
         private String stationId;
@@ -340,6 +341,8 @@ public class StationActivity extends TopActivity
                 case 1:
                     return StationLobbyFragment.newInstance(networkId, stationId);
                 case 2:
+                    return StationPOIFragment.newInstance(networkId, stationId);
+                case 3:
                     return StationTriviaFragment.newInstance(networkId, stationId);
                 default:
                     return null;
@@ -354,6 +357,8 @@ public class StationActivity extends TopActivity
                 case 1:
                     return context.getString(R.string.act_station_tab_lobbies);
                 case 2:
+                    return context.getString(R.string.act_station_tab_pois);
+                case 3:
                     return context.getString(R.string.act_station_tab_trivia);
                 default:
                     return null;

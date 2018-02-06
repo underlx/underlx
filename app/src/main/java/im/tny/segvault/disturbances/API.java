@@ -32,8 +32,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -81,6 +81,7 @@ public class API {
         public List<WiFiAP> wiFiAPs;
         public Map<String, String> triviaURLs;
         public Map<String, Map<String, String>> connURLs;
+        public List<String> pois;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -258,6 +259,16 @@ public class API {
         public String s; // current station ID
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public String d; // current direction ID, or null if none
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class POI implements Serializable {
+        public String id;
+        public String type;
+        public float[] worldCoord;
+        public String webURL;
+        public String mainLocale;
+        public Map<String, String> names;
     }
 
     private int timeoutMs;
@@ -647,6 +658,19 @@ public class API {
     public List<Announcement> getAnnouncementsFromSource(String source) throws APIException {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("announcements/" + source), false), new TypeReference<List<Announcement>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<POI> getPOIs() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("pois"), false), new TypeReference<List<POI>>() {
             });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");

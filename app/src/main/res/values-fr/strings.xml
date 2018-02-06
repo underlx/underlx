@@ -276,6 +276,9 @@
     <string name="frag_stats_users_in_network">Environ %d d\'utilisateurs en ligne en déplacement</string>
     <string name="frag_settings_locale_title">Langue et région</string>
     <string name="frag_settings_app_language">Langue de l\'application</string>
+    <string name="act_station_tab_pois">Points d\'intérêt</string>
+    <string name="poi_view_map">Voir carte</string>
+    <string name="poi_view_website">Website</string>
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>
         <item>English</item>
