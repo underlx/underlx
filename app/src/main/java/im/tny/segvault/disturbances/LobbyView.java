@@ -4,9 +4,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,25 +30,29 @@ public class LobbyView extends LinearLayout {
     private LinearLayout scheduleLayout;
     private LinearLayout exitsLayout;
     private Lobby lobby;
+    private int color;
 
-    public LobbyView(Context context, Lobby lobby) {
+    public LobbyView(Context context, Lobby lobby, int color) {
         super(context);
         this.setOrientation(VERTICAL);
         this.lobby = lobby;
+        this.color = color;
         initializeViews(context);
     }
 
-    public LobbyView(Context context, AttributeSet attrs, Lobby lobby) {
+    public LobbyView(Context context, AttributeSet attrs, Lobby lobby, int color) {
         super(context, attrs);
         this.setOrientation(VERTICAL);
         this.lobby = lobby;
+        this.color = color;
         initializeViews(context);
     }
 
-    public LobbyView(Context context, AttributeSet attrs, int defStyle, Lobby lobby) {
+    public LobbyView(Context context, AttributeSet attrs, int defStyle, Lobby lobby, int color) {
         super(context, attrs, defStyle);
         this.setOrientation(VERTICAL);
         this.lobby = lobby;
+        this.color = color;
         initializeViews(context);
     }
 
@@ -60,14 +67,20 @@ public class LobbyView extends LinearLayout {
         inflater.inflate(R.layout.lobby_view, this);
 
         nameView = (TextView) findViewById(R.id.lobby_name);
-        nameView.setText(String.format(context.getString(R.string.frag_station_lobby_name), lobby.getName()));
+        String titleStr = String.format(context.getString(R.string.frag_station_lobby_name), lobby.getName());
+
+        int lStart = titleStr.indexOf(lobby.getName());
+        int lEnd = lStart + lobby.getName().length();
+        Spannable sb = new SpannableString(titleStr);
+        sb.setSpan(new ForegroundColorSpan(color), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        nameView.setText(sb);
 
         // Schedule
         scheduleLayout = (LinearLayout) findViewById(R.id.lobby_schedule_layout);
 
         boolean weekdaysAllTheSame = true;
-        for(int i = 2; i < 6; i++) {
-            if(!lobby.getSchedule(1).compare(lobby.getSchedule(i))) {
+        for (int i = 2; i < 6; i++) {
+            if (!lobby.getSchedule(1).compare(lobby.getSchedule(i))) {
                 weekdaysAllTheSame = false;
             }
         }
@@ -76,7 +89,7 @@ public class LobbyView extends LinearLayout {
 
         boolean allDaysTheSame = weekdaysAllTheSame && holidaysAllTheSame && lobby.getSchedule(-1).compare(lobby.getSchedule(2));
 
-        if(allDaysTheSame) {
+        if (allDaysTheSame) {
             TextView tv = new TextView(context);
             tv.setText(String.format(getContext().getString(R.string.lobby_schedule_all_days), scheduleToString(lobby.getSchedule(1))));
             scheduleLayout.addView(tv);
@@ -150,7 +163,7 @@ public class LobbyView extends LinearLayout {
     }
 
     private String scheduleToString(Schedule s) {
-        if(!s.open) {
+        if (!s.open) {
             return getContext().getString(R.string.lobby_schedule_closed);
         }
         Formatter f = new Formatter();
