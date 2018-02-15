@@ -293,6 +293,14 @@
     <string name="frag_trip_history_length_value">%.01f km</string>
     <string name="frag_settings_locale_title">Language and region</string>
     <string name="frag_settings_app_language">App language</string>
+    <string name="act_stats_title">Statistics</string>
+    <string name="act_stats_total_trips_count">Total trips</string>
+    <string name="act_stats_total_visits_count">Total visits</string>
+    <string name="act_stats_total_length">Total length</string>
+    <string name="act_stats_total_length_value">%.01f km</string>
+    <string name="act_stats_total_time">Total time in network</string>
+    <string name="act_stats_total_time_value_no_days">%1$dh %2$dm</string>
+    <string name="act_stats_total_time_value_with_days">%1$dd %2$dh %3$dm</string>
     <string-array name="frag_settings_languages">
         <item>System default</item>
         <item>English</item>
