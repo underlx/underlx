@@ -210,10 +210,12 @@ public class HomeStatsFragment extends Fragment {
         if(new Date().getTime() - stats.updated.getTime() > java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
             lineStatsLayout.setAlpha(0.6f);
             lastDisturbanceView.setAlpha(0.6f);
+            usersOnlineView.setAlpha(0.6f);
             updateInformationView.setTypeface(null, Typeface.BOLD);
         } else {
             lineStatsLayout.setAlpha(1f);
             lastDisturbanceView.setAlpha(1f);
+            usersOnlineView.setAlpha(1f);
             updateInformationView.setTypeface(null, Typeface.NORMAL);
         }
         updateInformationView.setText(String.format(getString(R.string.frag_stats_updated),
