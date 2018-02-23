@@ -125,7 +125,7 @@ class WiFiChecker {
         public void onReceive(Context c, Intent intent) {
             Log.d("WiFiChecker", "onReceive");
             SharedPreferences sharedPref = c.getSharedPreferences("settings", MODE_PRIVATE);
-            if (!sharedPref.getBoolean("pref_location_enable", true)) {
+            if (!sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
                 return;
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&

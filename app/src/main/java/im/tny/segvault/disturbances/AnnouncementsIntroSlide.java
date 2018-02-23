@@ -65,7 +65,7 @@ public class AnnouncementsIntroSlide extends Fragment {
                 LinearLayout checkboxLayout = (LinearLayout) view.findViewById(R.id.checkbox_layout);
 
                 SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
-                Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", null);
+                Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
 
                 for (final Announcement.Source s : Announcement.getSources()) {
                     AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
@@ -103,14 +103,14 @@ public class AnnouncementsIntroSlide extends Fragment {
         SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
         Set<String> defaultSet = new HashSet<String>();
         defaultSet.addAll(Arrays.asList(getResources().getStringArray(R.array.default_announcement_sources)));
-        Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", defaultSet);
+        Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, defaultSet);
         if(show) {
             sourcePref.add(sourceId);
         } else {
             sourcePref.remove(sourceId);
         }
         SharedPreferences.Editor e = sharedPref.edit();
-        e.putStringSet("pref_notifs_announcement_sources", sourcePref);
+        e.putStringSet(PreferenceNames.AnnouncementSources, sourcePref);
         e.apply();
     }
 }

@@ -95,7 +95,7 @@ public class IntroActivity extends AppIntro2 implements
                 Log.d("osc", "Requesting permission");
                 requestedLocation = true;
                 SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-                boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+                boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
                 if (locationEnabled &&
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                         checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

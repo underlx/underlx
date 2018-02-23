@@ -155,9 +155,9 @@ public class MainService extends Service {
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
-        if (new Date().getTime() - sharedPref.getLong("pref_last_auto_topology_update_check", 0) > TimeUnit.HOURS.toMillis(2)) {
+        if (new Date().getTime() - sharedPref.getLong(PreferenceNames.LastAutoTopologyUpdateCheck, 0) > TimeUnit.HOURS.toMillis(2)) {
             SharedPreferences.Editor e = sharedPref.edit();
-            e.putLong("pref_last_auto_topology_update_check", new Date().getTime());
+            e.putLong(PreferenceNames.LastAutoTopologyUpdateCheck, new Date().getTime());
             e.apply();
             checkForTopologyUpdates();
         }
@@ -284,7 +284,7 @@ public class MainService extends Service {
     public void reloadFCMsubscriptions() {
         FirebaseMessaging fcm = FirebaseMessaging.getInstance();
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
+        Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
         if (linePref != null && linePref.size() != 0) {
             fcm.subscribeToTopic("disturbances");
             if (BuildConfig.DEBUG) {
@@ -295,7 +295,7 @@ public class MainService extends Service {
             fcm.unsubscribeFromTopic("disturbances-debug");
         }
 
-        Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", null);
+        Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
 
         for (Announcement.Source possibleSource : Announcement.getSources()) {
             if (sourcePref != null && sourcePref.contains(possibleSource.id)) {
@@ -805,7 +805,7 @@ public class MainService extends Service {
                                                long msgtime) {
         Log.d("MainService", "handleDisturbanceNotification");
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
+        Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
 
         Network snetwork;
         synchronized (lock) {
@@ -833,7 +833,7 @@ public class MainService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (!downtime && !sharedPref.getBoolean("pref_notifs_service_resumed", true)) {
+        if (!downtime && !sharedPref.getBoolean(PreferenceNames.NotifsServiceResumed, true)) {
             // notifications for normal service resumed disabled
             notificationManager.cancel(id.hashCode());
             return;
@@ -866,11 +866,11 @@ public class MainService extends Service {
                 .setContentText(status)
                 .setAutoCancel(true)
                 .setWhen(msgtime)
-                .setSound(Uri.parse(sharedPref.getString(downtime ? "pref_notifs_ringtone" : "pref_notifs_regularization_ringtone", "content://settings/system/notification_sound")))
+                .setSound(Uri.parse(sharedPref.getString(downtime ? PreferenceNames.NotifsRingtone : PreferenceNames.NotifsRegularizationRingtone, "content://settings/system/notification_sound")))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent);
 
-        if (sharedPref.getBoolean(downtime ? "pref_notifs_vibrate" : "pref_notifs_regularization_vibrate", false)) {
+        if (sharedPref.getBoolean(downtime ? PreferenceNames.NotifsVibrate : PreferenceNames.NotifsRegularizationVibrate, false)) {
             notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
         } else {
             notificationBuilder.setVibrate(new long[]{0l});
@@ -906,7 +906,7 @@ public class MainService extends Service {
                                                 long msgtime) {
         Log.d("MainService", "handleAnnouncementNotification");
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> sourcePref = sharedPref.getStringSet("pref_notifs_announcement_sources", null);
+        Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
 
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
         notificationIntent.setData(Uri.parse(url));
@@ -937,11 +937,11 @@ public class MainService extends Service {
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setWhen(msgtime)
-                .setSound(Uri.parse(sharedPref.getString("pref_notifs_announcement_ringtone", "content://settings/system/notification_sound")))
+                .setSound(Uri.parse(sharedPref.getString(PreferenceNames.NotifsAnnouncementRingtone, "content://settings/system/notification_sound")))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(contentIntent);
 
-        if (sharedPref.getBoolean("pref_notifs_announcement_vibrate", false)) {
+        if (sharedPref.getBoolean(PreferenceNames.NotifsAnnouncementVibrate, false)) {
             notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
         } else {
             notificationBuilder.setVibrate(new long[]{0l});
@@ -1115,7 +1115,7 @@ public class MainService extends Service {
             }
 
             SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-            boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+            boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
 
             if (loc.getState() instanceof InNetworkState) {
                 wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
@@ -1194,8 +1194,8 @@ public class MainService extends Service {
             }
 
             SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-            boolean openTripCorrection = sharedPref.getBoolean("pref_auto_open_trip_correction", false);
-            boolean openVisitCorrection = sharedPref.getBoolean("pref_auto_open_visit_correction", false);
+            boolean openTripCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenTripCorrection, false);
+            boolean openVisitCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenVisitCorrection, false);
             if (openTripCorrection && (path.getEdgeList().size() > 0 || openVisitCorrection)) {
                 intent = new Intent(getApplicationContext(), TripCorrectionActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1322,8 +1322,8 @@ public class MainService extends Service {
 
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (key.equals("pref_location_enable")) {
-                if (prefs.getBoolean("pref_location_enable", true))
+            if (key.equals(PreferenceNames.LocationEnable)) {
+                if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
                     wfc.startScanningIfWiFiEnabled();
                 else
                     wfc.stopScanning();

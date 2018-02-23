@@ -491,7 +491,7 @@ public class RouteFragment extends TopFragment {
         }
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-        boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+        boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
         if (locationEnabled) {
             layoutBottomSheet.setVisibility(View.VISIBLE);
         }

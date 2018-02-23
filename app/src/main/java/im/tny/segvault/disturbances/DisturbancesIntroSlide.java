@@ -10,16 +10,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.widget.AppCompatCheckBox;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 
@@ -90,7 +86,7 @@ public class DisturbancesIntroSlide extends Fragment {
                 LinearLayout checkboxLayout = (LinearLayout) view.findViewById(R.id.checkbox_layout);
 
                 SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
-                Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", null);
+                Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
 
                 for (final Line l : lines) {
                     AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
@@ -128,14 +124,14 @@ public class DisturbancesIntroSlide extends Fragment {
         SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
         Set<String> defaultSet = new HashSet<String>();
         defaultSet.addAll(Arrays.asList(getResources().getStringArray(R.array.default_notif_lines)));
-        Set<String> linePref = sharedPref.getStringSet("pref_notifs_lines", defaultSet);
+        Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, defaultSet);
         if(show) {
             linePref.add(lineId);
         } else {
             linePref.remove(lineId);
         }
         SharedPreferences.Editor e = sharedPref.edit();
-        e.putStringSet("pref_notifs_lines", linePref);
+        e.putStringSet(PreferenceNames.NotifsLines, linePref);
         e.apply();
     }
 

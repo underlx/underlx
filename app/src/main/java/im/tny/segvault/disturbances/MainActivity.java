@@ -135,7 +135,7 @@ public class MainActivity extends TopActivity
                         }
                     });
                 } else {
-                    boolean locationEnabled = sharedPref.getBoolean("pref_location_enable", true);
+                    boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
                     if (locationEnabled &&
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                             checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -219,7 +219,7 @@ public class MainActivity extends TopActivity
         getMenuInflater().inflate(R.menu.main, menu);
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-        boolean devMode = sharedPref.getBoolean("pref_developer_mode", false);
+        boolean devMode = sharedPref.getBoolean(PreferenceNames.DeveloperMode, false);
         if (!devMode) {
             menu.findItem(R.id.menu_debug).setVisible(false);
         }

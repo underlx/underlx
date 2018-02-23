@@ -83,9 +83,9 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
         setPreferencesFromResource(R.xml.notif_settings, null);
 
         updatePreferences();
-        bindPreferenceSummaryToValue(findPreference("pref_notifs_ringtone"));
-        bindPreferenceSummaryToValue(findPreference("pref_notifs_regularization_ringtone"));
-        bindPreferenceSummaryToValue(findPreference("pref_notifs_announcement_ringtone"));
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRingtone));
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRegularizationRingtone));
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsAnnouncementRingtone));
     }
 
     @Override
@@ -107,7 +107,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
 
     private void updateLinesPreference() {
         MultiSelectListPreference linesPreference;
-        linesPreference = (MultiSelectListPreference) findPreference("pref_notifs_lines");
+        linesPreference = (MultiSelectListPreference) findPreference(PreferenceNames.NotifsLines);
 
         List<CharSequence> lineNames = new ArrayList<>();
         List<CharSequence> lineIDs = new ArrayList<>();
@@ -156,9 +156,9 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
             preference.setSummary(getString(R.string.frag_notif_summary_no_lines));
         }
 
-        Preference notifsDistServiceResumed = findPreference("pref_notifs_service_resumed");
-        Preference notifsDistRingtone = findPreference("pref_notifs_ringtone");
-        Preference notifsDistVibrate = findPreference("pref_notifs_vibrate");
+        Preference notifsDistServiceResumed = findPreference(PreferenceNames.NotifsServiceResumed);
+        Preference notifsDistRingtone = findPreference(PreferenceNames.NotifsRingtone);
+        Preference notifsDistVibrate = findPreference(PreferenceNames.NotifsVibrate);
         notifsDistServiceResumed.setEnabled(values.size() != 0);
         notifsDistRingtone.setEnabled(values.size() != 0);
         notifsDistVibrate.setEnabled(values.size() != 0);
@@ -166,7 +166,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
 
     private void updateSourcesPreference() {
         MultiSelectListPreference sourcesPreference;
-        sourcesPreference = (MultiSelectListPreference) findPreference("pref_notifs_announcement_sources");
+        sourcesPreference = (MultiSelectListPreference) findPreference(PreferenceNames.AnnouncementSources);
 
         List<CharSequence> entryValues = new ArrayList<>();
         List<CharSequence> entries = new ArrayList<>();
@@ -202,8 +202,8 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
             preference.setSummary(getString(R.string.frag_notif_summary_no_sources));
         }
 
-        Preference notifsAnnRingtone = findPreference("pref_notifs_announcement_ringtone");
-        Preference notifsAnnVibrate = findPreference("pref_notifs_announcement_vibrate");
+        Preference notifsAnnRingtone = findPreference(PreferenceNames.NotifsAnnouncementRingtone);
+        Preference notifsAnnVibrate = findPreference(PreferenceNames.NotifsAnnouncementVibrate);
         notifsAnnRingtone.setEnabled(values.size() != 0);
         notifsAnnVibrate.setEnabled(values.size() != 0);
     }
@@ -237,7 +237,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d("NotifPreferenceFrag", "onSharedPreferenceChanged " + key);
-        if (key.equals("pref_notifs_lines") || key.equals("pref_notifs_announcement_sources")) {
+        if (key.equals(PreferenceNames.NotifsLines) || key.equals(PreferenceNames.AnnouncementSources)) {
             if (mListener != null && mListener.getMainService() != null) {
                 mListener.getMainService().reloadFCMsubscriptions();
             }

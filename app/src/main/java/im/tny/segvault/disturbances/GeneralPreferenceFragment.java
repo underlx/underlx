@@ -86,14 +86,14 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d("GeneralPreferenceFrag", "onSharedPreferenceChanged " + key);
-        if (key.equals("pref_location_enable")) {
-            boolean locationEnabled = sharedPreferences.getBoolean("pref_location_enable", true);
+        if (key.equals(PreferenceNames.LocationEnable)) {
+            boolean locationEnabled = sharedPreferences.getBoolean(PreferenceNames.LocationEnable, true);
             if (locationEnabled &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MainActivity.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
             }
-        } else if (key.equals("pref_locale")) {
+        } else if (key.equals(PreferenceNames.Locale)) {
             updateLanguagePreferenceSummary();
             TopActivity.flagLocaleNeedsReloading();
             getActivity().recreate();
@@ -118,7 +118,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     }
 
     private void updateLanguagePreferenceSummary() {
-        ListPreference languagePreference = (ListPreference) findPreference("pref_locale");
+        ListPreference languagePreference = (ListPreference) findPreference(PreferenceNames.Locale);
         languagePreference.setSummary(languagePreference.getEntry());
     }
 

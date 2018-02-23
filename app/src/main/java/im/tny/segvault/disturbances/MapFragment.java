@@ -91,7 +91,7 @@ public class MapFragment extends TopFragment {
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-        portraitMap = sharedPref.getBoolean("pref_portrait_map", false);
+        portraitMap = sharedPref.getBoolean(PreferenceNames.PortraitMap, false);
         if (portraitMap) {
             webview.getSettings().setUseWideViewPort(false);
             webview.loadUrl("file:///android_asset/map-" + networkId + "-portrait.html");
@@ -108,7 +108,7 @@ public class MapFragment extends TopFragment {
 
         SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
         if (sharedPref != null) {
-            if (BuildConfig.DEBUG && sharedPref.getBoolean("pref_developer_mode", false)) {
+            if (BuildConfig.DEBUG && sharedPref.getBoolean(PreferenceNames.DeveloperMode, false)) {
                 menu.findItem(R.id.menu_mock_location).setVisible(true);
             }
         }
@@ -134,7 +134,7 @@ public class MapFragment extends TopFragment {
                 portraitMap = !portraitMap;
                 SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
                 SharedPreferences.Editor e = sharedPref.edit();
-                e.putBoolean("pref_portrait_map", portraitMap);
+                e.putBoolean(PreferenceNames.PortraitMap, portraitMap);
                 e.apply();
                 if (portraitMap) {
                     webview.getSettings().setUseWideViewPort(false);
