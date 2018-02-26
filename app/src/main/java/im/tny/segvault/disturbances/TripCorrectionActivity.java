@@ -122,13 +122,19 @@ public class TripCorrectionActivity extends TopActivity {
 
     private void populateUI() {
         Realm realm = Realm.getDefaultInstance();
-        trip = realm.copyFromRealm(realm.where(Trip.class).equalTo("id", tripId).findFirst());
+        trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
+        if (trip == null) {
+            finish();
+            return;
+        }
+        trip = realm.copyFromRealm(trip);
         realm.close();
 
         originalPath = trip.toConnectionPath(network);
 
         if (!trip.canBeCorrected()) {
             finish();
+            return;
         }
 
         List<Station> stations = new ArrayList<>(network.getStations());
