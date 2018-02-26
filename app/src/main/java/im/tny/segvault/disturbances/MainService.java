@@ -113,7 +113,14 @@ public class MainService extends Service {
     private void putNetwork(final Network net) {
         synchronized (lock) {
             // create Realm stations for the network if they don't exist already
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm;
+            try {
+                realm = Realm.getDefaultInstance();
+            } catch (IllegalStateException e) {
+                Application.initRealm(getApplicationContext());
+                realm = Realm.getDefaultInstance();
+            }
+
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
