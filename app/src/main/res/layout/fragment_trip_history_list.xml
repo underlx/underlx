@@ -129,7 +129,7 @@
                     android:id="@+id/stats_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="More statistics"
+                    android:text="@string/frag_trip_history_more_statistics"
                     style="@style/Widget.AppCompat.Button.Borderless.Colored" />
             </LinearLayout>
         </TableRow>

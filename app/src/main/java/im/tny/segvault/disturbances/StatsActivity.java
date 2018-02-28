@@ -63,18 +63,24 @@ public class StatsActivity extends TopActivity {
         stats.add(new TotalVisitsStatistic(0));
         stats.add(new TotalLengthStatistic(0));
         stats.add(new TotalTimeStatistic(0));
+        stats.add(new AverageSpeedStatistic(0));
+        stats.add(new AverageStationsStatistic(0));
 
         stats.add(new TitlePseudoStatistic(R.string.act_stats_last_7_days));
         stats.add(new TotalTripsStatistic(7));
         stats.add(new TotalVisitsStatistic(7));
         stats.add(new TotalLengthStatistic(7));
         stats.add(new TotalTimeStatistic(7));
+        stats.add(new AverageSpeedStatistic(7));
+        stats.add(new AverageStationsStatistic(7));
 
         stats.add(new TitlePseudoStatistic(R.string.act_stats_last_30_days));
         stats.add(new TotalTripsStatistic(30));
         stats.add(new TotalVisitsStatistic(30));
         stats.add(new TotalLengthStatistic(30));
         stats.add(new TotalTimeStatistic(30));
+        stats.add(new AverageSpeedStatistic(30));
+        stats.add(new AverageStationsStatistic(30));
     }
 
     @Override
@@ -352,6 +358,78 @@ public class StatsActivity extends TopActivity {
             // https://github.com/realm/realm-java/issues/1575
             // https://github.com/realm/realm-java/issues/4011
             return tripsQuery.equalTo("id", "NEVER_BE_TRUE");
+        }
+    }
+
+    private static class AverageSpeedStatistic extends Statistic {
+        int days = 0;
+        int timeableLength = 0;
+        long movementMilliseconds = 0;
+
+        public AverageSpeedStatistic(int days) {
+            this.days = days;
+        }
+
+        @Override
+        public void compute(Realm realm, Collection<Network> networks) {
+            for (Trip trip : getTripsFor(realm, days).findAll()) {
+                Network network = null;
+                for (Network n : networks) {
+                    if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                        network = n;
+                        break;
+                    }
+                }
+                Path path = trip.toConnectionPath(network);
+                timeableLength += path.getTimeablePhysicalLength();
+                movementMilliseconds += path.getMovementMilliseconds();
+            }
+        }
+
+        @Override
+        public int getNameStringId() {
+            return R.string.act_stats_avg_speed;
+        }
+
+        @Override
+        public String getValue(Context context) {
+            if (movementMilliseconds > 0) {
+                return String.format(context.getString(R.string.act_stats_avg_speed_value),
+                        ((double) timeableLength / (double) (movementMilliseconds / 1000)) * 3.6);
+            }
+            return "--";
+        }
+    }
+
+    private static class AverageStationsStatistic extends Statistic {
+        int days = 0;
+        long stations = 0;
+        long trips = 0;
+
+        public AverageStationsStatistic(int days) {
+            this.days = days;
+        }
+
+        @Override
+        public void compute(Realm realm, Collection<Network> networks) {
+            RealmQuery<Trip> q = getTripsFor(realm, days);
+            for (Trip trip : q.findAll()) {
+                stations += trip.getPath().size();
+            }
+            trips = q.count();
+        }
+
+        @Override
+        public int getNameStringId() {
+            return R.string.act_stats_avg_stations;
+        }
+
+        @Override
+        public String getValue(Context context) {
+            if (trips > 0) {
+                return String.format("%.01f", (double) stations / (double) trips);
+            }
+            return "--";
         }
     }
 

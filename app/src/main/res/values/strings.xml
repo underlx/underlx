@@ -304,6 +304,10 @@
     <string name="act_stats_total_time">Total time in network</string>
     <string name="act_stats_total_time_value_no_days">%1$dh %2$dm</string>
     <string name="act_stats_total_time_value_with_days">%1$dd %2$dh %3$dm</string>
+    <string name="act_stats_avg_speed">Average speed</string>
+    <string name="act_stats_avg_speed_value">%.01f km/h</string>
+    <string name="act_stats_avg_stations">Average stations</string>
+    <string name="frag_trip_history_more_statistics">More statistics</string>
     <string-array name="frag_settings_languages">
         <item>System default</item>
         <item>English</item>

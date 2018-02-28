@@ -290,6 +290,10 @@
     <string name="act_stats_total_time">Tempo passado na rede</string>
     <string name="act_stats_total_time_value_no_days">%1$dh %2$dm</string>
     <string name="act_stats_total_time_value_with_days">%1$dd %2$dh %3$dm</string>
+    <string name="act_stats_avg_speed">Velocidade média</string>
+    <string name="act_stats_avg_speed_value">%.01f km/h</string>
+    <string name="act_stats_avg_stations">Média de estações</string>
+    <string name="frag_trip_history_more_statistics">Mais estatísticas</string>
     <string-array name="frag_settings_languages">
         <item>Padrão do sistema</item>
         <item>English</item>
