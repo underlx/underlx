@@ -305,10 +305,7 @@ public class StatsActivity extends TopActivity {
                     }
                 }
                 Path path = trip.toConnectionPath(network);
-                List<Connection> edges = path.getEdgeList();
-                if (edges.size() > 0) {
-                    value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
-                }
+                value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
             }
         }
 
