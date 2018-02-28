@@ -279,6 +279,21 @@
     <string name="act_station_tab_pois">Points d\'intérêt</string>
     <string name="poi_view_map">Voir carte</string>
     <string name="poi_view_website">Website</string>
+    <string name="act_stats_title">Statistiques</string>
+    <string name="act_stats_since_install">Depuis l\'installation</string>
+    <string name="act_stats_last_7_days">Dernières 7 journées</string>
+    <string name="act_stats_last_30_days">Dernières 30 journées</string>
+    <string name="act_stats_total_trips_count">Total de voyages</string>
+    <string name="act_stats_total_visits_count">Total des visites</string>
+    <string name="act_stats_total_length">Distance parcourue</string>
+    <string name="act_stats_total_length_value">%.01f km</string>
+    <string name="act_stats_total_time">Temps dans le réseau</string>
+    <string name="act_stats_total_time_value_no_days">%1$dh %2$dm</string>
+    <string name="act_stats_total_time_value_with_days">%1$dj %2$dh %3$dm</string>
+    <string name="act_stats_avg_speed">Vitesse moyenne</string>
+    <string name="act_stats_avg_speed_value">%.01f km/h</string>
+    <string name="act_stats_avg_stations">Moyenne de stations</string>
+    <string name="frag_trip_history_more_statistics">Plus de statistiques</string>
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>
         <item>English</item>
