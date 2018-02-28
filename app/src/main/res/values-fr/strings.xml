@@ -283,7 +283,7 @@
     <string name="act_stats_since_install">Depuis l\'installation</string>
     <string name="act_stats_last_7_days">Dernières 7 journées</string>
     <string name="act_stats_last_30_days">Dernières 30 journées</string>
-    <string name="act_stats_total_trips_count">Total de voyages</string>
+    <string name="act_stats_total_trips_count">Total de trajets</string>
     <string name="act_stats_total_visits_count">Total des visites</string>
     <string name="act_stats_total_length">Distance parcourue</string>
     <string name="act_stats_total_length_value">%.01f km</string>
