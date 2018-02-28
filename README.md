@@ -1,5 +1,5 @@
-# underlx [![Discord](https://img.shields.io/discord/334423823552217090.svg)](https://discord.gg/hhuC7fc) [![license](https://img.shields.io/github/license/gbl08ma/underlx.svg)](https://github.com/gbl08ma/underlx/blob/master/LICENSE)
-This is an app for Android devices that shows information about the [Lisbon Metro](http://www.metrolisboa.pt/), as collected by my other project, [disturbancesmlx](https://github.com/gbl08ma/disturbancesmlx).
+# underlx [![Discord](https://img.shields.io/discord/334423823552217090.svg)](https://discord.gg/hhuC7fc) [![license](https://img.shields.io/github/license/underlx/underlx.svg)](https://github.com/underlx/underlx/blob/master/LICENSE)
+This is an app for Android devices that shows information about the [Lisbon Metro](http://www.metrolisboa.pt/), as collected by our other project, [disturbancesmlx](https://github.com/underlx/disturbancesmlx).
 
 The long-term goal is to become **the only Lisbon Metro app users will ever need**, and perhaps most importantly, **the one they'll want to have**.
 The plan is for the app/service to feature a strong collaborative component, with users collectively submitting information about the current network status, through both automated and manual means - more or less like a **"Waze for the Lisbon Metro"**.
@@ -28,16 +28,16 @@ You can also join the **beta-testing group**. Beta testers might get releases ea
 
 ## License
 
-[Apache License 2.0](https://github.com/gbl08ma/underlx/blob/master/LICENSE)
+[Apache License 2.0](https://github.com/underlx/underlx/blob/master/LICENSE)
 
 ## Privacy considerations
 
-This is a non-profit project. I don't plan on monetizing the app, not even inserting advertisements; this service is meant to monitor the subway network, not the users' lifes.
+This is a non-profit project. We don't plan on monetizing the app, not even inserting advertisements; this service is meant to monitor the subway network, not the users' lifes.
 
 The collaborative features are being engineered with privacy in mind; users will not be uniquely identified. For example, when submitting information during trips, a random ID will be generated at the start of the trip, used for its duration, and destroyed once the user leaves the network.
 
-Maintaining the servers for the online components incurs costs that are paid out of my own pocket and eventually any proceedings from my for-profit (but not profitable) projects such as [tny.im](https://tny.im).
+Maintaining the servers for the online components incurs costs that are paid out of our own pockets and eventually any proceedings from gbl08ma's for-profit (but not profitable) projects such as [tny.im](https://tny.im).
 
 ## Disclaimer
 
-I have no affiliation with _Metropolitano de Lisboa, E.P.E._. The code and the associated website are not sponsored or endorsed by them. I shall not be liable for any damages arising from the use of this code or associated website.
+We have no affiliation with _Metropolitano de Lisboa, E.P.E._. The code and the associated website are not sponsored or endorsed by them. We shall not be liable for any damages arising from the use of this code or associated website.
