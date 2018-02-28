@@ -17,14 +17,18 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
 public class StatsActivity extends TopActivity {
 
@@ -54,11 +58,23 @@ public class StatsActivity extends TopActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // TODO
-        stats.add(new TotalTripsStatistic());
-        stats.add(new TotalVisitsStatistic());
-        stats.add(new TotalLengthStatistic());
-        stats.add(new TotalTimeStatistic());
+        stats.add(new TitlePseudoStatistic(R.string.act_stats_since_install));
+        stats.add(new TotalTripsStatistic(0));
+        stats.add(new TotalVisitsStatistic(0));
+        stats.add(new TotalLengthStatistic(0));
+        stats.add(new TotalTimeStatistic(0));
+
+        stats.add(new TitlePseudoStatistic(R.string.act_stats_last_7_days));
+        stats.add(new TotalTripsStatistic(7));
+        stats.add(new TotalVisitsStatistic(7));
+        stats.add(new TotalLengthStatistic(7));
+        stats.add(new TotalTimeStatistic(7));
+
+        stats.add(new TitlePseudoStatistic(R.string.act_stats_last_30_days));
+        stats.add(new TotalTripsStatistic(30));
+        stats.add(new TotalVisitsStatistic(30));
+        stats.add(new TotalLengthStatistic(30));
+        stats.add(new TotalTimeStatistic(30));
     }
 
     @Override
@@ -114,7 +130,9 @@ public class StatsActivity extends TopActivity {
 
     private abstract static class Statistic {
         abstract public void compute(Realm realm, Collection<Network> networks);
+
         abstract public int getNameStringId();
+
         abstract public String getValue(Context context);
 
         public void addToTable(LayoutInflater inflater, TableLayout table) {
@@ -122,10 +140,10 @@ public class StatsActivity extends TopActivity {
             TableRow.LayoutParams trParams = new TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
 
-            TextView name = (TextView)tr.findViewById(R.id.name_view);
+            TextView name = (TextView) tr.findViewById(R.id.name_view);
             name.setText(getNameStringId());
 
-            TextView value = (TextView)tr.findViewById(R.id.value_view);
+            TextView value = (TextView) tr.findViewById(R.id.value_view);
             value.setText(getValue(table.getContext()));
 
             table.addView(tr, new TableLayout.LayoutParams(
@@ -133,11 +151,53 @@ public class StatsActivity extends TopActivity {
         }
     }
 
-    private static class TotalTripsStatistic extends Statistic {
-        long value;
+    private static class TitlePseudoStatistic extends Statistic {
+        private int stringId;
+
+        public TitlePseudoStatistic(int titleStringId) {
+            stringId = titleStringId;
+        }
+
         @Override
         public void compute(Realm realm, Collection<Network> networks) {
-            value = realm.where(Trip.class).count();
+            // nothing to do here
+        }
+
+        @Override
+        public int getNameStringId() {
+            return stringId;
+        }
+
+        @Override
+        public String getValue(Context context) {
+            return null;
+        }
+
+        @Override
+        public void addToTable(LayoutInflater inflater, TableLayout table) {
+            TableRow tr = (TableRow) inflater.inflate(R.layout.stat_row_title_template, null);
+            TableRow.LayoutParams trParams = new TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+
+            TextView name = (TextView) tr.findViewById(R.id.name_view);
+            name.setText(getNameStringId());
+
+            table.addView(tr, new TableLayout.LayoutParams(
+                    TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
+        }
+    }
+
+    private static class TotalTripsStatistic extends Statistic {
+        int days;
+        long value;
+
+        public TotalTripsStatistic(int days) {
+            this.days = days;
+        }
+
+        @Override
+        public void compute(Realm realm, Collection<Network> networks) {
+            value = getTripsFor(realm, days).count();
         }
 
         @Override
@@ -152,11 +212,16 @@ public class StatsActivity extends TopActivity {
     }
 
     private static class TotalVisitsStatistic extends Statistic {
+        int days = 0;
         long value = 0;
+
+        public TotalVisitsStatistic(int days) {
+            this.days = days;
+        }
+
         @Override
         public void compute(Realm realm, Collection<Network> networks) {
-
-            for (Trip trip : realm.where(Trip.class).findAll()) {
+            for (Trip trip : getTripsFor(realm, days).findAll()) {
                 Network network = null;
                 for (Network n : networks) {
                     if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
@@ -185,11 +250,16 @@ public class StatsActivity extends TopActivity {
 
 
     private static class TotalLengthStatistic extends Statistic {
+        int days = 0;
         long value = 0;
+
+        public TotalLengthStatistic(int days) {
+            this.days = days;
+        }
+
         @Override
         public void compute(Realm realm, Collection<Network> networks) {
-
-            for (Trip trip : realm.where(Trip.class).findAll()) {
+            for (Trip trip : getTripsFor(realm, days).findAll()) {
                 Network network = null;
                 for (Network n : networks) {
                     if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
@@ -212,16 +282,21 @@ public class StatsActivity extends TopActivity {
 
         @Override
         public String getValue(Context context) {
-            return String.format(context.getString(R.string.act_stats_total_length_value), (double)value / 1000f);
+            return String.format(context.getString(R.string.act_stats_total_length_value), (double) value / 1000f);
         }
     }
 
     private static class TotalTimeStatistic extends Statistic {
+        int days = 0;
         long value = 0;
+
+        public TotalTimeStatistic(int days) {
+            this.days = days;
+        }
+
         @Override
         public void compute(Realm realm, Collection<Network> networks) {
-
-            for (Trip trip : realm.where(Trip.class).findAll()) {
+            for (Trip trip : getTripsFor(realm, days).findAll()) {
                 Network network = null;
                 for (Network n : networks) {
                     if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
@@ -232,7 +307,7 @@ public class StatsActivity extends TopActivity {
                 Path path = trip.toConnectionPath(network);
                 List<Connection> edges = path.getEdgeList();
                 if (edges.size() > 0) {
-                    value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() -  trip.getPath().get(0).getEntryDate().getTime();
+                    value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
                 }
             }
         }
@@ -255,6 +330,34 @@ public class StatsActivity extends TopActivity {
         }
     }
 
+    private static RealmQuery<Trip> getTripsFor(Realm realm, int days) {
+        if (days == 0) {
+            return realm.where(Trip.class);
+        } else {
+            RealmResults<StationUse> uses = realm.where(StationUse.class)
+                    .greaterThan("entryDate", new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(days))).findAll().where()
+                    .equalTo("type", "NETWORK_ENTRY").or().equalTo("type", "VISIT").findAll();
+
+            // now we have all station uses that **might** be part of editable trips
+            // get all trips that contain these uses and which are yet to be confirmed
+            RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
+            if (uses.size() > 0) {
+                // first item detached from the others because otherwise "Missing left-hand side of OR" might happen
+                // https://github.com/realm/realm-java/issues/1014#issuecomment-107235374
+                tripsQuery = tripsQuery.equalTo("path.station.id", uses.get(0).getStation().getId()).equalTo("path.entryDate", uses.get(0).getEntryDate());
+                for (int i = 1; i < uses.size(); i++) {
+                    tripsQuery = tripsQuery.or().equalTo("path.station.id", uses.get(i).getStation().getId()).equalTo("path.entryDate", uses.get(i).getEntryDate());
+                }
+                return tripsQuery;
+            }
+            // realm is just terrible. not only is it hard to do a proper WHERE ... IN ... query, it's also hard to generate an empty result set.
+            // https://github.com/realm/realm-java/issues/1862
+            // https://github.com/realm/realm-java/issues/1575
+            // https://github.com/realm/realm-java/issues/4011
+            return tripsQuery.equalTo("id", "NEVER_BE_TRUE");
+        }
+    }
+
     private LocServiceConnection mConnection = new LocServiceConnection();
 
     private class LocServiceConnection implements ServiceConnection {
@@ -268,7 +371,7 @@ public class StatsActivity extends TopActivity {
             locService = binder.getService();
             locBound = true;
 
-            new UpdateStatsTask(stats, (TableLayout)findViewById(R.id.table_layout), getLayoutInflater()).execute();
+            new UpdateStatsTask(stats, (TableLayout) findViewById(R.id.table_layout), getLayoutInflater()).execute();
         }
 
         @Override
