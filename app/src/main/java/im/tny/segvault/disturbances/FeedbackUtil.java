@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import im.tny.segvault.disturbances.model.Feedback;
+import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
 

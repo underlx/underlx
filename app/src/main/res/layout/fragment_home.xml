@@ -6,7 +6,7 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     android:padding="8dp"
-    tools:context="im.tny.segvault.disturbances.HomeFragment">
+    tools:context="im.tny.segvault.disturbances.ui.fragment.top.HomeFragment">
 
     <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ongoing_trip_card"

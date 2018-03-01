@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="im.tny.segvault.disturbances.TripCorrectionActivity">
+    tools:context="im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -53,7 +53,7 @@
 
             <!-- :nextFocusUp and :nextFocusLeft have been set to the id of this component
             to prevent the dummy from receiving focus again -->
-            <im.tny.segvault.disturbances.StationPickerView
+            <im.tny.segvault.disturbances.ui.widget.StationPickerView
                 android:id="@+id/start_picker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
                     android:orientation="vertical"></LinearLayout>
             </LinearLayout>
 
-            <im.tny.segvault.disturbances.StationPickerView
+            <im.tny.segvault.disturbances.ui.widget.StationPickerView
                 android:id="@+id/end_picker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

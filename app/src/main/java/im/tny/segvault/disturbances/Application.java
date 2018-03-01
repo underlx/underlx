@@ -6,8 +6,8 @@ import com.evernote.android.job.JobManager;
 
 import java.util.Date;
 
+import im.tny.segvault.disturbances.ui.activity.TopActivity;
 import io.realm.DynamicRealm;
-import io.realm.FieldAttribute;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;

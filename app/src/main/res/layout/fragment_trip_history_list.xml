@@ -177,7 +177,7 @@
         android:layout_height="wrap_content"
         android:clipToPadding="false"
         app:layoutManager="LinearLayoutManager"
-        tools:context="im.tny.segvault.disturbances.DisturbanceFragment"
+        tools:context="im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment"
         tools:listitem="@layout/fragment_trip_history" />
 
     <TextView

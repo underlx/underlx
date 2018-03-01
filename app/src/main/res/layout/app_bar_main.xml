@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="im.tny.segvault.disturbances.MainActivity">
+    tools:context="im.tny.segvault.disturbances.ui.activity.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="im.tny.segvault.disturbances.MainActivity">
+        tools:context="im.tny.segvault.disturbances.ui.activity.MainActivity">
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/main_fragment_container"
@@ -42,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="im.tny.segvault.disturbances.MainActivity"></FrameLayout>
+        tools:context="im.tny.segvault.disturbances.ui.activity.MainActivity"></FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

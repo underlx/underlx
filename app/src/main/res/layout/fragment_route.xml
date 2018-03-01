@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="im.tny.segvault.disturbances.RouteFragment">
+    tools:context="im.tny.segvault.disturbances.ui.fragment.top.RouteFragment">
 
     <RelativeLayout
         android:id="@+id/bottom_sheet_layout"
@@ -73,7 +73,7 @@
 
                     <!-- :nextFocusUp and :nextFocusLeft have been set to the id of this component
                     to prevent the dummy from receiving focus again -->
-                    <im.tny.segvault.disturbances.StationPickerView
+                    <im.tny.segvault.disturbances.ui.widget.StationPickerView
                         android:id="@+id/origin_picker"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
                         android:nextFocusUp="@id/origin_picker"
                         app:hint="@string/frag_route_origin_station" />
 
-                    <im.tny.segvault.disturbances.StationPickerView
+                    <im.tny.segvault.disturbances.ui.widget.StationPickerView
                         android:id="@+id/destination_picker"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

@@ -12,7 +12,7 @@
         android:clipToPadding="false"
         android:padding="8dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="im.tny.segvault.disturbances.AnnouncementFragment"
+        tools:context="im.tny.segvault.disturbances.ui.fragment.top.AnnouncementFragment"
         tools:listitem="@layout/fragment_announcement" />
 
     <TextView

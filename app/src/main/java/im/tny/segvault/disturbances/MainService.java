@@ -47,6 +47,8 @@ import im.tny.segvault.disturbances.model.NotificationRule;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
 import im.tny.segvault.s2ls.OffNetworkState;
@@ -100,7 +102,7 @@ public class MainService extends Service {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        MainService getService() {
+        public MainService getService() {
             // Return this instance of MainService so clients can call public methods
             return MainService.this;
         }
@@ -487,7 +489,7 @@ public class MainService extends Service {
     }
 
     // DEBUG:
-    protected String dumpDebugInfo() {
+    public String dumpDebugInfo() {
         String s = "Service created on " + creationDate.toString();
         s += (wfc.isScanning() ? String.format(". WFC scanning every %d s", wfc.getScanInterval() / 1000) : ". WFC not scanning") + "\n";
         for (Network n : getNetworks()) {
