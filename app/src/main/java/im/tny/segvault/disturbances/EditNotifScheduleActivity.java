@@ -68,13 +68,12 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        realm = Realm.getDefaultInstance();
+        realm = Application.getDefaultRealmInstance(this);
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(final Realm realm) {
                 if (ruleId == null) {
-
                     rule = realm.createObject(NotificationRule.class, UUID.randomUUID().toString());
                 } else {
                     rule = realm.where(NotificationRule.class).equalTo("id", ruleId).findFirst();

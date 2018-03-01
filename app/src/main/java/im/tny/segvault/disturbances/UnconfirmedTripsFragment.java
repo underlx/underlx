@@ -122,7 +122,7 @@ public class UnconfirmedTripsFragment extends Fragment {
                 return false;
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : Trip.getMissingConfirmTrips(realm)) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
                 items.add(item);

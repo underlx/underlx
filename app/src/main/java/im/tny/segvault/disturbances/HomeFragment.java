@@ -214,7 +214,7 @@ public class HomeFragment extends TopFragment {
     }
 
     private void refresh(boolean requestOnlineUpdate) {
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(getContext());
         boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
         realm.close();
 

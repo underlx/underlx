@@ -147,7 +147,7 @@ public class FeedbackUtil {
             try {
                 String jsonResult = mapper.writerWithDefaultPrettyPrinter()
                         .writeValueAsString(map);
-                Realm realm = Realm.getDefaultInstance();
+                Realm realm = Application.getDefaultRealmInstance(context);
                 realm.beginTransaction();
                 Feedback feedback = realm.createObject(Feedback.class, UUID.randomUUID().toString());
                 feedback.setSynced(false);

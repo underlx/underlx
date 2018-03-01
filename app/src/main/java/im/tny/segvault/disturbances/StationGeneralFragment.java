@@ -256,7 +256,7 @@ public class StationGeneralFragment extends Fragment {
         }
 
         // Statistics
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(getContext());
         TextView statsEntryCountView = (TextView) view.findViewById(R.id.station_entry_count_view);
         long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
         statsEntryCountView.setText(String.format(getString(R.string.frag_station_stats_entry), entryCount));

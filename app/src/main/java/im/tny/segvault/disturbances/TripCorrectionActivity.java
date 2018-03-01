@@ -121,7 +121,7 @@ public class TripCorrectionActivity extends TopActivity {
     }
 
     private void populateUI() {
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(this);
         trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
         if (trip == null) {
             finish();

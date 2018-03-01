@@ -113,13 +113,7 @@ public class MainService extends Service {
     private void putNetwork(final Network net) {
         synchronized (lock) {
             // create Realm stations for the network if they don't exist already
-            Realm realm;
-            try {
-                realm = Realm.getDefaultInstance();
-            } catch (IllegalStateException e) {
-                Application.initRealm(getApplicationContext());
-                realm = Realm.getDefaultInstance();
-            }
+            Realm realm = Application.getDefaultRealmInstance(this);
 
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
@@ -169,7 +163,7 @@ public class MainService extends Service {
             checkForTopologyUpdates();
         }
 
-        realmForListeners = Realm.getDefaultInstance();
+        realmForListeners = Application.getDefaultRealmInstance(this);
         tripRealmResults = realmForListeners.where(Trip.class).findAll();
         tripRealmResults.addChangeListener(tripRealmChangeListener);
         feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
@@ -469,7 +463,7 @@ public class MainService extends Service {
     }
 
     public double getLeaveTrainFactorForStop(Stop stop) {
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(this);
         long entryCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
         long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
         // number of times user left at this stop to transfer to another line
@@ -846,7 +840,7 @@ public class MainService extends Service {
             return;
         }
 
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(this);
         for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
             if (rule.isEnabled() && rule.applies(new Date(msgtime))) {
                 realm.close();

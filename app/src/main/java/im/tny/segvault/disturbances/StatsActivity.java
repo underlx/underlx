@@ -112,7 +112,7 @@ public class StatsActivity extends TopActivity {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm = Application.getDefaultRealmInstance(StatsActivity.this);
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {

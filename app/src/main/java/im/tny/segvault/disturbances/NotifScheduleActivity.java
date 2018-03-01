@@ -68,7 +68,7 @@ public class NotifScheduleActivity extends TopActivity {
             }
         });
 
-        realmForListeners = Realm.getDefaultInstance();
+        realmForListeners = Application.getDefaultRealmInstance(this);
         results = realmForListeners.where(NotificationRule.class).findAll();
         results.addChangeListener(realmListener);
         new UpdateDataTask().execute();
@@ -77,7 +77,7 @@ public class NotifScheduleActivity extends TopActivity {
     private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
         @Override
         protected Boolean doInBackground(Void... voids) {
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm = Application.getDefaultRealmInstance(NotifScheduleActivity.this);
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {

@@ -37,6 +37,17 @@ public class Application extends android.app.Application {
         Realm.setDefaultConfiguration(config);
     }
 
+    public static Realm getDefaultRealmInstance(Context context) {
+        Realm realm;
+        try {
+            realm = Realm.getDefaultInstance();
+        } catch (IllegalStateException e) {
+            Application.initRealm(context);
+            realm = Realm.getDefaultInstance();
+        }
+        return realm;
+    }
+
     static class MyMigration implements RealmMigration {
         @Override
         public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {

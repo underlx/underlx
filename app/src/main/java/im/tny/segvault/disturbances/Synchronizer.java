@@ -56,7 +56,7 @@ public class Synchronizer {
                 // avoid looping on ACTION_TRIP_REALM_UPDATED broadcasts
                 return;
             }
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm = Application.getDefaultRealmInstance(context);
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {

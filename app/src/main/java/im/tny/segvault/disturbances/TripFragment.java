@@ -155,7 +155,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         if (network == null) {
             return;
         }
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(getContext());
         Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
 
         if(trip == null) {
@@ -350,7 +350,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     }
 
     private void deleteTrip() {
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(getContext());
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {

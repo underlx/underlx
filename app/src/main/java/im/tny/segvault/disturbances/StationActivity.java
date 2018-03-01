@@ -129,7 +129,7 @@ public class StationActivity extends TopActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.station, menu);
 
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = Application.getDefaultRealmInstance(this);
         RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
         boolean isFavorite = false;
         if (rstation != null) {
@@ -293,7 +293,7 @@ public class StationActivity extends TopActivity
                 }
                 return true;
             case R.id.menu_favorite:
-                Realm realm = Realm.getDefaultInstance();
+                Realm realm = Application.getDefaultRealmInstance(this);
                 realm.beginTransaction();
                 RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
                 boolean isFavorite = rstation.isFavorite();

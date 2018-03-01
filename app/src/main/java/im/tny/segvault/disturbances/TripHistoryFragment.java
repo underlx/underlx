@@ -58,7 +58,7 @@ public class TripHistoryFragment extends TopFragment {
     private boolean showVisits = false;
     private Menu menu;
 
-    private Realm realm = Realm.getDefaultInstance();
+    private Realm realm = Application.getDefaultRealmInstance(getContext());
 
     /**
      * Mandatory constructor for the fragment manager to instantiate the
@@ -201,7 +201,7 @@ public class TripHistoryFragment extends TopFragment {
                 }
             }
             Collection<Network> networks = mListener.getMainService().getNetworks();
-            Realm realm = Realm.getDefaultInstance();
+            Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : realm.where(Trip.class).findAll()) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
                 if(!item.isVisit) {
