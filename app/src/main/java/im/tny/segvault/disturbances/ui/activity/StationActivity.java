@@ -62,6 +62,8 @@ public class StationActivity extends TopActivity
 
     private String networkId;
     private String stationId;
+    private String lobbyId;
+    private float[] preselectedExitCoords;
 
     private float[] worldCoords;
 
@@ -78,6 +80,12 @@ public class StationActivity extends TopActivity
         if (savedInstanceState == null) {
             networkId = getIntent().getStringExtra(EXTRA_NETWORK_ID);
             stationId = getIntent().getStringExtra(EXTRA_STATION_ID);
+            lobbyId = getIntent().getStringExtra(EXTRA_LOBBY_ID);
+            if(getIntent().hasExtra(EXTRA_EXIT_COORD_LAT) && getIntent().hasExtra(EXTRA_EXIT_COORD_LONG)) {
+                preselectedExitCoords = new float[2];
+                preselectedExitCoords[0] = getIntent().getFloatExtra(EXTRA_EXIT_COORD_LAT, 0);
+                preselectedExitCoords[1] = getIntent().getFloatExtra(EXTRA_EXIT_COORD_LONG, 0);
+            }
         } else {
             networkId = savedInstanceState.getString(STATE_NETWORK_ID);
             stationId = savedInstanceState.getString(STATE_STATION_ID);
@@ -105,8 +113,11 @@ public class StationActivity extends TopActivity
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId));
+        pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId, lobbyId));
         tabLayout.setupWithViewPager(pager);
+        if(lobbyId != null && !lobbyId.isEmpty()) {
+            pager.setCurrentItem(1);
+        }
 
         bm = LocalBroadcastManager.getInstance(this);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +171,11 @@ public class StationActivity extends TopActivity
     @Override
     public MainService getMainService() {
         return locService;
+    }
+
+    @Override
+    public float[] getPreselectedExitCoords() {
+        return preselectedExitCoords;
     }
 
     class LocServiceConnection implements ServiceConnection {
@@ -327,13 +343,15 @@ public class StationActivity extends TopActivity
 
         private String networkId;
         private String stationId;
+        private String lobbyId;
         private Context context;
 
-        public StationPagerAdapter(FragmentManager fragmentManager, Context context, String networkId, String stationId) {
+        public StationPagerAdapter(FragmentManager fragmentManager, Context context, String networkId, String stationId, String lobbyId) {
             super(fragmentManager);
             this.context = context;
             this.networkId = networkId;
             this.stationId = stationId;
+            this.lobbyId = lobbyId;
         }
 
         @Override
@@ -387,6 +405,9 @@ public class StationActivity extends TopActivity
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    public static final String EXTRA_EXIT_COORD_LAT = "im.tny.segvault.disturbances.extra.StationActivity.exitcoord.lat";
+    public static final String EXTRA_EXIT_COORD_LONG = "im.tny.segvault.disturbances.extra.StationActivity.exitcoord.long";
+    public static final String EXTRA_LOBBY_ID = "im.tny.segvault.disturbances.extra.StationActivity.lobbyid";
     public static final String EXTRA_STATION_ID = "im.tny.segvault.disturbances.extra.StationActivity.stationid";
     public static final String EXTRA_NETWORK_ID = "im.tny.segvault.disturbances.extra.StationActivity.networkid";
 

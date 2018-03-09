@@ -1,4 +1,4 @@
-package im.tny.segvault.disturbances;
+package im.tny.segvault.disturbances.ui.widget;
 
 import android.content.Context;
 import android.graphics.Rect;

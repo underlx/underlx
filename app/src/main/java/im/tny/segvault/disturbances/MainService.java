@@ -66,6 +66,7 @@ import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
@@ -399,6 +400,16 @@ public class MainService extends Service {
             }
         }
         return lines;
+    }
+
+    public List<POI> getAllPOIs() {
+        List<POI> pois = new ArrayList<>();
+        synchronized (lock) {
+            for (Network n : networks.values()) {
+                pois.addAll(n.getPOIs());
+            }
+        }
+        return pois;
     }
 
     public LineStatusCache getLineStatusCache() {

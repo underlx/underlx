@@ -294,6 +294,13 @@
     <string name="act_stats_avg_speed_value">%.01f km/h</string>
     <string name="act_stats_avg_stations">Moyenne de stations</string>
     <string name="frag_trip_history_more_statistics">Plus de statistiques</string>
+    <string name="act_main_search_hint">Chercher les stations, rues, POIs…</string>
+    <string name="act_main_search">Chercher</string>
+    <string name="search_line_subtitle">Ligne du %s</string>
+    <string name="search_station_subtitle">Station du %s</string>
+    <string name="search_poi_subtitle">Point d\'intérêt</string>
+    <string name="search_exit_subtitle">Sortie de la station %s</string>
+    <string name="search_closed_exit_subtitle">Sortie fermée de la station %s</string>
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>
         <item>English</item>

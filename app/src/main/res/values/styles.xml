@@ -15,6 +15,10 @@
 
         <item name="viewMapButtonStyle">@style/AppTheme.ViewMapButton</item>
         <item name="android:navigationBarColor" tools:targetApi="21">@color/colorPrimary</item>
+
+        <item name="autoCompleteTextViewStyle">@style/myAutoCompleteTextViewStyle</item>
+        <item name="textAppearanceSearchResultTitle">@style/mySearchResultTitle</item>
+        <item name="textAppearanceSearchResultSubtitle">@style/mySearchResultSubtitle</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -29,6 +33,7 @@
     <style name="AppTheme.WhiteButton" parent="ThemeOverlay.AppCompat.Light">
         <item name="colorButtonNormal">@android:color/white</item>
     </style>
+
     <style name="AppTheme.ViewMapButton" parent="Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
@@ -43,6 +48,20 @@
         <item name="android:shadowDx">0</item>
         <item name="android:shadowRadius">8</item>
         <item name="android:shadowColor">@android:color/black</item>
+    </style>
+
+    <style name="myAutoCompleteTextViewStyle" parent="Widget.AppCompat.Light.AutoCompleteTextView">
+        <item name="android:popupBackground">#ffffff</item>
+    </style>
+
+    <style name="mySearchResultTitle" parent="TextAppearance.AppCompat.SearchResult.Subtitle">
+        <item name="android:textColor">#333333</item>
+        <item name="android:textSize">18dp</item>
+    </style>
+
+    <style name="mySearchResultSubtitle" parent="TextAppearance.AppCompat.SearchResult.Subtitle">
+        <item name="android:textColor">#444444</item>
+        <item name="android:textSize">14dp</item>
     </style>
 
 </resources>

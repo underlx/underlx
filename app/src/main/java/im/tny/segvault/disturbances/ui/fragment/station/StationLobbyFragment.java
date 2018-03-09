@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,14 +21,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import im.tny.segvault.disturbances.ui.widget.LobbyView;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.util.ScrollFixMapView;
+import im.tny.segvault.disturbances.ui.widget.LobbyView;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -191,6 +191,8 @@ public class StationLobbyFragment extends Fragment {
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
 
+        final float[] preselExitCoords = mListener.getPreselectedExitCoords();
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
@@ -214,12 +216,16 @@ public class StationLobbyFragment extends Fragment {
                         }
                         LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
                         builder.include(pos);
-                        googleMap.addMarker(new MarkerOptions()
+                        Marker marker = googleMap.addMarker(new MarkerOptions()
                                 .position(pos)
                                 .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
-                                .snippet(TextUtils.join(", ", exit.streets))
+                                .snippet(exit.getExitsString())
                                 .icon(Util.getBitmapDescriptorFromVector(getContext(), markerRes, lobbyColors[curLobbyColorIdx]))
                                 .alpha(alpha));
+                        if(preselExitCoords != null &&
+                                preselExitCoords[0] == exit.worldCoord[0] && preselExitCoords[1] == exit.worldCoord[1]) {
+                            marker.showInfoWindow();
+                        }
                     }
                     curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
                 }
@@ -244,6 +250,7 @@ public class StationLobbyFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         MainService getMainService();
+        float[] getPreselectedExitCoords();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

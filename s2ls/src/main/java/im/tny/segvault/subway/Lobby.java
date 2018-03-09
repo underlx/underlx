@@ -1,5 +1,7 @@
 package im.tny.segvault.subway;
 
+import android.text.TextUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -126,6 +128,10 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
             this.id = id;
             this.worldCoord = worldCoord;
             this.streets = streets;
+        }
+
+        public String getExitsString() {
+            return TextUtils.join(", ", streets);
         }
     }
 }

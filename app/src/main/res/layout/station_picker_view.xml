@@ -10,14 +10,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <im.tny.segvault.disturbances.InstantAutoComplete
+        <im.tny.segvault.disturbances.ui.widget.InstantAutoComplete
             android:id="@+id/text_station"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text|textNoSuggestions"
             android:maxLines="1">
 
-        </im.tny.segvault.disturbances.InstantAutoComplete>
+        </im.tny.segvault.disturbances.ui.widget.InstantAutoComplete>
 
 
     </android.support.design.widget.TextInputLayout>

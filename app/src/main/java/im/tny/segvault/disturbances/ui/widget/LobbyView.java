@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.text.style.ForegroundColorSpan;
@@ -134,7 +133,7 @@ public class LobbyView extends LinearLayout {
             LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             exitLayout.setLayoutParams(lp);
             TextView tv = new TextView(context);
-            tv.setText(TextUtils.join(", ", exit.streets));
+            tv.setText(exit.getExitsString());
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1);
             lp.gravity = Gravity.CENTER_VERTICAL;
             tv.setLayoutParams(lp);

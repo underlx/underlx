@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances.ui.activity;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,9 +24,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,7 +71,8 @@ import im.tny.segvault.subway.Station;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class MainActivity extends TopActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
+        implements SearchView.OnSuggestionListener,
+        NavigationView.OnNavigationItemSelectedListener,
         HomeFragment.OnFragmentInteractionListener,
         RouteFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener,
@@ -81,14 +86,16 @@ public class MainActivity extends TopActivity
         GeneralPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
         TripFragment.OnFragmentInteractionListener,
-        UnconfirmedTripsFragment.OnListFragmentInteractionListener {
+        UnconfirmedTripsFragment.OnListFragmentInteractionListener, SearchView.OnQueryTextListener {
 
-    MainService locService;
-    boolean locBound = false;
+    private MainService locService;
+    private boolean locBound = false;
 
-    NavigationView navigationView;
+    private NavigationView navigationView;
+    private MenuItem searchItem;
+    private SearchView searchView;
 
-    LocalBroadcastManager bm;
+    private LocalBroadcastManager bm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,7 +247,7 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
@@ -250,7 +257,36 @@ public class MainActivity extends TopActivity
             menu.findItem(R.id.menu_debug).setVisible(false);
         }
 
+        searchItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchItem.getActionView();
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnSuggestionListener(this);
+        searchView.setOnQueryTextListener(this);
+        // Detect SearchView open / close
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                setItemsVisibility(menu, searchItem, false);
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                invalidateOptionsMenu();
+                return true;
+            }
+        });
+
         return true;
+    }
+
+    private void setItemsVisibility(Menu menu, MenuItem exception, boolean visible) {
+        for (int i = 0; i < menu.size(); ++i) {
+            MenuItem item = menu.getItem(i);
+            if (item != exception) item.setVisible(visible);
+        }
     }
 
     private Fragment getNewFragment(int id) {
@@ -391,6 +427,14 @@ public class MainActivity extends TopActivity
 
     @Override
     public void onStationLinkClicked(String destination) {
+        onStationLinkClicked(destination, null);
+    }
+
+    public void onStationLinkClicked(String destination, String lobby) {
+        onStationLinkClicked(destination, lobby, null);
+    }
+
+    public void onStationLinkClicked(String destination, String lobby, String exit) {
         if (locService != null) {
             for (Network network : locService.getNetworks()) {
                 Station station;
@@ -398,6 +442,29 @@ public class MainActivity extends TopActivity
                     Intent intent = new Intent(this, StationActivity.class);
                     intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
                     intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
+                    if (lobby != null && !lobby.isEmpty()) {
+                        intent.putExtra(StationActivity.EXTRA_LOBBY_ID, lobby);
+                    }
+                    if (exit != null && !exit.isEmpty()) {
+                        String[] coordStr = exit.split(",");
+                        intent.putExtra(StationActivity.EXTRA_EXIT_COORD_LAT, Float.parseFloat(coordStr[0]));
+                        intent.putExtra(StationActivity.EXTRA_EXIT_COORD_LONG, Float.parseFloat(coordStr[1]));
+                    }
+                    startActivity(intent);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void onLineLinkClicked(String destination) {
+        if (locService != null) {
+            for (Network network : locService.getNetworks()) {
+                Line line;
+                if ((line = network.getLine(destination)) != null) {
+                    Intent intent = new Intent(this, LineActivity.class);
+                    intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
+                    intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
                     startActivity(intent);
                     return;
                 }
@@ -427,6 +494,17 @@ public class MainActivity extends TopActivity
      * Defines callbacks for service binding, passed to bindService()
      */
     private LocServiceConnection mConnection = new LocServiceConnection();
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        // make submit be a no-op, our results are the "suggestions"
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
 
     class LocServiceConnection implements ServiceConnection {
         MainService.LocalBinder binder;
@@ -575,6 +653,7 @@ public class MainActivity extends TopActivity
     }
 
     private String planRouteTo = null;
+
     @Override
     public String getRouteDestination() {
         String s = planRouteTo;
@@ -675,6 +754,48 @@ public class MainActivity extends TopActivity
             return null;
         }
         return locService.getLineStatusCache();
+    }
+
+    @Override
+    public boolean onSuggestionSelect(int position) {
+        return false;
+    }
+
+    @Override
+    public boolean onSuggestionClick(int position) {
+        Cursor cursor = (Cursor) searchView.getSuggestionsAdapter().getItem(position);
+        int intentDataColumn = cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA);
+        String intentData = cursor.getString(intentDataColumn);
+
+        String[] parts = intentData.split(":");
+        switch (parts[0]) {
+            case "station":
+                if (parts.length > 3 && parts[2].equals("lobby")) {
+                    if (parts.length > 5 && parts[4].equals("exit")) {
+                        onStationLinkClicked(parts[1], parts[3], parts[5]);
+                    } else {
+                        onStationLinkClicked(parts[1], parts[3]);
+                    }
+                } else {
+                    onStationLinkClicked(parts[1]);
+                }
+                break;
+            case "line":
+                onLineLinkClicked(parts[1]);
+                break;
+            case "poi":
+                // TODO
+                break;
+        }
+        searchView.setIconified(true);
+        searchView.clearFocus();
+        // call your request, do some stuff..
+
+        // collapse the action view
+        if (searchItem != null) {
+            searchItem.collapseActionView();
+        }
+        return true;
     }
 
     public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.mainservicebound";

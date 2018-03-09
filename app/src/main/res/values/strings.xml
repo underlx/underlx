@@ -308,6 +308,13 @@
     <string name="act_stats_avg_speed_value">%.01f km/h</string>
     <string name="act_stats_avg_stations">Average stations</string>
     <string name="frag_trip_history_more_statistics">More statistics</string>
+    <string name="act_main_search_hint">Search stations, streets, POIs…</string>
+    <string name="act_main_search">Search</string>
+    <string name="search_line_subtitle">%s line</string>
+    <string name="search_station_subtitle">%s station</string>
+    <string name="search_poi_subtitle">Point of interest</string>
+    <string name="search_exit_subtitle">Station %s exit</string>
+    <string name="search_closed_exit_subtitle">Closed exit of station %s</string>
     <string-array name="frag_settings_languages">
         <item>System default</item>
         <item>English</item>

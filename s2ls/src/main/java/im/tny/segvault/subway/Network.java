@@ -151,6 +151,10 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return pois.get(id);
     }
 
+    public Collection<POI> getPOIs() {
+        return pois.values();
+    }
+
     public void addPOI(POI poi) {
         pois.put(poi.getId(), poi);
     }
