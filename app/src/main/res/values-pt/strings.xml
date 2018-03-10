@@ -301,6 +301,46 @@
     <string name="search_poi_subtitle">Ponto de interesse</string>
     <string name="search_exit_subtitle">Saída da estação %s</string>
     <string name="search_closed_exit_subtitle">Saída encerrada da estação %s</string>
+    <string name="search_no_results">Sem resultados</string>
+    <string name="act_poi_webpage">Página na Internet</string>
+    <string name="act_poi_map">Ver mapa</string>
+    <string name="act_poi_access_stations">Estações de acesso</string>
+
+    <string name="poi_type_dinning">Restauração</string>
+    <string name="poi_type_police">Esquadra de polícia</string>
+    <string name="poi_type_fire_station">Quartel de bombeiros</string>
+    <string name="poi_type_sports">Desporto</string>
+    <string name="poi_type_school">Escola</string>
+    <string name="poi_type_university">Universidade</string>
+    <string name="poi_type_library">Biblioteca</string>
+    <string name="poi_type_airport">Aeroporto</string>
+    <string name="poi_type_embassy">Embaixada</string>
+    <string name="poi_type_church">Local de culto</string>
+    <string name="poi_type_business">Negócio</string>
+    <string name="poi_type_zoo">Jardim Zoológico</string>
+    <string name="poi_type_court">Tribunal</string>
+    <string name="poi_type_park">Parque</string>
+    <string name="poi_type_hospital">Hospital</string>
+    <string name="poi_type_monument">Monumento</string>
+    <string name="poi_type_museum">Museu</string>
+    <string name="poi_type_shopping_center">Centro comercial</string>
+    <string name="poi_type_health_center">Centro de saúde</string>
+    <string name="poi_type_bank">Banco</string>
+    <string name="poi_type_viewpoint">Miradouro</string>
+    <string name="poi_type_casino">Casino</string>
+    <string name="poi_type_theater">Teatro</string>
+    <string name="poi_type_show_room">Salão de exposições</string>
+    <string name="poi_type_organization">Organização</string>
+    <string name="poi_type_transportation_hub">Hub de transportes</string>
+    <string name="poi_type_public_space">Espaço público</string>
+    <string name="poi_type_government">Governo</string>
+    <string name="poi_type_market">Mercado</string>
+    <string name="poi_type_public_service">Serviço público</string>
+    <string name="poi_type_institute">Instituto</string>
+    <string name="poi_type_post_office">Correios</string>
+    <string name="poi_type_cemetery">Cemitério</string>
+    <string name="poi_type_hotel">Alojamento</string>
+
     <string-array name="frag_settings_languages">
         <item>Padrão do sistema</item>
         <item>English</item>

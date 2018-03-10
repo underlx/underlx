@@ -54,7 +54,7 @@ dependencies {
     compile 'uk.co.samuelwall:material-tap-target-prompt:2.6.0'
     ext.supportLibsVersion = "25.4.0"
     compile "com.android.support:appcompat-v7:$supportLibsVersion"
-    compile 'com.android.support:design:25.4.0'
+    compile "com.android.support:design:$supportLibsVersion"
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile "com.android.support:support-v4:$supportLibsVersion"
     compile "com.android.support:recyclerview-v7:$supportLibsVersion"
@@ -64,6 +64,7 @@ dependencies {
     compile 'com.code-troopers.betterpickers:library:3.1.0'
     compile "com.android.support:appcompat-v7:$supportLibsVersion"
     compile "com.android.support:preference-v7:$supportLibsVersion"
+    compile 'net.opacapp:multiline-collapsingtoolbar:1.5.0'
     testCompile 'junit:junit:4.12'
     debugCompile 'com.facebook.stetho:stetho:1.5.0'
     debugImplementation 'com.uphyca:stetho_realm:2.2.1'

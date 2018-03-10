@@ -192,7 +192,7 @@ public class TripCorrectionActivity extends TopActivity {
             hasChanges = true;
         }
 
-        TripFragment.populatePathView(this, getLayoutInflater(), network, newPath, pathLayout, false);
+        TripFragment.populatePathView(this, getLayoutInflater(), newPath, pathLayout, false);
 
         final ViewTreeObserver vto = pathLayout.getViewTreeObserver();
         if (vto.isAlive()) {

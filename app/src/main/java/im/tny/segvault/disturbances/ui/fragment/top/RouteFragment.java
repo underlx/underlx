@@ -326,7 +326,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                populateStationView(getActivity(), network, step.getStation(), view);
+                populateStationView(getActivity(), step.getStation(), view);
 
                 if (step.getStation().getLines().size() > 1) {
                     Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(line.getId()));
@@ -386,7 +386,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
 
-                populateStationView(getActivity(), network, lStep.getStation(), view);
+                populateStationView(getActivity(), lStep.getStation(), view);
 
                 Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(lStep.getTarget().getId()));
                 drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
@@ -439,7 +439,7 @@ public class RouteFragment extends TopFragment {
                 FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
 
-                populateStationView(getActivity(), network, step.getStation(), view);
+                populateStationView(getActivity(), step.getStation(), view);
             }
             layoutRoute.addView(view);
         }
@@ -447,7 +447,7 @@ public class RouteFragment extends TopFragment {
         if (layoutRoute.getChildCount() == 0) {
             View view = getActivity().getLayoutInflater().inflate(R.layout.step_already_there, layoutRoute, false);
 
-            populateStationView(getActivity(), network, originPicker.getSelection(), view);
+            populateStationView(getActivity(), originPicker.getSelection(), view);
 
             // TODO maybe revive this
             /*if (originPicker.getSelection().getLine().getUsualCarCount() < network.getUsualCarCount() ||
@@ -506,11 +506,11 @@ public class RouteFragment extends TopFragment {
         }
     }
 
-    public static void populateStationView(final Context context, final Network network, final Station station, View view, boolean showInfoIcons) {
+    public static void populateStationView(final Context context, final Station station, View view, boolean showInfoIcons) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
-        if(station.isExceptionallyClosed(network, new Date())) {
+        if(station.isExceptionallyClosed(station.getNetwork(), new Date())) {
             stationView.setTextColor(Color.GRAY);
         }
 
@@ -568,23 +568,23 @@ public class RouteFragment extends TopFragment {
                 if (context != null) {
                     Intent intent = new Intent(context, StationActivity.class);
                     intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
                     context.startActivity(intent);
                 }
             }
         });
     }
 
-    public static void populateStationView(final Context context, final Network network, final Station station, View view) {
-        populateStationView(context, network, station, view, true);
+    public static void populateStationView(final Context context, final Station station, View view) {
+        populateStationView(context, station, view, true);
     }
 
-    public static void populateStationView(final Context context, final Network network, final Stop stop, View view, boolean showInfoIcons) {
-        populateStationView(context, network, stop.getStation(), view, showInfoIcons);
+    public static void populateStationView(final Context context, final Stop stop, View view, boolean showInfoIcons) {
+        populateStationView(context, stop.getStation(), view, showInfoIcons);
     }
 
-    public static void populateStationView(final Context context, final Network network, final Stop stop, View view) {
-        populateStationView(context, network, stop.getStation(), view, true);
+    public static void populateStationView(final Context context, final Stop stop, View view) {
+        populateStationView(context, stop.getStation(), view, true);
     }
 
     @Override

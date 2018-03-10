@@ -88,6 +88,15 @@
                 android:value=".ui.activity.MainActivity" />
         </activity>
         <activity
+            android:name=".ui.activity.POIActivity"
+            android:label="@string/activity_loading_title"
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activity.MainActivity" />
+        </activity>
+        <activity
             android:name=".ui.activity.TripCorrectionActivity"
             android:label="@string/act_trip_correction_title"
             android:parentActivityName=".ui.activity.MainActivity"

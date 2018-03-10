@@ -472,6 +472,12 @@ public class MainActivity extends TopActivity
         }
     }
 
+    public void onPOILinkClicked(String destination) {
+        Intent intent = new Intent(this, POIActivity.class);
+        intent.putExtra(POIActivity.EXTRA_POI_ID, destination);
+        startActivity(intent);
+    }
+
     @Override
     public void onMailtoLinkClicked(String address) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -784,7 +790,7 @@ public class MainActivity extends TopActivity
                 onLineLinkClicked(parts[1]);
                 break;
             case "poi":
-                // TODO
+                onPOILinkClicked(parts[1]);
                 break;
         }
         searchView.setIconified(true);

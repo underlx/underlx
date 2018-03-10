@@ -412,6 +412,17 @@ public class MainService extends Service {
         return pois;
     }
 
+    public POI getPOI(String id) {
+        synchronized (lock) {
+            for (Network n : networks.values()) {
+                if(n.getPOI(id) != null) {
+                    return n.getPOI(id);
+                }
+            }
+        }
+        return null;
+    }
+
     public LineStatusCache getLineStatusCache() {
         return lineStatusCache;
     }

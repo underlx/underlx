@@ -173,7 +173,7 @@ public class LineActivity extends TopActivity {
                 closedLayout.setVisibility(View.GONE);
             }
 
-            populateLineView(LineActivity.this, getLayoutInflater(), net, line, lineLayout);
+            populateLineView(LineActivity.this, getLayoutInflater(), line, lineLayout);
         }
 
         @Override
@@ -196,7 +196,7 @@ public class LineActivity extends TopActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static void populateLineView(final Context context, final LayoutInflater inflater, final Network network, final Line line, ViewGroup root) {
+    public static void populateLineView(final Context context, final LayoutInflater inflater, final Line line, ViewGroup root) {
         root.removeAllViews();
 
         // TODO note: this doesn't work for circular lines
@@ -298,7 +298,7 @@ public class LineActivity extends TopActivity {
                 crossView.setVisibility(View.VISIBLE);
             }
 
-            RouteFragment.populateStationView(context, network, station, stepview);
+            RouteFragment.populateStationView(context, station, stepview);
             root.addView(stepview);
         }
     }

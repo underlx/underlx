@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.ui.activity.POIActivity;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Schedule;
@@ -72,6 +73,16 @@ public class POIView extends LinearLayout {
             secondNameView.setVisibility(VISIBLE);
             secondNameView.setText(names[1]);
         }
+        OnClickListener clickListener = new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), POIActivity.class);
+                intent.putExtra(POIActivity.EXTRA_POI_ID, poi.getId());
+                getContext().startActivity(intent);
+            }
+        };
+        nameView.setOnClickListener(clickListener);
+        secondNameView.setOnClickListener(clickListener);
 
         findViewById(R.id.poi_map_button).setOnClickListener(new OnClickListener() {
             @Override

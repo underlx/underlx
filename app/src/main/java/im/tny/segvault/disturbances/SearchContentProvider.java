@@ -9,23 +9,16 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.BaseColumns;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.text.TextUtils;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.xml.transform.Result;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
@@ -59,6 +52,7 @@ public class SearchContentProvider extends ContentProvider {
             SearchManager.SUGGEST_COLUMN_TEXT_1,
             SearchManager.SUGGEST_COLUMN_TEXT_2,
             SearchManager.SUGGEST_COLUMN_ICON_1,
+            SearchManager.SUGGEST_COLUMN_ICON_2,
             SearchManager.SUGGEST_COLUMN_INTENT_DATA
     };
 
@@ -103,7 +97,7 @@ public class SearchContentProvider extends ContentProvider {
             for (Lobby lobby : station.getLobbies()) {
                 if (lobby.getId().equals(query)) {
                     for (Lobby.Exit exit : lobby.getExits()) {
-                        results.add(buildResultRowForExit(station, lobby, exit, -5000));
+                        results.add(buildResultRowForExit(station, lobby, exit, -5000, null));
                     }
                     break;
                 }
@@ -113,7 +107,7 @@ public class SearchContentProvider extends ContentProvider {
                     for (String street : exit.streets) {
                         distance = getDistance(street, normalizedQuery);
                         if (distance < Double.MAX_VALUE) {
-                            results.add(buildResultRowForExit(station, lobby, exit, distance));
+                            results.add(buildResultRowForExit(station, lobby, exit, distance, street));
                             added = true;
                             break;
                         }
@@ -157,8 +151,9 @@ public class SearchContentProvider extends ContentProvider {
             if (distance < Double.MAX_VALUE) {
                 ResultRow row = new ResultRow();
                 row.title = poi.getNames(locale)[0];
-                row.subtitle = getContext().getString(R.string.search_poi_subtitle);
+                row.subtitle = String.format("%s \u2022 %s", getContext().getString(R.string.search_poi_subtitle), getContext().getString(Util.getStringResourceIdForPOIType(poi.getType())));
                 row.drawable = R.drawable.ic_place_black_24dp;
+                row.drawable2 = Util.getDrawableResourceIdForPOIType(poi.getType());
                 row.intentData = "poi:" + poi.getId();
                 row.distance = distance;
                 results.add(row);
@@ -174,6 +169,15 @@ public class SearchContentProvider extends ContentProvider {
             }
         });
 
+        if(results.size() == 0) {
+            ResultRow row = new ResultRow();
+            row.title = getContext().getString(R.string.search_no_results);
+            row.drawable = R.drawable.ic_sentiment_dissatisfied_black_24dp;
+            row.intentData = "no-results";
+            row.distance = 0;
+            results.add(row);
+        }
+
         MatrixCursor cursor = new MatrixCursor(columns);
 
         int i = 0;
@@ -182,6 +186,7 @@ public class SearchContentProvider extends ContentProvider {
                     row.title,
                     row.subtitle,
                     row.drawable,
+                    row.drawable2,
                     row.intentData};
             cursor.addRow(cursorRow);
         }
@@ -189,9 +194,17 @@ public class SearchContentProvider extends ContentProvider {
         return cursor;
     }
 
-    private ResultRow buildResultRowForExit(Station station, Lobby lobby, Lobby.Exit exit, double distance) {
+    private ResultRow buildResultRowForExit(Station station, Lobby lobby, Lobby.Exit exit, double distance, String matchStreet) {
         ResultRow row = new ResultRow();
-        row.title = exit.getExitsString();
+        if(matchStreet == null) {
+            row.title = exit.getExitsString();
+        } else {
+            // like exit.getExitsString() but always get our match first
+            List<String> otherStreets = new ArrayList<>(exit.streets);
+            otherStreets.remove(matchStreet);
+            otherStreets.add(0, matchStreet);
+            row.title = TextUtils.join(", ", otherStreets);
+        }
         row.subtitle = String.format(getContext().getString(R.string.search_exit_subtitle), station.getName());
         row.drawable = R.drawable.map_marker_exit;
         if (lobby.isAlwaysClosed()) {
@@ -212,6 +225,19 @@ public class SearchContentProvider extends ContentProvider {
             return -1000.0 + indexOf;
         }
 
+        String[] normWords = norm.split(" ");
+        for(String word : normWords) {
+            if (Math.min(normalizedQuery.length(), word.length()) < 3) {
+                continue;
+            }
+            word = word.substring(0, Math.min(normalizedQuery.length(), word.length()));
+
+            double distance = sift4.distance(word, normalizedQuery);
+            if (distance < 3.0) {
+                return distance;
+            }
+        }
+
         norm = norm.substring(0, Math.min(normalizedQuery.length(), norm.length()));
 
         double distance = sift4.distance(norm, normalizedQuery);
@@ -225,6 +251,7 @@ public class SearchContentProvider extends ContentProvider {
         String title;
         String subtitle;
         int drawable;
+        int drawable2;
         String intentData;
         double distance;
     }

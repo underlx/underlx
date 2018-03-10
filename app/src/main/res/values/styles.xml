@@ -64,4 +64,8 @@
         <item name="android:textSize">14dp</item>
     </style>
 
+    <style name="poiExpandedCollapsedToolbarLayoutTitle" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">24sp</item>
+    </style>
+
 </resources>
