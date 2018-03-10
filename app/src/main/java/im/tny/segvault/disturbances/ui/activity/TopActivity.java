@@ -58,7 +58,7 @@ public abstract class TopActivity extends AppCompatActivity {
             SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
             String localeString = sharedPref.getString(PreferenceNames.Locale, "auto");
             if(localeString.equals("auto")) {
-               currentLocale = null;
+               currentLocale = Resources.getSystem().getConfiguration().locale;
             } else {
                 String[] l = localeString.split("-");
                 currentLocale = new Locale(l[0], l[1]);
