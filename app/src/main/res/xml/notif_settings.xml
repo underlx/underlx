@@ -11,7 +11,7 @@
         <PreferenceScreen android:title="@string/frag_notif_schedule">
             <intent
                 android:action="android.intent.action.MAIN"
-                android:targetClass="im.tny.segvault.disturbances.NotifScheduleActivity"
+                android:targetClass="im.tny.segvault.disturbances.ui.activity.NotifScheduleActivity"
                 android:targetPackage="im.tny.segvault.disturbances" />
         </PreferenceScreen>
 
