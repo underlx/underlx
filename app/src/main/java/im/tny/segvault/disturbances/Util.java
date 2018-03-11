@@ -265,7 +265,7 @@ public class Util {
             case "government":
             case "public-service":
             case "post-office":
-                return Color.parseColor("#C64200");
+                return Color.parseColor("#AD9000");
 
             default:
                 return ContextCompat.getColor(context, R.color.colorPrimary);

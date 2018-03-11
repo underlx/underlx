@@ -20,9 +20,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Collections;
@@ -64,6 +67,8 @@ public class StationPOIFragment extends Fragment {
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
     private boolean mapLayoutReady = false;
+
+    private List<POI> pois;
 
     public StationPOIFragment() {
         // Required empty public constructor
@@ -184,7 +189,7 @@ public class StationPOIFragment extends Fragment {
         final String lang = l.getLanguage();
 
         // POIs
-        final List<POI> pois = station.getPOIs();
+        pois = station.getPOIs();
 
         Collections.sort(pois, new Comparator<POI>() {
             @Override
@@ -193,7 +198,7 @@ public class StationPOIFragment extends Fragment {
             }
         });
 
-        for (POI poi: pois) {
+        for (POI poi : pois) {
             POIView v = new POIView(getContext(), poi);
             poisLayout.addView(v);
         }
@@ -206,7 +211,7 @@ public class StationPOIFragment extends Fragment {
                 Color.parseColor("#E0A63A"),
                 Color.parseColor("#F15D2A")};
 
-        if(station.getLobbies().size() == 1) {
+        if (station.getLobbies().size() == 1) {
             lobbyColors[0] = Color.BLACK;
         }
 
@@ -263,16 +268,25 @@ public class StationPOIFragment extends Fragment {
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
 
-        for(POI poi: pois) {
+        for (POI poi : pois) {
             LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
             builder.include(pos);
-            googleMap.addMarker(new MarkerOptions().position(pos).title(poi.getNames(lang)[0]));
+            googleMap.addMarker(new MarkerOptions()
+                    .position(pos)
+                    .icon(getMarkerIcon(Util.getColorForPOIType(poi.getType(), getContext())))
+                    .title(poi.getNames(lang)[0]));
         }
 
         LatLngBounds bounds = builder.build();
         int padding = 64; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         googleMap.moveCamera(cu);
+    }
+
+    private BitmapDescriptor getMarkerIcon(int color) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        return BitmapDescriptorFactory.defaultMarker(hsv[0]);
     }
 
     /**
