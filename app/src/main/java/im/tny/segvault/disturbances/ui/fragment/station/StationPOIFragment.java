@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.ui.activity.POIActivity;
 import im.tny.segvault.disturbances.ui.widget.POIView;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -53,7 +54,8 @@ import im.tny.segvault.subway.Station;
  * Use the {@link StationPOIFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StationPOIFragment extends Fragment {
+public class StationPOIFragment extends Fragment
+        implements GoogleMap.OnInfoWindowClickListener {
     private static final String ARG_STATION_ID = "stationId";
     private static final String ARG_NETWORK_ID = "networkId";
 
@@ -277,6 +279,8 @@ public class StationPOIFragment extends Fragment {
                     .title(poi.getNames(lang)[0]));
         }
 
+        googleMap.setOnInfoWindowClickListener(this);
+
         LatLngBounds bounds = builder.build();
         int padding = 64; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
@@ -287,6 +291,19 @@ public class StationPOIFragment extends Fragment {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);
         return BitmapDescriptorFactory.defaultMarker(hsv[0]);
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        for (POI poi : pois) {
+            if(marker.getPosition().latitude == poi.getWorldCoord()[0] &&
+                    marker.getPosition().longitude == poi.getWorldCoord()[1]) {
+                Intent intent = new Intent(getContext(), POIActivity.class);
+                intent.putExtra(POIActivity.EXTRA_POI_ID, poi.getId());
+                getContext().startActivity(intent);
+                return;
+            }
+        }
     }
 
     /**
