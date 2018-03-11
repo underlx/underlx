@@ -38,6 +38,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
 
+import java.util.List;
+
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -53,6 +55,7 @@ public class POIActivity extends TopActivity {
 
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
+    private boolean mapLayoutReady = false;
 
     MainService mainService;
     boolean locBound = false;
@@ -263,14 +266,25 @@ public class POIActivity extends TopActivity {
                 }
             }
 
+            final ViewTreeObserver vto = mapView.getViewTreeObserver();
+            if (vto.isAlive()) {
+                vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    public void onGlobalLayout() {
+                        mapLayoutReady = true;
+                        trySetupMap(poi, names[0]);
+                        // remove the listener... or we'll be doing this a lot.
+                        ViewTreeObserver obs = mapView.getViewTreeObserver();
+                        obs.removeGlobalOnLayoutListener(this);
+                    }
+                });
+            }
+
             mapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(GoogleMap mMap) {
                     googleMap = mMap;
 
-                    LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
-                    googleMap.addMarker(new MarkerOptions().position(pos).title(names[0]));
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(pos.latitude, pos.longitude), 15.0f));
+                    trySetupMap(poi, names[0]);
                 }
             });
 
@@ -284,6 +298,16 @@ public class POIActivity extends TopActivity {
         public MainService.LocalBinder getBinder() {
             return binder;
         }
+    }
+
+    private void trySetupMap(final POI poi, final String name) {
+        if (googleMap == null || !mapLayoutReady) {
+            return;
+        }
+
+        LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
+        googleMap.addMarker(new MarkerOptions().position(pos).title(name));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(pos.latitude, pos.longitude), 15.0f));
     }
 
     @Override

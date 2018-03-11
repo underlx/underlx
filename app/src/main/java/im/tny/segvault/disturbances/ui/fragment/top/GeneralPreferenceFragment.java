@@ -10,8 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import net.xpece.android.support.preference.ListPreference;
-
 import android.support.v7.preference.XpPreferenceFragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,11 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import net.xpece.android.support.preference.ListPreference;
+
+import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
-import im.tny.segvault.disturbances.ui.activity.TopActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 
 public class GeneralPreferenceFragment extends XpPreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -55,7 +55,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     }
 
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
-        TopActivity.initializeLocale(getContext());
+        LocaleUtil.initializeLocale(getContext());
         getPreferenceManager().setSharedPreferencesName("settings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 
@@ -102,7 +102,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
             }
         } else if (key.equals(PreferenceNames.Locale)) {
             updateLanguagePreferenceSummary();
-            TopActivity.flagLocaleNeedsReloading();
+            LocaleUtil.flagLocaleNeedsReloading();
             getActivity().recreate();
         }
     }

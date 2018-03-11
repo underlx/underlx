@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -62,6 +63,7 @@ public class StationPOIFragment extends Fragment {
 
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
+    private boolean mapLayoutReady = false;
 
     public StationPOIFragment() {
         // Required empty public constructor
@@ -96,6 +98,7 @@ public class StationPOIFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mapLayoutReady = false;
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_station_poi, container, false);
 
@@ -207,48 +210,69 @@ public class StationPOIFragment extends Fragment {
             lobbyColors[0] = Color.BLACK;
         }
 
+        final ViewTreeObserver vto = mapView.getViewTreeObserver();
+        if (vto.isAlive()) {
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                public void onGlobalLayout() {
+                    mapLayoutReady = true;
+                    trySetupMap(station, pois, lobbyColors, lang);
+                    // remove the listener... or we'll be doing this a lot.
+                    ViewTreeObserver obs = mapView.getViewTreeObserver();
+                    obs.removeGlobalOnLayoutListener(this);
+                }
+            });
+        }
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
                 googleMap = mMap;
 
-                if (!station.getFeatures().train) {
-                    googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    getContext(), R.raw.no_train_stations_map_style));
-                }
-
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-                int curLobbyColorIdx = 0;
-                for (Lobby lobby : station.getLobbies()) {
-                    if (lobby.isAlwaysClosed()) {
-                        continue;
-                    }
-                    for (Lobby.Exit exit : lobby.getExits()) {
-                        LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
-                        builder.include(pos);
-                        googleMap.addMarker(new MarkerOptions()
-                                .position(pos)
-                                .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
-                                .snippet(TextUtils.join(", ", exit.streets))
-                                .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
-                    }
-                    curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
-                }
-
-                for(POI poi: pois) {
-                    LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
-                    builder.include(pos);
-                    googleMap.addMarker(new MarkerOptions().position(pos).title(poi.getNames(lang)[0]));
-                }
-
-                LatLngBounds bounds = builder.build();
-                int padding = 64; // offset from edges of the map in pixels
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                googleMap.moveCamera(cu);
+                trySetupMap(station, pois, lobbyColors, lang);
             }
         });
+    }
+
+    private void trySetupMap(final Station station, final List<POI> pois, final int[] lobbyColors, final String lang) {
+        if (googleMap == null || !mapLayoutReady) {
+            return;
+        }
+
+        if (!station.getFeatures().train) {
+            googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.no_train_stations_map_style));
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        int curLobbyColorIdx = 0;
+        for (Lobby lobby : station.getLobbies()) {
+            if (lobby.isAlwaysClosed()) {
+                continue;
+            }
+            for (Lobby.Exit exit : lobby.getExits()) {
+                LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
+                builder.include(pos);
+                googleMap.addMarker(new MarkerOptions()
+                        .position(pos)
+                        .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
+                        .snippet(TextUtils.join(", ", exit.streets))
+                        .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
+            }
+            curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
+        }
+
+        for(POI poi: pois) {
+            LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
+            builder.include(pos);
+            googleMap.addMarker(new MarkerOptions().position(pos).title(poi.getNames(lang)[0]));
+        }
+
+        LatLngBounds bounds = builder.build();
+        int padding = 64; // offset from edges of the map in pixels
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        googleMap.moveCamera(cu);
     }
 
     /**

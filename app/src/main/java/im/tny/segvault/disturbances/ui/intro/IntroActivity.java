@@ -19,11 +19,11 @@ import com.github.paolorotolo.appintro.AppIntro2;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 import com.github.paolorotolo.appintro.model.SliderPage;
 
-import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.activity.TopActivity;
+import im.tny.segvault.disturbances.ui.activity.MainActivity;
 
 /**
  * Created by Gabriel on 27/07/2017.
@@ -39,7 +39,7 @@ public class IntroActivity extends AppIntro2 implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TopActivity.initializeLocale(this);
+        LocaleUtil.initializeLocale(this);
 
         Object conn = getLastCustomNonConfigurationInstance();
         if (conn != null) {

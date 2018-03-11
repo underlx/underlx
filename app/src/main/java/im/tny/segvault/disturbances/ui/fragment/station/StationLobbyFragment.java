@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -56,6 +57,7 @@ public class StationLobbyFragment extends Fragment {
 
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
+    private boolean mapLayoutReady = false;
 
     public StationLobbyFragment() {
         // Required empty public constructor
@@ -90,6 +92,7 @@ public class StationLobbyFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mapLayoutReady = false;
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_station_lobby, container, false);
 
@@ -193,49 +196,69 @@ public class StationLobbyFragment extends Fragment {
 
         final float[] preselExitCoords = mListener.getPreselectedExitCoords();
 
+        final ViewTreeObserver vto = mapView.getViewTreeObserver();
+        if (vto.isAlive()) {
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                public void onGlobalLayout() {
+                    mapLayoutReady = true;
+                    trySetupMap(station, lobbyColors, preselExitCoords);
+                    // remove the listener... or we'll be doing this a lot.
+                    ViewTreeObserver obs = mapView.getViewTreeObserver();
+                    obs.removeGlobalOnLayoutListener(this);
+                }
+            });
+        }
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
                 googleMap = mMap;
 
-                if (!station.getFeatures().train) {
-                    googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    getContext(), R.raw.no_train_stations_map_style));
-                }
-
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                int curLobbyColorIdx = 0;
-                for (Lobby lobby : station.getLobbies()) {
-                    for (Lobby.Exit exit : lobby.getExits()) {
-                        int markerRes = R.drawable.map_marker_exit;
-                        float alpha = 1;
-                        if (lobby.isAlwaysClosed()) {
-                            markerRes = R.drawable.map_marker_exit_closed;
-                            alpha = 0.5f;
-                        }
-                        LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
-                        builder.include(pos);
-                        Marker marker = googleMap.addMarker(new MarkerOptions()
-                                .position(pos)
-                                .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
-                                .snippet(exit.getExitsString())
-                                .icon(Util.getBitmapDescriptorFromVector(getContext(), markerRes, lobbyColors[curLobbyColorIdx]))
-                                .alpha(alpha));
-                        if(preselExitCoords != null &&
-                                preselExitCoords[0] == exit.worldCoord[0] && preselExitCoords[1] == exit.worldCoord[1]) {
-                            marker.showInfoWindow();
-                        }
-                    }
-                    curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
-                }
-
-                LatLngBounds bounds = builder.build();
-                int padding = 100; // offset from edges of the map in pixels
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                googleMap.moveCamera(cu);
+                trySetupMap(station, lobbyColors, preselExitCoords);
             }
         });
+    }
+
+    private void trySetupMap(final Station station, final int[] lobbyColors, final float[] preselExitCoords) {
+        if (googleMap == null || !mapLayoutReady) {
+            return;
+        }
+        if (!station.getFeatures().train) {
+            googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.no_train_stations_map_style));
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        int curLobbyColorIdx = 0;
+        for (Lobby lobby : station.getLobbies()) {
+            for (Lobby.Exit exit : lobby.getExits()) {
+                int markerRes = R.drawable.map_marker_exit;
+                float alpha = 1;
+                if (lobby.isAlwaysClosed()) {
+                    markerRes = R.drawable.map_marker_exit_closed;
+                    alpha = 0.5f;
+                }
+                LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
+                builder.include(pos);
+                Marker marker = googleMap.addMarker(new MarkerOptions()
+                        .position(pos)
+                        .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
+                        .snippet(exit.getExitsString())
+                        .icon(Util.getBitmapDescriptorFromVector(getContext(), markerRes, lobbyColors[curLobbyColorIdx]))
+                        .alpha(alpha));
+                if (preselExitCoords != null &&
+                        preselExitCoords[0] == exit.worldCoord[0] && preselExitCoords[1] == exit.worldCoord[1]) {
+                    marker.showInfoWindow();
+                }
+            }
+            curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
+        }
+
+        LatLngBounds bounds = builder.build();
+        int padding = 100; // offset from edges of the map in pixels
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        googleMap.moveCamera(cu);
     }
 
     /**
@@ -250,6 +273,7 @@ public class StationLobbyFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         MainService getMainService();
+
         float[] getPreselectedExitCoords();
     }
 

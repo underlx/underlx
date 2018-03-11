@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.Announcement;
+import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
-import im.tny.segvault.disturbances.ui.activity.TopActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -83,7 +83,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
 
     @Override
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
-        TopActivity.initializeLocale(getContext());
+        LocaleUtil.initializeLocale(getContext());
         getPreferenceManager().setSharedPreferencesName("notifsettings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 

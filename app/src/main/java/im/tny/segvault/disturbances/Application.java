@@ -6,7 +6,6 @@ import com.evernote.android.job.JobManager;
 
 import java.util.Date;
 
-import im.tny.segvault.disturbances.ui.activity.TopActivity;
 import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -21,7 +20,7 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        TopActivity.initializeLocale(getApplicationContext());
+        LocaleUtil.initializeLocale(getApplicationContext());
         StethoUtils.install(this);
         initRealm(this);
         JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());
@@ -30,7 +29,7 @@ public class Application extends android.app.Application {
     @Override
     public Context getApplicationContext() {
         Context context = super.getApplicationContext();
-        TopActivity.initializeLocale(context);
+        LocaleUtil.initializeLocale(context);
         return context;
     }
 
