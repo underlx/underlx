@@ -19,7 +19,7 @@ android {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 53
+        versionCode 54
         versionName '0.31'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
