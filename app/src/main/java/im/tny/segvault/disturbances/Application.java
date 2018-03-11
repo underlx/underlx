@@ -27,6 +27,13 @@ public class Application extends android.app.Application {
         JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());
     }
 
+    @Override
+    public Context getApplicationContext() {
+        Context context = super.getApplicationContext();
+        TopActivity.initializeLocale(context);
+        return context;
+    }
+
     public static void initRealm(Context context) {
         // Initialize Realm. Should only be done once when the application starts.
         Realm.init(context);
