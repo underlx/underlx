@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,11 +28,14 @@ import java.util.Date;
 import java.util.List;
 
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.StatsCache;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A fragment representing a list of Items.
@@ -149,10 +153,17 @@ public class HomeStatsFragment extends Fragment {
         lastDisturbance.set(Calendar.SECOND, 0);
         lastDisturbance.set(Calendar.MILLISECOND, 0);
 
-        if(stats.curOnInTransit == 0) {
-            usersOnlineView.setText(R.string.frag_stats_few_users_in_network);
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
+        if(locationEnabled) {
+            if (stats.curOnInTransit == 0) {
+                usersOnlineView.setText(R.string.frag_stats_few_users_in_network);
+            } else {
+                usersOnlineView.setText(String.format(getString(R.string.frag_stats_users_in_network), stats.curOnInTransit));
+            }
+            usersOnlineView.setVisibility(View.VISIBLE);
         } else {
-            usersOnlineView.setText(String.format(getString(R.string.frag_stats_users_in_network), stats.curOnInTransit));
+            usersOnlineView.setVisibility(View.GONE);
         }
 
         long days = (today.getTime().getTime() - lastDisturbance.getTime().getTime()) / (24 * 60 * 60 * 1000);
