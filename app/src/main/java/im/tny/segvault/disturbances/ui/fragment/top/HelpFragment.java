@@ -1,12 +1,15 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spanned;
 import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
@@ -25,7 +28,7 @@ public class HelpFragment extends TopFragment {
     private static final String ARG_PAGE = "page";
     private OnFragmentInteractionListener mListener;
 
-    private HtmlTextView htmltv;
+    private View rootView;
 
     public HelpFragment() {
         // Required empty public constructor
@@ -56,9 +59,7 @@ public class HelpFragment extends TopFragment {
                              Bundle savedInstanceState) {
         setUpActivity(getString(R.string.frag_help_title), R.id.nav_help, false, false);
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_help, container, false);
-
-        htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
+        rootView = inflater.inflate(R.layout.fragment_help, container, false);
 
         if (getArguments() != null && getArguments().containsKey(ARG_PAGE)) {
             setHtmlFromHelpFile(getArguments().getString(ARG_PAGE));
@@ -66,7 +67,7 @@ public class HelpFragment extends TopFragment {
             setHtmlFromHelpFile("index");
         }
 
-        return view;
+        return rootView;
     }
 
     @Override
@@ -87,24 +88,68 @@ public class HelpFragment extends TopFragment {
     }
 
     private void setHtmlFromHelpFile(String file) {
-        htmltv.setHtml(getHelpFileContents(file));
-        htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new RichTextUtils.ClickSpan.OnClickListener() {
-            @Override
-            public void onClick(String url) {
-                if(mListener == null) {
-                    return;
+        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout);
+        linearLayout.removeAllViews();
+
+        String[] contents = getHelpFileContents(file).split("<contactlinks/>");
+
+        for(int i = 0; i < contents.length; i++) {
+            HtmlTextView htmltv = new HtmlTextView(getContext());
+            htmltv.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            htmltv.setTextAppearance(getContext(), android.R.style.TextAppearance_Medium);
+            linearLayout.addView(htmltv);
+
+            htmltv.setHtml(contents[i]);
+            htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new RichTextUtils.ClickSpan.OnClickListener() {
+                @Override
+                public void onClick(String url) {
+                    if (mListener == null) {
+                        return;
+                    }
+                    if (url.startsWith("help:")) {
+                        mListener.onHelpLinkClicked(url.substring(5));
+                    } else if (url.startsWith("station:")) {
+                        mListener.onStationLinkClicked(url.substring(8));
+                    } else if (url.startsWith("mailto:")) {
+                        mListener.onMailtoLinkClicked(url.substring(7));
+                    } else {
+                        mListener.onLinkClicked(url);
+                    }
                 }
-                if (url.startsWith("help:")) {
-                    mListener.onHelpLinkClicked(url.substring(5));
-                } else if (url.startsWith("station:")) {
-                    mListener.onStationLinkClicked(url.substring(8));
-                } else if (url.startsWith("mailto:")) {
-                    mListener.onMailtoLinkClicked(url.substring(7));
-                } else {
-                    mListener.onLinkClicked(url);
-                }
+            }));
+
+            if(contents.length > 1 && i < contents.length - 1) {
+                View view = getLayoutInflater().inflate(R.layout.help_contactlinks_view, linearLayout, true);
+                view.findViewById(R.id.facebook_button).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.facebook_project_url)));
+                        startActivity(browserIntent);
+                    }
+                });
+                view.findViewById(R.id.twitter_button).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.twitter_project_url)));
+                        startActivity(browserIntent);
+                    }
+                });
+                view.findViewById(R.id.discord_button).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.discord_server_url)));
+                        startActivity(browserIntent);
+                    }
+                });
+                view.findViewById(R.id.github_button).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_project_url)));
+                        startActivity(browserIntent);
+                    }
+                });
             }
-        }));
+        }
     }
 
     private String getPathForHelpFile(String file) {
