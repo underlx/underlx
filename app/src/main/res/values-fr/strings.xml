@@ -9,10 +9,10 @@
     <string name="update_topology_success">Plan du réseau mis à jour</string>
     <string name="dataset_info_authors">Développeurs</string>
     <string name="dataset_info_update">Mettre à jour</string>
-    <string name="frag_about_copyright">Copyright © Segvault 2017-2018</string>
+    <string name="frag_about_copyright">Copyright © 2017–2018 L\'équipe UnderLX\nEn partenariat avec le groupe Segvault</string>
     <string name="frag_about_datasets">Plans du réseau</string>
     <string name="frag_about_disclaimer">Cette application et le service associé n\'ont pas de connexion à Metropolitano de Lisboa, E.P.E.\nCe n\'est pas possible de garantir la correction de l\'information fournie.</string>
-    <string name="frag_about_thanks">Communauté portugaise du SkyscraperCity\nbrazanet - travail de terrain, contenu informatif et groupe sur Discord\nJaime Silva - image du volet de navigation</string>
+    <string name="frag_about_thanks">Communauté portugaise du SkyscraperCity\nkidrauhl - traduction de l\'interface\nJaime Silva - image du volet de navigation</string>
     <string name="frag_about_thanks_title">Remerciements</string>
     <string name="frag_about_thirdparty">Composants inclus</string>
     <string name="frag_about_title">Sur UnderLX</string>
@@ -150,7 +150,7 @@
     <string name="cache_extras_success">Contenu additionnel téléchargé</string>
     <string name="cache_extras_failure">Erreur lors de l\'obtention du contenu additionnel</string>
     <string name="cache_extras_progress">En obtenant le contenu additionnel %d%%</string>
-    <string name="dataset_info_cache_all_extras">Télécharger contenu additionnel</string>
+    <string name="dataset_info_cache_all_extras">Télécharger du contenu additionnel</string>
     <string name="notif_route_end_trip">Terminer trajet</string>
     <string name="frag_home_end_trip">Terminer trajet</string>
     <string name="act_trip_correction_start_station">Station de départ</string>

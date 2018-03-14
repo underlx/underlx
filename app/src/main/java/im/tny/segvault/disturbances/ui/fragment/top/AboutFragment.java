@@ -157,6 +157,12 @@ public class AboutFragment extends TopFragment {
         pickers.put("url", "https://github.com/code-troopers/android-betterpickers");
         data.add(pickers);
 
+        Map<String, String> mlct = new HashMap<>(3);
+        mlct.put("name", "multiline-collapsingtoolbar");
+        mlct.put("license", "© Johan von Forstner, Raphael Michel - Apache License 2.0");
+        mlct.put("url", "https://github.com/opacapp/multiline-collapsingtoolbar");
+        data.add(mlct);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
