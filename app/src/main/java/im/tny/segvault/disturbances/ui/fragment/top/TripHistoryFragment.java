@@ -250,18 +250,23 @@ public class TripHistoryFragment extends TopFragment {
                 tripTotalTimeView.setText(String.format(getString(R.string.frag_trip_history_duration_with_days), days, hours, minutes));
             }
             tripAverageSpeedView.setText("--");
-            if (result && recyclerView != null && mListener != null) {
+            if(recyclerView != null && mListener != null) {
                 recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
-                emptyView.setVisibility(View.GONE);
+                if (result) {
+                    emptyView.setVisibility(View.GONE);
 
-                if (tripTotalMovementTime > 0) {
-                    tripAverageSpeedView.setText(String.format(getString(R.string.frag_trip_history_speed_value),
-                            ((double) tripTotalTimeableLength / (double) (tripTotalMovementTime / 1000)) * 3.6));
+                    if (tripTotalMovementTime > 0) {
+                        tripAverageSpeedView.setText(String.format(getString(R.string.frag_trip_history_speed_value),
+                                ((double) tripTotalTimeableLength / (double) (tripTotalMovementTime / 1000)) * 3.6));
+                    }
+                } else {
+                    emptyView.setVisibility(View.VISIBLE);
                 }
             } else {
                 emptyView.setVisibility(View.VISIBLE);
             }
+
         }
     }
 
