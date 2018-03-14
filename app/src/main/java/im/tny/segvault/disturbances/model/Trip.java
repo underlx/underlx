@@ -269,9 +269,10 @@ public class Trip extends RealmObject {
             trip.setUserConfirmed(false);
         }
         trip.setPath(uses);
+        String tripId = trip.getId();
         realm.commitTransaction();
         realm.close();
-        return trip.getId();
+        return tripId;
     }
 
     public static void confirm(final String id) {

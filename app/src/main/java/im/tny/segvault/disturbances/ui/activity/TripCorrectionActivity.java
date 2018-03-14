@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +23,7 @@ import java.util.List;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.disturbances.ui.fragment.TripFragment;
 import im.tny.segvault.disturbances.model.StationUse;
@@ -49,6 +51,7 @@ public class TripCorrectionActivity extends TopActivity {
     private LinearLayout pathLayout;
     private LinearLayout buttonsLayout;
     private Button saveButton;
+    private MenuItem saveMenuItem;
 
     private Trip trip;
     private Path originalPath;
@@ -108,6 +111,7 @@ public class TripCorrectionActivity extends TopActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.trip_correction, menu);
+        saveMenuItem = menu.findItem(R.id.menu_save);
         return true;
     }
 
@@ -292,8 +296,32 @@ public class TripCorrectionActivity extends TopActivity {
     }
 
     private void saveChanges() {
-        Trip.persistConnectionPath(newPath, tripId);
-        finish();
+        new SaveChangesTask().execute();
+    }
+
+    private class SaveChangesTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            saveButton.setEnabled(false);
+            saveMenuItem.setEnabled(false);
+            Util.setViewAndChildrenEnabled(buttonsLayout, false);
+            Util.setViewAndChildrenEnabled(startPicker, false);
+            Util.setViewAndChildrenEnabled(endPicker, false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Trip.persistConnectionPath(newPath, tripId);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void nothing) {
+            super.onPostExecute(nothing);
+
+            finish();
+        }
     }
 
     private LocServiceConnection mConnection = new LocServiceConnection();
