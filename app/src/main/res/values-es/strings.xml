@@ -123,7 +123,7 @@
     <string name="frag_map_zoom_out">Reducir</string>
     <string name="frag_map_zoom_in">Ampliar</string>
     <string name="act_station_tab_general">General</string>
-    <string name="act_station_tab_lobbies">Salidas y horarios</string>
+    <string name="act_station_tab_lobbies">Accesos</string>
     <string name="act_station_tab_trivia">Trivia</string>
     <string name="frag_settings_location_title">Ubicación</string>
     <string name="frag_settings_background_location">Situar en segundo plano</string>
