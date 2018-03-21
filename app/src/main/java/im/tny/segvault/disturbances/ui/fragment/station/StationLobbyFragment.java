@@ -192,14 +192,14 @@ public class StationLobbyFragment extends Fragment {
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
 
-        final float[] preselExitCoords = mListener.getPreselectedExitCoords();
+        final int preselExit = mListener.getPreselectedExitId();
 
         final ViewTreeObserver vto = mapView.getViewTreeObserver();
         if (vto.isAlive()) {
             vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 public void onGlobalLayout() {
                     mapLayoutReady = true;
-                    trySetupMap(station, lobbyColors, preselExitCoords);
+                    trySetupMap(station, lobbyColors, preselExit);
                     // remove the listener... or we'll be doing this a lot.
                     ViewTreeObserver obs = mapView.getViewTreeObserver();
                     obs.removeGlobalOnLayoutListener(this);
@@ -212,12 +212,12 @@ public class StationLobbyFragment extends Fragment {
             public void onMapReady(GoogleMap mMap) {
                 googleMap = mMap;
 
-                trySetupMap(station, lobbyColors, preselExitCoords);
+                trySetupMap(station, lobbyColors, preselExit);
             }
         });
     }
 
-    private void trySetupMap(final Station station, final int[] lobbyColors, final float[] preselExitCoords) {
+    private void trySetupMap(final Station station, final int[] lobbyColors, final int preselExit) {
         if (googleMap == null || !mapLayoutReady) {
             return;
         }
@@ -245,8 +245,7 @@ public class StationLobbyFragment extends Fragment {
                         .snippet(exit.getExitsString())
                         .icon(Util.getBitmapDescriptorFromVector(getContext(), markerRes, lobbyColors[curLobbyColorIdx]))
                         .alpha(alpha));
-                if (preselExitCoords != null &&
-                        preselExitCoords[0] == exit.worldCoord[0] && preselExitCoords[1] == exit.worldCoord[1]) {
+                if (exit.id == preselExit) {
                     marker.showInfoWindow();
                 }
             }
@@ -282,7 +281,7 @@ public class StationLobbyFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         MainService getMainService();
 
-        float[] getPreselectedExitCoords();
+        int getPreselectedExitId();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

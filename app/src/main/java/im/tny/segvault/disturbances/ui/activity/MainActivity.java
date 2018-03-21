@@ -446,9 +446,7 @@ public class MainActivity extends TopActivity
                         intent.putExtra(StationActivity.EXTRA_LOBBY_ID, lobby);
                     }
                     if (exit != null && !exit.isEmpty()) {
-                        String[] coordStr = exit.split(",");
-                        intent.putExtra(StationActivity.EXTRA_EXIT_COORD_LAT, Float.parseFloat(coordStr[0]));
-                        intent.putExtra(StationActivity.EXTRA_EXIT_COORD_LONG, Float.parseFloat(coordStr[1]));
+                        intent.putExtra(StationActivity.EXTRA_EXIT_ID, Integer.parseInt(exit));
                     }
                     startActivity(intent);
                     return;

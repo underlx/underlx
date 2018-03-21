@@ -306,6 +306,7 @@
     <string name="act_poi_webpage">Página na Internet</string>
     <string name="act_poi_map">Ver mapa</string>
     <string name="act_poi_access_stations">Estações de acesso</string>
+    <string name="frag_map_action_more">Toque para ver mais</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

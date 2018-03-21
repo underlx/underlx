@@ -63,7 +63,7 @@ public class StationActivity extends TopActivity
     private String networkId;
     private String stationId;
     private String lobbyId;
-    private float[] preselectedExitCoords;
+    private int exitId = -1;
 
     private float[] worldCoords;
 
@@ -81,11 +81,7 @@ public class StationActivity extends TopActivity
             networkId = getIntent().getStringExtra(EXTRA_NETWORK_ID);
             stationId = getIntent().getStringExtra(EXTRA_STATION_ID);
             lobbyId = getIntent().getStringExtra(EXTRA_LOBBY_ID);
-            if(getIntent().hasExtra(EXTRA_EXIT_COORD_LAT) && getIntent().hasExtra(EXTRA_EXIT_COORD_LONG)) {
-                preselectedExitCoords = new float[2];
-                preselectedExitCoords[0] = getIntent().getFloatExtra(EXTRA_EXIT_COORD_LAT, 0);
-                preselectedExitCoords[1] = getIntent().getFloatExtra(EXTRA_EXIT_COORD_LONG, 0);
-            }
+            exitId = getIntent().getIntExtra(EXTRA_EXIT_ID, -1);
         } else {
             networkId = savedInstanceState.getString(STATE_NETWORK_ID);
             stationId = savedInstanceState.getString(STATE_STATION_ID);
@@ -173,9 +169,8 @@ public class StationActivity extends TopActivity
         return locService;
     }
 
-    @Override
-    public float[] getPreselectedExitCoords() {
-        return preselectedExitCoords;
+    public int getPreselectedExitId() {
+        return exitId;
     }
 
     class LocServiceConnection implements ServiceConnection {
@@ -406,8 +401,7 @@ public class StationActivity extends TopActivity
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    public static final String EXTRA_EXIT_COORD_LAT = "im.tny.segvault.disturbances.extra.StationActivity.exitcoord.lat";
-    public static final String EXTRA_EXIT_COORD_LONG = "im.tny.segvault.disturbances.extra.StationActivity.exitcoord.long";
+    public static final String EXTRA_EXIT_ID = "im.tny.segvault.disturbances.extra.StationActivity.exitid";
     public static final String EXTRA_LOBBY_ID = "im.tny.segvault.disturbances.extra.StationActivity.lobbyid";
     public static final String EXTRA_STATION_ID = "im.tny.segvault.disturbances.extra.StationActivity.stationid";
     public static final String EXTRA_NETWORK_ID = "im.tny.segvault.disturbances.extra.StationActivity.networkid";

@@ -211,7 +211,7 @@ public class SearchContentProvider extends ContentProvider {
             row.subtitle = String.format(getContext().getString(R.string.search_closed_exit_subtitle), station.getName());
             row.drawable = R.drawable.map_marker_exit_closed;
         }
-        row.intentData = "station:" + station.getId() + ":lobby:" + lobby.getId() + ":exit:" + Float.toString(exit.worldCoord[0]) + "," + Float.toString(exit.worldCoord[1]);
+        row.intentData = "station:" + station.getId() + ":lobby:" + lobby.getId() + ":exit:" + Integer.toString(exit.id);
         row.distance = distance + 10; // apply small bias so that stations come first. Example of problematic case: "Alameda"
         return row;
     }

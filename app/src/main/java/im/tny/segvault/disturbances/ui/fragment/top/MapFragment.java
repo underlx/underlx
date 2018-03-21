@@ -39,7 +39,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.BuildConfig;
 import im.tny.segvault.disturbances.MainService;
@@ -251,11 +253,13 @@ public class MapFragment extends TopFragment {
         }
     }
 
-    private class GoogleMapsMapStrategy extends MapStrategy implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
+    private class GoogleMapsMapStrategy extends MapStrategy implements
+            OnMapReadyCallback, GoogleMap.OnCameraIdleListener, GoogleMap.OnInfoWindowClickListener {
         private ScrollFixMapView mapView;
         private GoogleMap googleMap;
         private List<Marker> stationMarkers = new ArrayList<>();
         private List<Marker> lobbyMarkers = new ArrayList<>();
+        private Map<Marker, String> markerLinks = new HashMap<>();
 
         @Override
         public void initialize(FrameLayout parent, Network.Plan map) {
@@ -289,7 +293,9 @@ public class MapFragment extends TopFragment {
         public void onMapReady(GoogleMap googleMap) {
             this.googleMap = googleMap;
             googleMap.getUiSettings().setZoomControlsEnabled(false);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
             googleMap.setOnCameraIdleListener(this);
+            googleMap.setOnInfoWindowClickListener(this);
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
@@ -305,14 +311,17 @@ public class MapFragment extends TopFragment {
 
             stationMarkers.clear();
             lobbyMarkers.clear();
+            markerLinks.clear();
             for(Station station : network.getStations()) {
                 LatLng pos = new LatLng(station.getWorldCoordinates()[0], station.getWorldCoordinates()[1]);
                 builder.include(pos);
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(pos)
                         .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.ic_station_dot))
-                        .title(station.getName()));
+                        .title(station.getName())
+                .snippet(getString(R.string.frag_map_action_more)));
                 stationMarkers.add(marker);
+                markerLinks.put(marker, "station:" + station.getId());
 
                 // lobbies
                 final int[] lobbyColors = Util.lobbyColors.clone();
@@ -330,10 +339,11 @@ public class MapFragment extends TopFragment {
                         marker = googleMap.addMarker(new MarkerOptions()
                                 .position(pos)
                                 .title(String.format(getString(R.string.frag_map_lobby_name), station.getName(), lobby.getName()))
-                                .snippet(TextUtils.join(", ", exit.streets))
+                                .snippet(getString(R.string.frag_map_action_more))
                                 .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
                         marker.setVisible(false); // only shown when zoomed in past a certain level
                         lobbyMarkers.add(marker);
+                        markerLinks.put(marker, "station:" + station.getId() + ":lobby:" + lobby.getId() + ":exit:" + exit.id);
                     }
                     curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
                 }
@@ -389,6 +399,29 @@ public class MapFragment extends TopFragment {
                 for(Marker marker : lobbyMarkers) {
                     marker.setVisible(false);
                 }
+            }
+        }
+
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+            String link = markerLinks.get(marker);
+            if (link == null) {
+                return;
+            }
+
+            String[] parts = link.split(":");
+            switch (parts[0]) {
+                case "station":
+                    if (parts.length > 3 && parts[2].equals("lobby")) {
+                        if (parts.length > 5 && parts[4].equals("exit")) {
+                            mListener.onStationLinkClicked(parts[1], parts[3], parts[5]);
+                        } else {
+                            mListener.onStationLinkClicked(parts[1], parts[3]);
+                        }
+                    } else {
+                        mListener.onStationLinkClicked(parts[1]);
+                    }
+                    break;
             }
         }
     }
@@ -573,6 +606,9 @@ public class MapFragment extends TopFragment {
      */
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
         MainService getMainService();
+        void onStationLinkClicked(String destination);
+        void onStationLinkClicked(String destination, String lobby);
+        void onStationLinkClicked(String destination, String lobby, String exit);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
