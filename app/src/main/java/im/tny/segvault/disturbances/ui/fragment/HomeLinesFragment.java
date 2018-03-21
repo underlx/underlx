@@ -132,7 +132,9 @@ public class HomeLinesFragment extends Fragment {
             if (s.line == null) {
                 continue;
             }
-            if (s.down) {
+            if (s.stopped) {
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.stopped));
+            } else if (s.down) {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince));
             } else {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line));

@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,6 +40,7 @@ public class LineStatusCache {
     public static class Status implements Serializable {
         private final String id;
         public final boolean down;
+        public final boolean stopped;
         public final Date downSince;
         public final Date updated;
         public transient Line line;
@@ -46,6 +49,7 @@ public class LineStatusCache {
             this.id = line.getId();
             this.line = line;
             this.down = false;
+            this.stopped = false;
             this.downSince = new Date();
             this.updated = new Date();
         }
@@ -54,6 +58,16 @@ public class LineStatusCache {
             this.id = line.getId();
             this.line = line;
             this.down = true;
+            this.stopped = false;
+            this.downSince = downSince;
+            this.updated = new Date();
+        }
+
+        public Status(Line line, Date downSince, boolean stopped) {
+            this.id = line.getId();
+            this.line = line;
+            this.down = true;
+            this.stopped = stopped;
             this.downSince = downSince;
             this.updated = new Date();
         }
@@ -186,7 +200,22 @@ public class LineStatusCache {
                     for (API.Disturbance d : disturbances) {
                         if (d.line.equals(l.getId()) && !d.ended) {
                             foundDisturbance = true;
-                            statuses.put(l.getId(), new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000)));
+                            LineStatusCache.Status status;
+                            Collections.sort(d.statuses, new Comparator<API.Status>() {
+                                @Override
+                                public int compare(API.Status o1, API.Status o2) {
+                                    long lhs = o1.time[0];
+                                    long rhs = o2.time[0];
+                                    return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
+                                }
+                            });
+
+                            if (d.statuses.get(d.statuses.size() - 1).status.contains("interrompida")) {
+                                status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000), true);
+                            } else {
+                                status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000));
+                            }
+                            statuses.put(l.getId(), status);
                             break;
                         }
                     }

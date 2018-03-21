@@ -56,8 +56,13 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(holder.mItem.name);
-        if(holder.mItem.down) {
-
+        if(holder.mItem.isInterrupted) {
+            long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
+            holder.mStatusDescView.setVisibility(View.VISIBLE);
+            holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
+            holder.mStatusView.setImageResource(R.drawable.ic_alert_octagon_white_24dp);
+            setDownGradient(holder);
+        } else if(holder.mItem.down) {
             long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
@@ -69,6 +74,10 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             DateUtils.formatDateRange(context, f, holder.mItem.closedUntil, holder.mItem.closedUntil, DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_until), f.toString()));
             holder.mStatusView.setImageResource(R.drawable.ic_close_white_24dp);
+        } else if (holder.mItem.scheduleClosed) {
+            holder.mView.setBackgroundColor(holder.mItem.color);
+            holder.mStatusDescView.setVisibility(View.GONE);
+            holder.mStatusView.setImageResource(R.drawable.ic_sleep_white_24dp);
         } else {
             holder.mView.setBackgroundColor(holder.mItem.color);
             holder.mStatusDescView.setVisibility(View.GONE);
@@ -131,6 +140,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final boolean down;
         public final Date downSince;
         public final boolean exceptionallyClosed;
+        public final boolean scheduleClosed;
+        public final boolean isInterrupted;
         public final long closedUntil;
 
         public LineItem(Line line) {
@@ -140,6 +151,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.down = false;
             this.downSince = new Date();
             this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
+            this.scheduleClosed = !line.isOpen();
+            this.isInterrupted = false;
             this.closedUntil = line.getNextOpenTime(new Date());
         }
 
@@ -150,6 +163,20 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.down = true;
             this.downSince = downSince;
             this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
+            this.scheduleClosed = !line.isOpen();
+            this.isInterrupted = false;
+            this.closedUntil = line.getNextOpenTime(new Date());
+        }
+
+        public LineItem(Line line, Date downSince, boolean isInterrupted) {
+            this.id = line.getId();
+            this.name = line.getName();
+            this.color = line.getColor();
+            this.down = true;
+            this.downSince = downSince;
+            this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
+            this.scheduleClosed = !line.isOpen();
+            this.isInterrupted = isInterrupted;
             this.closedUntil = line.getNextOpenTime(new Date());
         }
 
