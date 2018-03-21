@@ -54,6 +54,13 @@ public class Util {
         return getDrawableResourceIdForLineId(line.getId());
     }
 
+    public static final int[] lobbyColors = new int[]{
+            Color.parseColor("#C040CE"),
+            Color.parseColor("#4CAF50"),
+            Color.parseColor("#142382"),
+            Color.parseColor("#E0A63A"),
+            Color.parseColor("#F15D2A")};
+
     public static int getDrawableResourceIdForLineId(String id) {
         switch (id) {
             case "pt-ml-amarela":
@@ -281,6 +288,15 @@ public class Util {
         Drawable wrapDrawable = DrawableCompat.wrap(vectorDrawable);
         DrawableCompat.setTint(wrapDrawable, tintColor);
         wrapDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 

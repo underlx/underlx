@@ -11,7 +11,7 @@ public class PreferenceNames {
     public static final String AutoOpenTripCorrection = "pref_auto_open_trip_correction";
     public static final String AutoOpenVisitCorrection = "pref_auto_open_visit_correction";
     public static final String Locale = "pref_locale";
-    public static final String PortraitMap = "pref_portrait_map";
+    public static final String MapType = "pref_map_type";
     public static final String DeveloperMode = "pref_developer_mode";
 
     // notifsettings

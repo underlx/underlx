@@ -28,6 +28,7 @@ import im.tny.segvault.subway.Schedule;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
+import im.tny.segvault.subway.WorldPath;
 
 /**
  * Created by gabriel on 4/9/17.
@@ -150,7 +151,7 @@ public class TopologyCache {
                     }
 
                     // POIs
-                    for(String poiId : s.pois) {
+                    for (String poiId : s.pois) {
                         POI poi = net.getPOI(poiId);
                         if (poi != null) {
                             station.addPOI(poi);
@@ -178,6 +179,11 @@ public class TopologyCache {
                 Schedule sched = new Schedule(
                         asched.holiday, asched.day, asched.open, asched.openTime * 1000, asched.duration * 1000);
                 line.addSchedule(sched);
+            }
+
+            for (API.WorldPath apath : l.worldPaths) {
+                WorldPath path = new WorldPath(apath.id, apath.path);
+                line.addPath(path);
             }
             net.addLine(line);
         }

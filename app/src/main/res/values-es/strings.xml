@@ -100,6 +100,7 @@
     <string name="frag_trip_delete_confirm_title">Borrar trayecto?</string>
     <string name="frag_trip_delete_confirm_desc">La información sobre este trayecto será borrada y las estadísticas cubiertas se recalculan.</string>
     <string name="frag_station_lobby_name">Atrio %s</string>
+    <string name="frag_map_lobby_name">%1$s: Atrio %2$s</string>
     <string name="frag_station_exits">Salidas</string>
     <string name="frag_station_schedule">Horario</string>
     <string name="lobby_schedule_weekdays">Laborables: %s</string>

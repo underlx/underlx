@@ -67,6 +67,7 @@ public class API {
         public int typCars;
         public List<String> stations;
         public List<Schedule> schedule;
+        public List<WorldPath> worldPaths;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -269,6 +270,12 @@ public class API {
         public String webURL;
         public String mainLocale;
         public Map<String, String> names;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class WorldPath implements Serializable {
+        public String id;
+        public List<float[]> path;
     }
 
     private int timeoutMs;

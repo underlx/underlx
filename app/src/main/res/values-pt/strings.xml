@@ -99,6 +99,7 @@
     <string name="frag_trip_delete_confirm_title">Apagar viagem?</string>
     <string name="frag_trip_delete_confirm_desc">A informação sobre esta viagem será eliminada e as estatísticas afectadas serão recalculadas.</string>
     <string name="frag_station_lobby_name">Átrio %s</string>
+    <string name="frag_map_lobby_name">%1$s: Átrio %2$s</string>
     <string name="frag_station_exits">Saídas</string>
     <string name="frag_station_schedule">Horário</string>
     <string name="lobby_schedule_weekdays">Dias úteis: %s</string>

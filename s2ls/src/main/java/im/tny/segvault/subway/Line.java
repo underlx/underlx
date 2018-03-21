@@ -1,5 +1,6 @@
 package im.tny.segvault.subway;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -193,5 +194,19 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
 
     public long getNextCloseTime(Date curDate) {
         return Schedule.getNextCloseTime(getNetwork(), schedules, curDate);
+    }
+
+    private Map<String, WorldPath> worldPaths = new HashMap<>();
+
+    public void addPath(WorldPath path) {
+        worldPaths.put(path.getId(), path);
+    }
+
+    public Collection<WorldPath> getPaths() {
+        return worldPaths.values();
+    }
+
+    public WorldPath getPath(String id) {
+        return worldPaths.get(id);
     }
 }

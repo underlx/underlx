@@ -2,11 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="im.tny.segvault.disturbances.ui.fragment.top.MapFragment">
-
-    <im.tny.segvault.disturbances.ui.util.CustomWebView
-        android:id="@+id/webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></im.tny.segvault.disturbances.ui.util.CustomWebView>
+    tools:context="im.tny.segvault.disturbances.ui.fragment.top.MapFragment"
+    android:id="@+id/map_container">
 
 </FrameLayout>

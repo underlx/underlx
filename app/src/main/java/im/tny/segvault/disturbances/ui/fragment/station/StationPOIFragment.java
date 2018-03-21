@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,10 +41,12 @@ import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.util.ScrollFixMapView;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Station;
+import im.tny.segvault.subway.WorldPath;
 
 
 /**
@@ -206,13 +209,7 @@ public class StationPOIFragment extends Fragment
         }
 
         // Lobbies
-        final int[] lobbyColors = new int[]{
-                Color.parseColor("#C040CE"),
-                Color.parseColor("#4CAF50"),
-                Color.parseColor("#142382"),
-                Color.parseColor("#E0A63A"),
-                Color.parseColor("#F15D2A")};
-
+        final int[] lobbyColors = Util.lobbyColors.clone();
         if (station.getLobbies().size() == 1) {
             lobbyColors[0] = Color.BLACK;
         }
@@ -277,6 +274,16 @@ public class StationPOIFragment extends Fragment
                     .position(pos)
                     .icon(getMarkerIcon(Util.getColorForPOIType(poi.getType(), getContext())))
                     .title(poi.getNames(lang)[0]));
+        }
+
+        for(Line line : station.getNetwork().getLines()) {
+            for(WorldPath path : line.getPaths()) {
+                PolylineOptions options = new PolylineOptions().width(5).color(line.getColor()).geodesic(true);
+                for(float[] point : path.getPath()) {
+                    options.add(new LatLng(point[0], point[1]));
+                }
+                googleMap.addPolyline(options);
+            }
         }
 
         googleMap.setOnInfoWindowClickListener(this);
