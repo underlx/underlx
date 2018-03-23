@@ -134,6 +134,32 @@ public class HomeFragment extends TopFragment {
             }
         });
 
+        view.findViewById(R.id.plan_route_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchToPage("nav_plan_route");
+            }
+        });
+        view.findViewById(R.id.map_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchToPage("nav_map");
+            }
+        });
+        view.findViewById(R.id.disturbances_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchToPage("nav_disturbances");
+            }
+        });
+        view.findViewById(R.id.disturbances_button).setSelected(true);
+        view.findViewById(R.id.trip_history_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchToPage("nav_trip_history");
+            }
+        });
+
         getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
