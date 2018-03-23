@@ -9,11 +9,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -116,7 +120,7 @@ public class MapFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_map_title), R.id.nav_map, false, false);
+        setUpActivity(getString(R.string.frag_map_title), R.id.nav_map, true, false);
         setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
@@ -130,6 +134,25 @@ public class MapFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         this.savedInstanceState = savedInstanceState;
+
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        fab.setImageResource(R.drawable.ic_swap_horiz_white_24dp);
+        CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        params.setMargins(getResources().getDimensionPixelOffset(R.dimen.fab_margin),
+                getResources().getDimensionPixelOffset(R.dimen.fab_margin),
+                getResources().getDimensionPixelOffset(R.dimen.fab_margin),
+                getResources().getDimensionPixelOffset(R.dimen.fab_margin));
+        fab.setLayoutParams(params);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (network != null) {
+                    switchMap(network.getMaps(), true);
+                }
+            }
+        });
 
         tryLoad();
         return view;
@@ -299,10 +322,10 @@ public class MapFragment extends TopFragment {
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-            for(Line line : network.getLines()) {
-                for(WorldPath path : line.getPaths()) {
+            for (Line line : network.getLines()) {
+                for (WorldPath path : line.getPaths()) {
                     PolylineOptions options = new PolylineOptions().width(6).color(line.getColor()).geodesic(true);
-                    for(float[] point : path.getPath()) {
+                    for (float[] point : path.getPath()) {
                         options.add(new LatLng(point[0], point[1]));
                     }
                     googleMap.addPolyline(options);
@@ -312,14 +335,14 @@ public class MapFragment extends TopFragment {
             stationMarkers.clear();
             lobbyMarkers.clear();
             markerLinks.clear();
-            for(Station station : network.getStations()) {
+            for (Station station : network.getStations()) {
                 LatLng pos = new LatLng(station.getWorldCoordinates()[0], station.getWorldCoordinates()[1]);
                 builder.include(pos);
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(pos)
                         .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.ic_station_dot))
                         .title(station.getName())
-                .snippet(getString(R.string.frag_map_action_more)));
+                        .snippet(getString(R.string.frag_map_action_more)));
                 stationMarkers.add(marker);
                 markerLinks.put(marker, "station:" + station.getId());
 
@@ -385,18 +408,18 @@ public class MapFragment extends TopFragment {
 
         @Override
         public void onCameraIdle() {
-            if(googleMap.getCameraPosition().zoom >= 15 && !stationMarkers.isEmpty() && stationMarkers.get(0).isVisible()) {
-                for(Marker marker : stationMarkers) {
+            if (googleMap.getCameraPosition().zoom >= 15 && !stationMarkers.isEmpty() && stationMarkers.get(0).isVisible()) {
+                for (Marker marker : stationMarkers) {
                     marker.setVisible(false);
                 }
-                for(Marker marker : lobbyMarkers) {
+                for (Marker marker : lobbyMarkers) {
                     marker.setVisible(true);
                 }
-            } else if(googleMap.getCameraPosition().zoom < 15 && !stationMarkers.isEmpty() && !stationMarkers.get(0).isVisible()) {
-                for(Marker marker : stationMarkers) {
+            } else if (googleMap.getCameraPosition().zoom < 15 && !stationMarkers.isEmpty() && !stationMarkers.get(0).isVisible()) {
+                for (Marker marker : stationMarkers) {
                     marker.setVisible(true);
                 }
-                for(Marker marker : lobbyMarkers) {
+                for (Marker marker : lobbyMarkers) {
                     marker.setVisible(false);
                 }
             }
@@ -457,11 +480,6 @@ public class MapFragment extends TopFragment {
                 return true;
             case R.id.menu_zoom_in:
                 currentMapStrategy.zoomIn();
-                return true;
-            case R.id.menu_swap_map:
-                if (network != null) {
-                    switchMap(network.getMaps(), true);
-                }
                 return true;
             case R.id.menu_mock_location:
                 mockLocationMode = !item.isChecked();
@@ -533,7 +551,7 @@ public class MapFragment extends TopFragment {
         }
 
         new MaterialTapTargetPrompt.Builder(getActivity())
-                .setTarget(R.id.menu_swap_map)
+                .setTarget(R.id.fab)
                 .setPrimaryText(R.string.frag_map_switch_type_taptarget_title)
                 .setSecondaryText(R.string.frag_map_switch_type_taptarget_subtitle)
                 .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
@@ -606,8 +624,11 @@ public class MapFragment extends TopFragment {
      */
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
         MainService getMainService();
+
         void onStationLinkClicked(String destination);
+
         void onStationLinkClicked(String destination, String lobby);
+
         void onStationLinkClicked(String destination, String lobby, String exit);
     }
 
