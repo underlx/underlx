@@ -134,6 +134,10 @@ public class MainActivity extends TopActivity
                     newFragment = getNewFragment(pageStringToResourceId(id));
                     planRouteTo = getIntent().getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
                 }
+
+                if(getIntent().getBooleanExtra(EXTRA_FROM_INTRO, false)) {
+                    showTargetPrompt();
+                }
             }
             if (newFragment == null) {
                 newFragment = new HomeFragment();
@@ -164,7 +168,7 @@ public class MainActivity extends TopActivity
                         @Override
                         public void run() {
                             startActivity(i);
-                            showTargetPrompt();
+                            finish();
                         }
                     });
                 } else {
@@ -805,6 +809,8 @@ public class MainActivity extends TopActivity
     public static final String ACTION_MAIN_SERVICE_BOUND = "im.tny.segvault.disturbances.action.MainActivity.mainservicebound";
 
     public static final String EXTRA_INITIAL_FRAGMENT = "im.tny.segvault.disturbances.extra.MainActivity.initialfragment";
+
+    public static final String EXTRA_FROM_INTRO = "im.tny.segvault.disturbances.extra.MainActivity.fromintro";
 
     public static final String EXTRA_PLAN_ROUTE_TO_STATION = "im.tny.segvault.disturbances.extra.MainActivity.planroute.to.station";
 }

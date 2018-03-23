@@ -119,6 +119,9 @@ public class IntroActivity extends AppIntro2 implements
         SharedPreferences.Editor e = sharedPref.edit();
         e.putBoolean("fuse_first_run", false);
         e.apply();
+        final Intent i = new Intent(this, MainActivity.class);
+        i.putExtra(MainActivity.EXTRA_FROM_INTRO, true);
+        startActivity(i);
         finish();
     }
 
