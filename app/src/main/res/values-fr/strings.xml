@@ -208,8 +208,8 @@
     <string name="frag_about_github">Projet sur GitHub</string>
     <string name="frag_about_discord">Groupe sur Discord</string>
     <string name="frag_map_switch_type">Changer type de plan</string>
-    <string name="frag_map_switch_type_taptarget_title">Changer type de diagramme</string>
-    <string name="frag_map_switch_type_taptarget_subtitle">Touchez pour basculer entre un diagramme compacte et un diagramme géographiquement précis.</string>
+    <string name="frag_map_switch_type_taptarget_title">Changer type de plan</string>
+    <string name="frag_map_switch_type_taptarget_subtitle">Appuyez pour alterner entre plusieurs diagrammes et cartes du réseau.</string>
     <string name="frag_home_incorrect_location">Signaler erreur de localisation</string>
     <string name="feedback_location_title">Signalisation d\'erreurs de localisation</string>
     <string name="feedback_location_where_are_you">Où êtes-vous maintenant?</string>

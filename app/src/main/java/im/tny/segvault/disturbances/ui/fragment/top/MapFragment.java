@@ -569,7 +569,7 @@ public class MapFragment extends TopFragment {
                         }
                     }
                 })
-                .setFocalColour(ContextCompat.getColor(getContext(), R.color.colorAccent))
+                .setFocalColour(Color.TRANSPARENT)
                 .setBackgroundColour(ContextCompat.getColor(getContext(), R.color.colorPrimaryLight))
                 .show();
     }

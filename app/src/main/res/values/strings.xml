@@ -259,8 +259,8 @@
     <string name="github_project_url" translatable="false">https://github.com/underlx</string>
     <string name="discord_server_url" translatable="false">https://discord.gg/hhuC7fc</string>
     <string name="frag_map_switch_type">Switch map type</string>
-    <string name="frag_map_switch_type_taptarget_title">Switch diagram types</string>
-    <string name="frag_map_switch_type_taptarget_subtitle">Tap to switch between a compact diagram and a more geographically-accurate one.</string>
+    <string name="frag_map_switch_type_taptarget_title">Switch map types</string>
+    <string name="frag_map_switch_type_taptarget_subtitle">Tap to switch between different network maps and diagrams.</string>
     <string name="frag_home_incorrect_location">Report incorrect station</string>
     <string name="feedback_location_title">Location issue reporting</string>
     <string name="feedback_location_where_are_you">Where are you now?</string>
