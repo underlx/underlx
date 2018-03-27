@@ -272,9 +272,9 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     public List<Plan> getMaps() {
         // TODO retrieve maps from server
         List<Plan> maps = new ArrayList<>(3);
+        maps.add(new WorldMap());
         maps.add(new HtmlDiagram("file:///android_asset/map-pt-ml.html", true));
         maps.add(new HtmlDiagram("file:///android_asset/map-pt-ml-portrait.html", false));
-        maps.add(new WorldMap());
         return maps;
     }
 }
