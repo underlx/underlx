@@ -135,7 +135,7 @@ public class MainActivity extends TopActivity
                     planRouteTo = getIntent().getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
                 }
 
-                if(getIntent().getBooleanExtra(EXTRA_FROM_INTRO, false)) {
+                if (getIntent().getBooleanExtra(EXTRA_FROM_INTRO, false)) {
                     showTargetPrompt();
                 }
             }
@@ -732,8 +732,14 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public void onListFragmentConfirmButtonClick(TripRecyclerViewAdapter.TripItem item) {
-        Trip.confirm(item.id);
+    public void onListFragmentConfirmButtonClick(final TripRecyclerViewAdapter.TripItem item) {
+        (new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Trip.confirm(item.id);
+                return null;
+            }
+        }).execute();
     }
 
     @Override
