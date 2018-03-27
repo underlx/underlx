@@ -257,6 +257,9 @@ public class HomeFragment extends TopFragment {
     }
 
     private void recomputeShortcutVisibility() {
+        if(disturbancesButton == null || mListener == null) {
+            return;
+        }
         Layout layout = disturbancesButton.getLayout();
         boolean littleSpace = false;
         if (layout == null) {
