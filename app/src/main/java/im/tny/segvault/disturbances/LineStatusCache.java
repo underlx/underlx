@@ -142,6 +142,18 @@ public class LineStatusCache {
         }
     }
 
+    public boolean isDisturbanceOngoing() {
+        synchronized (lock) {
+            Map<String, Status> statuses = getLineStatus();
+            for(Status status : statuses.values()) {
+                if(status.down) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     public void clear() {
         synchronized (lock) {
             lineStatuses.clear();

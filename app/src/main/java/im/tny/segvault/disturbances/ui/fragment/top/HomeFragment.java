@@ -8,12 +8,14 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
+import android.text.Layout;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.TypedValue;
@@ -23,6 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -77,6 +80,8 @@ public class HomeFragment extends TopFragment {
     private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
     private CardView unconfirmedTripsCard;
+    private Button disturbancesButton;
+    private Button tripHistoryButton;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -88,8 +93,7 @@ public class HomeFragment extends TopFragment {
      *
      * @return A new instance of fragment HomeFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(/*String param1, String param2*/) {
+    public static HomeFragment newInstance() {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -146,14 +150,28 @@ public class HomeFragment extends TopFragment {
                 switchToPage("nav_map");
             }
         });
-        view.findViewById(R.id.disturbances_button).setOnClickListener(new View.OnClickListener() {
+
+        disturbancesButton = (Button) view.findViewById(R.id.disturbances_button);
+        disturbancesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 switchToPage("nav_disturbances");
             }
         });
-        view.findViewById(R.id.disturbances_button).setSelected(true);
-        view.findViewById(R.id.trip_history_button).setOnClickListener(new View.OnClickListener() {
+        disturbancesButton.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                recomputeShortcutVisibility();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    disturbancesButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    disturbancesButton.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
+
+        tripHistoryButton = (Button) view.findViewById(R.id.trip_history_button);
+        tripHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 switchToPage("nav_trip_history");
@@ -187,6 +205,13 @@ public class HomeFragment extends TopFragment {
         refresh(true);
         refreshCurrentTrip();
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+
     }
 
     @Override
@@ -231,6 +256,36 @@ public class HomeFragment extends TopFragment {
         mListener = null;
     }
 
+    private void recomputeShortcutVisibility() {
+        Layout layout = disturbancesButton.getLayout();
+        boolean littleSpace = false;
+        if (layout == null) {
+            return;
+        }
+        int lines = layout.getLineCount();
+        if (lines > 0) {
+            int ellipsisCount = layout.getEllipsisCount(lines - 1);
+            if (ellipsisCount > 0) {
+                littleSpace = true;
+            }
+        }
+
+        if (!littleSpace) {
+            disturbancesButton.setVisibility(View.VISIBLE);
+            tripHistoryButton.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        MainService m = mListener.getMainService();
+        if (m.getLineStatusCache().isDisturbanceOngoing()) {
+            disturbancesButton.setVisibility(View.VISIBLE);
+            tripHistoryButton.setVisibility(View.GONE);
+        } else {
+            disturbancesButton.setVisibility(View.GONE);
+            tripHistoryButton.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void refresh(boolean requestOnlineUpdate) {
         Realm realm = Application.getDefaultRealmInstance(getContext());
         boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
@@ -273,6 +328,7 @@ public class HomeFragment extends TopFragment {
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
         }
+        recomputeShortcutVisibility();
     }
 
     private void refreshCurrentTrip() {
