@@ -262,6 +262,12 @@ public class MainService extends Service {
         UpdateTopologyJob.schedule();
         SyncTripsJob.schedule();
 
+        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
+        if (permanentForeground) {
+            startPermanentForeground();
+        }
+
         return Service.START_STICKY;
     }
 
@@ -415,7 +421,7 @@ public class MainService extends Service {
     public POI getPOI(String id) {
         synchronized (lock) {
             for (Network n : networks.values()) {
-                if(n.getPOI(id) != null) {
+                if (n.getPOI(id) != null) {
                     return n.getPOI(id);
                 }
             }
@@ -978,6 +984,7 @@ public class MainService extends Service {
         notificationManager.notify(url.hashCode(), notificationBuilder.build());
     }
 
+    private static final int PERMANENT_FOREGROUND_NOTIFICATION_ID = -101;
     private static final int ROUTE_NOTIFICATION_ID = -100;
     public static final String ACTION_END_NAVIGATION = "im.tny.segvault.disturbances.action.route.current.end";
     public static final String EXTRA_NAVIGATION_NETWORK = "im.tny.segvault.disturbances.extra.route.current.end.network";
@@ -1283,15 +1290,37 @@ public class MainService extends Service {
                 }
             }, state.getPreferredTickIntervalMillis());
         }
+    }
 
-        private boolean checkStopForeground(S2LS loc) {
-            if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
+    private boolean checkStopForeground(S2LS loc) {
+        if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
+            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+            boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
+            if (permanentForeground) {
+                startPermanentForeground();
+            } else {
                 stopForeground(true);
-                return true;
             }
-            return false;
+            return true;
         }
+        return false;
+    }
 
+    private void startPermanentForeground() {
+        Intent intent = new Intent(MainService.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(MainService.this, 0, intent, 0);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainService.this)
+                .setColor(getResources().getColor(R.color.colorPrimary))
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.notif_permanent_foreground_description))
+                .setAutoCancel(false)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_sleep_white_24dp)
+                .setVisibility(Notification.VISIBILITY_SECRET)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setOngoing(true);
+        startForeground(PERMANENT_FOREGROUND_NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private class SubmitRealtimeLocationTask extends AsyncTask<String, Void, Void> {
@@ -1347,11 +1376,16 @@ public class MainService extends Service {
 
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (key.equals(PreferenceNames.LocationEnable)) {
-                if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
-                    wfc.startScanningIfWiFiEnabled();
-                else
-                    wfc.stopScanning();
+            switch (key) {
+                case PreferenceNames.LocationEnable:
+                    if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
+                        wfc.startScanningIfWiFiEnabled();
+                    else
+                        wfc.stopScanning();
+                    break;
+                case PreferenceNames.PermanentForeground:
+                    checkStopForeground(getS2LS(PRIMARY_NETWORK_ID));
+                    break;
             }
         }
     };

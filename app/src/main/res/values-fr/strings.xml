@@ -307,7 +307,9 @@
     <string name="act_poi_map">Voir carte</string>
     <string name="act_poi_access_stations">Stations d\'accès</string>
     <string name="frag_map_action_more">Touchez pour savoir plus</string>
-
+    <string name="frag_settings_permanent_foreground">Garder au premier plan</string>
+    <string name="frag_settings_permanent_foreground_summary">Toujours montrer une notification. Nécessaire dans Android 8.0 et supérieur pour enregistrer des voyages d\'une façon fiable.</string>
+    <string name="notif_permanent_foreground_description">\'Garder au premier plan\' est activée dans les paramètres</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

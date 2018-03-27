@@ -307,6 +307,9 @@
     <string name="act_poi_webpage">Sitio Web</string>
     <string name="act_poi_map">Ver mapa</string>
     <string name="act_poi_access_stations">Estaciones de acceso</string>
+    <string name="frag_settings_permanent_foreground">Mantener en primer plano</string>
+    <string name="frag_settings_permanent_foreground_summary">Mostrar siempre una notificación. Necesario en Android 8.0 y superior para registrar trayectos de forma confiable.</string>
+    <string name="notif_permanent_foreground_description">\'Mantener en primer plano\' está habilitado en los ajustes</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

@@ -307,6 +307,9 @@
     <string name="act_poi_map">Ver mapa</string>
     <string name="act_poi_access_stations">Estações de acesso</string>
     <string name="frag_map_action_more">Toque para ver mais</string>
+    <string name="notif_permanent_foreground_description">\'Manter em primeiro plano\' está ligado nas definições</string>
+    <string name="frag_settings_permanent_foreground">Manter em primeiro plano</string>
+    <string name="frag_settings_permanent_foreground_summary">Mostrar sempre uma notificação. Necessário em Android 8.0 e superior para registar viagens de forma fiável.</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>
