@@ -136,7 +136,7 @@ public class StationGeneralFragment extends Fragment {
         } else if (station.isExceptionallyClosed(net, new Date())) {
             TextView closedView = (TextView) view.findViewById(R.id.closed_info_view);
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, station.getNextOpenTime(net), station.getNextOpenTime(net), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, station.getNextOpenTime(net), station.getNextOpenTime(net), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
             closedView.setText(String.format(getString(R.string.frag_station_closed_schedule), f.toString()));
 
             LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);

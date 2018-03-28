@@ -164,7 +164,7 @@ public class LineActivity extends TopActivity {
             if (line.isExceptionallyClosed(new Date())) {
                 TextView closedView = (TextView) findViewById(R.id.closed_info_view);
                 Formatter f = new Formatter();
-                DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+                DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
                 closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
 
 

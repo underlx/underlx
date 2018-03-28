@@ -256,7 +256,7 @@ public class RouteFragment extends TopFragment {
             layoutNetworkClosed.setVisibility(View.GONE);
         } else {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, network.getNextOpenTime(), network.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, network.getNextOpenTime(), network.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, network.getTimezone().getID());
             viewNetworkClosed.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             layoutNetworkClosed.setVisibility(View.VISIBLE);
         }
@@ -461,7 +461,7 @@ public class RouteFragment extends TopFragment {
 
         if (network.isAboutToClose() && route.hasLineChange()) {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, network.getNextCloseTime(), network.getNextCloseTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, network.getNextCloseTime(), network.getNextCloseTime(), DateUtils.FORMAT_SHOW_TIME, network.getTimezone().getID());
             viewNetworkClosed.setText(
                     String.format(getString(R.string.warning_network_about_to_close_transfers),
                             f.toString(), destinationPicker.getSelection().getName()));

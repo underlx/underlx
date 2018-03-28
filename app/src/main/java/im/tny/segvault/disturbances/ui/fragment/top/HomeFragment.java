@@ -257,7 +257,7 @@ public class HomeFragment extends TopFragment {
     }
 
     private void recomputeShortcutVisibility() {
-        if(disturbancesButton == null || mListener == null) {
+        if (disturbancesButton == null || mListener == null) {
             return;
         }
         Layout layout = disturbancesButton.getLayout();
@@ -280,6 +280,9 @@ public class HomeFragment extends TopFragment {
         }
 
         MainService m = mListener.getMainService();
+        if (m == null) {
+            return;
+        }
         if (m.getLineStatusCache().isDisturbanceOngoing()) {
             disturbancesButton.setVisibility(View.VISIBLE);
             tripHistoryButton.setVisibility(View.GONE);
@@ -327,7 +330,7 @@ public class HomeFragment extends TopFragment {
             networkClosedCard.setVisibility(View.GONE);
         } else {
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(getContext(), f, net.getNextOpenTime(), net.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(getContext(), f, net.getNextOpenTime(), net.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
         }
