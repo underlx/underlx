@@ -310,6 +310,7 @@
     <string name="frag_settings_permanent_foreground">Mantener en primer plano</string>
     <string name="frag_settings_permanent_foreground_summary">Mostrar siempre una notificación. Necesario en Android 8.0 y superior para registrar trayectos de forma confiable.</string>
     <string name="notif_permanent_foreground_description">\'Mantener en primer plano\' está habilitado en los ajustes</string>
+    <string name="frag_disturbance_notes">Notas del equipo de &appname;:</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

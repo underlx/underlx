@@ -170,6 +170,7 @@ public class API {
         public String network;
         public String line;
         public List<Status> statuses;
+        public String notes;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

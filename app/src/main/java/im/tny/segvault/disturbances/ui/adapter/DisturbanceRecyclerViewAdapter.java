@@ -17,6 +17,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
+import org.sufficientlysecure.htmltextview.HtmlTextView;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,10 +75,15 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             holder.iconLayout.setBackground(drawable);
         }
 
-        if(mValues.get(position).ended) {
+        if(holder.mItem.ended) {
             holder.mOngoingView.setVisibility(View.GONE);
         } else {
             holder.mOngoingView.setVisibility(View.VISIBLE);
+        }
+
+        if(!holder.mItem.notes.isEmpty()) {
+            holder.notesView.setHtml(holder.mItem.notes, new HtmlHttpImageGetter(holder.notesView, null, true));
+            holder.notesLayout.setVisibility(View.VISIBLE);
         }
 
         holder.mLayout.removeAllViews();
@@ -120,6 +128,8 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final TextView mDateView;
         public final TextView mOngoingView;
         public final FrameLayout iconLayout;
+        public final LinearLayout notesLayout;
+        public final HtmlTextView notesView;
         public DisturbanceItem mItem;
 
         public ViewHolder(View view) {
@@ -130,6 +140,8 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             mDateView = (TextView) view.findViewById(R.id.date_view);
             mOngoingView = (TextView) view.findViewById(R.id.ongoing_view);
             iconLayout = (FrameLayout) view.findViewById(R.id.frame_icon);
+            notesLayout = (LinearLayout) view.findViewById(R.id.disturbance_notes_layout);
+            notesView = (HtmlTextView) view.findViewById(R.id.disturbance_notes_view);
         }
 
         @Override
@@ -148,6 +160,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final String lineName;
         public final int lineColor;
         public final List<Status> statuses;
+        public final String notes;
 
         public DisturbanceItem(API.Disturbance disturbance, Collection<Network> networks) {
             this.id = disturbance.id;
@@ -155,6 +168,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.endTime = new Date(disturbance.endTime[0] * 1000);
             this.ended = disturbance.ended;
             this.lineId = disturbance.line;
+            this.notes = disturbance.notes;
             String name = "Unknown line";
             String netId = "";
             int color = 0;

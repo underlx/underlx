@@ -310,6 +310,7 @@
     <string name="notif_permanent_foreground_description">\'Manter em primeiro plano\' está ligado nas definições</string>
     <string name="frag_settings_permanent_foreground">Manter em primeiro plano</string>
     <string name="frag_settings_permanent_foreground_summary">Mostrar sempre uma notificação. Necessário em Android 8.0 e superior para registar viagens de forma fiável.</string>
+    <string name="frag_disturbance_notes">Notas da equipa do &appname;:</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

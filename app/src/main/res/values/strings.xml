@@ -48,6 +48,7 @@
     <string name="frag_disturbances_empty">Information not available</string>
     <string name="frag_disturbance_ongoing">Ongoing</string>
     <string name="frag_disturbance_line">%s line</string>
+    <string name="frag_disturbance_notes">Notes from the &appname; team:</string>
     <string name="frag_notif_title">Notifications</string>
     <string name="frag_notif_disturbance_title">Disturbance notifications</string>
     <string name="frag_notif_lines">Lines</string>
