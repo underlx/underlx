@@ -199,7 +199,11 @@ public class AnnouncementFragment extends TopFragment {
                 recyclerView.setAdapter(new AnnouncementRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
                 emptyView.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
             } else {
+                if(recyclerView != null) {
+                    recyclerView.setVisibility(View.GONE);
+                }
                 emptyView.setVisibility(View.VISIBLE);
             }
             getSwipeRefreshLayout().setRefreshing(false);
