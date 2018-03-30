@@ -4,7 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,7 +72,16 @@ public class DatasetInfoView extends LinearLayout {
         updateButton = (Button) findViewById(R.id.dataset_update_button);
         cacheAllExtrasButton = (Button) findViewById(R.id.dataset_cache_all_button);
 
-        nameView.setText(Util.getNetworkNames(context, net)[0]);
+        String[] names = Util.getNetworkNames(context, net);
+        if(names.length == 1) {
+            nameView.setText(names[0]);
+        } else {
+            SpannableStringBuilder str = new SpannableStringBuilder(names[0] + "\t\t\t" + names[1]);
+            int start = names[0].length() + 3;
+            int end = names[0].length() + names[1].length() + 3;
+            str.setSpan(new android.text.style.StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            nameView.setText(str);
+        }
         versionView.setText(String.format(context.getString(R.string.dataset_info_version), net.getDatasetVersion()));
 
         String authors = "";
