@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -36,11 +37,12 @@
     <TextView
         android:id="@+id/exit_name_view"
         style="@style/TextAppearance.AppCompat.Small"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:visibility="gone" />
+        android:minWidth="200dp"
+        android:maxWidth="350dp" />
 
     <TextView
         style="@style/TextAppearance.AppCompat.Caption"

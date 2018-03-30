@@ -121,11 +121,13 @@ public class Lobby implements IIDable, Comparable<Lobby>, Serializable {
         public int id;
         public float[] worldCoord;
         public List<String> streets;
+        public String type;
 
-        public Exit(int id, float[] worldCoord, List<String> streets) {
+        public Exit(int id, float[] worldCoord, List<String> streets, String type) {
             this.id = id;
             this.worldCoord = worldCoord;
             this.streets = streets;
+            this.type = type;
         }
 
         public String getExitsString() {

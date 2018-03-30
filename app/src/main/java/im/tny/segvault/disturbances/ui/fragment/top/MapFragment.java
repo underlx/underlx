@@ -523,8 +523,9 @@ public class MapFragment extends TopFragment {
                     Lobby lobby = exitMarkers.get(marker);
                     lobbyNameView.setVisibility(View.VISIBLE);
                     lobbyNameView.setText(String.format(getString(R.string.frag_map_lobby_name), lobby.getName()));
-                    exitNameView.setVisibility(View.VISIBLE);
                     exitNameView.setText(exit.getExitsString());
+                } else {
+                    exitNameView.setVisibility(View.GONE);
                 }
                 return view;
             }
