@@ -37,7 +37,11 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <include layout="@layout/station_include" />
+        <include
+            layout="@layout/station_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
 
         <LinearLayout
             android:id="@+id/cars_warning_layout"

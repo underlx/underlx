@@ -161,7 +161,7 @@
     <string name="frag_announcement_no_text">This post does not contain textual information.</string>
     <string name="frag_map_zoom_out">Zoom out</string>
     <string name="frag_map_zoom_in">Zoom in</string>
-    <string name="frag_map_lobby_name">%1$s: Lobby %2$s</string>
+    <string name="frag_map_lobby_name">Lobby %s</string>
     <string name="frag_map_action_more">Tap for more</string>
     <string name="act_station_tab_general">General</string>
     <string name="act_station_tab_lobbies">Entrances</string>

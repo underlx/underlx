@@ -8,17 +8,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Html;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,14 +30,14 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -46,6 +45,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -280,11 +281,13 @@ public class MapFragment extends TopFragment {
     }
 
     private class GoogleMapsMapStrategy extends MapStrategy implements
-            OnMapReadyCallback, GoogleMap.OnCameraIdleListener, GoogleMap.OnInfoWindowClickListener {
+            OnMapReadyCallback, GoogleMap.OnCameraIdleListener, GoogleMap.OnInfoWindowClickListener, GoogleMap.InfoWindowAdapter {
         private ScrollFixMapView mapView;
         private GoogleMap googleMap;
-        private List<Marker> stationMarkers = new ArrayList<>();
-        private List<Marker> lobbyMarkers = new ArrayList<>();
+        private Map<Marker, Station> stationMarkers = new HashMap<>();
+        private Map<Marker, Lobby> exitMarkers = new HashMap<>();
+        private Map<Marker, Station> stationsOfExitMarkers = new HashMap<>();
+        private Map<Marker, Lobby.Exit> exitsOfExitMarkers = new HashMap<>();
         private Map<Marker, String> markerLinks = new HashMap<>();
 
         @Override
@@ -336,6 +339,7 @@ public class MapFragment extends TopFragment {
             }
             googleMap.setOnCameraIdleListener(this);
             googleMap.setOnInfoWindowClickListener(this);
+            googleMap.setInfoWindowAdapter(this);
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
@@ -350,7 +354,7 @@ public class MapFragment extends TopFragment {
             }
 
             stationMarkers.clear();
-            lobbyMarkers.clear();
+            exitMarkers.clear();
             markerLinks.clear();
             for (Station station : network.getStations()) {
                 LatLng pos = new LatLng(station.getWorldCoordinates()[0], station.getWorldCoordinates()[1]);
@@ -360,7 +364,7 @@ public class MapFragment extends TopFragment {
                         .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.ic_station_dot))
                         .title(station.getName())
                         .snippet(getString(R.string.frag_map_action_more)));
-                stationMarkers.add(marker);
+                stationMarkers.put(marker, station);
                 markerLinks.put(marker, "station:" + station.getId());
 
                 // lobbies
@@ -378,11 +382,11 @@ public class MapFragment extends TopFragment {
                         builder.include(pos);
                         marker = googleMap.addMarker(new MarkerOptions()
                                 .position(pos)
-                                .title(String.format(getString(R.string.frag_map_lobby_name), station.getName(), lobby.getName()))
-                                .snippet(getString(R.string.frag_map_action_more))
                                 .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
                         marker.setVisible(false); // only shown when zoomed in past a certain level
-                        lobbyMarkers.add(marker);
+                        exitMarkers.put(marker, lobby);
+                        stationsOfExitMarkers.put(marker, station);
+                        exitsOfExitMarkers.put(marker, exit);
                         markerLinks.put(marker, "station:" + station.getId() + ":lobby:" + lobby.getId() + ":exit:" + exit.id);
                     }
                     curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
@@ -425,18 +429,18 @@ public class MapFragment extends TopFragment {
 
         @Override
         public void onCameraIdle() {
-            if (googleMap.getCameraPosition().zoom >= 15 && !stationMarkers.isEmpty() && stationMarkers.get(0).isVisible()) {
-                for (Marker marker : stationMarkers) {
+            if (googleMap.getCameraPosition().zoom >= 15 && !stationMarkers.isEmpty() && stationMarkers.keySet().iterator().next().isVisible()) {
+                for (Marker marker : stationMarkers.keySet()) {
                     marker.setVisible(false);
                 }
-                for (Marker marker : lobbyMarkers) {
+                for (Marker marker : exitMarkers.keySet()) {
                     marker.setVisible(true);
                 }
-            } else if (googleMap.getCameraPosition().zoom < 15 && !stationMarkers.isEmpty() && !stationMarkers.get(0).isVisible()) {
-                for (Marker marker : stationMarkers) {
+            } else if (googleMap.getCameraPosition().zoom < 15 && !stationMarkers.isEmpty() && !stationMarkers.keySet().iterator().next().isVisible()) {
+                for (Marker marker : stationMarkers.keySet()) {
                     marker.setVisible(true);
                 }
-                for (Marker marker : lobbyMarkers) {
+                for (Marker marker : exitMarkers.keySet()) {
                     marker.setVisible(false);
                 }
             }
@@ -463,6 +467,71 @@ public class MapFragment extends TopFragment {
                     }
                     break;
             }
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            Station station = stationMarkers.get(marker);
+            if(stationsOfExitMarkers.get(marker) != null) {
+                station = stationsOfExitMarkers.get(marker);
+            }
+            if (station != null) {
+                View view = getLayoutInflater().inflate(R.layout.infowindow_station, null, false);
+                /*TextView namesView = (TextView)view.findViewById(R.id.station_name_view);
+                namesView.setText(station.getName());*/
+
+                RouteFragment.populateStationView(getContext(), station, view);
+
+                LinearLayout stationIconsLayout = (LinearLayout)view.findViewById(R.id.station_icons_layout);
+
+                List<Line> lines = new ArrayList<>(station.getLines());
+                Collections.sort(lines, new Comparator<Line>() {
+                    @Override
+                    public int compare(Line l1, Line l2) {
+                        return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
+                    }
+                });
+
+                for (Line l : lines) {
+                    Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(l.getId()));
+                    drawable.setColorFilter(l.getColor(), PorterDuff.Mode.SRC_ATOP);
+
+                    int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
+                    FrameLayout iconFrame = new FrameLayout(getContext());
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
+                    int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        params.setMarginEnd(margin);
+                    }
+                    int marginTop = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+                    params.setMargins(0, marginTop, margin, 0);
+                    iconFrame.setLayoutParams(params);
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                        iconFrame.setBackgroundDrawable(drawable);
+                    } else {
+                        iconFrame.setBackground(drawable);
+                    }
+                    stationIconsLayout.addView(iconFrame);
+                }
+
+                TextView lobbyNameView = (TextView)view.findViewById(R.id.lobby_name_view);
+                TextView exitNameView = (TextView)view.findViewById(R.id.exit_name_view);
+                Lobby.Exit exit = exitsOfExitMarkers.get(marker);
+                if(exit != null) {
+                    Lobby lobby = exitMarkers.get(marker);
+                    lobbyNameView.setVisibility(View.VISIBLE);
+                    lobbyNameView.setText(String.format(getString(R.string.frag_map_lobby_name), lobby.getName()));
+                    exitNameView.setVisibility(View.VISIBLE);
+                    exitNameView.setText(exit.getExitsString());
+                }
+                return view;
+            }
+            return null;
         }
     }
 

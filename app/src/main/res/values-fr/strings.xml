@@ -120,7 +120,7 @@
     <string name="frag_announcement_posted_on">Publié à %s</string>
     <string name="frag_map_zoom_out">Réduire</string>
     <string name="frag_map_zoom_in">Amplifier</string>
-    <string name="frag_map_lobby_name">%1$s: Hall %2$s</string>
+    <string name="frag_map_lobby_name">Hall %s</string>
     <string name="act_station_tab_general">Général</string>
     <string name="act_station_tab_lobbies">Accès</string>
     <string name="act_station_tab_trivia">Trivia</string>
