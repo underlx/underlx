@@ -231,20 +231,15 @@ public class StationLobbyFragment extends Fragment {
         int curLobbyColorIdx = 0;
         for (Lobby lobby : station.getLobbies()) {
             for (Lobby.Exit exit : lobby.getExits()) {
-                int markerRes = R.drawable.map_marker_exit;
-                float alpha = 1;
-                if (lobby.isAlwaysClosed()) {
-                    markerRes = R.drawable.map_marker_exit_closed;
-                    alpha = 0.5f;
-                }
                 LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
                 builder.include(pos);
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(pos)
                         .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
                         .snippet(exit.getExitsString())
-                        .icon(Util.getBitmapDescriptorFromVector(getContext(), markerRes, lobbyColors[curLobbyColorIdx]))
-                        .alpha(alpha));
+                        .icon(Util.createMapMarker(getContext(),
+                                Util.getDrawableResourceIdForExitType(exit.type, lobby.isAlwaysClosed()), lobbyColors[curLobbyColorIdx]))
+                        .alpha(lobby.isAlwaysClosed() ? 0.5f : 1));
                 if (exit.id == preselExit) {
                     marker.showInfoWindow();
                 }

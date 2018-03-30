@@ -112,6 +112,7 @@ public class API {
         public int id;
         public float[] worldCoord;
         public List<String> streets;
+        public String type;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

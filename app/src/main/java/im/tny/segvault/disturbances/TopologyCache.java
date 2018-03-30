@@ -139,7 +139,7 @@ public class TopologyCache {
                         API.Lobby alobby = t.lobbies.get(lid);
                         Lobby lobby = new Lobby(alobby.id, alobby.name);
                         for (API.Exit aexit : alobby.exits) {
-                            Lobby.Exit exit = new Lobby.Exit(aexit.id, aexit.worldCoord, aexit.streets);
+                            Lobby.Exit exit = new Lobby.Exit(aexit.id, aexit.worldCoord, aexit.streets, aexit.type);
                             lobby.addExit(exit);
                         }
                         for (API.Schedule asched : alobby.schedule) {

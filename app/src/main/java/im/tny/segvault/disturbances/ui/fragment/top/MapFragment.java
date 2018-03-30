@@ -361,9 +361,7 @@ public class MapFragment extends TopFragment {
                 builder.include(pos);
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(pos)
-                        .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.ic_station_dot))
-                        .title(station.getName())
-                        .snippet(getString(R.string.frag_map_action_more)));
+                        .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.ic_station_dot)));
                 stationMarkers.put(marker, station);
                 markerLinks.put(marker, "station:" + station.getId());
 
@@ -374,15 +372,14 @@ public class MapFragment extends TopFragment {
                 }
                 int curLobbyColorIdx = 0;
                 for (Lobby lobby : station.getLobbies()) {
-                    if (lobby.isAlwaysClosed()) {
-                        continue;
-                    }
                     for (Lobby.Exit exit : lobby.getExits()) {
                         pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
                         builder.include(pos);
                         marker = googleMap.addMarker(new MarkerOptions()
                                 .position(pos)
-                                .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
+                                .icon(Util.createMapMarker(getContext(),
+                                        Util.getDrawableResourceIdForExitType(exit.type, lobby.isAlwaysClosed()), lobbyColors[curLobbyColorIdx]))
+                                .alpha(lobby.isAlwaysClosed() ? 0.5f : 1));
                         marker.setVisible(false); // only shown when zoomed in past a certain level
                         exitMarkers.put(marker, lobby);
                         stationsOfExitMarkers.put(marker, station);
@@ -477,7 +474,7 @@ public class MapFragment extends TopFragment {
         @Override
         public View getInfoContents(Marker marker) {
             Station station = stationMarkers.get(marker);
-            if(stationsOfExitMarkers.get(marker) != null) {
+            if (stationsOfExitMarkers.get(marker) != null) {
                 station = stationsOfExitMarkers.get(marker);
             }
             if (station != null) {
@@ -487,7 +484,7 @@ public class MapFragment extends TopFragment {
 
                 RouteFragment.populateStationView(getContext(), station, view);
 
-                LinearLayout stationIconsLayout = (LinearLayout)view.findViewById(R.id.station_icons_layout);
+                LinearLayout stationIconsLayout = (LinearLayout) view.findViewById(R.id.station_icons_layout);
 
                 List<Line> lines = new ArrayList<>(station.getLines());
                 Collections.sort(lines, new Comparator<Line>() {
@@ -519,10 +516,10 @@ public class MapFragment extends TopFragment {
                     stationIconsLayout.addView(iconFrame);
                 }
 
-                TextView lobbyNameView = (TextView)view.findViewById(R.id.lobby_name_view);
-                TextView exitNameView = (TextView)view.findViewById(R.id.exit_name_view);
+                TextView lobbyNameView = (TextView) view.findViewById(R.id.lobby_name_view);
+                TextView exitNameView = (TextView) view.findViewById(R.id.exit_name_view);
                 Lobby.Exit exit = exitsOfExitMarkers.get(marker);
-                if(exit != null) {
+                if (exit != null) {
                     Lobby lobby = exitMarkers.get(marker);
                     lobbyNameView.setVisibility(View.VISIBLE);
                     lobbyNameView.setText(String.format(getString(R.string.frag_map_lobby_name), lobby.getName()));

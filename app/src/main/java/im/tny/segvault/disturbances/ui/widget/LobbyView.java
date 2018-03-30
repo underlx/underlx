@@ -3,17 +3,23 @@ package im.tny.segvault.disturbances.ui.widget;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,6 +28,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Schedule;
 
@@ -132,6 +139,19 @@ public class LobbyView extends LinearLayout {
             exitLayout.setOrientation(HORIZONTAL);
             LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             exitLayout.setLayoutParams(lp);
+
+            ImageView iv = new ImageView(context);
+            Drawable image = ContextCompat.getDrawable(context, Util.getDrawableResourceIdForExitType(exit.type, lobby.isAlwaysClosed())).mutate();
+            image.setBounds(0, 0, image.getIntrinsicWidth(), image.getIntrinsicHeight());
+            Drawable imageWrap = DrawableCompat.wrap(image);
+            DrawableCompat.setTint(imageWrap, color);
+            iv.setImageDrawable(imageWrap);
+
+            LayoutParams ivlp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            ivlp.gravity = Gravity.CENTER_VERTICAL;
+            ivlp.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, context.getResources().getDisplayMetrics());
+            iv.setLayoutParams(ivlp);
+
             TextView tv = new TextView(context);
             tv.setText(exit.getExitsString());
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1);
@@ -156,6 +176,7 @@ public class LobbyView extends LinearLayout {
             lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0);
             lp.gravity = Gravity.CENTER_VERTICAL;
             b.setLayoutParams(lp);
+            exitLayout.addView(iv);
             exitLayout.addView(tv);
             exitLayout.addView(b);
             exitsLayout.addView(exitLayout);

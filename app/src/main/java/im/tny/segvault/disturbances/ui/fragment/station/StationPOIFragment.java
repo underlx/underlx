@@ -261,8 +261,10 @@ public class StationPOIFragment extends Fragment
                 googleMap.addMarker(new MarkerOptions()
                         .position(pos)
                         .title(String.format(getString(R.string.frag_station_lobby_name), lobby.getName()))
-                        .snippet(TextUtils.join(", ", exit.streets))
-                        .icon(Util.getBitmapDescriptorFromVector(getContext(), R.drawable.map_marker_exit, lobbyColors[curLobbyColorIdx])));
+                        .snippet(exit.getExitsString())
+                        .icon(Util.createMapMarker(getContext(),
+                                Util.getDrawableResourceIdForExitType(exit.type, lobby.isAlwaysClosed()), lobbyColors[curLobbyColorIdx]))
+                        .alpha(lobby.isAlwaysClosed() ? 0.5f : 1));
             }
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }

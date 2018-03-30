@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -15,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -284,7 +287,26 @@ public class Util {
         }
     }
 
-    public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, int vectorResId, int tintColor) {
+    public static int getDrawableResourceIdForExitType(String type, boolean closed) {
+        if (closed) {
+            return R.drawable.ic_no_entry_black_24dp;
+        }
+        switch (type) {
+            case "stairs":
+                return R.drawable.ic_stairs_black_24dp;
+            case "escalator":
+                return R.drawable.ic_escalator_black_24dp;
+            case "ramp":
+                return R.drawable.ic_ramp_black_24dp;
+            case "lift":
+                return R.drawable.ic_elevator;
+            default:
+                // TODO
+                return R.drawable.ic_place_black_24dp;
+        }
+    }
+
+    public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId, int tintColor) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -295,12 +317,36 @@ public class Util {
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, int vectorResId) {
+    public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    public static BitmapDescriptor createMapMarker(Context context, @DrawableRes int vectorResId, int markerColor) {
+        Drawable background_background = ContextCompat.getDrawable(context, R.drawable.map_marker_background_background);
+        background_background.setBounds(0, 0, background_background.getIntrinsicWidth(), background_background.getIntrinsicHeight());
+
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.map_marker_background);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable backgroundWrap = DrawableCompat.wrap(background);
+        DrawableCompat.setTint(backgroundWrap, markerColor);
+
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        int one = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
+        int twentyfour = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 23, context.getResources().getDisplayMetrics());
+        vectorDrawable.setBounds(one, one, twentyfour, twentyfour);
+        Drawable foregroundWrap = DrawableCompat.wrap(vectorDrawable);
+        DrawableCompat.setTint(foregroundWrap, markerColor);
+
+        Bitmap bitmap = Bitmap.createBitmap(backgroundWrap.getIntrinsicWidth(), backgroundWrap.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        background_background.draw(canvas);
+        backgroundWrap.draw(canvas);
+        foregroundWrap.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
@@ -333,7 +379,7 @@ public class Util {
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
         boolean preferMainNames = sharedPref.getBoolean(PreferenceNames.PreferMainNames, true);
         String[] names = line.getNames(getCurrentLanguage(context));
-        if(!preferMainNames && names.length > 1) {
+        if (!preferMainNames && names.length > 1) {
             return new String[]{names[1], names[0]};
         }
         return names;
@@ -343,7 +389,7 @@ public class Util {
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
         boolean preferMainNames = sharedPref.getBoolean(PreferenceNames.PreferMainNames, true);
         String[] names = network.getNames(getCurrentLanguage(context));
-        if(!preferMainNames && names.length > 1) {
+        if (!preferMainNames && names.length > 1) {
             return new String[]{names[1], names[0]};
         }
         return names;
