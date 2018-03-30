@@ -525,13 +525,13 @@ public class MainService extends Service {
             synchronized (lock) {
                 loc = locServices.get(n.getId());
             }
-            s += "Network " + n.getName() + "\n";
+            s += "Network " + n.getNames("en")[0] + "\n";
             s += "State machine: " + loc.getState().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
             if (loc.getState() instanceof InNetworkState) {
                 s += "\tPossible stops:\n";
                 for (Stop stop : loc.getLocation().vertexSet()) {
-                    s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getName());
+                    s += String.format("\t\t%s (%s)\n", stop.getStation().getName(), stop.getLine().getNames("en")[0]);
                 }
                 s += "\tPath:\n";
                 if (loc.getCurrentTrip() != null) {
@@ -883,7 +883,7 @@ public class MainService extends Service {
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        String title = String.format(getString(R.string.notif_disturbance_title), sline.getName());
+        String title = String.format(getString(R.string.notif_disturbance_title), Util.getLineNames(this, sline)[0]);
 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
         bigTextStyle.setBigContentTitle(title);
@@ -1027,11 +1027,11 @@ public class MainService extends Service {
                 color = currentRoute.getSourceStop().getLine().getColor();
             } else if (nextStep instanceof ChangeLineStep) {
                 ChangeLineStep clStep = (ChangeLineStep) nextStep;
-                String lineName = clStep.getTarget().getName();
+                String lineName = Util.getLineNames(this, clStep.getTarget())[0];
                 String titleStr;
                 if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
                     titleStr = String.format(getString(R.string.notif_route_catch_train_line_change_title),
-                            clStep.getTarget().getName());
+                            lineName);
                 } else {
                     titleStr = String.format(getString(R.string.notif_route_line_change_title),
                             nextStep.getStation().getName(10),

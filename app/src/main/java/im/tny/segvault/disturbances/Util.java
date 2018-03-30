@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -33,6 +34,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Network;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by gabriel on 4/22/17.
@@ -319,6 +323,30 @@ public class Util {
             //noinspection deprecation
             return context.getResources().getConfiguration().locale;
         }
+    }
+
+    public static String getCurrentLanguage(Context context) {
+        return getCurrentLocale(context).getLanguage();
+    }
+
+    public static String[] getLineNames(Context context, Line line) {
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean preferMainNames = sharedPref.getBoolean(PreferenceNames.PreferMainNames, true);
+        String[] names = line.getNames(getCurrentLanguage(context));
+        if(!preferMainNames && names.length > 1) {
+            return new String[]{names[1], names[0]};
+        }
+        return names;
+    }
+
+    public static String[] getNetworkNames(Context context, Network network) {
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean preferMainNames = sharedPref.getBoolean(PreferenceNames.PreferMainNames, true);
+        String[] names = network.getNames(getCurrentLanguage(context));
+        if(!preferMainNames && names.length > 1) {
+            return new String[]{names[1], names[0]};
+        }
+        return names;
     }
 
     public static String encodeRFC3339(Date date) {

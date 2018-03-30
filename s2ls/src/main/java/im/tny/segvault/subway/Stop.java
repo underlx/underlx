@@ -22,7 +22,7 @@ public class Stop implements Comparable<Stop>, Serializable {
 
     @Override
     public String toString() {
-        return String.format("Stop: %s (%s)", station.getName(), line.getName());
+        return String.format("Stop: %s (%s)", station.getName(), line.getNames("en")[0]);
     }
 
     private Map<String, Object> metaMap = new HashMap<>();

@@ -118,7 +118,7 @@ public class POIActivity extends TopActivity {
                 finish();
             }
 
-            final String[] names = poi.getNames(Util.getCurrentLocale(POIActivity.this).getLanguage());
+            final String[] names = poi.getNames(Util.getCurrentLanguage(POIActivity.this));
             setTitle(names[0]);
             getSupportActionBar().setTitle(names[0]);
             AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);

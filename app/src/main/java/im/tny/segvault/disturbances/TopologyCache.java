@@ -99,7 +99,7 @@ public class TopologyCache {
             e.printStackTrace();
             throw new CacheException(e).addInfo("Unforeseen exception");
         }
-        Network net = new Network(t.network.id, t.network.name, t.network.typCars,
+        Network net = new Network(t.network.id, t.network.mainLocale, t.network.names, t.network.typCars,
                 t.network.holidays, t.network.timezone, t.network.newsURL);
 
         for (API.POI poi : t.pois) {
@@ -108,7 +108,7 @@ public class TopologyCache {
 
         for (String lineid : t.network.lines) {
             API.Line l = t.lines.get(lineid);
-            Line line = new Line(net, new HashSet<Stop>(), l.id, l.name, l.typCars);
+            Line line = new Line(net, l.mainLocale, l.names, new HashSet<Stop>(), l.id, l.typCars, l.order);
             line.setColor(Color.parseColor("#" + l.color));
             boolean isFirstStationInLine = true;
             for (String sid : l.stations) {

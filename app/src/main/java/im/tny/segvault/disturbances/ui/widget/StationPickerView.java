@@ -349,7 +349,7 @@ public class StationPickerView extends LinearLayout {
             Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
                 @Override
                 public int compare(Line l1, Line l2) {
-                    return l1.getName().compareTo(l2.getName());
+                    return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
                 }
             }));
 
@@ -556,6 +556,7 @@ public class StationPickerView extends LinearLayout {
     private static abstract class RealmBasedSortStrategy implements AllStationsSortStrategy {
         protected Realm realm = null;
         protected Map<String, Double> scores = new HashMap<>();
+
         @Override
         public void sortStations(List<Station> stations) {
             // ensure this is created in the right thread

@@ -340,7 +340,7 @@ public class RouteFragment extends TopFragment {
                     }
 
                     TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
-                    lineView.setText(String.format(getString(R.string.frag_route_line_name), line.getName()));
+                    lineView.setText(String.format(getString(R.string.frag_route_line_name), Util.getLineNames(getContext(), line)[0]));
                     lineView.setTextColor(lineColor);
 
                     LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
@@ -399,7 +399,7 @@ public class RouteFragment extends TopFragment {
                 }
 
                 TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
-                lineView.setText(String.format(getString(R.string.frag_route_line_name), lStep.getTarget().getName()));
+                lineView.setText(String.format(getString(R.string.frag_route_line_name), Util.getLineNames(getContext(), lStep.getTarget())[0]));
                 lineView.setTextColor(nextLineColor);
 
                 LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);

@@ -48,7 +48,8 @@ public class API {
     @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Network implements Serializable {
         public String id;
-        public String name;
+        public String mainLocale;
+        public Map<String, String> names;
         public int typCars;
         public List<Integer> holidays;
         public String timezone;
@@ -61,9 +62,11 @@ public class API {
     @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Line implements Serializable {
         public String id;
-        public String name;
+        public String mainLocale;
+        public Map<String, String> names;
         public String color;
         public String network;
+        public int order;
         public int typCars;
         public List<String> stations;
         public List<Schedule> schedule;

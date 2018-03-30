@@ -300,6 +300,8 @@
     <string name="frag_trip_history_length_value">%.01f km</string>
     <string name="frag_settings_locale_title">Language and region</string>
     <string name="frag_settings_app_language">App language</string>
+    <string name="frag_settings_prefer_main_names">Prefer native names</string>
+    <string name="frag_settings_prefer_main_names_summary">Prefer to show line and network names in their original language</string>
     <string name="act_stats_title">Statistics</string>
     <string name="act_stats_since_install">Since install</string>
     <string name="act_stats_last_7_days">Last 7 days</string>

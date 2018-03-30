@@ -17,7 +17,7 @@
     <string name="frag_about_thirdparty">Composants inclus</string>
     <string name="frag_about_title">Sur UnderLX</string>
     <string name="frag_about_version">Version %s</string>
-    <string name="frag_lines_line_status">Information trafic</string>
+    <string name="frag_lines_line_status">État des lignes</string>
     <string name="nav_disturbances">Perturbations</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_infrastructure">Infrastructure</string>
@@ -311,6 +311,8 @@
     <string name="frag_settings_permanent_foreground_summary">Toujours montrer une notification. Nécessaire dans Android 8.0 et supérieur pour enregistrer des voyages d\'une façon fiable.</string>
     <string name="notif_permanent_foreground_description">\'Garder au premier plan\' est activée dans les paramètres</string>
     <string name="frag_disturbance_notes">Notes de l\'équipe &appname;:</string>
+    <string name="frag_settings_prefer_main_names">Préférer noms originaux</string>
+    <string name="frag_settings_prefer_main_names_summary">Préférer montrer les noms des lignes et réseaux dans sa langue originale</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

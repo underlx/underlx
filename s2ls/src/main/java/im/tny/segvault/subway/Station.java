@@ -21,7 +21,7 @@ import im.tny.segvault.s2ls.routing.IAlternativeQualifier;
  * Created by gabriel on 5/25/17.
  */
 
-public class Station extends Zone implements INameable, IIDable, Comparable<Station> {
+public class Station extends Zone implements IIDable, Comparable<Station> {
     public Station(Network network, Set<Stop> stops, String id, String name, List<String> altNames, Features features, Map<String, String> triviaURLs) {
         super(network, stops);
         setId(id);
@@ -38,7 +38,6 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
 
     private String name;
 
-    @Override
     public String getName() {
         return name;
     }
@@ -65,7 +64,6 @@ public class Station extends Zone implements INameable, IIDable, Comparable<Stat
         return TextUtils.join(" ", parts);
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }

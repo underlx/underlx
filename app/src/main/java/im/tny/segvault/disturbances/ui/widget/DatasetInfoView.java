@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.top.AboutFragment;
 import im.tny.segvault.subway.Network;
 
@@ -68,7 +69,7 @@ public class DatasetInfoView extends LinearLayout {
         updateButton = (Button) findViewById(R.id.dataset_update_button);
         cacheAllExtrasButton = (Button) findViewById(R.id.dataset_cache_all_button);
 
-        nameView.setText(net.getName());
+        nameView.setText(Util.getNetworkNames(context, net)[0]);
         versionView.setText(String.format(context.getString(R.string.dataset_info_version), net.getDatasetVersion()));
 
         String authors = "";

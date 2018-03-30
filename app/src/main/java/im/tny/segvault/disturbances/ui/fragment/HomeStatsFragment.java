@@ -31,6 +31,7 @@ import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.StatsCache;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -186,7 +187,7 @@ public class HomeStatsFragment extends Fragment {
         Collections.sort(lines, new Comparator<Line>() {
             @Override
             public int compare(Line t0, Line t1) {
-                return t0.getName().compareTo(t1.getName());
+                return Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder());
             }
         });
 
@@ -210,7 +211,7 @@ public class HomeStatsFragment extends Fragment {
 
             TableRow row = (TableRow)getActivity().getLayoutInflater().inflate(R.layout.line_stats_row, lineStatsLayout, false);
             TextView lineNameView = (TextView)row.findViewById(R.id.line_name_view);
-            lineNameView.setText(line.getName());
+            lineNameView.setText(Util.getLineNames(getContext(), line)[0]);
             lineNameView.setTextColor(line.getColor());
 
             ((TextView)row.findViewById(R.id.week_availability_view)).setText(String.format("%.3f%%", weekAvail * 100));

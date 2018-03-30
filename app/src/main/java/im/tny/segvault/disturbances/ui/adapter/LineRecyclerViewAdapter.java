@@ -2,9 +2,12 @@ package im.tny.segvault.disturbances.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.subway.Line;
@@ -55,7 +59,15 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mNameView.setText(holder.mItem.name);
+        if(holder.mItem.names.length == 1) {
+            holder.mNameView.setText(holder.mItem.names[0]);
+        } else {
+            SpannableStringBuilder str = new SpannableStringBuilder(holder.mItem.names[0] + "\t\t\t" + holder.mItem.names[1]);
+            int start = holder.mItem.names[0].length() + 3;
+            int end = holder.mItem.names[0].length() + holder.mItem.names[1].length() + 3;
+            str.setSpan(new android.text.style.StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.mNameView.setText(str);
+        }
         if(holder.mItem.isInterrupted) {
             long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
@@ -135,8 +147,9 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
 
     public static class LineItem implements Serializable {
         public final String id;
-        public final String name;
+        public final String[] names;
         public final int color;
+        public final int order;
         public final boolean down;
         public final Date downSince;
         public final boolean exceptionallyClosed;
@@ -144,10 +157,11 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final boolean isInterrupted;
         public final long closedUntil;
 
-        public LineItem(Line line) {
+        public LineItem(Line line, Context context) {
             this.id = line.getId();
-            this.name = line.getName();
+            this.names = Util.getLineNames(context, line);
             this.color = line.getColor();
+            this.order = line.getOrder();
             this.down = false;
             this.downSince = new Date();
             this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
@@ -156,10 +170,11 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.closedUntil = line.getNextOpenTime(new Date());
         }
 
-        public LineItem(Line line, Date downSince) {
+        public LineItem(Line line, Date downSince, Context context) {
             this.id = line.getId();
-            this.name = line.getName();
+            this.names = Util.getLineNames(context, line);
             this.color = line.getColor();
+            this.order = line.getOrder();
             this.down = true;
             this.downSince = downSince;
             this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
@@ -168,10 +183,11 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.closedUntil = line.getNextOpenTime(new Date());
         }
 
-        public LineItem(Line line, Date downSince, boolean isInterrupted) {
+        public LineItem(Line line, Date downSince, boolean isInterrupted, Context context) {
             this.id = line.getId();
-            this.name = line.getName();
+            this.names = Util.getLineNames(context, line);
             this.color = line.getColor();
+            this.order = line.getOrder();
             this.down = true;
             this.downSince = downSince;
             this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
@@ -182,7 +198,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
 
         @Override
         public String toString() {
-            return name;
+            return names[0];
         }
     }
 }

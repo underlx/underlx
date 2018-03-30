@@ -17,7 +17,7 @@
     <string name="frag_about_thirdparty">Componentes incluidos</string>
     <string name="frag_about_title">Acerca de UnderLX</string>
     <string name="frag_about_version">Versión %s</string>
-    <string name="frag_lines_line_status">Estado de la circulación</string>
+    <string name="frag_lines_line_status">Estado de las líneas</string>
     <string name="nav_disturbances">Incidencias</string>
     <string name="nav_home">Inicio</string>
     <string name="nav_infrastructure">Infraestructura</string>
@@ -311,6 +311,8 @@
     <string name="frag_settings_permanent_foreground_summary">Mostrar siempre una notificación. Necesario en Android 8.0 y superior para registrar trayectos de forma confiable.</string>
     <string name="notif_permanent_foreground_description">\'Mantener en primer plano\' está habilitado en los ajustes</string>
     <string name="frag_disturbance_notes">Notas del equipo de &appname;:</string>
+    <string name="frag_settings_prefer_main_names">Preferir los nombres originales</string>
+    <string name="frag_settings_prefer_main_names_summary">Preferir mostrar los nombres de las líneas y redes en su idioma original</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

@@ -110,7 +110,7 @@ public class LineActivity extends TopActivity {
             Network net = mainService.getNetwork(networkId);
             Line line = net.getLine(lineId);
 
-            String title = String.format(getString(R.string.act_line_title), line.getName());
+            String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
             setTitle(title);
             getSupportActionBar().setTitle(title);
             AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);

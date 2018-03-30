@@ -133,11 +133,11 @@ public class HomeLinesFragment extends Fragment {
                 continue;
             }
             if (s.stopped) {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.stopped));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.stopped, getContext()));
             } else if (s.down) {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, getContext()));
             } else {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, getContext()));
             }
             if (s.updated.getTime() < mostRecentUpdate.getTime()) {
                 mostRecentUpdate = s.updated;
@@ -152,7 +152,7 @@ public class HomeLinesFragment extends Fragment {
         Collections.sort(items, new Comparator<LineRecyclerViewAdapter.LineItem>() {
             @Override
             public int compare(LineRecyclerViewAdapter.LineItem lineItem, LineRecyclerViewAdapter.LineItem t1) {
-                return lineItem.name.compareTo(t1.name);
+                return Integer.valueOf(lineItem.order).compareTo(t1.order);
             }
         });
 

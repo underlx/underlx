@@ -69,7 +69,7 @@ public class SearchContentProvider extends ContentProvider {
 
         final List<ResultRow> results = new ArrayList<>();
 
-        final String locale = Util.getCurrentLocale(getContext()).getLanguage();
+        final String locale = Util.getCurrentLanguage(getContext());
 
         for (Station station : mainService.getAllStations()) {
             double distance = getDistance(station.getName(), normalizedQuery);
@@ -87,7 +87,7 @@ public class SearchContentProvider extends ContentProvider {
             if (distance < Double.MAX_VALUE) {
                 ResultRow row = new ResultRow();
                 row.title = station.getName();
-                row.subtitle = String.format(getContext().getString(R.string.search_station_subtitle), station.getNetwork().getName());
+                row.subtitle = String.format(getContext().getString(R.string.search_station_subtitle), Util.getNetworkNames(getContext(), station.getNetwork())[0]);
                 row.drawable = R.drawable.network_pt_ml;
                 row.intentData = "station:" + station.getId();
                 row.distance = distance;
@@ -119,15 +119,22 @@ public class SearchContentProvider extends ContentProvider {
         }
 
         for (Line line : mainService.getAllLines()) {
-            double distance = getDistance(line.getName(), normalizedQuery);
+            double distance = Double.MAX_VALUE;
             if (line.getId().equals(query)) {
                 distance = -5000; // push to top of results
             }
 
+            for (String name : Util.getLineNames(getContext(), line)) {
+                double thisDistance = getDistance(name, normalizedQuery);
+                if (thisDistance < distance) {
+                    distance = thisDistance;
+                }
+            }
+
             if (distance < Double.MAX_VALUE) {
                 ResultRow row = new ResultRow();
-                row.title = line.getName();
-                row.subtitle = String.format(getContext().getString(R.string.search_line_subtitle), line.getNetwork().getName());
+                row.title = Util.getLineNames(getContext(), line)[0];
+                row.subtitle = String.format(getContext().getString(R.string.search_line_subtitle), Util.getNetworkNames(getContext(), line.getNetwork())[0]);
                 row.drawable = Util.getDrawableResourceIdForLineId(line.getId());
                 row.intentData = "line:" + line.getId();
                 row.distance = distance;

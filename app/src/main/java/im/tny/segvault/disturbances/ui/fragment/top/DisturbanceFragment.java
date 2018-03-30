@@ -179,7 +179,7 @@ public class DisturbanceFragment extends TopFragment {
             try {
                 List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(14)));
                 for (API.Disturbance d : disturbances) {
-                    items.add(new DisturbanceRecyclerViewAdapter.DisturbanceItem(d, networks));
+                    items.add(new DisturbanceRecyclerViewAdapter.DisturbanceItem(d, networks, getContext()));
                 }
             } catch (APIException e) {
                 return false;

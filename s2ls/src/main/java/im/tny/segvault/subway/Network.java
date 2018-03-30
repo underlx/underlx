@@ -19,11 +19,12 @@ import java.util.TimeZone;
  * Created by gabriel on 4/5/17.
  */
 
-public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements INameable, IIDable {
-    public Network(String id, String name, int usualCarCount, List<Integer> holidays, String timezone, String announcementsURL) {
+public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> implements IIDable {
+    public Network(String id, String mainLocale, Map<String, String> names, int usualCarCount, List<Integer> holidays, String timezone, String announcementsURL) {
         super(Connection.class);
         setId(id);
-        setName(name);
+        this.mainLocale = mainLocale;
+        this.names = names;
         setUsualCarCount(usualCarCount);
         setHolidays(holidays);
         setTimezone(timezone);
@@ -31,16 +32,18 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         this.schedules = new HashMap<>();
     }
 
-    private String name;
+    private String mainLocale;
+    private Map<String, String> names;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
+    public String[] getNames(String locale) {
+        if (locale.equals(mainLocale)) {
+            return new String[]{names.get(locale)};
+        }
+        if (names.get(locale) != null) {
+            return new String[]{names.get(mainLocale), names.get(locale)};
+        }
+        // no translation available for this locale
+        return new String[]{names.get(mainLocale)};
     }
 
     private String id;
@@ -206,7 +209,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     @Override
     public String toString() {
-        return String.format("Network: %s", getName());
+        return String.format("Network: %s", getNames(mainLocale)[0]);
     }
 
     private Map<Integer, Schedule> schedules = null;
@@ -247,7 +250,9 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return Schedule.getNextCloseTime(this, schedules, curDate);
     }
 
-    public abstract class Plan{}
+    public abstract class Plan {
+    }
+
     public class HtmlDiagram extends Plan {
         private String url;
         private boolean wideViewport;
@@ -267,7 +272,8 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     }
 
-    public class WorldMap extends Plan {}
+    public class WorldMap extends Plan {
+    }
 
     public List<Plan> getMaps() {
         // TODO retrieve maps from server

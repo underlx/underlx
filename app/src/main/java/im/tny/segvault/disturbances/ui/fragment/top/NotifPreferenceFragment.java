@@ -42,6 +42,7 @@ import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.subway.Line;
@@ -126,11 +127,11 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
             Collections.sort(lines, new Comparator<Line>() {
                 @Override
                 public int compare(Line line, Line t1) {
-                    return line.getName().compareTo(t1.getName());
+                    return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
                 }
             });
             for (Line l : lines) {
-                lineNames.add(l.getName());
+                lineNames.add(Util.getLineNames(getContext(), l)[0]);
                 lineIDs.add(l.getId());
             }
         }

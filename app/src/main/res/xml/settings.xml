@@ -35,6 +35,11 @@
             android:title="@string/frag_settings_app_language"
             android:entries="@array/frag_settings_languages"
             android:entryValues="@array/frag_settings_language_values"/>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_prefer_main_names"
+            android:summary="@string/frag_settings_prefer_main_names_summary"
+            android:title="@string/frag_settings_prefer_main_names" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/frag_settings_other_title">
      <CheckBoxPreference

@@ -311,6 +311,8 @@
     <string name="frag_settings_permanent_foreground">Manter em primeiro plano</string>
     <string name="frag_settings_permanent_foreground_summary">Mostrar sempre uma notificação. Necessário em Android 8.0 e superior para registar viagens de forma fiável.</string>
     <string name="frag_disturbance_notes">Notas da equipa do &appname;:</string>
+    <string name="frag_settings_prefer_main_names">Preferir nomes originais</string>
+    <string name="frag_settings_prefer_main_names_summary">Preferir mostrar os nomes das linhas e redes no seu idioma original</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

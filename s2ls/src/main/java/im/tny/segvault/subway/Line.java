@@ -11,12 +11,14 @@ import java.util.Set;
  * Created by gabriel on 4/5/17.
  */
 
-public class Line extends Zone implements INameable, IColorable, IIDable, Comparable<Line> {
-    public Line(Network network, Set<Stop> stops, String id, String name, int usualCarCount) {
+public class Line extends Zone implements IColorable, IIDable, Comparable<Line> {
+    public Line(Network network, String mainLocale, Map<String, String> names, Set<Stop> stops, String id, int usualCarCount, int order) {
         super(network, stops);
         setId(id);
-        setName(name);
+        this.mainLocale = mainLocale;
+        this.names = names;
         setUsualCarCount(usualCarCount);
+        setOrder(order);
         this.schedules = new HashMap<>();
     }
 
@@ -31,16 +33,18 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
         this.color = color;
     }
 
-    private String name;
+    private String mainLocale;
+    private Map<String, String> names;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
+    public String[] getNames(String locale) {
+        if (locale.equals(mainLocale)) {
+            return new String[]{names.get(locale)};
+        }
+        if (names.get(locale) != null) {
+            return new String[]{names.get(mainLocale), names.get(locale)};
+        }
+        // no translation available for this locale
+        return new String[]{names.get(mainLocale)};
     }
 
     private String id;
@@ -72,7 +76,7 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
 
     @Override
     public String toString() {
-        return String.format("Line: %s with color %s", getName(), String.format("#%06X", 0xFFFFFF & getColor()));
+        return String.format("Line: %s with color %s", getNames(mainLocale)[0], String.format("#%06X", 0xFFFFFF & getColor()));
     }
 
     public Set<Stop> getEndStops() {
@@ -147,6 +151,16 @@ public class Line extends Zone implements INameable, IColorable, IIDable, Compar
 
     public void setUsualCarCount(int usualCarCount) {
         this.usualCarCount = usualCarCount;
+    }
+
+    private int order;
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

@@ -162,7 +162,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final List<Status> statuses;
         public final String notes;
 
-        public DisturbanceItem(API.Disturbance disturbance, Collection<Network> networks) {
+        public DisturbanceItem(API.Disturbance disturbance, Collection<Network> networks, Context context) {
             this.id = disturbance.id;
             this.startTime = new Date(disturbance.startTime[0] * 1000);
             this.endTime = new Date(disturbance.endTime[0] * 1000);
@@ -177,7 +177,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                     netId = n.getId();
                     for(Line l : n.getLines()) {
                         if(l.getId().equals(disturbance.line)) {
-                            name = l.getName();
+                            name = Util.getLineNames(context, l)[0];
                             color = l.getColor();
                             break;
                         }

@@ -29,6 +29,7 @@ import im.tny.segvault.disturbances.Connectivity;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 
@@ -71,7 +72,7 @@ public class DisturbancesIntroSlide extends Fragment {
                     Collections.sort(lines, new Comparator<Line>() {
                         @Override
                         public int compare(Line line, Line t1) {
-                            return line.getName().compareTo(t1.getName());
+                            return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
                         }
                     });
                 }
@@ -94,7 +95,7 @@ public class DisturbancesIntroSlide extends Fragment {
 
                 for (final Line l : lines) {
                     AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
-                    checkBox.setText(l.getName());
+                    checkBox.setText(Util.getLineNames(getContext(), l)[0]);
                     checkBox.setTextColor(Color.WHITE);
                     ColorStateList colorStateList = new ColorStateList(
                             new int[][]{

@@ -16,7 +16,7 @@ import java.util.TimeZone;
  * Created by gabriel on 4/5/17.
  */
 
-public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializable {
+public class Lobby implements IIDable, Comparable<Lobby>, Serializable {
     public Lobby(String id, String name) {
         setId(id);
         setName(name);
@@ -83,12 +83,10 @@ public class Lobby implements INameable, IIDable, Comparable<Lobby>, Serializabl
 
     private String name;
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }
