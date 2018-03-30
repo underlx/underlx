@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -114,6 +116,16 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
         holder.mLineNameView.setOnClickListener(lineClickListener);
         holder.iconLayout.setOnClickListener(lineClickListener);
+        holder.shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.setType("text/plain");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id));
+                context.startActivity(Intent.createChooser(sendIntent, null));
+            }
+        });
     }
 
     @Override
@@ -130,6 +142,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final FrameLayout iconLayout;
         public final LinearLayout notesLayout;
         public final HtmlTextView notesView;
+        public final ImageButton shareButton;
         public DisturbanceItem mItem;
 
         public ViewHolder(View view) {
@@ -142,6 +155,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             iconLayout = (FrameLayout) view.findViewById(R.id.frame_icon);
             notesLayout = (LinearLayout) view.findViewById(R.id.disturbance_notes_layout);
             notesView = (HtmlTextView) view.findViewById(R.id.disturbance_notes_view);
+            shareButton = (ImageButton) view.findViewById(R.id.share_button);
         }
 
         @Override

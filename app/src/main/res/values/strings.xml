@@ -380,4 +380,7 @@
         <item>fr-FR</item>
         <item>pt-PT</item>
     </string-array>
+
+    <string name="link_format_station" translatable="false">https://perturbacoes.pt/s/%s</string>
+    <string name="link_format_disturbance" translatable="false">https://perturbacoes.pt/d/%s</string>
 </resources>

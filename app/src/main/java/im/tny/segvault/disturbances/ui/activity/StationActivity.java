@@ -305,7 +305,7 @@ public class StationActivity extends TopActivity
                 return true;
             case R.id.menu_share_webprofile:
                 // TODO: un-hardcode this URL, move it to strings
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://perturbacoes.gbl08ma.com/s/" + stationId));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(getString(R.string.link_format_station), stationId)));
                 try {
                     startActivity(browserIntent);
                 } catch (ActivityNotFoundException e) {
