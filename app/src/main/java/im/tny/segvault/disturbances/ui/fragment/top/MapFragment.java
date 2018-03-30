@@ -1,11 +1,14 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -312,11 +315,25 @@ public class MapFragment extends TopFragment {
             }
         }
 
+        private static final int PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION = 10002;
+
         @Override
         public void onMapReady(GoogleMap googleMap) {
             this.googleMap = googleMap;
             googleMap.getUiSettings().setZoomControlsEnabled(false);
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                googleMap.setMyLocationEnabled(true);
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION);
+                        }
+                    }
+                });
+            }
             googleMap.setOnCameraIdleListener(this);
             googleMap.setOnInfoWindowClickListener(this);
 
