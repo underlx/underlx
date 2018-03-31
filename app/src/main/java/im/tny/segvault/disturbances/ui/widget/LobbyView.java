@@ -3,11 +3,12 @@ package im.tny.segvault.disturbances.ui.widget;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
@@ -179,6 +180,18 @@ public class LobbyView extends LinearLayout {
             exitLayout.addView(iv);
             exitLayout.addView(tv);
             exitLayout.addView(b);
+            int[] attrs = new int[] { R.attr.selectableItemBackground /* index 0 */};
+            TypedArray ta = getContext().obtainStyledAttributes(attrs);
+            ViewCompat.setBackground(exitLayout, ta.getDrawable(0));
+            ta.recycle();
+            exitLayout.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (interactionListener != null) {
+                        interactionListener.onExitClicked(exit);
+                    }
+                }
+            });
             exitsLayout.addView(exitLayout);
         }
     }
@@ -197,5 +210,19 @@ public class LobbyView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+    }
+
+    private OnViewInteractionListener interactionListener;
+
+    public OnViewInteractionListener getInteractionListener() {
+        return interactionListener;
+    }
+
+    public void setInteractionListener(OnViewInteractionListener interactionListener) {
+        this.interactionListener = interactionListener;
+    }
+
+    public interface OnViewInteractionListener {
+        void onExitClicked(Lobby.Exit exit);
     }
 }

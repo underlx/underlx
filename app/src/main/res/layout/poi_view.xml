@@ -14,11 +14,18 @@
         android:textStyle="italic"
         android:visibility="gone" />
 
-    <LinearLayout
+    <im.tny.segvault.disturbances.ui.util.FlowLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/poi_on_map_button"
+            style="@style/AppTheme.ViewMapButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/poi_view_on_map" />
 
         <Button
             android:id="@+id/poi_map_button"
@@ -33,5 +40,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/poi_view_website" />
-    </LinearLayout>
+    </im.tny.segvault.disturbances.ui.util.FlowLayout>
 </merge>

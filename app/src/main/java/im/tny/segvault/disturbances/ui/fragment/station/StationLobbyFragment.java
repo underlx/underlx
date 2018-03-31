@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.NestedScrollView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
@@ -57,10 +62,12 @@ public class StationLobbyFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private LinearLayout lobbiesLayout;
+    private NestedScrollView lobbyScrollView;
 
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
     private boolean mapLayoutReady = false;
+    private Map<Lobby.Exit, Marker> markers = new HashMap<>();
 
     public StationLobbyFragment() {
         // Required empty public constructor
@@ -105,6 +112,7 @@ public class StationLobbyFragment extends Fragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         lobbiesLayout = (LinearLayout) view.findViewById(R.id.lobbies_layout);
+        lobbyScrollView = (NestedScrollView) view.findViewById(R.id.lobby_scroll_view);
 
         mapView = (ScrollFixMapView) view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
@@ -188,6 +196,22 @@ public class StationLobbyFragment extends Fragment {
         int curLobbyColorIdx = 0;
         for (Lobby lobby : station.getLobbies()) {
             LobbyView v = new LobbyView(getContext(), lobby, lobbyColors[curLobbyColorIdx]);
+            v.setInteractionListener(new LobbyView.OnViewInteractionListener() {
+                @Override
+                public void onExitClicked(Lobby.Exit exit) {
+                    if (googleMap == null || !mapLayoutReady) {
+                        return;
+                    }
+                    Marker marker = markers.get(exit);
+                    if (marker != null) {
+                        marker.showInfoWindow();
+                    }
+                    lobbyScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                    googleMap.animateCamera(
+                            CameraUpdateFactory.newCameraPosition(
+                                    CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
+                }
+            });
             lobbiesLayout.addView(v);
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
@@ -227,8 +251,10 @@ public class StationLobbyFragment extends Fragment {
                             getContext(), R.raw.no_train_stations_map_style));
         }
 
+        markers.clear();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         int curLobbyColorIdx = 0;
+        Marker focusMarker = null;
         for (Lobby lobby : station.getLobbies()) {
             for (Lobby.Exit exit : lobby.getExits()) {
                 LatLng pos = new LatLng(exit.worldCoord[0], exit.worldCoord[1]);
@@ -242,15 +268,17 @@ public class StationLobbyFragment extends Fragment {
                         .alpha(lobby.isAlwaysClosed() ? 0.5f : 1));
                 if (exit.id == preselExit) {
                     marker.showInfoWindow();
+                    focusMarker = marker;
                 }
+                markers.put(exit, marker);
             }
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
 
-        for(Line line : station.getNetwork().getLines()) {
-            for(WorldPath path : line.getPaths()) {
+        for (Line line : station.getNetwork().getLines()) {
+            for (WorldPath path : line.getPaths()) {
                 PolylineOptions options = new PolylineOptions().width(5).color(line.getColor()).geodesic(true);
-                for(float[] point : path.getPath()) {
+                for (float[] point : path.getPath()) {
                     options.add(new LatLng(point[0], point[1]));
                 }
                 googleMap.addPolyline(options);
@@ -261,6 +289,11 @@ public class StationLobbyFragment extends Fragment {
         int padding = 100; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         googleMap.moveCamera(cu);
+        if (focusMarker != null) {
+            googleMap.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(
+                            CameraPosition.fromLatLngZoom(focusMarker.getPosition(), googleMap.getCameraPosition().zoom)));
+        }
     }
 
     /**

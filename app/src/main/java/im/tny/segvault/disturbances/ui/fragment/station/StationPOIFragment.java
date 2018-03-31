@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.NestedScrollView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -31,8 +33,10 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.ui.activity.POIActivity;
@@ -68,12 +72,14 @@ public class StationPOIFragment extends Fragment
     private OnFragmentInteractionListener mListener;
 
     private LinearLayout poisLayout;
+    private NestedScrollView poiScrollView;
 
     private ScrollFixMapView mapView;
     private GoogleMap googleMap;
     private boolean mapLayoutReady = false;
 
     private List<POI> pois;
+    private Map<POI, Marker> markers = new HashMap<>();
 
     public StationPOIFragment() {
         // Required empty public constructor
@@ -118,6 +124,7 @@ public class StationPOIFragment extends Fragment
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         poisLayout = (LinearLayout) view.findViewById(R.id.pois_layout);
+        poiScrollView = (NestedScrollView) view.findViewById(R.id.poi_scroll_view);
 
         mapView = (ScrollFixMapView) view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
@@ -205,6 +212,22 @@ public class StationPOIFragment extends Fragment
 
         for (POI poi : pois) {
             POIView v = new POIView(getContext(), poi);
+            v.setInteractionListener(new POIView.OnViewInteractionListener() {
+                @Override
+                public void onPOIClicked(POI poi) {
+                    if (googleMap == null || !mapLayoutReady) {
+                        return;
+                    }
+                    Marker marker = markers.get(poi);
+                    if (marker != null) {
+                        marker.showInfoWindow();
+                    }
+                    poiScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                    googleMap.animateCamera(
+                            CameraUpdateFactory.newCameraPosition(
+                                    CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
+                }
+            });
             poisLayout.addView(v);
         }
 
@@ -269,19 +292,21 @@ public class StationPOIFragment extends Fragment
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
         }
 
+        markers.clear();
         for (POI poi : pois) {
             LatLng pos = new LatLng(poi.getWorldCoord()[0], poi.getWorldCoord()[1]);
             builder.include(pos);
-            googleMap.addMarker(new MarkerOptions()
+            Marker marker = googleMap.addMarker(new MarkerOptions()
                     .position(pos)
                     .icon(getMarkerIcon(Util.getColorForPOIType(poi.getType(), getContext())))
                     .title(poi.getNames(lang)[0]));
+            markers.put(poi, marker);
         }
 
-        for(Line line : station.getNetwork().getLines()) {
-            for(WorldPath path : line.getPaths()) {
+        for (Line line : station.getNetwork().getLines()) {
+            for (WorldPath path : line.getPaths()) {
                 PolylineOptions options = new PolylineOptions().width(5).color(line.getColor()).geodesic(true);
-                for(float[] point : path.getPath()) {
+                for (float[] point : path.getPath()) {
                     options.add(new LatLng(point[0], point[1]));
                 }
                 googleMap.addPolyline(options);
@@ -305,7 +330,7 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onInfoWindowClick(Marker marker) {
         for (POI poi : pois) {
-            if(marker.getPosition().latitude == poi.getWorldCoord()[0] &&
+            if (marker.getPosition().latitude == poi.getWorldCoord()[0] &&
                     marker.getPosition().longitude == poi.getWorldCoord()[1]) {
                 Intent intent = new Intent(getContext(), POIActivity.class);
                 intent.putExtra(POIActivity.EXTRA_POI_ID, poi.getId());

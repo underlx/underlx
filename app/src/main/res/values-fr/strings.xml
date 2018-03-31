@@ -278,7 +278,8 @@
     <string name="frag_settings_locale_title">Langue et région</string>
     <string name="frag_settings_app_language">Langue de l\'application</string>
     <string name="act_station_tab_pois">Points d\'intérêt</string>
-    <string name="poi_view_map">Voir carte</string>
+    <string name="poi_view_map">Voir carte externe</string>
+    <string name="poi_view_on_map">Voir sur la carte</string>
     <string name="poi_view_website">Website</string>
     <string name="act_stats_title">Statistiques</string>
     <string name="act_stats_since_install">Depuis l\'installation</string>
