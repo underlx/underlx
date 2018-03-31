@@ -218,7 +218,9 @@ public class RouteFragment extends TopFragment {
                 hideRoute();
             }
         });
-        originPicker.setAllowMyLocation(true);
+        if(!loc.inNetwork()) {
+            originPicker.setAllowMyLocation(true);
+        }
 
         if (loc.getCurrentTrip() != null) {
             originPicker.setWeakSelection(loc.getCurrentTrip().getEndVertex().getStation());
