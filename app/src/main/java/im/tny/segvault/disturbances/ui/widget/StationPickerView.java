@@ -1,6 +1,8 @@
 package im.tny.segvault.disturbances.ui.widget;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,7 +10,11 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -36,27 +42,32 @@ import org.jgrapht.alg.BellmanFordShortestPath;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
 import io.realm.Realm;
 
-public class StationPickerView extends LinearLayout {
+public class StationPickerView extends LinearLayout implements LocationListener {
+    private LocationManager locationManager;
     private InstantAutoComplete textView;
     private ImageButton clearButton;
+    private ImageButton myLocationButton;
     private AutoCompleteStationsAdapter adapter = null;
     private OnStationSelectedListener onStationSelectedListener = null;
     private OnSelectionLostListener onSelectionLostListener = null;
@@ -66,11 +77,16 @@ public class StationPickerView extends LinearLayout {
     // weakSelection: if true, selection should clear once the textbox gets focus
     private boolean weakSelection = false;
 
+    private boolean allowMyLocation = false;
+
     public Station getSelection() {
         return selection;
     }
 
     public void setSelection(Station station) {
+        if (adapter == null) {
+            return;
+        }
         if (adapter.stations.contains(station)) {
             textView.setText(station.getName());
             selection = station;
@@ -129,18 +145,35 @@ public class StationPickerView extends LinearLayout {
         ((TextInputLayout) findViewById(R.id.input_station)).setHint(hint);
     }
 
+    public void setAllowMyLocation(boolean allowMyLocation) {
+        this.allowMyLocation = allowMyLocation;
+        if (myLocationButton == null || clearButton == null) {
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            this.allowMyLocation = false;
+        }
+        if (!this.allowMyLocation) {
+            myLocationButton.setVisibility(GONE);
+        } else if (clearButton.getVisibility() == GONE) {
+            myLocationButton.setVisibility(VISIBLE);
+        }
+    }
+
     /**
      * Inflates the views in the layout.
      *
      * @param context the current context for the view.
      */
     private void initializeViews(Context context) {
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.station_picker_view, this);
 
         textView = (InstantAutoComplete) findViewById(R.id.text_station);
         clearButton = (ImageButton) findViewById(R.id.button_clear);
+        myLocationButton = (ImageButton) findViewById(R.id.button_my_location);
 
         textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -197,13 +230,38 @@ public class StationPickerView extends LinearLayout {
                 showHideClearButton();
             }
         });
+
+        if (!this.allowMyLocation) {
+            myLocationButton.setVisibility(GONE);
+        } else if (clearButton.getVisibility() == GONE) {
+            myLocationButton.setVisibility(VISIBLE);
+        }
+
+        myLocationButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - TimeUnit.MINUTES.toMillis(1)) {
+                        // use the recent location fix
+                        selectNearestStation(location);
+                    } else {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, StationPickerView.this);
+                    }
+                }
+            }
+        });
     }
 
     private void showHideClearButton() {
         if (textView.getEditableText().length() > 0 && textView.isFocused()) {
+            myLocationButton.setVisibility(GONE);
             clearButton.setVisibility(VISIBLE);
         } else {
             clearButton.setVisibility(GONE);
+            if (allowMyLocation) {
+                myLocationButton.setVisibility(VISIBLE);
+            }
         }
     }
 
@@ -217,6 +275,62 @@ public class StationPickerView extends LinearLayout {
         String hint = ta.getString(R.styleable.StationPickerView_hint);
         setHint(hint);
         ta.recycle();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+            locationManager.removeUpdates(this);
+            selectNearestStation(location);
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        locationManager.removeUpdates(this);
+    }
+
+    public void selectNearestStation(Location location) {
+        float minDistance = Float.MAX_VALUE;
+        Station minStation = null;
+        if (adapter == null) {
+            return;
+        }
+        for (Station station : adapter.stations) {
+            if(station.isAlwaysClosed()) {
+                continue;
+            }
+            for (Lobby lobby : station.getLobbies()) {
+                for (Lobby.Exit exit : lobby.getExits()) {
+                    Location exitLocation = new Location("");
+                    exitLocation.setLatitude(exit.worldCoord[0]);
+                    exitLocation.setLongitude(exit.worldCoord[1]);
+
+                    float distance = location.distanceTo(exitLocation);
+                    if (distance < minDistance || minStation == null) {
+                        minDistance = distance;
+                        minStation = station;
+                    }
+                }
+            }
+        }
+        setSelection(minStation);
     }
 
     class StationsFilter extends Filter {
