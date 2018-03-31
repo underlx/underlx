@@ -507,7 +507,7 @@ public class RouteFragment extends TopFragment {
         }
     }
 
-    public static void populateStationView(final Context context, final Station station, View view, boolean showInfoIcons) {
+    public static void populateStationView(final Context context, final Station station, View view, boolean showInfoIcons, boolean setOnClickListener) {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
@@ -563,29 +563,35 @@ public class RouteFragment extends TopFragment {
 
         LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
 
-        stationLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (context != null) {
-                    Intent intent = new Intent(context, StationActivity.class);
-                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                    context.startActivity(intent);
+        if(setOnClickListener) {
+            stationLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (context != null) {
+                        Intent intent = new Intent(context, StationActivity.class);
+                        intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                        intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                        context.startActivity(intent);
+                    }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    public static void populateStationView(final Context context, final Station station, View view, boolean showInfoIcons) {
+        populateStationView(context, station, view, showInfoIcons, true);
     }
 
     public static void populateStationView(final Context context, final Station station, View view) {
-        populateStationView(context, station, view, true);
+        populateStationView(context, station, view, true, true);
     }
 
     public static void populateStationView(final Context context, final Stop stop, View view, boolean showInfoIcons) {
-        populateStationView(context, stop.getStation(), view, showInfoIcons);
+        populateStationView(context, stop.getStation(), view, showInfoIcons, true);
     }
 
     public static void populateStationView(final Context context, final Stop stop, View view) {
-        populateStationView(context, stop.getStation(), view, true);
+        populateStationView(context, stop.getStation(), view, true, true);
     }
 
     @Override

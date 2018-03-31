@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
     android:clipChildren="false"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:focusable="true">
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:minWidth="71dp"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:minWidth="71dp">
 
         <TextView
             android:id="@+id/time_view"

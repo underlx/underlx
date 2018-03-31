@@ -222,7 +222,7 @@ public class LineActivity extends TopActivity {
                     break;
                 }
             }
-            if(!loop) {
+            if (!loop) {
                 continue;
             }
             for (Connection outedge : line.outgoingEdgesOf(curStop)) {
@@ -236,7 +236,7 @@ public class LineActivity extends TopActivity {
         int lineColor = line.getColor();
 
         for (int i = 0; i < stations.size(); i++) {
-            Station station = stations.get(i);
+            final Station station = stations.get(i);
 
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
@@ -298,7 +298,17 @@ public class LineActivity extends TopActivity {
                 crossView.setVisibility(View.VISIBLE);
             }
 
-            RouteFragment.populateStationView(context, station, stepview);
+            stepview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    context.startActivity(intent);
+                }
+            });
+
+            RouteFragment.populateStationView(context, station, stepview, true, false);
             root.addView(stepview);
         }
     }

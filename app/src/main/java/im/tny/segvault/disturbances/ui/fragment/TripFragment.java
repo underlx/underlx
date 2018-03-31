@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
 import im.tny.segvault.s2ls.Path;
@@ -216,6 +218,8 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         List<Connection> el = path.getEdgeList();
 
+        final int stepviewPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, context.getResources().getDisplayMetrics());
+
         if (el.size() == 0) {
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
@@ -234,8 +238,19 @@ public class TripFragment extends BottomSheetDialogFragment {
                                 DateUtils.FORMAT_SHOW_TIME));
             }
 
-            RouteFragment.populateStationView(context, path.getStartVertex(), stepview, showInfoIcons);
+            final Station station = path.getStartVertex().getStation();
+            stepview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    context.startActivity(intent);
+                }
+            });
 
+            RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
+            stepview.setPadding(stepviewPadding, 0, stepviewPadding, 0);
             root.addView(stepview);
             return;
         }
@@ -295,12 +310,24 @@ public class TripFragment extends BottomSheetDialogFragment {
                 }
             }
 
-            RouteFragment.populateStationView(context, c.getSource(), stepview, showInfoIcons);
+            final Station station = c.getSource().getStation();
+            stepview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    context.startActivity(intent);
+                }
+            });
+
+            RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
 
             ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
             if (c.getSource().getStation().isAlwaysClosed()) {
                 crossView.setVisibility(View.VISIBLE);
             }
+            stepview.setPadding(stepviewPadding, 0, stepviewPadding, 0);
             root.addView(stepview);
 
             if (c instanceof Transfer && i != el.size() - 1) {
@@ -331,8 +358,19 @@ public class TripFragment extends BottomSheetDialogFragment {
             crossView.setVisibility(View.VISIBLE);
         }
 
-        RouteFragment.populateStationView(context, c.getTarget(), stepview, showInfoIcons);
+        final Station station = c.getTarget().getStation();
+        stepview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                context.startActivity(intent);
+            }
+        });
 
+        RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
+        stepview.setPadding(stepviewPadding, 0, stepviewPadding, 0);
         root.addView(stepview);
     }
 
