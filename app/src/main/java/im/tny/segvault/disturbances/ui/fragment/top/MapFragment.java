@@ -167,6 +167,9 @@ public class MapFragment extends TopFragment {
             return;
         }
         network = mListener.getMainService().getNetwork(networkId);
+        if (network == null) {
+            return;
+        }
         List<Network.Plan> maps = network.getMaps();
         switchMap(maps, false);
     }
