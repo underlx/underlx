@@ -321,8 +321,8 @@ public class MainService extends Service {
     }
 
     public void updateTopology() {
-        if (!isTopologyUpdateInProgress()) {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (!isTopologyUpdateInProgress()) {
                 cancelTopologyUpdate();
                 currentUpdateTopologyTask = new UpdateTopologyTask();
                 currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
@@ -331,8 +331,8 @@ public class MainService extends Service {
     }
 
     public void updateTopology(String... network_ids) {
-        if (!isTopologyUpdateInProgress()) {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (!isTopologyUpdateInProgress()) {
                 cancelTopologyUpdate();
                 currentUpdateTopologyTask = new UpdateTopologyTask();
                 currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
@@ -349,12 +349,16 @@ public class MainService extends Service {
     }
 
     public boolean isTopologyUpdateInProgress() {
-        return currentUpdateTopologyTask != null;
+        synchronized (lock) {
+            return currentUpdateTopologyTask != null;
+        }
     }
 
     public void checkForTopologyUpdates() {
-        if (!isTopologyUpdateInProgress()) {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
+                    && lastTopologyUpdatesCheckLongAgo()) {
+                lastTopologyUpdatesCheck = new Date();
                 currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
                 currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
             }
@@ -362,12 +366,20 @@ public class MainService extends Service {
     }
 
     public void checkForTopologyUpdates(boolean autoUpdate) {
-        if (!isTopologyUpdateInProgress()) {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
+                    && lastTopologyUpdatesCheckLongAgo()) {
+                lastTopologyUpdatesCheck = new Date();
                 currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
                 currentCheckTopologyUpdatesTask.execute(autoUpdate);
             }
         }
+    }
+
+    private Date lastTopologyUpdatesCheck = new Date(0);
+
+    private boolean lastTopologyUpdatesCheckLongAgo() {
+        return new Date().getTime() - lastTopologyUpdatesCheck.getTime() > 5000;
     }
 
     public Collection<Network> getNetworks() {
