@@ -69,6 +69,21 @@ public class TripHistoryFragment extends TopFragment {
 
     }
 
+    @Override
+    public boolean needsTopology() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_trip_history;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_trip_history";
+    }
+
     @SuppressWarnings("unused")
     public static TripHistoryFragment newInstance(int columnCount) {
         TripHistoryFragment fragment = new TripHistoryFragment();
@@ -90,7 +105,7 @@ public class TripHistoryFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_trip_history_title), R.id.nav_trip_history, false, false);
+        setUpActivity(getString(R.string.frag_trip_history_title), false, false);
         setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_trip_history_list, container, false);

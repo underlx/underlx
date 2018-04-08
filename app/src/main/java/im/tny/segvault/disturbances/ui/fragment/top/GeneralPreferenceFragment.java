@@ -24,9 +24,11 @@ import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 
-public class GeneralPreferenceFragment extends XpPreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class GeneralPreferenceFragment extends XpPreferenceFragment implements
+        SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {
     private OnFragmentInteractionListener mListener;
 
     public GeneralPreferenceFragment() {
@@ -127,6 +129,26 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements S
     private void updateLanguagePreferenceSummary() {
         ListPreference languagePreference = (ListPreference) findPreference(PreferenceNames.Locale);
         languagePreference.setSummary(languagePreference.getEntry());
+    }
+
+    @Override
+    public boolean needsTopology() {
+        return false;
+    }
+
+    @Override
+    public boolean isScrollable() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_settings;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_settings";
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {

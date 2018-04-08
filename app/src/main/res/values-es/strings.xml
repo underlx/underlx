@@ -4,13 +4,13 @@
     <string name="action_settings">Ajustes</string>
     <string name="navigation_drawer_close">Ocultar el panel de navegación</string>
     <string name="update_topology_cancel_action">Cancelar</string>
-    <string name="update_topology_failure">Error al actualizar plano de la red</string>
-    <string name="update_topology_progress">Actualizando plano de la red %d%%</string>
+    <string name="update_topology_failure">Error al actualizar plano de red</string>
+    <string name="update_topology_progress">Actualizando plano de red %d%%</string>
     <string name="update_topology_success">Plano de la red actualizado</string>
     <string name="dataset_info_authors">Autores</string>
     <string name="dataset_info_update">Actualizar</string>
     <string name="frag_about_copyright">Copyright © 2017–2018 El Equipo de UnderLX\nEn asociación con el grupo Segvault</string>
-    <string name="frag_about_datasets">Planos de la red</string>
+    <string name="frag_about_datasets">Planos de red</string>
     <string name="frag_about_disclaimer">Esta app y el servicio asociado no tienen cualquier conexión a la Metropolitano de Lisboa, E.P.E.\nNo es posible garantizar la corrección de la información suministrada.</string>
     <string name="frag_about_thanks">Comunidad portuguesa de SkyscraperCity\nkidrauhl - traducción de la interfaz\nJaime Silva - imagen del panel de navegación</string>
     <string name="frag_about_thanks_title">Agradecimientos</string>
@@ -33,7 +33,7 @@
     <string name="frag_lines_updated">Actualizado %s</string>
     <string name="frag_lines_duration">desde hace %d min</string>
     <string name="frag_lines_until">hasta %s</string>
-    <string name="update_topology_available">Actualización del plano de la red disponible</string>
+    <string name="update_topology_available">Actualización del plano de red disponible</string>
     <string name="update_topology_update_action">Actualizar</string>
     <string name="navigation_drawer_open">Abrir panel de navegación</string>
     <string name="frag_lines_error_updating">Error al actualizar estado de la circulación</string>
@@ -78,6 +78,7 @@
     <string name="frag_disturbance_updated">Incidencias actualizadas</string>
     <string name="error_no_connection">Sin conexión</string>
     <string name="error_no_connection_action_retry">Repetir</string>
+    <string name="error_generic_action_retry">Intentar nuevamente</string>
     <string name="frag_trip_history_title">Historial de trayectos</string>
     <string name="nav_trip_history">Historial de trayectos</string>
     <string name="frag_trip_history_empty">Sin trayectos</string>
@@ -173,8 +174,8 @@
     <string name="intro_disturbances_desc">Sé informado de retrasos y interrupciones del servicio antes de entrar en la red, evitando frustraciones adicionales</string>
     <string name="intro_disturbances_select_lines">Escoger líneas</string>
     <string name="intro_disturbances_select_lines_instruction">Escoge las líneas de que quieras recibir notificaciones:</string>
-    <string name="intro_disturbances_misc_error">Plano de la red aún no obtido. Intentalo de nuevo más tarde.</string>
-    <string name="intro_disturbances_connection_error">Plano de la red aún no obtido. Comprueba tu conexión a Internet.</string>
+    <string name="intro_disturbances_misc_error">Plano de red aún no obtido. Intentalo de nuevo más tarde.</string>
+    <string name="intro_disturbances_connection_error">Plano de red aún no obtido. Comprueba tu conexión a Internet.</string>
     <string name="intro_announcements_title">Notificaciones de noticias</string>
     <string name="intro_announcements_desc">Sé notificado sobre nuevas publicaciones en el website del Metro y en la página oficial de Facebook</string>
     <string name="intro_announcements_select_sources">Habilitar notificaciones</string>
@@ -186,7 +187,7 @@
     <string name="intro_finish_wait_title">Está casi listo</string>
     <string name="intro_finish_connect_desc">Es necesario descargar algunas cosas de la Internet (menos de 1 MB). Comprueba tu conexión.</string>
     <string name="intro_finish_try_again">Repetir</string>
-    <string name="intro_finish_downloading">Obteniendo plano de la red - %d%% completo</string>
+    <string name="intro_finish_downloading">Obteniendo plano de red - %d%% completo</string>
     <string name="intro_finish_done_title">Está listo. Aprovecha el &appname;.</string>
     <string name="intro_finish_done_desc">Al utilizar el &appname;, no te olvides de que este:\n- está aún en desarrollo \n- no es una app oficial, ni oficialmente reconocida\n- es un proyecto colaborativo sin ánimo de lucro</string>
     <string name="intro_finish_get_started">Empezar</string>
@@ -314,6 +315,12 @@
     <string name="frag_disturbance_notes">Notas del equipo de &appname;:</string>
     <string name="frag_settings_prefer_main_names">Preferir los nombres originales</string>
     <string name="frag_settings_prefer_main_names_summary">Preferir mostrar los nombres de las líneas y redes en su idioma original</string>
+    <string name="frag_error_missing_topology">Falta de plano de red</string>
+    <string name="frag_error_missing_topology_desc">&appname; se actualizó y el plano de red descargado anteriormente ha dejado de ser compatible. Conéctese a Internet para descargar un nuevo plano de red.</string>
+    <string name="frag_error_topology_download_ongoing">El plano de red está siendo actualizado...</string>
+    <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
+    <string name="frag_error_version_too_old_desc">Esta versión de &appname; ha dejado de ser compatible con los servicios en línea de &appname;. Por favor, atualiza para seguir usando &appname;.</string>
+    <string name="frag_error_view_store_page">Ver aplicación en Google Play</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

@@ -77,7 +77,8 @@
     <string name="frag_home_menu_refresh">Mettre à jour</string>
     <string name="frag_disturbance_updated">Liste de perturbations mise à jour</string>
     <string name="error_no_connection">Sans connexion</string>
-    <string name="error_no_connection_action_retry">Répéter</string>
+    <string name="error_no_connection_action_retry">Réessayer</string>
+    <string name="error_generic_action_retry">Réessayer</string>
     <string name="frag_trip_history_title">Historique de trajets</string>
     <string name="nav_trip_history">Historique de trajets</string>
     <string name="frag_trip_history_empty">Sans trajets</string>
@@ -314,6 +315,12 @@
     <string name="frag_disturbance_notes">Notes de l\'équipe &appname;:</string>
     <string name="frag_settings_prefer_main_names">Préférer les noms originaux</string>
     <string name="frag_settings_prefer_main_names_summary">Préférer montrer les noms des lignes et des réseaux dans sa langue originale</string>
+    <string name="frag_error_missing_topology">Plan du réseau manquante</string>
+    <string name="frag_error_missing_topology_desc">L\' &appname; actualisé et le plan du réseau déchargé antérieurement n\'est-ce pas compatible. Connectez-vous à internet pour décharger un nouveau plan du réseau.</string>
+    <string name="frag_error_topology_download_ongoing">Le plan du réseau est être actualisé...</string>
+    <string name="frag_error_version_too_old">&appname; trop obsolète</string>
+    <string name="frag_error_version_too_old_desc">Cette version d\'&appname; n\'est-ce pas compatible avec des services en ligne &appname;. Actualiser s\'il vous plaît pour être continuer utiliser &appname;.</string>
+    <string name="frag_error_view_store_page">Voir application sur Google Play</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

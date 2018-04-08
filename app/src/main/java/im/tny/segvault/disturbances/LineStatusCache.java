@@ -205,6 +205,9 @@ public class LineStatusCache {
                 return false;
             }
             List<Line> lines = new LinkedList<>(mainService.getAllLines());
+            if(lines.size() == 0) {
+                return false;
+            }
             try {
                 List<API.Disturbance> disturbances = API.getInstance().getOngoingDisturbances();
                 for (Line l : lines) {

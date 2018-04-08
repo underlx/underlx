@@ -60,6 +60,21 @@ public class AboutFragment extends TopFragment {
     }
 
     @Override
+    public boolean needsTopology() {
+        return false;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_about;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_about";
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -67,7 +82,7 @@ public class AboutFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_about_title), R.id.nav_about, false, false);
+        setUpActivity(getString(R.string.frag_about_title), false, false);
         setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);

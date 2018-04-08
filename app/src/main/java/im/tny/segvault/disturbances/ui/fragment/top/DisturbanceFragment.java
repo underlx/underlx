@@ -59,6 +59,21 @@ public class DisturbanceFragment extends TopFragment {
     public DisturbanceFragment() {
     }
 
+    @Override
+    public boolean needsTopology() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_disturbances;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_disturbances";
+    }
+
     @SuppressWarnings("unused")
     public static DisturbanceFragment newInstance(int columnCount) {
         DisturbanceFragment fragment = new DisturbanceFragment();
@@ -80,7 +95,7 @@ public class DisturbanceFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_disturbances_title), R.id.nav_disturbances, false, true);
+        setUpActivity(getString(R.string.frag_disturbances_title), false, true);
         setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_disturbance_list, container, false);

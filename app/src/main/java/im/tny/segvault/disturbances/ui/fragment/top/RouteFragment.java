@@ -82,6 +82,21 @@ public class RouteFragment extends TopFragment {
         // Required empty public constructor
     }
 
+    @Override
+    public boolean needsTopology() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_plan_route;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_plan_route";
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -129,7 +144,7 @@ public class RouteFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_route_title), R.id.nav_plan_route, false, false);
+        setUpActivity(getString(R.string.frag_route_title), false, false);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_route, container, false);

@@ -56,6 +56,21 @@ public class AnnouncementFragment extends TopFragment {
     public AnnouncementFragment() {
     }
 
+    @Override
+    public boolean needsTopology() {
+        return false;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_announcements;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_announcements";
+    }
+
     @SuppressWarnings("unused")
     public static AnnouncementFragment newInstance(String networkId, int columnCount) {
         AnnouncementFragment fragment = new AnnouncementFragment();
@@ -79,7 +94,7 @@ public class AnnouncementFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_announcements_title), R.id.nav_announcements, false, true);
+        setUpActivity(getString(R.string.frag_announcements_title), false, true);
         setHasOptionsMenu(true);
 
         View view = inflater.inflate(R.layout.fragment_announcement_list, container, false);
@@ -201,7 +216,7 @@ public class AnnouncementFragment extends TopFragment {
                 emptyView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
             } else {
-                if(recyclerView != null) {
+                if (recyclerView != null) {
                     recyclerView.setVisibility(View.GONE);
                 }
                 emptyView.setVisibility(View.VISIBLE);

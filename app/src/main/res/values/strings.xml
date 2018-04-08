@@ -106,6 +106,7 @@
     <string name="frag_home_menu_refresh">Refresh</string>
     <string name="error_no_connection">No connection</string>
     <string name="error_no_connection_action_retry">Retry</string>
+    <string name="error_generic_action_retry">Retry</string>
     <string name="nav_trip_history">Trip history</string>
     <string name="frag_trip_history_title">Trip history</string>
     <string name="frag_trip_history_empty">No trips yet</string>
@@ -330,6 +331,12 @@
     <string name="act_poi_map">View map</string>
     <string name="act_poi_access_stations">Nearby stations</string>
     <string name="notif_permanent_foreground_description">\'Keep in foreground\' is enabled in the settings</string>
+    <string name="frag_error_missing_topology">Missing network map</string>
+    <string name="frag_error_missing_topology_desc">&appname; updated and the previously downloaded network map is no longer compatible. Connect to the internet to download a new network map.</string>
+    <string name="frag_error_topology_download_ongoing">The network map is currently being downloaded...</string>
+    <string name="frag_error_version_too_old">&appname; version too old</string>
+    <string name="frag_error_version_too_old_desc">This &appname; version is no longer compatible with the &appname; online services. Please update to continue using &appname;.</string>
+    <string name="frag_error_view_store_page">View app on Google Play</string>
 
     <string name="poi_type_dinning">Dinning</string>
     <string name="poi_type_police">Police station</string>

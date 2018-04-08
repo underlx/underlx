@@ -34,6 +34,21 @@ public class HelpFragment extends TopFragment {
         // Required empty public constructor
     }
 
+    @Override
+    public boolean needsTopology() {
+        return false;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_help;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_help";
+    }
+
     public static HelpFragment newInstance() {
         HelpFragment fragment = new HelpFragment();
         Bundle args = new Bundle();
@@ -57,7 +72,7 @@ public class HelpFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_help_title), R.id.nav_help, false, false);
+        setUpActivity(getString(R.string.frag_help_title), false, false);
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_help, container, false);
 

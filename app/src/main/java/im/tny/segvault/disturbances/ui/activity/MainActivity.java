@@ -30,6 +30,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,10 +39,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
-import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
 import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
 import im.tny.segvault.disturbances.FeedbackUtil;
+import im.tny.segvault.disturbances.ui.fragment.top.ErrorFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.GeneralPreferenceFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
@@ -86,6 +88,7 @@ public class MainActivity extends TopActivity
         GeneralPreferenceFragment.OnFragmentInteractionListener,
         TripHistoryFragment.OnListFragmentInteractionListener,
         TripFragment.OnFragmentInteractionListener,
+        ErrorFragment.OnFragmentInteractionListener,
         UnconfirmedTripsFragment.OnListFragmentInteractionListener, SearchView.OnQueryTextListener {
 
     private MainService locService;
@@ -142,7 +145,7 @@ public class MainActivity extends TopActivity
             if (newFragment == null) {
                 newFragment = new HomeFragment();
             }
-            replaceFragment(newFragment, false);
+            replaceFragment(newFragment, false, false);
         }
 
         IntentFilter filter = new IntentFilter();
@@ -152,6 +155,7 @@ public class MainActivity extends TopActivity
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         filter.addAction(FeedbackUtil.ACTION_FEEDBACK_PROVIDED);
+        filter.addAction(ACTION_MAIN_SERVICE_BOUND);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -352,25 +356,47 @@ public class MainActivity extends TopActivity
         }
     }
 
-    private void replaceFragment(Fragment newFragment, boolean addToBackStack) {
+    private Fragment getCurrentFragment() {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
         if (currentFragment == null || !currentFragment.isAdded()) {
             currentFragment = getSupportFragmentManager().findFragmentById(R.id.alt_fragment_container);
         }
+        return currentFragment;
+    }
+
+    private void replaceFragment(Fragment newFragment, boolean addToBackStack, boolean specialBackStackManipulation) {
+        if (!(newFragment instanceof MainAddableFragment)) {
+            throw new IllegalArgumentException("Fragment must implement MainAddableFragment");
+        }
+
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        Fragment currentFragment = getCurrentFragment();
         if (currentFragment != null) {
             transaction.remove(currentFragment);
         }
-        int destContainer = R.id.main_fragment_container;
-        if (newFragment instanceof TopFragment) {
-            TopFragment newFrag = (TopFragment) newFragment;
-            if (!newFrag.isScrollable()) {
-                destContainer = R.id.alt_fragment_container;
+
+        if (locService != null && ((MainAddableFragment) newFragment).needsTopology() && locService.getNetworks().isEmpty()) {
+            ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
+            if (locService.isTopologyUpdateInProgress()) {
+                type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
             }
+            newFragment = ErrorFragment.newInstance(type,
+                    ((MainAddableFragment) newFragment).getNavDrawerId(),
+                    ((MainAddableFragment) newFragment).getNavDrawerIdAsString());
+        }
+        int destContainer = R.id.main_fragment_container;
+        if (!((MainAddableFragment) newFragment).isScrollable()) {
+            destContainer = R.id.alt_fragment_container;
         }
         transaction.replace(destContainer, newFragment);
         if (addToBackStack) {
             transaction.addToBackStack(null);
+        } else if (specialBackStackManipulation) {
+            // TODO remove specialBackStackManipulation
+            // same effect as not adding to the back stack,
+            // but doesn't make it crash when user goes back from this fragment
+            /*getSupportFragmentManager().popBackStack();
+            transaction.addToBackStack(null);*/
         }
         transaction.commit();
     }
@@ -411,7 +437,7 @@ public class MainActivity extends TopActivity
         Fragment newFragment = getNewFragment(item.getItemId());
 
         if (newFragment != null) {
-            replaceFragment(newFragment, true);
+            replaceFragment(newFragment, true, false);
         } else {
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
@@ -632,6 +658,26 @@ public class MainActivity extends TopActivity
                     }
                     Snackbar.make(findViewById(R.id.fab), msg3, Snackbar.LENGTH_LONG).show();
                     break;
+                case ACTION_MAIN_SERVICE_BOUND: {
+                    // when the activity loads, we're not bound to the main service, and thus we cannot know if
+                    // there is topology data or not, therefore we can't display the "no topology" error message
+                    // now that we have bound to the main service, we can check whether the topology is present and display the error if not.
+                    Fragment currentFragment = getCurrentFragment();
+                    if (locService != null &&
+                            currentFragment instanceof MainAddableFragment &&
+                            ((MainAddableFragment) currentFragment).needsTopology() &&
+                            locService.getNetworks().isEmpty()) {
+                        ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
+                        if (locService.isTopologyUpdateInProgress()) {
+                            type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
+                        }
+                        Fragment newFragment = ErrorFragment.newInstance(type,
+                                ((MainAddableFragment) currentFragment).getNavDrawerId(),
+                                ((MainAddableFragment) currentFragment).getNavDrawerIdAsString());
+                        replaceFragment(newFragment, false, true);
+                        break;
+                    }
+                }
             }
         }
     };
@@ -650,11 +696,11 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public void switchToPage(String pageString) {
+    public void switchToPage(String pageString, boolean addToBackStack) {
         Fragment newFragment = getNewFragment(pageStringToResourceId(pageString));
 
         if (newFragment != null) {
-            replaceFragment(newFragment, true);
+            replaceFragment(newFragment, addToBackStack, true);
         } else {
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }

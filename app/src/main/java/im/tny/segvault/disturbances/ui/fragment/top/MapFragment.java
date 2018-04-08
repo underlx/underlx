@@ -99,6 +99,21 @@ public class MapFragment extends TopFragment {
         // Required empty public constructor
     }
 
+    @Override
+    public boolean needsTopology() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_map;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_map";
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -124,7 +139,7 @@ public class MapFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.frag_map_title), R.id.nav_map, true, false);
+        setUpActivity(getString(R.string.frag_map_title), true, false);
         setHasOptionsMenu(true);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);

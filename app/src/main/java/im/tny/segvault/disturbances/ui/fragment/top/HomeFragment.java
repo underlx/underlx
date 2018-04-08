@@ -87,6 +87,21 @@ public class HomeFragment extends TopFragment {
         // Required empty public constructor
     }
 
+    @Override
+    public boolean needsTopology() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_home;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_home";
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -108,7 +123,7 @@ public class HomeFragment extends TopFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setUpActivity(getString(R.string.app_name), R.id.nav_home, false, true);
+        setUpActivity(getString(R.string.app_name), false, true);
         setHasOptionsMenu(true);
 
         // Inflate the layout for this fragment

@@ -44,11 +44,13 @@ import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 
-public class NotifPreferenceFragment extends XpPreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class NotifPreferenceFragment extends XpPreferenceFragment implements
+        SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {
     private OnFragmentInteractionListener mListener;
 
     public NotifPreferenceFragment() {
@@ -269,6 +271,26 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements Sha
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public boolean needsTopology() {
+        return false;
+    }
+
+    @Override
+    public boolean isScrollable() {
+        return true;
+    }
+
+    @Override
+    public int getNavDrawerId() {
+        return R.id.nav_notif;
+    }
+
+    @Override
+    public String getNavDrawerIdAsString() {
+        return "nav_notif";
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {

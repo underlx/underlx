@@ -16,13 +16,13 @@ import im.tny.segvault.disturbances.R;
  * Created by gabriel on 5/6/17.
  */
 
-public abstract class TopFragment extends Fragment {
+public abstract class TopFragment extends Fragment implements MainAddableFragment {
     private OnInteractionListener mListener;
 
-    protected void setUpActivity(String title, int navDrawerId, boolean withFab, boolean withRefresh) {
+    protected void setUpActivity(String title, boolean withFab, boolean withRefresh) {
         getActivity().setTitle(title);
         if (mListener != null) {
-            mListener.checkNavigationDrawerItem(navDrawerId);
+            mListener.checkNavigationDrawerItem(getNavDrawerId());
         }
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         if (withFab) {
@@ -57,7 +57,7 @@ public abstract class TopFragment extends Fragment {
 
     protected void switchToPage(String pageString) {
         if (mListener != null) {
-            mListener.switchToPage(pageString);
+            mListener.switchToPage(pageString, true);
         }
     }
 
@@ -83,6 +83,6 @@ public abstract class TopFragment extends Fragment {
 
         void checkNavigationDrawerItem(int id);
 
-        void switchToPage(String pageString);
+        void switchToPage(String pageString, boolean addToBackStack);
     }
 }
