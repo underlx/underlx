@@ -321,6 +321,11 @@
     <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
     <string name="frag_error_version_too_old_desc">Esta versão do &appname; já não é compatível com os serviços online &appname;. Por favor actualize para poder continuar a usar o &appname;.</string>
     <string name="frag_error_view_store_page">Ver app no Google Play</string>
+    <string name="frag_settings_all_trips_delete">Limpar histórico de viagens</string>
+    <string name="frag_settings_all_trips_delete_summary">Apagar todas as viagens do histórico de viagens neste dispositivo</string>
+    <string name="frag_settings_all_trips_delete_confirmation_title">Apagar todas as viagens?</string>
+    <string name="frag_settings_all_trips_delete_confirmation_desc">A informação sobre todas as viagens será eliminada e todas as estatísticas serão repostas a zeros.</string>
+    <string name="frag_settings_all_trips_delete_confirmation_delete">Apagar todas as viagens</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

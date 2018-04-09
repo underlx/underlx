@@ -321,6 +321,11 @@
     <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
     <string name="frag_error_version_too_old_desc">Esta versión de &appname; ha dejado de ser compatible con los servicios en línea de &appname;. Por favor, atualiza para seguir usando &appname;.</string>
     <string name="frag_error_view_store_page">Ver aplicación en Google Play</string>
+    <string name="frag_settings_all_trips_delete">Borrar historial de trayectos</string>
+    <string name="frag_settings_all_trips_delete_summary">Borrar todos los trayectos del historial de trayectos en este dispositivo</string>
+    <string name="frag_settings_all_trips_delete_confirmation_title">Borrar todos los trayectos?</string>
+    <string name="frag_settings_all_trips_delete_confirmation_desc">La información sobre todos los trayectos será eliminada y todas las estadísticas se restablecerán.</string>
+    <string name="frag_settings_all_trips_delete_confirmation_delete">Borrar todos los trayectos</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

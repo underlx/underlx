@@ -27,14 +27,17 @@
             android:key="pref_auto_open_visit_correction"
             android:summary="@string/frag_settings_auto_open_visit_correction_summary"
             android:title="@string/frag_settings_auto_open_visit_correction" />
+        <im.tny.segvault.disturbances.ui.util.ClearAllTripsPreference
+            android:summary="@string/frag_settings_all_trips_delete_summary"
+            android:title="@string/frag_settings_all_trips_delete" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/frag_settings_locale_title">
         <ListPreference
             android:defaultValue="auto"
-            android:key="pref_locale"
-            android:title="@string/frag_settings_app_language"
             android:entries="@array/frag_settings_languages"
-            android:entryValues="@array/frag_settings_language_values"/>
+            android:entryValues="@array/frag_settings_language_values"
+            android:key="pref_locale"
+            android:title="@string/frag_settings_app_language" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_prefer_main_names"
@@ -42,7 +45,7 @@
             android:title="@string/frag_settings_prefer_main_names" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/frag_settings_other_title">
-     <CheckBoxPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_developer_mode"
             android:summary="@string/frag_settings_developer_mode_summary"

@@ -321,6 +321,11 @@
     <string name="frag_error_version_too_old">&appname; trop obsolète</string>
     <string name="frag_error_version_too_old_desc">Cette version d\'&appname; n\'est-ce pas compatible avec des services en ligne &appname;. Actualiser s\'il vous plaît pour être continuer utiliser &appname;.</string>
     <string name="frag_error_view_store_page">Voir application sur Google Play</string>
+    <string name="frag_settings_all_trips_delete">Effacer historique de trajets</string>
+    <string name="frag_settings_all_trips_delete_summary">Effacer tous les trajets du historique de trajets à ce dispositif</string>
+    <string name="frag_settings_all_trips_delete_confirmation_title">Effacer tous les trajets?</string>
+    <string name="frag_settings_all_trips_delete_confirmation_desc">L\'information sur tous les trajets sera effacée et tous les statistiques seront remisé à zéro.</string>
+    <string name="frag_settings_all_trips_delete_confirmation_delete">Effacer tous les trajets</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>
