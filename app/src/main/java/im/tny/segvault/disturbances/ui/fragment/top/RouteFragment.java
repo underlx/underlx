@@ -33,8 +33,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
@@ -233,7 +235,7 @@ public class RouteFragment extends TopFragment {
                 hideRoute();
             }
         });
-        if(!loc.inNetwork()) {
+        if (!loc.inNetwork()) {
             originPicker.setAllowMyLocation(true);
         }
 
@@ -264,7 +266,7 @@ public class RouteFragment extends TopFragment {
         });
 
         String destId = mListener.getRouteDestination();
-        if(destId != null) {
+        if (destId != null) {
             destinationPicker.setSelectionById(destId);
         }
     }
@@ -289,7 +291,7 @@ public class RouteFragment extends TopFragment {
         Route realtimeRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
         Route neutralRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(),
                 new NeutralWeighter(), new NeutralQualifier());
-        if(useRealtimeCheckbox.isChecked()) {
+        if (useRealtimeCheckbox.isChecked()) {
             route = realtimeRoute;
         } else {
             route = neutralRoute;
@@ -489,7 +491,7 @@ public class RouteFragment extends TopFragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
-        if(realtimeEqualsNeutral) {
+        if (realtimeEqualsNeutral) {
             useRealtimeCheckbox.setVisibility(View.GONE);
         } else {
             useRealtimeCheckbox.setVisibility(View.VISIBLE);
@@ -501,7 +503,7 @@ public class RouteFragment extends TopFragment {
         // can actually provide proper weights for lines with disturbances, and not just some
         // extremely large number
         NeutralWeighter weighter = new NeutralWeighter();
-        for(Connection c : route.getPath().getEdgeList()) {
+        for (Connection c : route.getPath().getEdgeList()) {
             length += c.getWorldLength();
             realWeight += weighter.getEdgeWeight(network, c);
         }
@@ -528,13 +530,31 @@ public class RouteFragment extends TopFragment {
         TextView stationView = (TextView) view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
-        if(station.isExceptionallyClosed(station.getNetwork(), new Date())) {
+        if (station.isExceptionallyClosed(station.getNetwork(), new Date())) {
             stationView.setTextColor(Color.GRAY);
         }
 
-        if(showInfoIcons) {
+        if (showInfoIcons) {
             View separatorView = (View) view.findViewById(R.id.feature_separator_view);
+            LinearLayout iconsLayout = (LinearLayout) view.findViewById(R.id.icons_layout);
 
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            Set<Integer> addedDrawables = new HashSet<>();
+            for (String tag : station.getTags()) {
+                int drawableResourceId = Util.getDrawableResourceIdForStationTag(tag);
+
+                if(drawableResourceId != 0 && !addedDrawables.contains(drawableResourceId)) {
+                    addedDrawables.add(drawableResourceId);
+                    View iconView = inflater.inflate(R.layout.station_include_icon, iconsLayout, false);
+                    ImageView iconImageView = (ImageView) iconView.findViewById(R.id.image_view);
+                    iconImageView.setImageResource(drawableResourceId);
+                    separatorView.setVisibility(View.VISIBLE);
+                    iconsLayout.addView(iconView);
+                }
+            }
+/*
             ImageView liftView = (ImageView) view.findViewById(R.id.feature_lift_view);
             if (station.getFeatures().lift) {
                 liftView.setVisibility(View.VISIBLE);
@@ -575,12 +595,12 @@ public class RouteFragment extends TopFragment {
             if (station.getFeatures().bike) {
                 bikeView.setVisibility(View.VISIBLE);
                 separatorView.setVisibility(View.VISIBLE);
-            }
+            }*/
         }
 
         LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
 
-        if(setOnClickListener) {
+        if (setOnClickListener) {
             stationLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

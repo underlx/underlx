@@ -245,7 +245,7 @@ public class StationLobbyFragment extends Fragment {
         if (googleMap == null || !mapLayoutReady) {
             return;
         }
-        if (!station.getFeatures().train) {
+        if (!station.getAllTags().contains("c_train")) {
             googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             getContext(), R.raw.no_train_stations_map_style));

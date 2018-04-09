@@ -1,14 +1,9 @@
 package im.tny.segvault.subway;
 
-import android.text.format.DateUtils;
-import android.text.format.Time;
-
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Created by Gabriel on 28/12/2017.

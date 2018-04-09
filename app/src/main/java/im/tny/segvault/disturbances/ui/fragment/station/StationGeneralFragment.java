@@ -20,7 +20,9 @@ import android.widget.TextView;
 
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.ExtraContentCache;
@@ -143,8 +145,66 @@ public class StationGeneralFragment extends Fragment {
             closedLayout.setVisibility(View.VISIBLE);
         }
 
-        // Connections
+        // Titles
         TextView connectionsTitleView = (TextView) view.findViewById(R.id.connections_title_view);
+        TextView accessibilityTitleView = (TextView) view.findViewById(R.id.accessibility_title_view);
+        TextView servicesTitleView = (TextView) view.findViewById(R.id.services_title_view);
+
+        // feature indication
+        final Map<String, View> tagToView = new HashMap<>();
+        final Map<String, View> tagToTitle = new HashMap<>();
+        tagToView.put("a_store", view.findViewById(R.id.service_stores_layout));
+        tagToTitle.put("a_store", servicesTitleView);
+        tagToView.put("a_wc", view.findViewById(R.id.service_wc_layout));
+        tagToTitle.put("a_wc", servicesTitleView);
+        tagToView.put("a_wifi", view.findViewById(R.id.service_wifi_layout));
+        tagToTitle.put("a_wifi", servicesTitleView);
+        tagToView.put("c_airport", view.findViewById(R.id.feature_airport_layout));
+        tagToTitle.put("c_airport", connectionsTitleView);
+        tagToView.put("c_bike", view.findViewById(R.id.service_bike_layout));
+        tagToTitle.put("c_bike", servicesTitleView);
+        tagToView.put("c_boat", view.findViewById(R.id.feature_boat_layout));
+        tagToTitle.put("c_boat", connectionsTitleView);
+        tagToView.put("c_bus", view.findViewById(R.id.feature_bus_layout));
+        tagToTitle.put("c_bus", connectionsTitleView);
+        tagToView.put("c_parking", view.findViewById(R.id.service_park_layout));
+        tagToTitle.put("c_parking", servicesTitleView);
+        tagToView.put("c_taxi", view.findViewById(R.id.feature_taxi_layout));
+        tagToTitle.put("c_taxi", connectionsTitleView);
+        tagToView.put("c_train", view.findViewById(R.id.feature_train_layout));
+        tagToTitle.put("c_train", connectionsTitleView);
+        tagToView.put("m_escalator_platform", view.findViewById(R.id.feature_escalator_platform_layout));
+        tagToTitle.put("m_escalator_platform", accessibilityTitleView);
+        tagToView.put("m_escalator_surface", view.findViewById(R.id.feature_escalator_surface_layout));
+        tagToTitle.put("m_escalator_surface", accessibilityTitleView);
+        tagToView.put("m_stepfree", view.findViewById(R.id.feature_stepfree_layout));
+        tagToTitle.put("m_stepfree", accessibilityTitleView);
+        tagToView.put("m_lift_platform", view.findViewById(R.id.feature_lift_platform_layout));
+        tagToTitle.put("m_lift_platform", accessibilityTitleView);
+        tagToView.put("m_lift_surface", view.findViewById(R.id.feature_lift_surface_layout));
+        tagToTitle.put("m_lift_surface", accessibilityTitleView);
+        tagToView.put("m_platform", view.findViewById(R.id.feature_wheelchair_platform_layout));
+        tagToTitle.put("m_platform", accessibilityTitleView);
+        tagToView.put("s_lostfound", view.findViewById(R.id.service_lostfound_layout));
+        tagToTitle.put("s_lostfound", servicesTitleView);
+        tagToView.put("s_ticket1", view.findViewById(R.id.service_ticket_office_layout));
+        tagToTitle.put("s_ticket1", servicesTitleView);
+        tagToView.put("s_ticket2", view.findViewById(R.id.service_ticket_office_layout));
+        tagToTitle.put("s_ticket2", servicesTitleView);
+        tagToView.put("s_ticket3", view.findViewById(R.id.service_ticket_office_layout));
+        tagToTitle.put("s_ticket3", servicesTitleView);
+        tagToView.put("s_urgent_pass", view.findViewById(R.id.service_urgent_tickets_layout));
+        tagToTitle.put("s_urgent_pass", servicesTitleView);
+
+        List<String> stationTags = station.getAllTags();
+        for(String tag : stationTags) {
+            View view = tagToView.get(tag);
+            View titleView = tagToTitle.get(tag);
+            if(view != null && titleView != null) {
+                view.setVisibility(View.VISIBLE);
+                titleView.setVisibility(View.VISIBLE);
+            }
+        }
 
         // buttons
         Button busButton = (Button) view.findViewById(R.id.connections_bus_button);
@@ -183,42 +243,6 @@ public class StationGeneralFragment extends Fragment {
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
-        // icons
-        LinearLayout busLayout = (LinearLayout) view.findViewById(R.id.feature_bus_layout);
-        if (station.getFeatures().bus) {
-            busLayout.setVisibility(View.VISIBLE);
-            connectionsTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout boatLayout = (LinearLayout) view.findViewById(R.id.feature_boat_layout);
-        if (station.getFeatures().boat) {
-            boatLayout.setVisibility(View.VISIBLE);
-            connectionsTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout trainLayout = (LinearLayout) view.findViewById(R.id.feature_train_layout);
-        if (station.getFeatures().train) {
-            trainLayout.setVisibility(View.VISIBLE);
-            connectionsTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout airportLayout = (LinearLayout) view.findViewById(R.id.feature_airport_layout);
-        if (station.getFeatures().airport) {
-            airportLayout.setVisibility(View.VISIBLE);
-            connectionsTitleView.setVisibility(View.VISIBLE);
-        }
-
-        // Accessibility
-        TextView accessibilityTitleView = (TextView) view.findViewById(R.id.accessibility_title_view);
-        LinearLayout liftLayout = (LinearLayout) view.findViewById(R.id.feature_lift_layout);
-        if (station.getFeatures().lift) {
-            liftLayout.setVisibility(View.VISIBLE);
-            accessibilityTitleView.setVisibility(View.VISIBLE);
-        }
-
-        // Services
-        TextView servicesTitleView = (TextView) view.findViewById(R.id.services_title_view);
-
         Button parkButton = (Button) view.findViewById(R.id.connections_park_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_PARK)) {
             parkButton.setVisibility(View.VISIBLE);
@@ -240,24 +264,6 @@ public class StationGeneralFragment extends Fragment {
                     ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BIKE, station);
                 }
             });
-            servicesTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout wifiLayout = (LinearLayout) view.findViewById(R.id.service_wifi_layout);
-        if (station.getFeatures().wifi) {
-            wifiLayout.setVisibility(View.VISIBLE);
-            servicesTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout parkLayout = (LinearLayout) view.findViewById(R.id.service_park_layout);
-        if (station.getFeatures().parking) {
-            parkLayout.setVisibility(View.VISIBLE);
-            servicesTitleView.setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout bikeLayout = (LinearLayout) view.findViewById(R.id.service_bike_layout);
-        if (station.getFeatures().bike) {
-            bikeLayout.setVisibility(View.VISIBLE);
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 

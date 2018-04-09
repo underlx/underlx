@@ -35,8 +35,8 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
@@ -94,7 +94,8 @@ public class API {
         public String name;
         public List<String> altNames;
         public String network;
-        public StationFeatures features;
+        public List<String> tags;
+        public List<String> lowTags;
         public List<String> lobbies;
         public List<String> lines;
         public List<WiFiAP> wiFiAPs;

@@ -88,7 +88,6 @@
     <string name="frag_station_train">Gare ferroviaire</string>
     <string name="frag_station_airport">Aéroport</string>
     <string name="frag_station_accessibility">Accessibilité</string>
-    <string name="frag_station_lift">Ascenseur</string>
     <string name="frag_station_statistics">Statistiques</string>
     <string name="frag_station_stats_intro">Dans cette station, vous…</string>
     <string name="frag_station_stats_entry">Avez entré le réseau %d fois</string>
@@ -250,7 +249,6 @@
     <string name="notif_route_leave_train_next">Descendez au prochain arrêt</string>
     <string name="notif_route_leave_train_now">Descendez du train</string>
     <string name="frag_station_car_parking">Parking</string>
-    <string name="frag_station_parking">Parking</string>
     <string name="frag_trip_stats">%1$d m en %2$s, vitesse moyenne %3$.01f km/h</string>
     <string name="frag_station_shared_bikes">Partage de vélo</string>
     <string name="act_notif_schedule_title">Temps des notifications</string>
@@ -326,6 +324,18 @@
     <string name="frag_settings_all_trips_delete_confirmation_title">Effacer tous les trajets?</string>
     <string name="frag_settings_all_trips_delete_confirmation_desc">L\'information sur tous les trajets sera effacée et tous les statistiques seront remisé à zéro.</string>
     <string name="frag_settings_all_trips_delete_confirmation_delete">Effacer tous les trajets</string>
+    <string name="frag_station_taxi">Station de taxis</string>
+    <string name="frag_station_reduced_mobility">Mobilité Réduite</string>
+    <string name="frag_station_lift_surface">Ascenseur hall-surface</string>
+    <string name="frag_station_lift_platform">Ascenseur hall-quai</string>
+    <string name="frag_station_escalator_surface">Escalier roulant hall-surface</string>
+    <string name="frag_station_escalator_platform">Escalier roulant hall-quai</string>
+    <string name="frag_station_wheelchair_platform">Plateforme pour fauteuils roulants</string>
+    <string name="frag_station_wc">Salles de bain</string>
+    <string name="frag_station_stores">Magasin</string>
+    <string name="frag_station_ticket_office">Point de vente / assistance</string>
+    <string name="frag_station_urgent_ticket">Point Lisboa Viva urgent</string>
+    <string name="frag_station_lostfound">Bureau des objets trouvés</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

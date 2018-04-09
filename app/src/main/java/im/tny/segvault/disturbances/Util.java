@@ -306,6 +306,49 @@ public class Util {
         }
     }
 
+    public static int getDrawableResourceIdForStationTag(String tag) {
+        switch (tag) {
+            case "a_store":
+                return R.drawable.ic_gift_black_24dp;
+            case "a_wc":
+                return R.drawable.ic_wc_black_24dp;
+            case "a_wifi":
+                return R.drawable.ic_wifi_black_24dp;
+            case "c_airport":
+                return R.drawable.ic_local_airport_black_24dp;
+            case "c_bike":
+                return R.drawable.ic_directions_bike_black_24dp;
+            case "c_boat":
+                return R.drawable.ic_directions_boat_black_24dp;
+            case "c_bus":
+                return R.drawable.ic_directions_bus_black_24dp;
+            case "c_parking":
+                return R.drawable.ic_local_parking_black_24dp;
+            case "c_taxi":
+                return R.drawable.ic_local_taxi_black_24dp;
+            case "c_train":
+                return R.drawable.ic_train_black_24dp;
+            case "m_escalator_platform":
+            case "m_escalator_surface":
+                return R.drawable.ic_escalator_black_24dp;
+            case "m_lift_platform":
+            case "m_lift_surface":
+                return R.drawable.ic_elevator;
+            case "m_platform":
+            case "m_stepfree":
+                return R.drawable.ic_wheelchair_black_24dp;
+            case "s_lostfound":
+                return R.drawable.ic_account_balance_wallet_black_24dp;
+            case "s_ticket1":
+            case "s_ticket2":
+            case "s_ticket3":
+            case "s_urgent_pass":
+                return R.drawable.ic_cards_black_24dp;
+            default:
+                return 0;
+        }
+    }
+
     public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId, int tintColor) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());

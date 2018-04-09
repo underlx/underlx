@@ -22,18 +22,18 @@ import im.tny.segvault.s2ls.routing.IAlternativeQualifier;
  */
 
 public class Station extends Zone implements IIDable, Comparable<Station> {
-    public Station(Network network, Set<Stop> stops, String id, String name, List<String> altNames, Features features, Map<String, String> triviaURLs) {
+    public Station(Network network, Set<Stop> stops, String id, String name, List<String> altNames, List<String> tags, List<String> lowTags, Map<String, String> triviaURLs) {
         super(network, stops);
         setId(id);
         setName(name);
         setAltNames(altNames);
-        setFeatures(features);
+        setTags(tags, lowTags);
         this.lines = new ArrayList<>();
         setTriviaURLs(triviaURLs);
     }
 
-    public Station(Network network, String id, String name, List<String> altNames, Features features, Map<String, String> triviaURLs) {
-        this(network, new HashSet<Stop>(), id, name, altNames, features, triviaURLs);
+    public Station(Network network, String id, String name, List<String> altNames, List<String> tags, List<String> lowTags, Map<String, String> triviaURLs) {
+        this(network, new HashSet<Stop>(), id, name, altNames, tags, lowTags, triviaURLs);
     }
 
     private String name;
@@ -249,48 +249,26 @@ public class Station extends Zone implements IIDable, Comparable<Station> {
         return this.getId().compareTo(o.getId());
     }
 
-    static public class Features implements Serializable {
-        public boolean lift;
-        public boolean bus;
-        public boolean boat;
-        public boolean train;
-        public boolean airport;
-        public boolean wifi;
-        public boolean parking;
-        public boolean bike;
+    private List<String> tags = new ArrayList<>();
+    private List<String> lowTags = new ArrayList<>();
 
-        public Features(boolean lift, boolean bus, boolean boat, boolean train, boolean airport) {
-            this.lift = lift;
-            this.bus = bus;
-            this.boat = boat;
-            this.train = train;
-            this.airport = airport;
-        }
+    public void setTags(List<String> tags, List<String> lowTags) {
+        this.tags = tags;
+        this.lowTags = lowTags;
     }
 
-    private Features features;
-
-    public Features getFeatures() {
-        // TODO wi-fi: un-mock this and use info from server
-        features.wifi = false;
-        for (Stop stop : getStops()) {
-            Object o = stop.getMeta("WiFiChecker");
-            if (o == null || !(o instanceof List)) {
-                continue;
-            }
-            features.wifi = ((List) o).size() > 0;
-            if (features.wifi) {
-                break;
-            }
-        }
-        // TODO parking, bike: un-mock this and use info from server
-        features.parking = hasConnectionUrl(CONNECTION_TYPE_PARK);
-        features.bike = hasConnectionUrl(CONNECTION_TYPE_BIKE);
-        return features;
+    public List<String> getTags() {
+        return this.tags;
     }
 
-    public void setFeatures(Features features) {
-        this.features = features;
+    public List<String> getLowTags() {
+        return this.lowTags;
+    }
+
+    public List<String> getAllTags() {
+        List<String> l = new ArrayList<>(this.tags);
+        l.addAll(this.lowTags);
+        return l;
     }
 
     private List<Lobby> lobbies = new ArrayList<>();
