@@ -313,11 +313,11 @@
     <string name="frag_disturbance_notes">Notes de l\'équipe &appname;:</string>
     <string name="frag_settings_prefer_main_names">Préférer les noms originaux</string>
     <string name="frag_settings_prefer_main_names_summary">Préférer montrer les noms des lignes et des réseaux dans sa langue originale</string>
-    <string name="frag_error_missing_topology">Plan du réseau manquante</string>
-    <string name="frag_error_missing_topology_desc">L\' &appname; actualisé et le plan du réseau déchargé antérieurement n\'est-ce pas compatible. Connectez-vous à internet pour décharger un nouveau plan du réseau.</string>
-    <string name="frag_error_topology_download_ongoing">Le plan du réseau est être actualisé...</string>
+    <string name="frag_error_missing_topology">Plan du réseau manquant</string>
+    <string name="frag_error_missing_topology_desc">L\'&appname; mis à jour et le plan du réseau téléchargé avant ne sont pas compatibles. Connectez-vous à l\'internet pour télécharger un nouveau plan du réseau.</string>
+    <string name="frag_error_topology_download_ongoing">La mise à jour du plan du réseau est en cours...</string>
     <string name="frag_error_version_too_old">&appname; trop obsolète</string>
-    <string name="frag_error_version_too_old_desc">Cette version d\'&appname; n\'est-ce pas compatible avec des services en ligne &appname;. Actualiser s\'il vous plaît pour être continuer utiliser &appname;.</string>
+    <string name="frag_error_version_too_old_desc">Cette version d\'&appname; n\'est pas compatible avec des services en ligne. Pour continuer à utiliser &appname;, s\'il vous plaît mettez-la à jour.</string>
     <string name="frag_error_view_store_page">Voir application sur Google Play</string>
     <string name="frag_settings_all_trips_delete">Effacer historique de trajets</string>
     <string name="frag_settings_all_trips_delete_summary">Effacer tous les trajets du historique de trajets à ce dispositif</string>
@@ -330,8 +330,8 @@
     <string name="frag_station_lift_platform">Ascenseur hall-quai</string>
     <string name="frag_station_escalator_surface">Escalier roulant hall-surface</string>
     <string name="frag_station_escalator_platform">Escalier roulant hall-quai</string>
-    <string name="frag_station_wheelchair_platform">Plateforme pour fauteuils roulants</string>
-    <string name="frag_station_wc">Salles de bain</string>
+    <string name="frag_station_wheelchair_platform">Plateforme pour des fauteuils roulants</string>
+    <string name="frag_station_wc">Toilettes publiques</string>
     <string name="frag_station_stores">Magasin</string>
     <string name="frag_station_ticket_office">Point de vente / assistance</string>
     <string name="frag_station_urgent_ticket">Point Lisboa Viva urgent</string>
