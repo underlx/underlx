@@ -149,6 +149,7 @@ public class MainService extends Service {
     public void onCreate() {
         creationDate = new Date();
         stateTickHandler = new Handler();
+        API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
         wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));

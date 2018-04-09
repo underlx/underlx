@@ -1,5 +1,8 @@
 package im.tny.segvault.disturbances;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,17 +35,29 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     public static API getInstance() {
         return singleton;
     }
 
     private PairManager pairManager;
+    private Meta endpointMetaInfo;
+    private Object lock = new Object();
+    private Context context;
 
     public void setPairManager(PairManager manager) {
         pairManager = manager;
+    }
+    public void setContext(Context context) { this.context = context; }
+
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Meta {
+        public boolean supported;
+        public boolean up;
+        public int minAndroidClient;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -393,7 +408,64 @@ public class API {
         return doInputRequest(uri, content, authenticate, "PUT");
     }
 
+    private Meta getMetaOnline() throws APIException {
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("meta"), false), Meta.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Meta getMeta() throws APIException {
+        synchronized (lock) {
+            if (this.endpointMetaInfo == null) {
+                this.endpointMetaInfo = getMetaOnline();
+                if(context != null) {
+                    Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                }
+            }
+            return this.endpointMetaInfo;
+        }
+    }
+
+    public boolean meetsEndpointRequirements(boolean goOnline) {
+        if(!goOnline) {
+            synchronized (lock) {
+                if (endpointMetaInfo == null) {
+                    return true;
+                }
+                return BuildConfig.VERSION_CODE >= endpointMetaInfo.minAndroidClient;
+            }
+        }
+        try {
+            Meta meta = getMeta();
+            return BuildConfig.VERSION_CODE >= meta.minAndroidClient;
+        } catch (APIException ex) {
+            return true;
+        }
+    }
+
+    private void throwIfRequirementsNotMet() throws APIException {
+        if (!meetsEndpointRequirements(true)) {
+            throw new APIException(new Exception("This API client does not meet endpoint requirements"));
+        }
+        if (this.endpointMetaInfo != null) {
+            if (!this.endpointMetaInfo.up) {
+                throw new APIException(new Exception("Endpoint reports it is not operating"));
+            }
+            if (!this.endpointMetaInfo.supported) {
+                throw new APIException(new Exception("Endpoint reports it is not supported"));
+            }
+        }
+    }
+
     public List<Network> getNetworks() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("networks"), false), new TypeReference<List<Network>>() {
             });
@@ -407,6 +479,7 @@ public class API {
     }
 
     public Network getNetwork(String id) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("networks/" + id), false), Network.class);
         } catch (JsonParseException e) {
@@ -419,6 +492,7 @@ public class API {
     }
 
     public List<Station> getStations() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("stations"), false), new TypeReference<List<Station>>() {
             });
@@ -432,6 +506,7 @@ public class API {
     }
 
     public Station getStation(String id) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("stations/" + id), false), Station.class);
         } catch (JsonParseException e) {
@@ -444,6 +519,7 @@ public class API {
     }
 
     public List<Lobby> getLobbies() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("lobbies"), false), new TypeReference<List<Lobby>>() {
             });
@@ -457,6 +533,7 @@ public class API {
     }
 
     public Lobby getLobby(String id) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("lobbies/" + id), false), Lobby.class);
         } catch (JsonParseException e) {
@@ -469,6 +546,7 @@ public class API {
     }
 
     public List<Connection> getConnections() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("connections"), false), new TypeReference<List<Connection>>() {
             });
@@ -482,6 +560,7 @@ public class API {
     }
 
     public List<Transfer> getTransfers() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("transfers"), false), new TypeReference<List<Transfer>>() {
             });
@@ -495,6 +574,7 @@ public class API {
     }
 
     public Line getLine(String id) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("lines/" + id), false), Line.class);
         } catch (JsonParseException e) {
@@ -507,6 +587,7 @@ public class API {
     }
 
     public List<DatasetInfo> getDatasetInfos() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("datasets"), false), new TypeReference<List<DatasetInfo>>() {
             });
@@ -520,6 +601,7 @@ public class API {
     }
 
     public DatasetInfo getDatasetInfo(String id) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("datasets/" + id), false), DatasetInfo.class);
         } catch (JsonParseException e) {
@@ -532,6 +614,7 @@ public class API {
     }
 
     public List<Disturbance> getDisturbances() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("disturbances?omitduplicatestatus=true"), false), new TypeReference<List<Disturbance>>() {
             });
@@ -545,6 +628,7 @@ public class API {
     }
 
     public List<Disturbance> getOngoingDisturbances() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("disturbances?omitduplicatestatus=true&filter=ongoing"), false), new TypeReference<List<Disturbance>>() {
             });
@@ -558,6 +642,7 @@ public class API {
     }
 
     public List<Disturbance> getDisturbancesSince(Date since) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             String url = String.format("disturbances?omitduplicatestatus=true&start=%s",
                     URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"));
@@ -573,6 +658,7 @@ public class API {
     }
 
     public Pair postPairRequest(PairRequest request) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("pair"), content, false);
@@ -587,6 +673,7 @@ public class API {
     }
 
     public AuthTest getAuthTest() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("authtest"), true), AuthTest.class);
         } catch (JsonParseException e) {
@@ -599,6 +686,7 @@ public class API {
     }
 
     public Trip postTrip(TripRequest request) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("trips"), content, true);
@@ -613,6 +701,7 @@ public class API {
     }
 
     public Trip putTrip(TripRequest request) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = putRequest(endpoint.resolve("trips"), content, true);
@@ -627,6 +716,7 @@ public class API {
     }
 
     public Stats getStats(String networkID, Date since, Date until) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             String url = String.format("stats/%s?start=%s&end=%s",
                     networkID, URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"), URLEncoder.encode(Util.encodeRFC3339(until), "utf-8"));
@@ -641,6 +731,7 @@ public class API {
     }
 
     public Feedback postFeedback(Feedback request) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("feedback"), content, true);
@@ -655,6 +746,7 @@ public class API {
     }
 
     public List<Announcement> getAnnouncements() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("announcements"), false), new TypeReference<List<Announcement>>() {
             });
@@ -668,6 +760,7 @@ public class API {
     }
 
     public List<Announcement> getAnnouncementsFromSource(String source) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("announcements/" + source), false), new TypeReference<List<Announcement>>() {
             });
@@ -681,6 +774,7 @@ public class API {
     }
 
     public List<POI> getPOIs() throws APIException {
+        throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("pois"), false), new TypeReference<List<POI>>() {
             });
@@ -694,6 +788,7 @@ public class API {
     }
 
     public Feedback postRealtimeLocation(RealtimeLocationRequest request) throws APIException {
+        throwIfRequirementsNotMet();
         try {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("rt"), content, true);
@@ -706,4 +801,6 @@ public class API {
             throw new APIException(e).addInfo("IOException");
         }
     }
+
+    public static final String ACTION_ENDPOINT_META_AVAILABLE = "im.tny.segvault.disturbances.action.API.metadownloaded";
 }

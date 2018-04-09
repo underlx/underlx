@@ -38,6 +38,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
@@ -156,6 +157,7 @@ public class MainActivity extends TopActivity
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         filter.addAction(FeedbackUtil.ACTION_FEEDBACK_PROVIDED);
         filter.addAction(ACTION_MAIN_SERVICE_BOUND);
+        filter.addAction(API.ACTION_ENDPOINT_META_AVAILABLE);
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -375,7 +377,11 @@ public class MainActivity extends TopActivity
             transaction.remove(currentFragment);
         }
 
-        if (locService != null && ((MainAddableFragment) newFragment).needsTopology() && locService.getNetworks().isEmpty()) {
+        if (!API.getInstance().meetsEndpointRequirements(false)) {
+            newFragment = ErrorFragment.newInstance(ErrorFragment.ErrorType.VERSION_TOO_OLD,
+                    ((MainAddableFragment) newFragment).getNavDrawerId(),
+                    ((MainAddableFragment) newFragment).getNavDrawerIdAsString());
+        } else if (locService != null && ((MainAddableFragment) newFragment).needsTopology() && locService.getNetworks().isEmpty()) {
             ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
             if (locService.isTopologyUpdateInProgress()) {
                 type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
@@ -658,25 +664,34 @@ public class MainActivity extends TopActivity
                     }
                     Snackbar.make(findViewById(R.id.fab), msg3, Snackbar.LENGTH_LONG).show();
                     break;
+                case API.ACTION_ENDPOINT_META_AVAILABLE:
                 case ACTION_MAIN_SERVICE_BOUND: {
                     // when the activity loads, we're not bound to the main service, and thus we cannot know if
                     // there is topology data or not, therefore we can't display the "no topology" error message
                     // now that we have bound to the main service, we can check whether the topology is present and display the error if not.
                     Fragment currentFragment = getCurrentFragment();
-                    if (locService != null &&
-                            currentFragment instanceof MainAddableFragment &&
-                            ((MainAddableFragment) currentFragment).needsTopology() &&
-                            locService.getNetworks().isEmpty()) {
-                        ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
-                        if (locService.isTopologyUpdateInProgress()) {
-                            type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
+                    Fragment newFragment = null;
+                    if (currentFragment instanceof MainAddableFragment) {
+                        if (!API.getInstance().meetsEndpointRequirements(false)) {
+                            newFragment = ErrorFragment.newInstance(ErrorFragment.ErrorType.VERSION_TOO_OLD,
+                                    ((MainAddableFragment) currentFragment).getNavDrawerId(),
+                                    ((MainAddableFragment) currentFragment).getNavDrawerIdAsString());
+                        } else if (locService != null &&
+                                ((MainAddableFragment) currentFragment).needsTopology() &&
+                                locService.getNetworks().isEmpty()) {
+                            ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
+                            if (locService.isTopologyUpdateInProgress()) {
+                                type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
+                            }
+                            newFragment = ErrorFragment.newInstance(type,
+                                    ((MainAddableFragment) currentFragment).getNavDrawerId(),
+                                    ((MainAddableFragment) currentFragment).getNavDrawerIdAsString());
                         }
-                        Fragment newFragment = ErrorFragment.newInstance(type,
-                                ((MainAddableFragment) currentFragment).getNavDrawerId(),
-                                ((MainAddableFragment) currentFragment).getNavDrawerIdAsString());
-                        replaceFragment(newFragment, false, true);
-                        break;
+                        if (newFragment != null) {
+                            replaceFragment(newFragment, false, true);
+                        }
                     }
+                    break;
                 }
             }
         }

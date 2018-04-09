@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -70,6 +72,7 @@ public class ErrorFragment extends TopFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -80,6 +83,7 @@ public class ErrorFragment extends TopFragment {
         originalFragmentIdString = getArguments().getString(ARG_ORIGINAL_ID_STRING);
 
         setUpActivity(getString(R.string.app_name), false, false);
+
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_error, container, false);
 
@@ -106,6 +110,12 @@ public class ErrorFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         return rootView;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.clear();
     }
 
     private void setUpMissingTopologyError() {
