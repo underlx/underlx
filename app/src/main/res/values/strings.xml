@@ -365,6 +365,11 @@
     <string name="act_report_success">Thanks for your contribution.</string>
     <string name="act_report_error">An error occurred when submitting your report. Please try again.</string>
 
+    <string name="disturbance_status_report_begin">Users reported service disruptions</string>
+    <string name="disturbance_status_report_confirm">Several users confirmed service disruptions</string>
+    <string name="disturbance_status_report_reconfirm">Several users confirmed more service disruptions</string>
+    <string name="disturbance_status_report_solved">There are no more reports of service disruptions</string>
+
     <string name="poi_type_dinning">Dinning</string>
     <string name="poi_type_police">Police station</string>
     <string name="poi_type_fire_station">Fire station</string>

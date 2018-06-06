@@ -341,12 +341,17 @@
     <string name="act_report_instructions">Se está a presenciar problemas no serviço do Metro, tais como tempos de espera demasiado elevados para a hora actual, sobrelotação das carruagens ou dos cais, ou incidentes com passageiros, seleccione as linhas afectadas:</string>
     <string name="act_report_send">Comunicar problemas de circulação</string>
     <string name="frag_lines_report_disruptions">Comunicar problemas</string>
-    <string name="notif_route_report">Problemas de circulação?</string>
+    <string name="notif_route_report">Problemas na circulação?</string>
     <string name="act_report_line_name">Linha %s</string>
     <string name="act_report_line_closed">Esta linha está fechada neste momento.</string>
     <string name="act_report_you_are_here">(está aqui)</string>
     <string name="act_report_success">Obrigado pela sua participação.</string>
     <string name="act_report_error">Ocorreu um erro ao submeter o seu relato, por favor tente novamente.</string>
+
+    <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
+    <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>
+    <string name="disturbance_status_report_reconfirm">Vários utilizadores confirmaram mais problemas na circulação</string>
+    <string name="disturbance_status_report_solved">Já não existem relatos de problemas na circulação</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

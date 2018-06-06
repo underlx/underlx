@@ -348,6 +348,11 @@
     <string name="act_report_success">Gracias por su contribuición.</string>
     <string name="act_report_error">Ha ocurrido un error al enviar su relato, por favor inténtelo de nuevo.</string>
 
+    <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
+    <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>
+    <string name="disturbance_status_report_reconfirm">Varios usuarios confirmaron más problemas en la circulación</string>
+    <string name="disturbance_status_report_solved">No hay ya informes de problemas en la circulación</string>
+
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>
     <string name="poi_type_fire_station">Cuartel de bomberos</string>

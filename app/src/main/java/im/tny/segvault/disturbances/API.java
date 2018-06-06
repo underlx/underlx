@@ -178,6 +178,7 @@ public class API {
         public boolean downtime;
         public String status;
         public String source;
+        public String msgType;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
