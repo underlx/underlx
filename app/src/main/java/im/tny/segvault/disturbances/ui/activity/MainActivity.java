@@ -156,6 +156,7 @@ public class MainActivity extends TopActivity
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         filter.addAction(FeedbackUtil.ACTION_FEEDBACK_PROVIDED);
+        filter.addAction(ReportActivity.ACTION_REPORT_PROVIDED);
         filter.addAction(ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(API.ACTION_ENDPOINT_META_AVAILABLE);
         bm = LocalBroadcastManager.getInstance(this);
@@ -663,6 +664,9 @@ public class MainActivity extends TopActivity
                         msg3 = getString(R.string.feedback_provided);
                     }
                     Snackbar.make(findViewById(R.id.fab), msg3, Snackbar.LENGTH_LONG).show();
+                    break;
+                case ReportActivity.ACTION_REPORT_PROVIDED:
+                    Snackbar.make(findViewById(R.id.fab), getString(R.string.act_report_success), Snackbar.LENGTH_LONG).show();
                     break;
                 case API.ACTION_ENDPOINT_META_AVAILABLE:
                 case ACTION_MAIN_SERVICE_BOUND: {

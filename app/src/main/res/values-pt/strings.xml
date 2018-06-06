@@ -336,6 +336,17 @@
     <string name="frag_station_ticket_office">Posto de venda / atendimento</string>
     <string name="frag_station_urgent_ticket">Posto Lisboa Viva urgente</string>
     <string name="frag_station_lostfound">Perdidos e achados</string>
+    <string name="act_report_title">Comunicar problemas</string>
+    <string name="act_report_intro">Seja os olhos do &appname; na rede e ajude a obter uma informação mais completa.</string>
+    <string name="act_report_instructions">Se está a presenciar problemas no serviço do Metro, tais como tempos de espera demasiado elevados para a hora actual, sobrelotação das carruagens ou dos cais, ou incidentes com passageiros, seleccione as linhas afectadas:</string>
+    <string name="act_report_send">Comunicar problemas de circulação</string>
+    <string name="frag_lines_report_disruptions">Comunicar problemas</string>
+    <string name="notif_route_report">Problemas de circulação?</string>
+    <string name="act_report_line_name">Linha %s</string>
+    <string name="act_report_line_closed">Esta linha está fechada neste momento.</string>
+    <string name="act_report_you_are_here">(está aqui)</string>
+    <string name="act_report_success">Obrigado pela sua participação.</string>
+    <string name="act_report_error">Ocorreu um erro ao submeter o seu relato, por favor tente novamente.</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

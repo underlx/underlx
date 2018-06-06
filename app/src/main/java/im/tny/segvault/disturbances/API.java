@@ -299,6 +299,12 @@ public class API {
         public List<float[]> path;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class DisturbanceReport implements Serializable {
+        public String line;
+        public String category;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -794,6 +800,20 @@ public class API {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("rt"), content, true);
             return mapper.readValue(is, Feedback.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public void postDisturbanceReport(DisturbanceReport report) throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            byte[] content = mapper.writeValueAsBytes(report);
+            postRequest(endpoint.resolve("disturbances/reports"), content, true);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

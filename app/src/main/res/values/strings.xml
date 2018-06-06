@@ -42,6 +42,7 @@
     <string name="frag_lines_updated">Updated %s</string>
     <string name="frag_lines_duration">for %d minutes</string>
     <string name="frag_lines_until">until %s</string>
+    <string name="frag_lines_report_disruptions">Report disruptions</string>
     <string name="frag_map_title">Map</string>
     <string name="frag_map_mock_location">Mock location</string>
     <string name="frag_disturbances_title">Disturbances</string>
@@ -81,7 +82,7 @@
     <string name="frag_route_line_name">%s line</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
     <string name="frag_route_station_closed_extended">Station %s is closed for an extended period. An alternative station was suggested.</string>
-    <string name="frag_route_station_closed_schedule">Station %s is currently closed. An alternative station was suggested.</string>
+    <string name="frag_route_station_closed_schedule">Station %s is currently closed for service. An alternative station was suggested.</string>
     <string name="frag_route_start_navigation">Start</string>
     <string name="frag_route_adapt_realtime">Adapt route to current conditions</string>
     <string name="frag_route_swap_choices">Swap origin and destination</string>
@@ -101,6 +102,7 @@
     <string name="notif_route_next_station">Next station: %s</string>
     <string name="notif_route_waiting">Waiting for train…</string>
     <string name="notif_route_end_navigation">Exit navigation</string>
+    <string name="notif_route_report">Service disruptions?</string>
     <string name="frag_disturbance_menu_refresh">Refresh</string>
     <string name="frag_disturbance_updated">Disturbance list updated</string>
     <string name="frag_home_menu_refresh">Refresh</string>
@@ -350,8 +352,18 @@
     <string name="frag_error_missing_topology_desc">&appname; updated and the previously downloaded network map is no longer compatible. Connect to the internet to download a new network map.</string>
     <string name="frag_error_topology_download_ongoing">The network map is currently being downloaded...</string>
     <string name="frag_error_version_too_old">&appname; version too old</string>
-    <string name="frag_error_version_too_old_desc">This &appname; version is no longer compatible with the &appname; online services. Please update to continue using &appname;.</string>
+    <string name="frag_error_version_too_old_desc">This &appname; version is no longer compatible with the &appname;
+        online services. Please update to continue using &appname;.</string>
     <string name="frag_error_view_store_page">View app on Google Play</string>
+    <string name="act_report_title">Report disruption</string>
+    <string name="act_report_intro">Be the eyes of &appname; in the network and help collect better information.</string>
+    <string name="act_report_instructions">If you are currently witnessing disruptions of the Metro service, such as waiting times that are too high for the current time of day, train or platform overcrowding, or incidents with passengers, select the affected lines:</string>
+    <string name="act_report_send">Report service disruption</string>
+    <string name="act_report_line_name">%s line</string>
+    <string name="act_report_line_closed">This line is currently closed for service.</string>
+    <string name="act_report_you_are_here">(you are here)</string>
+    <string name="act_report_success">Thanks for your contribution.</string>
+    <string name="act_report_error">An error occurred when submitting your report. Please try again.</string>
 
     <string name="poi_type_dinning">Dinning</string>
     <string name="poi_type_police">Police station</string>
@@ -406,4 +418,5 @@
 
     <string name="link_format_station" translatable="false">https://perturbacoes.pt/s/%s</string>
     <string name="link_format_disturbance" translatable="false">https://perturbacoes.pt/d/%s</string>
+
 </resources>

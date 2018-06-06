@@ -36,6 +36,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
@@ -136,6 +137,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activity.MainActivity" />
         </activity>
+        <activity
+            android:name=".ui.activity.ReportActivity"
+            android:label="@string/act_report_title"
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activity.MainActivity" />
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -152,7 +162,8 @@
             android:name=".SearchContentProvider"
             android:authorities="im.tny.segvault.disturbances.SearchContentProvider"
             android:enabled="true"
-            android:exported="false"></provider>
+            android:exported="false" />
+
     </application>
 
 </manifest>

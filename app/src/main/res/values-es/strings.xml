@@ -164,7 +164,7 @@
     <string name="frag_trip_correct">Corregir</string>
     <string name="act_line_title">Línea %1$s</string>
     <string name="act_line_disturbances_warning">Circulación lenta en esta línea. El tiempo de espera puede ser superior al normal.</string>
-    <string name="act_line_closed_schedule">En este momento, esta linea se encuentra cerrada. Se abrirá a las %s.</string>
+    <string name="act_line_closed_schedule">En este momento, esta línea se encuentra cerrada. Se abrirá a las %s.</string>
     <string name="frag_unconfirmed_trips_title">Trayectos aún no confirmados</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmar</string>
     <string name="frag_unconfirmed_trip_correct">Corregir</string>
@@ -336,6 +336,17 @@
     <string name="frag_station_ticket_office">Punto de venta / atención</string>
     <string name="frag_station_urgent_ticket">Punto Lisboa Viva urgente</string>
     <string name="frag_station_lostfound">Oficina de objetos perdidos</string>
+    <string name="act_report_title">Reportar problemas</string>
+    <string name="act_report_intro">Sea los ojos de &appname; en la red y ayude a obtener una información más completa.</string>
+    <string name="act_report_instructions">Si está presenciando problemas en el servicio del Metro, tales como tiempos de demasiado elevados para la hora actual, sobrelotación de los vagones o de los muelles, o incidentes con pasajeros, seleccione las líneas afectadas:</string>
+    <string name="act_report_send">Reportar problemas en la circulación</string>
+    <string name="frag_lines_report_disruptions">Reportar problemas</string>
+    <string name="notif_route_report">Reportar problemas</string>
+    <string name="act_report_line_name">Línea %s</string>
+    <string name="act_report_line_closed">Esta línea se encuentra cerrada en este momento.</string>
+    <string name="act_report_you_are_here">(está aquí)</string>
+    <string name="act_report_success">Gracias por su contribuición.</string>
+    <string name="act_report_error">Ha ocurrido un error al enviar su relato, por favor inténtelo de nuevo.</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

@@ -163,7 +163,7 @@
     <string name="frag_trip_correct">Modifier</string>
     <string name="act_line_title">Ligne %1$s</string>
     <string name="act_line_disturbances_warning">Il y a des perturbations en cours dans cette ligne. Le temps d\'attente peut être supérieur à la durée habituelle.</string>
-    <string name="act_line_closed_schedule">Cette ligne est actuellement fermée. Il ouvrira à %s.</string>
+    <string name="act_line_closed_schedule">Cette ligne est fermée en ce moment. Il ouvrira à %s.</string>
     <string name="frag_unconfirmed_trips_title">Trajets sans confirmation</string>
     <string name="frag_unconfirmed_trip_confirm">Confirmer</string>
     <string name="frag_unconfirmed_trip_correct">Modifier</string>
@@ -336,6 +336,17 @@
     <string name="frag_station_ticket_office">Point de vente / assistance</string>
     <string name="frag_station_urgent_ticket">Point Lisboa Viva urgent</string>
     <string name="frag_station_lostfound">Bureau des objets trouvés</string>
+    <string name="act_report_title">Rapporter des problèmes</string>
+    <string name="act_report_intro">Soyez les yeux d\'&appname; dans le réseau et aidez à obtenir de l\'information plus complète.</string>
+    <string name="act_report_instructions">Si vous avez témoigné des problèmes dans le Métro, tels que temps d\'attente trop haut pour l\'heure de la journée, surpopulation des trains ou des quais, ou même des incidents avec des voyageurs, choisissez les lignes touchées:</string>
+    <string name="act_report_send">Rapporter des problèmes de circulation</string>
+    <string name="frag_lines_report_disruptions">Rapporter des problèmes</string>
+    <string name="notif_route_report">Rapporter des problèmes</string>
+    <string name="act_report_line_name">Ligne %s</string>
+    <string name="act_report_line_closed">Cette ligne est fermée en ce moment.</string>
+    <string name="act_report_you_are_here">(vous êtes ici)</string>
+    <string name="act_report_success">Merci pour votre contribution.</string>
+    <string name="act_report_error">Il y a eu une erreur en soumettant votre rapport. Veuillez essayer à nouveau.</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

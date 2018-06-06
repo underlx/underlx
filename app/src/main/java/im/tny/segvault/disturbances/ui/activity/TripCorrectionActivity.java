@@ -364,6 +364,7 @@ public class TripCorrectionActivity extends TopActivity {
         savedInstanceState.putString(STATE_NETWORK_ID, networkId);
         savedInstanceState.putBoolean(STATE_START_FOCUSED, startPicker.isFocused());
         savedInstanceState.putBoolean(STATE_END_FOCUSED, endPicker.isFocused());
+        savedInstanceState.putBoolean(STATE_IS_STANDALONE, isStandalone);
 
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(savedInstanceState);
@@ -371,5 +372,5 @@ public class TripCorrectionActivity extends TopActivity {
 
     public static final String EXTRA_TRIP_ID = "im.tny.segvault.disturbances.extra.TripCorrectionActivity.tripid";
     public static final String EXTRA_NETWORK_ID = "im.tny.segvault.disturbances.extra.TripCorrectionActivity.networkid";
-    public static final String EXTRA_IS_STANDALONE = "im.tny.segvault.disturbances.extra.StationActivity.standalone";
+    public static final String EXTRA_IS_STANDALONE = "im.tny.segvault.disturbances.extra.TripCorrectionActivity.standalone";
 }

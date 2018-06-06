@@ -48,6 +48,7 @@ import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.activity.ReportActivity;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
@@ -1144,6 +1145,13 @@ public class MainService extends Service {
                         stopIntent, 0);
                 notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
             }
+            Intent reportIntent = new Intent(getApplicationContext(), ReportActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(ReportActivity.EXTRA_IS_STANDALONE, true);
+
+            PendingIntent pendingReportIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
+                    reportIntent, 0);
+            notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_report), pendingReportIntent);
         }
 
         startForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());

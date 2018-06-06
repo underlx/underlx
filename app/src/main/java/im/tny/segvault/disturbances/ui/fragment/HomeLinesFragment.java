@@ -15,6 +15,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -28,6 +29,8 @@ import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.activity.ReportActivity;
+import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.disturbances.ui.adapter.LineRecyclerViewAdapter;
 
 /**
@@ -44,6 +47,7 @@ public class HomeLinesFragment extends Fragment {
     private RecyclerView recyclerView = null;
     private ProgressBar progressBar = null;
     private TextView updateInformationView = null;
+    private Button reportButton;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,6 +90,15 @@ public class HomeLinesFragment extends Fragment {
         progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);
         progressBar.setVisibility(View.VISIBLE);
         updateInformationView = (TextView) view.findViewById(R.id.update_information);
+        reportButton = (Button) view.findViewById(R.id.report_button);
+
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), ReportActivity.class);
+                startActivity(intent);
+            }
+        });
 
         // fix scroll fling. less than ideal, but apparently there's still no other solution
         recyclerView.setNestedScrollingEnabled(false);
@@ -128,9 +141,13 @@ public class HomeLinesFragment extends Fragment {
 
         Date mostRecentUpdate = new Date();
         int count = 0;
+        boolean oneIsOpen = false;
         for (LineStatusCache.Status s : mListener.getLineStatusCache().getLineStatus().values()) {
             if (s.line == null) {
                 continue;
+            }
+            if (s.line.isOpen()) {
+                oneIsOpen = true;
             }
             if (s.stopped) {
                 items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.stopped, getContext()));
@@ -147,6 +164,9 @@ public class HomeLinesFragment extends Fragment {
         if (count == 0) {
             // no lines. probably still loading
             return;
+        }
+        if (!oneIsOpen) {
+            reportButton.setVisibility(View.GONE);
         }
 
         Collections.sort(items, new Comparator<LineRecyclerViewAdapter.LineItem>() {
@@ -198,8 +218,11 @@ public class HomeLinesFragment extends Fragment {
             switch (intent.getAction()) {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_STARTED:
                     progressBar.setVisibility(View.VISIBLE);
+                    reportButton.setVisibility(View.GONE);
                     break;
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                    reportButton.setVisibility(View.VISIBLE);
+                    // fallthrough
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED:
                     if (mListener != null) {
                         mListener.onLinesFinishedRefreshing();

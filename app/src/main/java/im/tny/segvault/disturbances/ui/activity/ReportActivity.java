@@ -1,0 +1,273 @@
+package im.tny.segvault.disturbances.ui.activity;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import im.tny.segvault.disturbances.API;
+import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.exception.APIException;
+import im.tny.segvault.s2ls.S2LS;
+import im.tny.segvault.subway.Line;
+import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Station;
+
+public class ReportActivity extends TopActivity {
+
+    private MainService mainService;
+    private boolean mainBound = false;
+
+    private LinearLayout linesLayout;
+    private Button sendButton;
+
+    private boolean isStandalone;
+    private Set<Line> checkedLines = new HashSet<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            isStandalone = getIntent().getBooleanExtra(EXTRA_IS_STANDALONE, false);
+        } else {
+            isStandalone = savedInstanceState.getBoolean(STATE_IS_STANDALONE, false);
+        }
+
+        Object conn = getLastCustomNonConfigurationInstance();
+        if (conn != null) {
+            // have the service connection survive through activity configuration changes
+            // (e.g. screen orientation changes)
+            mConnection = (MainServiceConnection) conn;
+            mainService = mConnection.getBinder().getService();
+            mainBound = true;
+        } else if (!mainBound) {
+            startService(new Intent(this, MainService.class));
+            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
+        }
+
+
+        setContentView(R.layout.activity_report);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (isStandalone) {
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+        }
+
+        linesLayout = (LinearLayout) findViewById(R.id.lines_layout);
+        sendButton = (Button) findViewById(R.id.send_button);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SubmitReportTask().execute();
+
+            }
+        });
+    }
+
+    private class SubmitReportTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Util.setViewAndChildrenEnabled(linesLayout, false);
+            sendButton.setEnabled(false);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            boolean anySuccess = false;
+            for(Line line : checkedLines) {
+                API.DisturbanceReport report = new API.DisturbanceReport();
+                report.category = "generic";
+                report.line = line.getId();
+
+                try {
+                    API.getInstance().postDisturbanceReport(report);
+                    anySuccess = true;
+                } catch(APIException ex) {
+                    // oh well
+                }
+            }
+            return anySuccess;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            String toastText = getString(R.string.act_report_success);
+            if(!success) {
+                toastText = getString(R.string.act_report_error);
+            }
+
+            if (isStandalone && success) {
+                // make normal toast
+                Toast.makeText(ReportActivity.this, toastText, Toast.LENGTH_LONG);
+            } else if (!success) {
+                // display fancy toast
+                Snackbar.make(linesLayout, toastText, 5000).show();
+            } else {
+                // tell main activity to display fancy toast
+                Intent intent = new Intent(ACTION_REPORT_PROVIDED);
+                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(ReportActivity.this);
+                bm.sendBroadcast(intent);
+            }
+
+            if(success) {
+                finish();
+            } else {
+                Util.setViewAndChildrenEnabled(linesLayout, true);
+                sendButton.setEnabled(true);
+            }
+        }
+    }
+
+    private void populateLineList() {
+        if (!mainBound || mainService == null) {
+            return;
+        }
+
+        List<Line> lines = new ArrayList<>();
+        for (Network network : mainService.getNetworks()) {
+            List<Line> nLines = new ArrayList<>(network.getLines());
+            Collections.sort(nLines, new Comparator<Line>() {
+                @Override
+                public int compare(Line t0, Line t1) {
+                    return Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder());
+                }
+            });
+            lines.addAll(nLines);
+        }
+
+        linesLayout.removeAllViews();
+        for (final Line line : lines) {
+            View view = getLayoutInflater().inflate(R.layout.checkbox_report_line, linesLayout, false);
+            final CheckBox lineCheckbox = (CheckBox) view.findViewById(R.id.line_checkbox);
+            lineCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b) {
+                        checkedLines.add(line);
+                    } else {
+                        checkedLines.remove(line);
+                    }
+                    sendButton.setEnabled(checkedLines.size() > 0);
+                }
+            });
+            TextView lineNameView = (TextView) view.findViewById(R.id.line_name_view);
+            String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
+            String lineLine = String.format(getString(R.string.act_report_line_name), lineName);
+            S2LS s2ls = mainService.getS2LS(line.getNetwork().getId());
+            if (s2ls != null && s2ls.getCurrentTrip() != null) {
+                final Station station = s2ls.getCurrentTrip().getCurrentStop().getStation();
+                if (station.getLines().contains(line)) {
+                    lineLine += " " + getString(R.string.act_report_you_are_here);
+                }
+            }
+            int lStart = lineLine.indexOf(lineName);
+            int lEnd = lStart + lineName.length();
+            SpannableString nameSpannable = new SpannableString(lineLine);
+            nameSpannable.setSpan(new ForegroundColorSpan(line.getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            lineNameView.setText(nameSpannable);
+            View.OnClickListener cbOnClick = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    lineCheckbox.performClick();
+                }
+            };
+
+            TextView lineClosedView = (TextView) view.findViewById(R.id.line_closed_view);
+            if (!line.isOpen()) {
+                lineClosedView.setVisibility(View.VISIBLE);
+                lineCheckbox.setEnabled(false);
+                lineNameView.setTextColor(Color.LTGRAY);
+            } else {
+                lineNameView.setOnClickListener(cbOnClick);
+                lineClosedView.setOnClickListener(cbOnClick);
+                view.setOnClickListener(cbOnClick);
+            }
+
+            linesLayout.addView(view);
+        }
+        sendButton.setEnabled(checkedLines.size() > 0);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private MainServiceConnection mConnection = new MainServiceConnection();
+
+    class MainServiceConnection implements ServiceConnection {
+        MainService.LocalBinder binder;
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            binder = (MainService.LocalBinder) service;
+            mainService = binder.getService();
+            mainBound = true;
+
+            populateLineList();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mainBound = false;
+        }
+
+        public MainService.LocalBinder getBinder() {
+            return binder;
+        }
+    }
+
+    public static final String STATE_IS_STANDALONE = "standalone";
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(STATE_IS_STANDALONE, isStandalone);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public static final String EXTRA_IS_STANDALONE = "im.tny.segvault.disturbances.extra.ReportActivity.standalone";
+
+    public static final String ACTION_REPORT_PROVIDED = "im.tny.segvault.disturbances.action.ReportActivity.provided";
+}
