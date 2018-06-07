@@ -200,7 +200,7 @@
     <string name="act_station_share">Partilhar</string>
     <string name="act_station_share_location">Localização</string>
     <string name="act_station_share_web_profile">Página no Perturbações</string>
-    <string name="frag_about_qrcode_desc">Partilhe facilmente o UnderLX através do seguinte código QR:</string>
+    <string name="frag_about_qrcode_desc">Partilhe facilmente o &appname; através do seguinte código QR:</string>
     <string name="frag_about_qrcode_close">Fechar</string>
     <string name="frag_about_qrcode">Código QR</string>
     <string name="frag_about_github">Projecto no GitHub</string>
@@ -347,6 +347,7 @@
     <string name="act_report_you_are_here">(está aqui)</string>
     <string name="act_report_success">Obrigado pela sua participação.</string>
     <string name="act_report_error">Ocorreu um erro ao submeter o seu relato, por favor tente novamente.</string>
+    <string name="frag_disturbances_bottom"><![CDATA[Veja o histórico completo de perturbações em <a href=\'https://perturbacoes.pt/d\'>Perturbações.pt</a>.]]></string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>

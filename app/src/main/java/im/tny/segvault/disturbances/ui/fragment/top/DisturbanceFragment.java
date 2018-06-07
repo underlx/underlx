@@ -18,7 +18,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,7 +52,8 @@ public class DisturbanceFragment extends TopFragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
-    private RecyclerView recyclerView = null;
+    private LinearLayout listContainer;
+    private RecyclerView recyclerView;
     private TextView emptyView;
 
     /**
@@ -109,9 +113,13 @@ public class DisturbanceFragment extends TopFragment {
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
+        listContainer = (LinearLayout) view.findViewById(R.id.list_container);
 
         // fix scroll fling. less than ideal, but apparently there's still no other solution
         recyclerView.setNestedScrollingEnabled(false);
+
+        HtmlTextView htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
+        htmltv.setHtml(getString(R.string.frag_disturbances_bottom));
 
         getSwipeRefreshLayout().setRefreshing(true);
 
@@ -221,10 +229,10 @@ public class DisturbanceFragment extends TopFragment {
                 recyclerView.setAdapter(new DisturbanceRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
                 emptyView.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                listContainer.setVisibility(View.VISIBLE);
             } else {
-                if(recyclerView != null) {
-                    recyclerView.setVisibility(View.GONE);
+                if(listContainer != null) {
+                    listContainer.setVisibility(View.GONE);
                 }
                 emptyView.setVisibility(View.VISIBLE);
             }

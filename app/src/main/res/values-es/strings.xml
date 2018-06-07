@@ -15,7 +15,7 @@
     <string name="frag_about_thanks">Comunidad portuguesa de SkyscraperCity\nkidrauhl - traducción de la interfaz\nJaime Silva - imagen del panel de navegación</string>
     <string name="frag_about_thanks_title">Agradecimientos</string>
     <string name="frag_about_thirdparty">Componentes incluidos</string>
-    <string name="frag_about_title">Acerca de UnderLX</string>
+    <string name="frag_about_title">Acerca de &appname;</string>
     <string name="frag_about_version">Versión %s</string>
     <string name="frag_lines_line_status">Estado de las líneas</string>
     <string name="nav_disturbances">Incidencias</string>
@@ -203,7 +203,7 @@
     <string name="act_station_share">Compartir</string>
     <string name="act_station_share_location">Ubicación</string>
     <string name="act_station_share_web_profile">Pagina en Perturbações.pt</string>
-    <string name="frag_about_qrcode_desc">Comparte facilmente el UnderLX a través del código QR siguiente:</string>
+    <string name="frag_about_qrcode_desc">Comparte facilmente el &appname; a través del código QR siguiente:</string>
     <string name="frag_about_qrcode_close">Cerrar</string>
     <string name="frag_about_qrcode">Código QR</string>
     <string name="frag_about_github">Proyecto en GitHub</string>
@@ -347,6 +347,7 @@
     <string name="act_report_you_are_here">(está aquí)</string>
     <string name="act_report_success">Gracias por su contribuición.</string>
     <string name="act_report_error">Ha ocurrido un error al enviar su relato, por favor inténtelo de nuevo.</string>
+    <string name="frag_disturbances_bottom"><![CDATA[Vea el historial completo de incidencias en <a href=\'https://perturbacoes.pt/d\'>Perturbações.pt</a>.]]></string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>
