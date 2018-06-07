@@ -203,24 +203,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.networkId = netId;
             statuses = new ArrayList<>();
             for(API.Status s : disturbance.statuses) {
-                String text = s.status;
-
-                if(context != null) {
-                    switch (s.msgType) {
-                        case "REPORT_BEGIN":
-                            text = context.getString(R.string.disturbance_status_report_begin);
-                            break;
-                        case "REPORT_CONFIRM":
-                            text = context.getString(R.string.disturbance_status_report_confirm);
-                            break;
-                        case "REPORT_RECONFIRM":
-                            text = context.getString(R.string.disturbance_status_report_reconfirm);
-                            break;
-                        case "REPORT_SOLVED":
-                            text = context.getString(R.string.disturbance_status_report_solved);
-                            break;
-                    }
-                }
+                String text = s.translateStatus(context);
 
                 statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime));
             }

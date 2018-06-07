@@ -37,7 +37,7 @@ public class FCMService extends FirebaseMessagingService {
     private void handleDisturbanceMessage(RemoteMessage remoteMessage) {
         Map<String, String> data = remoteMessage.getData();
         if (!data.containsKey("network") || !data.containsKey("line") || !data.containsKey("disturbance")
-                || !data.containsKey("status") || !data.containsKey("downtime")) {
+                || !data.containsKey("status") || !data.containsKey("downtime") || !data.containsKey("msgType")) {
             return;
         }
 
@@ -48,7 +48,7 @@ public class FCMService extends FirebaseMessagingService {
 
         MainService.startForDisturbanceNotification(getApplicationContext(),
                 data.get("network"), data.get("line"), data.get("disturbance"), data.get("status"),
-                data.get("downtime").equals("true"), remoteMessage.getSentTime());
+                data.get("msgType"), data.get("downtime").equals("true"), remoteMessage.getSentTime());
     }
 
     private void handleAnnouncementMessage(RemoteMessage remoteMessage) {

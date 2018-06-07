@@ -221,7 +221,8 @@ public class MainService extends Service {
                     final String status = intent.getStringExtra(EXTRA_DISTURBANCE_STATUS);
                     final boolean downtime = intent.getBooleanExtra(EXTRA_DISTURBANCE_DOWNTIME, false);
                     final long msgtime = intent.getLongExtra(EXTRA_DISTURBANCE_MSGTIME, 0);
-                    handleDisturbanceNotification(network, line, id, status, downtime, msgtime);
+                    final String msgType = intent.getStringExtra(EXTRA_DISTURBANCE_MSGTYPE);
+                    handleDisturbanceNotification(network, line, id, status, msgType, downtime, msgtime);
                     break;
                 }
                 case ACTION_ANNOUNCEMENT_NOTIFICATION: {
@@ -831,9 +832,11 @@ public class MainService extends Service {
     private static final String EXTRA_DISTURBANCE_STATUS = "im.tny.segvault.disturbances.extra.notification.disturbance.status";
     private static final String EXTRA_DISTURBANCE_DOWNTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.downtime";
     private static final String EXTRA_DISTURBANCE_MSGTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.msgtime";
+    private static final String EXTRA_DISTURBANCE_MSGTYPE = "im.tny.segvault.disturbances.extra.notification.disturbance.msgtype";
 
     public static void startForDisturbanceNotification(Context context, String network, String line,
-                                                       String id, String status, boolean downtime, long messageTime) {
+                                                       String id, String status, String msgType,
+                                                       boolean downtime, long messageTime) {
         Intent intent = new Intent(context, MainService.class);
         intent.setAction(ACTION_DISTURBANCE_NOTIFICATION);
         intent.putExtra(EXTRA_DISTURBANCE_NETWORK, network);
@@ -842,12 +845,13 @@ public class MainService extends Service {
         intent.putExtra(EXTRA_DISTURBANCE_STATUS, status);
         intent.putExtra(EXTRA_DISTURBANCE_DOWNTIME, downtime);
         intent.putExtra(EXTRA_DISTURBANCE_MSGTIME, messageTime);
+        intent.putExtra(EXTRA_DISTURBANCE_MSGTYPE, msgType);
         context.startService(intent);
     }
 
     private void handleDisturbanceNotification(String network, String line,
-                                               String id, String status, boolean downtime,
-                                               long msgtime) {
+                                               String id, String status, String msgType,
+                                               boolean downtime, long msgtime) {
         Log.d("MainService", "handleDisturbanceNotification");
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
@@ -874,6 +878,8 @@ public class MainService extends Service {
             // notifications disabled for this line
             return;
         }
+
+        status = API.Status.translateStatus(MainService.this, status, msgType);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

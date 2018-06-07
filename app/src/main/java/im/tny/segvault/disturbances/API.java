@@ -179,6 +179,26 @@ public class API {
         public String status;
         public String source;
         public String msgType;
+
+        public String translateStatus(Context context) {
+            return translateStatus(context, status, msgType);
+        }
+
+        public static String translateStatus(Context context, String status, String msgType) {
+            if(context != null) {
+                switch (msgType) {
+                    case "REPORT_BEGIN":
+                        return context.getString(R.string.disturbance_status_report_begin);
+                    case "REPORT_CONFIRM":
+                        return context.getString(R.string.disturbance_status_report_confirm);
+                    case "REPORT_RECONFIRM":
+                        return context.getString(R.string.disturbance_status_report_reconfirm);
+                    case "REPORT_SOLVED":
+                        return context.getString(R.string.disturbance_status_report_solved);
+                }
+            }
+            return status;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
