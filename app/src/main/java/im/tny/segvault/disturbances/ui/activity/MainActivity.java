@@ -129,20 +129,21 @@ public class MainActivity extends TopActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        Fragment newFragment = null;
+        if (getIntent() != null) {
+            String id = getIntent().getStringExtra(EXTRA_INITIAL_FRAGMENT);
+            if (id != null) {
+                newFragment = getNewFragment(pageStringToResourceId(id));
+                planRouteTo = getIntent().getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
+            }
+
+            if (getIntent().getBooleanExtra(EXTRA_FROM_INTRO, false)) {
+                showTargetPrompt();
+            }
+        }
+
         if (savedInstanceState == null) {
             // show initial fragment
-            Fragment newFragment = null;
-            if (getIntent() != null) {
-                String id = getIntent().getStringExtra(EXTRA_INITIAL_FRAGMENT);
-                if (id != null) {
-                    newFragment = getNewFragment(pageStringToResourceId(id));
-                    planRouteTo = getIntent().getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
-                }
-
-                if (getIntent().getBooleanExtra(EXTRA_FROM_INTRO, false)) {
-                    showTargetPrompt();
-                }
-            }
             if (newFragment == null) {
                 newFragment = new HomeFragment();
             }

@@ -190,7 +190,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                 if(n.getId().equals(disturbance.network)) {
                     netId = n.getId();
                     for(Line l : n.getLines()) {
-                        if(l.getId().equals(disturbance.line)) {
+                        if(l.getId().equals(disturbance.line) && context != null) {
                             name = Util.getLineNames(context, l)[0];
                             color = l.getColor();
                             break;
@@ -205,19 +205,21 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             for(API.Status s : disturbance.statuses) {
                 String text = s.status;
 
-                switch(s.msgType) {
-                    case "REPORT_BEGIN":
-                        text = context.getString(R.string.disturbance_status_report_begin);
-                        break;
-                    case "REPORT_CONFIRM":
-                        text = context.getString(R.string.disturbance_status_report_confirm);
-                        break;
-                    case "REPORT_RECONFIRM":
-                        text = context.getString(R.string.disturbance_status_report_reconfirm);
-                        break;
-                    case "REPORT_SOLVED":
-                        text = context.getString(R.string.disturbance_status_report_solved);
-                        break;
+                if(context != null) {
+                    switch (s.msgType) {
+                        case "REPORT_BEGIN":
+                            text = context.getString(R.string.disturbance_status_report_begin);
+                            break;
+                        case "REPORT_CONFIRM":
+                            text = context.getString(R.string.disturbance_status_report_confirm);
+                            break;
+                        case "REPORT_RECONFIRM":
+                            text = context.getString(R.string.disturbance_status_report_reconfirm);
+                            break;
+                        case "REPORT_SOLVED":
+                            text = context.getString(R.string.disturbance_status_report_solved);
+                            break;
+                    }
                 }
 
                 statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime));
