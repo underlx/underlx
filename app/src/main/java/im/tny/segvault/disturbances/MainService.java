@@ -1152,8 +1152,8 @@ public class MainService extends Service {
                 notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
             }
             Intent reportIntent = new Intent(getApplicationContext(), ReportActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(ReportActivity.EXTRA_IS_STANDALONE, true);
+            reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            reportIntent.putExtra(ReportActivity.EXTRA_IS_STANDALONE, true);
 
             PendingIntent pendingReportIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
                     reportIntent, 0);
