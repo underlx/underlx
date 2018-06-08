@@ -1,9 +1,11 @@
 package im.tny.segvault.subway;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,6 +37,7 @@ public class Line extends Zone implements IColorable, IIDable, Comparable<Line> 
 
     private String mainLocale;
     private Map<String, String> names;
+    private List<Station> stationsInOrder = new ArrayList<>();
 
     public String[] getNames(String locale) {
         if (locale.equals(mainLocale)) {
@@ -63,7 +66,14 @@ public class Line extends Zone implements IColorable, IIDable, Comparable<Line> 
     public boolean addVertex(Stop stop) {
         boolean contained = getBase().addVertex(stop);
         boolean contained_sub = super.addVertex(stop);
+        if(!stationsInOrder.contains(stop.getStation())) {
+            stationsInOrder.add(stop.getStation());
+        }
         return contained || contained_sub;
+    }
+
+    public List<Station> getStationsInOrder() {
+        return new ArrayList<>(stationsInOrder);
     }
 
     @Override

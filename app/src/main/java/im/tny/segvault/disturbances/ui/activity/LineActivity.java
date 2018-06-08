@@ -199,39 +199,7 @@ public class LineActivity extends TopActivity {
     public static void populateLineView(final Context context, final LayoutInflater inflater, final Line line, ViewGroup root) {
         root.removeAllViews();
 
-        // TODO note: this doesn't work for circular lines
-
-        List<Station> stations = new ArrayList<>();
-        Stop s = line.getFirstStop();
-        Set<Stop> visited = new HashSet<>();
-        // terminus will only have one outgoing edge
-        Connection c = line.outgoingEdgesOf(s).iterator().next();
-        while (visited.add(c.getSource())) {
-            stations.add(c.getSource().getStation());
-            Stop curStop = c.getTarget();
-            if (line.outDegreeOf(curStop) == 1) {
-                // it's an end station
-                stations.add(curStop.getStation());
-                break;
-            }
-            boolean loop = true;
-            for (Connection inedge : line.incomingEdgesOf(curStop)) {
-                if (!visited.contains(inedge.getSource())) {
-                    c = new Connection(true, inedge.getTarget(), inedge.getSource(), null, 0);
-                    loop = false;
-                    break;
-                }
-            }
-            if (!loop) {
-                continue;
-            }
-            for (Connection outedge : line.outgoingEdgesOf(curStop)) {
-                if (!visited.contains(outedge.getTarget())) {
-                    c = outedge;
-                    break;
-                }
-            }
-        }
+        List<Station> stations = line.getStationsInOrder();
 
         int lineColor = line.getColor();
 
