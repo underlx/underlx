@@ -790,7 +790,6 @@ public class MainService extends Service {
                     .setExecutionWindow(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(36))
                     .setBackoffCriteria(TimeUnit.MINUTES.toMillis(30), JobRequest.BackoffPolicy.EXPONENTIAL)
                     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
-                    .setPersisted(true)
                     .setUpdateCurrent(updateCurrent)
                     .build()
                     .schedule();
@@ -817,7 +816,6 @@ public class MainService extends Service {
                     .setExecutionWindow(TimeUnit.HOURS.toMillis(24), TimeUnit.HOURS.toMillis(48))
                     .setBackoffCriteria(TimeUnit.HOURS.toMillis(1), JobRequest.BackoffPolicy.EXPONENTIAL)
                     .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                    .setPersisted(true)
                     .setUpdateCurrent(updateCurrent)
                     .build()
                     .schedule();
