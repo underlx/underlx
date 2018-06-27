@@ -33,15 +33,17 @@ import static android.content.Context.MODE_PRIVATE;
 class WiFiChecker {
     private Map<String, WiFiLocator> locators = new HashMap<>();
     private long scanInterval = 30000;
-    private final WifiManager wifiMan;
+    private WifiManager wifiMan;
     private final Handler handler = new Handler();
     private boolean isScanning;
     List<ScanResult> wifiList = new ArrayList<>();
+    private Context context;
 
-    public WiFiChecker(Context context, WifiManager manager) {
-        wifiMan = manager;
+    public WiFiChecker(Context context) {
+        wifiMan = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         context.registerReceiver(mBroadcastReceiver, new IntentFilter(
                 WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        this.context = context;
     }
 
     public void setScanInterval(long scanInterval) {
@@ -50,7 +52,13 @@ class WiFiChecker {
 
     private void doScan() {
         isScanning = true;
-        wifiMan.startScan();
+        if(wifiMan == null) {
+            // let's try to get it again
+            wifiMan = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        }
+        if(wifiMan != null) {
+            wifiMan.startScan();
+        }
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -66,10 +74,10 @@ class WiFiChecker {
 
     public void startScanning() {
         boolean enabled = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        if (wifiMan != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             enabled = wifiMan.isScanAlwaysAvailable();
         }
-        if (wifiMan.isWifiEnabled() == false && !enabled) {
+        if (wifiMan != null && !wifiMan.isWifiEnabled() && !enabled) {
             wifiMan.setWifiEnabled(true);
         }
         stopScanning();
@@ -81,14 +89,14 @@ class WiFiChecker {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             enabled = wifiMan.isScanAlwaysAvailable();
         }
-        if (wifiMan.isWifiEnabled() || enabled) {
+        if ((wifiMan != null && wifiMan.isWifiEnabled()) || enabled) {
             stopScanning();
             doScan();
         }
     }
 
     public boolean isScanning() {
-        return isScanning;
+        return isScanning && wifiMan != null;
     }
 
     public long getScanInterval() {
@@ -131,6 +139,9 @@ class WiFiChecker {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     c.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
                 // we don't have permission to getScanResults
+                return;
+            }
+            if(wifiMan == null) {
                 return;
             }
             wifiList = wifiMan.getScanResults();

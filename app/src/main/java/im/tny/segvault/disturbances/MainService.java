@@ -153,7 +153,7 @@ public class MainService extends Service {
         API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
-        wfc = new WiFiChecker(this, (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE));
+        wfc = new WiFiChecker(this);
         wfc.setScanInterval(10000);
         if (networks.size() == 0) {
             loadNetworks();
