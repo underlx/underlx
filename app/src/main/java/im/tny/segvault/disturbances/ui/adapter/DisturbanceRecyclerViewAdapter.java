@@ -205,7 +205,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             for(API.Status s : disturbance.statuses) {
                 String text = s.translateStatus(context);
 
-                statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime));
+                statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime, s.isOfficial()));
             }
             Collections.sort(statuses, new Comparator<Status>() {
                 @Override
@@ -224,11 +224,13 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             public final Date date;
             public final String status;
             public final boolean isDowntime;
+            public final boolean isOfficial;
 
-            public Status(Date date, String status, boolean isDowntime) {
+            public Status(Date date, String status, boolean isDowntime, boolean isOfficial) {
                 this.date = date;
                 this.status = status;
                 this.isDowntime = isDowntime;
+                this.isOfficial = isOfficial;
             }
         }
     }
@@ -272,6 +274,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             inflater.inflate(R.layout.fragment_disturbance_status_view, this);
 
             TextView timeView = (TextView) findViewById(R.id.time_view);
+            ImageView communityView = (ImageView) findViewById(R.id.community_view);
             TextView statusView = (TextView) findViewById(R.id.status_view);
             ImageView iconView = (ImageView) findViewById(R.id.icon_view);
 
@@ -282,6 +285,10 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                 iconView.setVisibility(GONE);
             } else {
                 iconView.setVisibility(VISIBLE);
+            }
+
+            if(!status.isOfficial) {
+                communityView.setVisibility(VISIBLE);
             }
         }
 

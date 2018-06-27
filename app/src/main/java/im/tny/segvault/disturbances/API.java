@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -180,10 +181,12 @@ public class API {
         public String source;
         public String msgType;
 
+        @JsonIgnore
         public String translateStatus(Context context) {
             return translateStatus(context, status, msgType);
         }
 
+        @JsonIgnore
         public static String translateStatus(Context context, String status, String msgType) {
             if(context != null) {
                 switch (msgType) {
@@ -198,6 +201,12 @@ public class API {
                 }
             }
             return status;
+        }
+
+        @JsonIgnore
+        public boolean isOfficial() {
+            // TODO this is a stub
+            return source.equals("mlxscraper-pt-ml");
         }
     }
 

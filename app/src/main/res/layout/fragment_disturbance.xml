@@ -27,7 +27,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="@dimen/text_margin"
-                android:layout_marginTop="5dp"></FrameLayout>
+                android:layout_marginTop="5dp" />
 
             <TextView
                 android:id="@+id/line_name_view"
@@ -69,7 +69,7 @@
             android:id="@+id/disturbance_status_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
+            android:orientation="vertical" />
 
         <LinearLayout
             android:id="@+id/disturbance_notes_layout"
@@ -87,7 +87,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginRight="7dp"
                 android:layout_marginLeft="16dp"
-                android:background="#ddd"></FrameLayout>
+                android:background="#ddd" />
 
             <LinearLayout
                 android:layout_width="match_parent"
