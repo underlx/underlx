@@ -18,6 +18,9 @@ public class LocaleUtil {
     }
 
     public static void initializeLocale(Context context) {
+        if(context == null) {
+            return;
+        }
         Resources res = context.getResources();
         Configuration config = res.getConfiguration();
         java.util.Locale locale = getCurrentLocale(context);

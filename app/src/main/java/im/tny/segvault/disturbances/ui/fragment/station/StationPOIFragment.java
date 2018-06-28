@@ -162,25 +162,33 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
+        if(mapView != null) {
+            mapView.onResume();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
+        if(mapView != null) {
+            mapView.onPause();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+        if(mapView != null) {
+            mapView.onDestroy();
+        }
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        if(mapView != null) {
+            mapView.onLowMemory();
+        }
     }
 
     private void update() {
@@ -357,7 +365,7 @@ public class StationPOIFragment extends Fragment
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (getActivity() == null) {
+            if (getActivity() == null || intent.getAction() == null) {
                 return;
             }
             switch (intent.getAction()) {
