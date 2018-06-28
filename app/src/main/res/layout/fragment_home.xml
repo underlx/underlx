@@ -179,9 +179,9 @@
                     android:layout_gravity="start"
                     android:layout_marginLeft="@dimen/text_margin"
                     android:layout_marginRight="@dimen/text_margin"
-                    android:drawableLeft="@drawable/ic_stop_accent_24dp"
+                    android:drawableLeft="@drawable/ic_train_off_accent_24dp"
                     android:drawablePadding="10dp"
-                    android:drawableStart="@drawable/ic_stop_accent_24dp"
+                    android:drawableStart="@drawable/ic_train_off_accent_24dp"
                     android:text="@string/frag_home_end_trip"
                     android:textAlignment="textStart" />
 

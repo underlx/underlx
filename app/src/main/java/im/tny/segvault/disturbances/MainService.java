@@ -1105,7 +1105,7 @@ public class MainService extends Service {
                 stopIntent.putExtra(EXTRA_TRIP_NETWORK, loc.getNetwork().getId());
                 PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                         stopIntent, 0);
-                notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
+                notificationBuilder.addAction(R.drawable.ic_train_off_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
             }
             Intent reportIntent = new Intent(getApplicationContext(), ReportActivity.class);
             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1113,7 +1113,7 @@ public class MainService extends Service {
 
             PendingIntent pendingReportIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
                     reportIntent, 0);
-            notificationBuilder.addAction(R.drawable.ic_stop_black_24dp, getString(R.string.notif_route_report), pendingReportIntent);
+            notificationBuilder.addAction(R.drawable.ic_menu_announcement, getString(R.string.notif_route_report), pendingReportIntent);
         }
 
         startForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
