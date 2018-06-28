@@ -74,6 +74,7 @@ public class HomeFragment extends TopFragment {
 
     private TextView networkClosedView;
     private CardView networkClosedCard;
+    private CardView navigationCard;
     private CardView ongoingTripCard;
     private LinearLayout curStationLayout;
     private LinearLayout curStationIconsLayout;
@@ -141,6 +142,7 @@ public class HomeFragment extends TopFragment {
         networkClosedCard = (CardView) view.findViewById(R.id.network_closed_card);
         networkClosedView = (TextView) view.findViewById(R.id.network_closed_view);
 
+        navigationCard = (CardView) view.findViewById(R.id.navigation_card);
         ongoingTripCard = (CardView) view.findViewById(R.id.ongoing_trip_card);
         curStationLayout = (LinearLayout) view.findViewById(R.id.cur_station_layout);
         curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
@@ -380,16 +382,14 @@ public class HomeFragment extends TopFragment {
 
         if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
+            navigationCard.setVisibility(View.GONE);
             return;
         }
         final Path currentPath = loc.getCurrentTrip();
         final Route currentRoute = loc.getCurrentTargetRoute();
-        if (currentPath == null && currentRoute == null) {
+        if (currentPath == null) {
             ongoingTripCard.setVisibility(View.GONE);
-            return;
-        }
-
-        if (currentPath != null) {
+        } else {
             final Station station = currentPath.getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
 
@@ -442,15 +442,12 @@ public class HomeFragment extends TopFragment {
                 curTripEndButton.setVisibility(View.GONE);
                 curTripIncorrectLocationButton.setVisibility(View.VISIBLE);
             }
-        } else {
-            curStationLayout.setVisibility(View.GONE);
-            directionView.setVisibility(View.GONE);
-            nextStationView.setVisibility(View.GONE);
-            curTripEndButton.setVisibility(View.GONE);
-            curTripIncorrectLocationButton.setVisibility(View.GONE);
+            ongoingTripCard.setVisibility(View.VISIBLE);
         }
 
-        if (currentRoute != null) {
+        if (currentRoute == null) {
+            navigationCard.setVisibility(View.GONE);
+        } else {
             MainService.RouteStepInfo info = m.buildRouteStepInfo(currentRoute, currentPath);
             routeTitleView.setText(info.title);
             routeSummaryView.setText(info.summary);
@@ -477,17 +474,9 @@ public class HomeFragment extends TopFragment {
                     getContext().startService(stopIntent);
                 }
             });
-            navEndButton.setVisibility(View.VISIBLE);
-
-            curTripEndButton.setVisibility(View.GONE);
             routeInstructionsLayout.setVisibility(View.VISIBLE);
-        } else {
-            routeInstructionsLayout.setVisibility(View.GONE);
-            routeSummaryView.setVisibility(View.GONE);
-            navEndButton.setVisibility(View.GONE);
+            navigationCard.setVisibility(View.VISIBLE);
         }
-
-        ongoingTripCard.setVisibility(View.VISIBLE);
     }
 
     private void redrawCurrentStationLineIcons(Station station) {
