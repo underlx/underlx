@@ -239,6 +239,7 @@
     <string name="notif_route_current_station">Station actuelle: %s</string>
     <string name="notif_route_navigating_status">Votre destination est %s</string>
     <string name="notif_route_end_navigation">Quitter la navigation</string>
+    <string name="frag_home_end_navigation">Quitter la navigation</string>
     <string name="frag_route_adapt_realtime">Adapter l\'itinéraire aux conditions actuelles</string>
     <string name="frag_route_swap_choices">Changer départ et destination</string>
     <string name="frag_settings_other_title">Autres</string>

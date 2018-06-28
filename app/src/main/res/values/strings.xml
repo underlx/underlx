@@ -227,6 +227,7 @@
     <string name="dataset_info_cache_all_extras">Download extra content</string>
     <string name="notif_route_end_trip">End trip</string>
     <string name="frag_home_end_trip">End trip</string>
+    <string name="frag_home_end_navigation">Exit navigation</string>
     <string name="act_trip_correction_start_station">Starting station</string>
     <string name="act_trip_correction_end_station">End station</string>
     <string name="act_trip_correction_title">Correct trip log</string>

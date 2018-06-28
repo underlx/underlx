@@ -748,6 +748,7 @@ public class MainService extends Service {
     public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
     public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
     public static final String ACTION_S2LS_STATUS_CHANGED = "im.tny.segvault.disturbances.action.s2ls.status.changed";
+    public static final String ACTION_NAVIGATION_ENDED = "im.tny.segvault.disturbances.action.navigation.ended";
 
     public static final String ACTION_CACHE_EXTRAS_PROGRESS = "im.tny.segvault.disturbances.action.cacheextras.progress";
     public static final String EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT = "im.tny.segvault.disturbances.extra.cacheextras.progress.current";
@@ -1032,54 +1033,11 @@ public class MainService extends Service {
         List<CharSequence> statusLines = new ArrayList<>();
         int color = -1;
         if (currentRoute != null) {
-            inboxStyle.setSummaryText(String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getName()));
-            Step nextStep = currentRoute.getNextStep(currentPath);
-            if (nextStep instanceof EnterStep) {
-                if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
-                    title = String.format(getString(R.string.notif_route_catch_train_title), ((EnterStep) nextStep).getDirection().getName(12));
-                } else {
-                    title = String.format(getString(R.string.notif_route_enter_station_title), nextStep.getStation().getName(15));
-                }
-                // TODO: show "encurtamentos" warnings here if applicable
-                statusLines.add(String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()));
-                color = currentRoute.getSourceStop().getLine().getColor();
-            } else if (nextStep instanceof ChangeLineStep) {
-                ChangeLineStep clStep = (ChangeLineStep) nextStep;
-                String lineName = Util.getLineNames(this, clStep.getTarget())[0];
-                String titleStr;
-                if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                    titleStr = String.format(getString(R.string.notif_route_catch_train_line_change_title),
-                            lineName);
-                } else {
-                    titleStr = String.format(getString(R.string.notif_route_line_change_title),
-                            nextStep.getStation().getName(10),
-                            lineName);
-                }
-                int lStart = titleStr.indexOf(lineName);
-                int lEnd = lStart + lineName.length();
-                Spannable sb = new SpannableString(titleStr);
-                sb.setSpan(new ForegroundColorSpan(clStep.getTarget().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                title = sb;
-
-                // TODO: show "encurtamentos" warnings here if applicable
-                sb = new SpannableString(
-                        String.format(getString(R.string.notif_route_catch_train_status),
-                                clStep.getDirection().getName())
-                );
-                sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                statusLines.add(sb);
-                color = clStep.getTarget().getColor();
-            } else if (nextStep instanceof ExitStep) {
-                if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                    title = getString(R.string.notif_route_leave_train_now);
-                } else if (currentPath != null && currentPath.getNextStop() != null &&
-                        new Date().getTime() - currentPath.getCurrentStopEntryTime().getTime() > 30 * 1000 &&
-                        nextStep.getStation() == currentPath.getNextStop().getStation()) {
-                    title = getString(R.string.notif_route_leave_train_next);
-                } else {
-                    title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
-                }
-            }
+            RouteStepInfo info = buildRouteStepInfo(currentRoute, currentPath);
+            inboxStyle.setSummaryText(info.summary);
+            title = info.title;
+            statusLines.addAll(info.bodyLines);
+            color = info.color;
         }
 
         if (currentPath != null) {
@@ -1159,6 +1117,69 @@ public class MainService extends Service {
         }
 
         startForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    public class RouteStepInfo {
+        public CharSequence title;
+        public CharSequence summary;
+        public List<CharSequence> bodyLines = new ArrayList<>();
+        public int color;
+    }
+
+    public RouteStepInfo buildRouteStepInfo(Route currentRoute, Path currentPath) {
+        RouteStepInfo info = new RouteStepInfo();
+
+        info.summary = String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getName());
+        Step nextStep = currentRoute.getNextStep(currentPath);
+        if (nextStep instanceof EnterStep) {
+            if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
+                info.title = String.format(getString(R.string.notif_route_catch_train_title), ((EnterStep) nextStep).getDirection().getName(12));
+            } else {
+                info.title = String.format(getString(R.string.notif_route_enter_station_title), nextStep.getStation().getName(15));
+            }
+            // TODO: show "encurtamentos" warnings here if applicable
+            info.bodyLines.add(String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()));
+            info.color = currentRoute.getSourceStop().getLine().getColor();
+        } else if (nextStep instanceof ChangeLineStep) {
+            ChangeLineStep clStep = (ChangeLineStep) nextStep;
+            String lineName = Util.getLineNames(this, clStep.getTarget())[0];
+            String titleStr;
+            if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                titleStr = String.format(getString(R.string.notif_route_catch_train_line_change_title),
+                        lineName);
+            } else {
+                titleStr = String.format(getString(R.string.notif_route_line_change_title),
+                        nextStep.getStation().getName(10),
+                        lineName);
+            }
+            int lStart = titleStr.indexOf(lineName);
+            int lEnd = lStart + lineName.length();
+            Spannable sb = new SpannableString(titleStr);
+            sb.setSpan(new ForegroundColorSpan(clStep.getTarget().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            info.title = sb;
+
+            // TODO: show "encurtamentos" warnings here if applicable
+            sb = new SpannableString(
+                    String.format(getString(R.string.notif_route_catch_train_status),
+                            clStep.getDirection().getName())
+            );
+            sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            info.bodyLines.add(sb);
+            info.color = clStep.getTarget().getColor();
+        } else if (nextStep instanceof ExitStep) {
+            if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
+                info.title = getString(R.string.notif_route_leave_train_now);
+            } else if (currentPath != null && currentPath.getNextStop() != null &&
+                    new Date().getTime() - currentPath.getCurrentStopEntryTime().getTime() > 30 * 1000 &&
+                    nextStep.getStation() == currentPath.getNextStop().getStation()) {
+                info.title = getString(R.string.notif_route_leave_train_next);
+            } else {
+                info.title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
+            }
+            info.color = nextStep.getLine().getColor();
+        }
+
+        return info;
     }
 
     public class S2LSChangeListener implements S2LS.EventListener {
@@ -1296,6 +1317,9 @@ public class MainService extends Service {
             if (!checkStopForeground(s2ls)) {
                 updateRouteNotification(s2ls);
             }
+            Intent intent = new Intent(ACTION_NAVIGATION_ENDED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         }
 
         @Override
@@ -1304,6 +1328,9 @@ public class MainService extends Service {
             if (!checkStopForeground(s2ls)) {
                 updateRouteNotification(s2ls);
             }
+            Intent intent = new Intent(ACTION_NAVIGATION_ENDED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         }
 
         private void doTick(final State state) {

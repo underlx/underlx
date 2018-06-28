@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -50,7 +51,9 @@ import im.tny.segvault.disturbances.ui.fragment.UnconfirmedTripsFragment;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
+import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -79,9 +82,15 @@ public class HomeFragment extends TopFragment {
     private TextView nextStationView;
     private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
+    private Button navEndButton;
     private CardView unconfirmedTripsCard;
     private Button disturbancesButton;
     private Button tripHistoryButton;
+
+    private LinearLayout routeInstructionsLayout;
+    private LinearLayout routeBodyLayout;
+    private TextView routeTitleView;
+    private TextView routeSummaryView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -140,6 +149,12 @@ public class HomeFragment extends TopFragment {
         nextStationView = (TextView) view.findViewById(R.id.next_station_view);
         curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
         curTripIncorrectLocationButton = (Button) view.findViewById(R.id.cur_trip_incorrect_location);
+
+        routeInstructionsLayout = view.findViewById(R.id.route_instructions_layout);
+        routeBodyLayout = view.findViewById(R.id.route_body_layout);
+        routeTitleView = view.findViewById(R.id.route_title_view);
+        routeSummaryView = view.findViewById(R.id.route_summary_view);
+        navEndButton = view.findViewById(R.id.end_navigation);
 
         unconfirmedTripsCard = (CardView) view.findViewById(R.id.unconfirmed_trips_card);
 
@@ -207,6 +222,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
         filter.addAction(MainService.ACTION_S2LS_STATUS_CHANGED);
+        filter.addAction(MainService.ACTION_NAVIGATION_ENDED);
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -360,23 +376,32 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
-        S2LS loc = m.getS2LS(MainService.PRIMARY_NETWORK_ID);
+        final S2LS loc = m.getS2LS(MainService.PRIMARY_NETWORK_ID);
 
-        if (loc == null || loc.getCurrentTrip() == null) {
+        if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
-        } else {
-            final Station station = loc.getCurrentTrip().getCurrentStop().getStation();
+            return;
+        }
+        final Path currentPath = loc.getCurrentTrip();
+        final Route currentRoute = loc.getCurrentTargetRoute();
+        if (currentPath == null && currentRoute == null) {
+            ongoingTripCard.setVisibility(View.GONE);
+            return;
+        }
+
+        if (currentPath != null) {
+            final Station station = currentPath.getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
 
-            Stop direction = loc.getCurrentTrip().getDirection();
-            Stop next = loc.getCurrentTrip().getNextStop();
+            Stop direction = currentPath.getDirection();
+            Stop next = currentPath.getNextStop();
             if (direction != null && next != null) {
                 directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
                 nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
 
-                Stop likelyExit = m.getLikelyNextExit(loc.getCurrentTrip().getEdgeList(), 1);
+                Stop likelyExit = m.getLikelyNextExit(currentPath.getEdgeList(), 1);
                 int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
-                if (next == likelyExit) {
+                if (next == likelyExit && currentRoute == null) {
                     resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -392,6 +417,7 @@ public class HomeFragment extends TopFragment {
                 nextStationView.setVisibility(View.GONE);
             }
             redrawCurrentStationLineIcons(station);
+            curStationLayout.setVisibility(View.VISIBLE);
             curStationLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -416,8 +442,52 @@ public class HomeFragment extends TopFragment {
                 curTripEndButton.setVisibility(View.GONE);
                 curTripIncorrectLocationButton.setVisibility(View.VISIBLE);
             }
-            ongoingTripCard.setVisibility(View.VISIBLE);
+        } else {
+            curStationLayout.setVisibility(View.GONE);
+            directionView.setVisibility(View.GONE);
+            nextStationView.setVisibility(View.GONE);
+            curTripEndButton.setVisibility(View.GONE);
+            curTripIncorrectLocationButton.setVisibility(View.GONE);
         }
+
+        if (currentRoute != null) {
+            MainService.RouteStepInfo info = m.buildRouteStepInfo(currentRoute, currentPath);
+            routeTitleView.setText(info.title);
+            routeSummaryView.setText(info.summary);
+            routeSummaryView.setVisibility(View.VISIBLE);
+
+            routeBodyLayout.removeAllViews();
+            for (CharSequence s : info.bodyLines) {
+                TextView tv = new TextView(getContext());
+                if (Build.VERSION.SDK_INT < 23) {
+                    tv.setTextAppearance(getContext(), R.style.TextAppearance_AppCompat_Small);
+                } else {
+                    tv.setTextAppearance(R.style.TextAppearance_AppCompat_Small);
+                }
+                tv.setText(s);
+                routeBodyLayout.addView(tv);
+            }
+
+            navEndButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent stopIntent = new Intent(getContext(), MainService.class);
+                    stopIntent.setAction(MainService.ACTION_END_NAVIGATION);
+                    stopIntent.putExtra(MainService.EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
+                    getContext().startService(stopIntent);
+                }
+            });
+            navEndButton.setVisibility(View.VISIBLE);
+
+            curTripEndButton.setVisibility(View.GONE);
+            routeInstructionsLayout.setVisibility(View.VISIBLE);
+        } else {
+            routeInstructionsLayout.setVisibility(View.GONE);
+            routeSummaryView.setVisibility(View.GONE);
+            navEndButton.setVisibility(View.GONE);
+        }
+
+        ongoingTripCard.setVisibility(View.VISIBLE);
     }
 
     private void redrawCurrentStationLineIcons(Station station) {
@@ -485,6 +555,7 @@ public class HomeFragment extends TopFragment {
                 case MainService.ACTION_CURRENT_TRIP_UPDATED:
                 case MainService.ACTION_CURRENT_TRIP_ENDED:
                 case MainService.ACTION_S2LS_STATUS_CHANGED:
+                case MainService.ACTION_NAVIGATION_ENDED:
                     refreshCurrentTrip();
                     break;
             }
