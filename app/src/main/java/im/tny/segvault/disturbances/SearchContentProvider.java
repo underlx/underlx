@@ -42,8 +42,7 @@ public class SearchContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        getContext().startService(new Intent(getContext(), MainService.class));
-        getContext().bindService(new Intent(getContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
+        tryBindService();
         return false;
     }
 
@@ -56,10 +55,21 @@ public class SearchContentProvider extends ContentProvider {
             SearchManager.SUGGEST_COLUMN_INTENT_DATA
     };
 
+    private void tryBindService() {
+        try {
+            getContext().startService(new Intent(getContext(), MainService.class));
+            getContext().bindService(new Intent(getContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
+        } catch (IllegalStateException ex) {
+            // thanks Android 8+ and your stupid policies on background services!
+            // we'll just try again later when we're hopefully in the foreground
+        }
+    }
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         if (!serviceBound) {
+            tryBindService();
             return null;
         }
         String query = uri.getLastPathSegment();
@@ -176,7 +186,7 @@ public class SearchContentProvider extends ContentProvider {
             }
         });
 
-        if(results.size() == 0) {
+        if (results.size() == 0) {
             ResultRow row = new ResultRow();
             row.title = getContext().getString(R.string.search_no_results);
             row.drawable = R.drawable.ic_sentiment_dissatisfied_black_24dp;
@@ -203,7 +213,7 @@ public class SearchContentProvider extends ContentProvider {
 
     private ResultRow buildResultRowForExit(Station station, Lobby lobby, Lobby.Exit exit, double distance, String matchStreet) {
         ResultRow row = new ResultRow();
-        if(matchStreet == null) {
+        if (matchStreet == null) {
             row.title = exit.getExitsString();
         } else {
             // like exit.getExitsString() but always get our match first
@@ -233,7 +243,7 @@ public class SearchContentProvider extends ContentProvider {
         }
 
         String[] normWords = norm.split(" ");
-        for(String word : normWords) {
+        for (String word : normWords) {
             if (Math.min(normalizedQuery.length(), word.length()) < 3) {
                 continue;
             }
