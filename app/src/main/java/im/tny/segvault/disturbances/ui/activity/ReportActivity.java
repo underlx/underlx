@@ -34,6 +34,7 @@ import java.util.Set;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.exception.APIException;
@@ -43,10 +44,6 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 
 public class ReportActivity extends TopActivity {
-
-    private MainService mainService;
-    private boolean mainBound = false;
-
     private LinearLayout linesLayout;
     private Button sendButton;
 
@@ -62,29 +59,16 @@ public class ReportActivity extends TopActivity {
             isStandalone = savedInstanceState.getBoolean(STATE_IS_STANDALONE, false);
         }
 
-        Object conn = getLastCustomNonConfigurationInstance();
-        if (conn != null) {
-            // have the service connection survive through activity configuration changes
-            // (e.g. screen orientation changes)
-            mConnection = (MainServiceConnection) conn;
-            mainService = mConnection.getBinder().getService();
-            mainBound = true;
-        } else if (!mainBound) {
-            startService(new Intent(this, MainService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
-        }
-
-
         setContentView(R.layout.activity_report);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (isStandalone) {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
         }
 
-        linesLayout = (LinearLayout) findViewById(R.id.lines_layout);
-        sendButton = (Button) findViewById(R.id.send_button);
+        linesLayout = findViewById(R.id.lines_layout);
+        sendButton = findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,12 +135,8 @@ public class ReportActivity extends TopActivity {
     }
 
     private void populateLineList() {
-        if (!mainBound || mainService == null) {
-            return;
-        }
-
         List<Line> lines = new ArrayList<>();
-        for (Network network : mainService.getNetworks()) {
+        for (Network network : MapManager.getInstance(this).getNetworks()) {
             List<Line> nLines = new ArrayList<>(network.getLines());
             Collections.sort(nLines, new Comparator<Line>() {
                 @Override
@@ -185,7 +165,7 @@ public class ReportActivity extends TopActivity {
             TextView lineNameView = (TextView) view.findViewById(R.id.line_name_view);
             String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
             String lineLine = String.format(getString(R.string.act_report_line_name), lineName);
-            S2LS s2ls = mainService.getS2LS(line.getNetwork().getId());
+            S2LS s2ls = MapManager.getInstance(this).getS2LS(line.getNetwork().getId());
             if (s2ls != null && s2ls.getCurrentTrip() != null) {
                 final Station station = s2ls.getCurrentTrip().getCurrentStop().getStation();
                 if (station.getLines().contains(line)) {
@@ -229,32 +209,6 @@ public class ReportActivity extends TopActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private MainServiceConnection mConnection = new MainServiceConnection();
-
-    class MainServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            mainService = binder.getService();
-            mainBound = true;
-
-            populateLineList();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mainBound = false;
-        }
-
-        public MainService.LocalBinder getBinder() {
-            return binder;
-        }
     }
 
     public static final String STATE_IS_STANDALONE = "standalone";

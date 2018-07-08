@@ -58,6 +58,7 @@ public class MapManager {
     private Context context;
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
+    private Map<String, S2LS> locServices = new HashMap<>();
     private List<Network> loadedNotListened = new ArrayList<>();
 
     private MapManager(Context applicationContext) {
@@ -144,6 +145,19 @@ public class MapManager {
             }
         }
         return null;
+    }
+
+
+    public S2LS getS2LS(String networkId) {
+        synchronized (lock) {
+            return locServices.get(networkId);
+        }
+    }
+
+    public void putS2LS(String networkId, S2LS s2ls) {
+        synchronized (lock) {
+            locServices.put(networkId, s2ls);
+        }
     }
 
     private UpdateTopologyTask currentUpdateTopologyTask = null;

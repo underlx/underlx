@@ -379,7 +379,7 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
-        final S2LS loc = m.getS2LS(MapManager.PRIMARY_NETWORK_ID);
+        final S2LS loc = MapManager.getInstance(getContext()).getS2LS(MapManager.PRIMARY_NETWORK_ID);
 
         if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
@@ -530,7 +530,7 @@ public class HomeFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (getActivity() == null) {
+            if (getActivity() == null || intent.getAction() == null) {
                 return;
             }
             switch (intent.getAction()) {

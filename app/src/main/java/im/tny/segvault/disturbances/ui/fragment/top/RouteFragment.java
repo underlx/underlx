@@ -175,7 +175,7 @@ public class RouteFragment extends TopFragment {
         navigationStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                S2LS loc = mListener.getMainService().getS2LS(networkId);
+                S2LS loc = MapManager.getInstance(getContext()).getS2LS(networkId);
                 if (loc != null && route != null) {
                     loc.setCurrentTargetRoute(route, false);
                     switchToPage("nav_home");
@@ -200,14 +200,12 @@ public class RouteFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        if (mListener != null && mListener.getMainService() != null) {
-            network = MapManager.getInstance(getContext()).getNetwork(networkId);
-            loc = mListener.getMainService().getS2LS(networkId);
-            // the network map might not be loaded yet
-            if (network != null && loc != null) {
-                populatePickers();
-                updateClosedWarning();
-            }
+        network = MapManager.getInstance(getContext()).getNetwork(networkId);
+        loc = MapManager.getInstance(getContext()).getS2LS(networkId);
+        // the network map might not be loaded yet
+        if (network != null && loc != null) {
+            populatePickers();
+            updateClosedWarning();
         }
         return view;
     }
@@ -266,9 +264,11 @@ public class RouteFragment extends TopFragment {
             }
         });
 
-        String destId = mListener.getRouteDestination();
-        if (destId != null) {
-            destinationPicker.setSelectionById(destId);
+        if(mListener != null) {
+            String destId = mListener.getRouteDestination();
+            if (destId != null) {
+                destinationPicker.setSelectionById(destId);
+            }
         }
     }
 
@@ -546,7 +546,7 @@ public class RouteFragment extends TopFragment {
             for (String tag : station.getTags()) {
                 int drawableResourceId = Util.getDrawableResourceIdForStationTag(tag);
 
-                if(drawableResourceId != 0 && !addedDrawables.contains(drawableResourceId)) {
+                if (drawableResourceId != 0 && !addedDrawables.contains(drawableResourceId)) {
                     addedDrawables.add(drawableResourceId);
                     View iconView = inflater.inflate(R.layout.station_include_icon, iconsLayout, false);
                     ImageView iconImageView = (ImageView) iconView.findViewById(R.id.image_view);
@@ -653,7 +653,7 @@ public class RouteFragment extends TopFragment {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
                         network = MapManager.getInstance(context).getNetwork(networkId);
-                        loc = mListener.getMainService().getS2LS(networkId);
+                        loc = MapManager.getInstance(getContext()).getS2LS(networkId);
                         // the network map might not be loaded yet
                         if (network != null && loc != null) {
                             populatePickers();

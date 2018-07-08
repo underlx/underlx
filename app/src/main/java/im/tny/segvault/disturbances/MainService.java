@@ -87,7 +87,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     private Synchronizer synchronizer;
 
     private final Object lock = new Object();
-    private Map<String, S2LS> locServices = new HashMap<>();
 
     private Date creationDate = null;
 
@@ -118,7 +117,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         synchronized (lock) {
             network.setEdgeWeighter(cweighter);
             S2LS loc = new S2LS(network, new S2LSChangeListener());
-            locServices.put(network.getId(), loc);
+            MapManager.getInstance(MainService.this).putS2LS(network.getId(), loc);
             WiFiLocator wl = new WiFiLocator(network);
             wfc.setLocatorForNetwork(network, wl);
             loc.addNetworkDetector(wl);
@@ -231,10 +230,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
                 }
                 case ACTION_END_TRIP: {
                     final String network = intent.getStringExtra(EXTRA_TRIP_NETWORK);
-                    S2LS loc;
-                    synchronized (lock) {
-                        loc = locServices.get(network);
-                    }
+                    S2LS loc = MapManager.getInstance(MainService.this).getS2LS(network);
                     if (loc != null) {
                         loc.endCurrentTrip();
                     }
@@ -242,10 +238,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
                 }
                 case ACTION_END_NAVIGATION: {
                     final String network = intent.getStringExtra(EXTRA_NAVIGATION_NETWORK);
-                    S2LS loc;
-                    synchronized (lock) {
-                        loc = locServices.get(network);
-                    }
+                    S2LS loc = MapManager.getInstance(MainService.this).getS2LS(network);
                     if (loc != null) {
                         loc.setCurrentTargetRoute(null, false);
                     }
@@ -311,18 +304,14 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         return MapManager.getInstance(this).getAllLines();
     }
 
+    @Deprecated
     public List<POI> getAllPOIs() {
         return MapManager.getInstance(this).getAllPOIs();
     }
 
+    @Deprecated
     public POI getPOI(String id) {
         return MapManager.getInstance(this).getPOI(id);
-    }
-
-    public S2LS getS2LS(String networkId) {
-        synchronized (lock) {
-            return locServices.get(networkId);
-        }
     }
 
     public LineStatusCache getLineStatusCache() {
@@ -333,6 +322,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         return statsCache;
     }
 
+    // this method can be moved elsewhere
     public Stop getLikelyNextExit(List<Connection> path, double threshold) {
         if (path.size() == 0) {
             return null;
@@ -388,6 +378,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         return maxStop;
     }
 
+    // this method can be moved elsewhere
     public double getLeaveTrainFactorForStop(Stop stop) {
         Realm realm = Application.getDefaultRealmInstance(this);
         long entryCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
@@ -416,11 +407,8 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     public String dumpDebugInfo() {
         String s = "Service created on " + creationDate.toString();
         s += (wfc.isScanning() ? String.format(". WFC scanning every %d s", wfc.getScanInterval() / 1000) : ". WFC not scanning") + "\n";
-        for (Network n : getNetworks()) {
-            S2LS loc;
-            synchronized (lock) {
-                loc = locServices.get(n.getId());
-            }
+        for (Network n : MapManager.getInstance(this).getNetworks()) {
+            S2LS loc = MapManager.getInstance(this).getS2LS(n.getId());
             s += "Network " + n.getNames("en")[0] + "\n";
             s += "State machine: " + loc.getState().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
@@ -1242,7 +1230,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
                         wfc.stopScanning();
                     break;
                 case PreferenceNames.PermanentForeground:
-                    checkStopForeground(getS2LS(MapManager.PRIMARY_NETWORK_ID));
+                    checkStopForeground(MapManager.getInstance(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID));
                     break;
             }
         }

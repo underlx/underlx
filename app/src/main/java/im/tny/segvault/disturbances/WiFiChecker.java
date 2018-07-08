@@ -36,7 +36,7 @@ class WiFiChecker {
     private WifiManager wifiMan;
     private final Handler handler = new Handler();
     private boolean isScanning;
-    List<ScanResult> wifiList = new ArrayList<>();
+    private List<ScanResult> wifiList = new ArrayList<>();
     private Context context;
 
     public WiFiChecker(Context context) {
