@@ -169,7 +169,7 @@ public class SearchContentProvider extends ContentProvider {
             }
         });
 
-        if(results.size() == 0) {
+        if (results.size() == 0) {
             ResultRow row = new ResultRow();
             row.title = getContext().getString(R.string.search_no_results);
             row.drawable = R.drawable.ic_sentiment_dissatisfied_black_24dp;
@@ -196,7 +196,7 @@ public class SearchContentProvider extends ContentProvider {
 
     private ResultRow buildResultRowForExit(Station station, Lobby lobby, Lobby.Exit exit, double distance, String matchStreet) {
         ResultRow row = new ResultRow();
-        if(matchStreet == null) {
+        if (matchStreet == null) {
             row.title = exit.getExitsString();
         } else {
             // like exit.getExitsString() but always get our match first
@@ -226,7 +226,7 @@ public class SearchContentProvider extends ContentProvider {
         }
 
         String[] normWords = norm.split(" ");
-        for(String word : normWords) {
+        for (String word : normWords) {
             if (Math.min(normalizedQuery.length(), word.length()) < 3) {
                 continue;
             }

@@ -1,9 +1,11 @@
 package im.tny.segvault.disturbances;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -166,6 +169,8 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         }
 
         synchronizer = new Synchronizer(getApplicationContext());
+
+        createNotificationChannels();
     }
 
     @Override
@@ -180,6 +185,14 @@ public class MainService extends Service implements MapManager.OnLoadListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
+        if (permanentForeground) {
+            startPermanentForeground();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startTemporaryForeground();
+        }
+
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_TOPOLOGY_UPDATES:
@@ -245,12 +258,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
 
         UpdateTopologyJob.schedule();
         SyncTripsJob.schedule();
-
-        SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-        boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
-        if (permanentForeground) {
-            startPermanentForeground();
-        }
 
         return Service.START_STICKY;
     }
@@ -492,7 +499,11 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         @NonNull
         protected Result onRunJob(Params params) {
             Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_CHECK_TOPOLOGY_UPDATES);
-            getContext().startService(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getContext().startForegroundService(intent);
+            } else {
+                getContext().startService(intent);
+            }
             return Result.SUCCESS;
         }
 
@@ -518,7 +529,11 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         @NonNull
         protected Result onRunJob(Params params) {
             Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_SYNC_TRIPS);
-            getContext().startService(intent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getContext().startForegroundService(intent);
+            } else {
+                getContext().startService(intent);
+            }
             return Result.SUCCESS;
         }
 
@@ -559,7 +574,11 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         intent.putExtra(EXTRA_DISTURBANCE_DOWNTIME, downtime);
         intent.putExtra(EXTRA_DISTURBANCE_MSGTIME, messageTime);
         intent.putExtra(EXTRA_DISTURBANCE_MSGTYPE, msgType);
-        context.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
 
     private void handleDisturbanceNotification(String network, String line,
@@ -619,7 +638,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         bigTextStyle.setBigContentTitle(title);
         bigTextStyle.bigText(status);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_DISTURBANCES_ID)
                 .setStyle(bigTextStyle)
                 .setSmallIcon(R.drawable.ic_disturbance_notif)
                 .setColor(sline.getColor())
@@ -659,7 +678,11 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         intent.putExtra(EXTRA_ANNOUNCEMENT_URL, url);
         intent.putExtra(EXTRA_ANNOUNCEMENT_SOURCE, source);
         intent.putExtra(EXTRA_ANNOUNCEMENT_MSGTIME, messageTime);
-        context.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
 
     private void handleAnnouncementNotification(String network, String title,
@@ -690,7 +713,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         bigTextStyle.setBigContentTitle(title);
         bigTextStyle.bigText(body);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ANNOUNCEMENTS_ID)
                 .setStyle(bigTextStyle)
                 .setSmallIcon(R.drawable.ic_pt_ml_notif)
                 .setColor(source.color)
@@ -784,7 +807,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         }
         singleLineStatus = singleLineStatus.subSequence(0, singleLineStatus.length() - 3);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_REALTIME_ID)
                 .setStyle(inboxStyle)
                 .setColor(color)
                 .setContentTitle(title)
@@ -827,7 +850,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
             notificationBuilder.addAction(R.drawable.ic_menu_announcement, getString(R.string.notif_route_report), pendingReportIntent);
         }
 
-        startForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
+        proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
     }
 
     public class RouteStepInfo {
@@ -1073,17 +1096,89 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         Intent intent = new Intent(MainService.this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(MainService.this, 0, intent, 0);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainService.this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainService.this, NOTIF_CHANNEL_BACKGROUND_ID)
                 .setColor(getResources().getColor(R.color.colorPrimary))
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.notif_permanent_foreground_description))
                 .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_sleep_white_24dp)
-                .setVisibility(Notification.VISIBILITY_SECRET)
+                .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setOngoing(true);
+        proxyStartForeground(PERMANENT_FOREGROUND_NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    private boolean isTempForeground = false;
+    private Handler tempForegroundHandler = new Handler();
+
+    private void proxyStartForeground(int id, Notification notification) {
+        isTempForeground = false;
+        startForeground(id, notification);
+    }
+
+    private void startTemporaryForeground() {
+        Intent intent = new Intent(MainService.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(MainService.this, 0, intent, 0);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainService.this, NOTIF_CHANNEL_BACKGROUND_ID)
+                .setColor(getResources().getColor(R.color.colorPrimary))
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText("")
+                .setAutoCancel(false)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_sleep_white_24dp)
+                .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setOngoing(true);
+
+        isTempForeground = true;
         startForeground(PERMANENT_FOREGROUND_NOTIFICATION_ID, notificationBuilder.build());
+        tempForegroundHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isTempForeground) {
+                    stopForeground(true);
+                    isTempForeground = false;
+                }
+            }
+        }, 10000);
+    }
+
+    public static final String NOTIF_CHANNEL_DISTURBANCES_ID = "notif.disturbances";
+    public static final String NOTIF_CHANNEL_ANNOUNCEMENTS_ID = "notif.announcements";
+    public static final String NOTIF_CHANNEL_REALTIME_ID = "notif.realtime";
+    public static final String NOTIF_CHANNEL_BACKGROUND_ID = "notif.background";
+
+    private void createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager == null) {
+                return;
+            }
+
+            if (notificationManager.getNotificationChannel("fcm_fallback_notification_channel") == null) {
+                String channelName = getString(R.string.fcm_fallback_notification_channel_label);
+                NotificationChannel channel = new NotificationChannel("fcm_fallback_notification_channel", channelName, NotificationManager.IMPORTANCE_HIGH);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_DISTURBANCES_ID, "Disturbances", NotificationManager.IMPORTANCE_HIGH);
+            channel.setShowBadge(true);
+            notificationManager.createNotificationChannel(channel);
+
+            channel = new NotificationChannel(NOTIF_CHANNEL_ANNOUNCEMENTS_ID, "Announcements", NotificationManager.IMPORTANCE_HIGH);
+            channel.setShowBadge(true);
+            notificationManager.createNotificationChannel(channel);
+
+            channel = new NotificationChannel(NOTIF_CHANNEL_REALTIME_ID, "Real-time", NotificationManager.IMPORTANCE_LOW);
+            channel.setShowBadge(false);
+            notificationManager.createNotificationChannel(channel);
+
+            channel = new NotificationChannel(NOTIF_CHANNEL_BACKGROUND_ID, "Background", NotificationManager.IMPORTANCE_MIN);
+            channel.setShowBadge(false);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private class SubmitRealtimeLocationTask extends AsyncTask<String, Void, Void> {
