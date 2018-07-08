@@ -317,7 +317,7 @@ public class HomeFragment extends TopFragment {
         if (m == null) {
             return;
         }
-        if (m.getLineStatusCache().isDisturbanceOngoing()) {
+        if (MapManager.getInstance(getContext()).getLineStatusCache().isDisturbanceOngoing()) {
             disturbancesButton.setVisibility(View.VISIBLE);
             tripHistoryButton.setVisibility(View.GONE);
         } else {
@@ -350,16 +350,17 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
+        MapManager mapm = MapManager.getInstance(getContext());
         if (requestOnlineUpdate) {
-            m.getLineStatusCache().updateLineStatus();
+            mapm.getLineStatusCache().updateLineStatus();
             m.getStatsCache().updateStats();
         }
 
-        Network net = MapManager.getInstance(getContext()).getNetwork(MapManager.PRIMARY_NETWORK_ID);
+        Network net = mapm.getNetwork(MapManager.PRIMARY_NETWORK_ID);
         if (net == null) {
             networkClosedCard.setVisibility(View.GONE);
             unconfirmedTripsCard.setVisibility(View.GONE);
-            MapManager.getInstance(getContext()).checkForTopologyUpdates();
+            mapm.checkForTopologyUpdates();
         } else if (net.isOpen()) {
             networkClosedCard.setVisibility(View.GONE);
         } else {

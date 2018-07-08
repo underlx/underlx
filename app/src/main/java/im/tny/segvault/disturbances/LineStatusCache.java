@@ -30,11 +30,9 @@ public class LineStatusCache {
     private final Object lock = new Object();
     private HashMap<String, Status> lineStatuses = new HashMap<>();
     private Context context;
-    private MainService mainService;
 
-    public LineStatusCache(MainService mainService) {
-        this.context = mainService;
-        this.mainService = mainService;
+    public LineStatusCache(Context context) {
+        this.context = context.getApplicationContext();
     }
 
     public static class Status implements Serializable {
@@ -99,7 +97,7 @@ public class LineStatusCache {
             fis.close();
 
             Map<String, Line> lines = new HashMap<>();
-            for (Line l : mainService.getAllLines()) {
+            for (Line l : MapManager.getInstance(context).getAllLines()) {
                 lines.put(l.getId(), l);
             }
             for (Status s : info.values()) {
@@ -204,7 +202,7 @@ public class LineStatusCache {
             if (!Connectivity.isConnected(context)) {
                 return false;
             }
-            List<Line> lines = new LinkedList<>(mainService.getAllLines());
+            List<Line> lines = new LinkedList<>(MapManager.getInstance(context).getAllLines());
             if(lines.size() == 0) {
                 return false;
             }

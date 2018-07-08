@@ -264,7 +264,7 @@ public class RouteFragment extends TopFragment {
             }
         });
 
-        if(mListener != null) {
+        if (mListener != null) {
             String destId = mListener.getRouteDestination();
             if (destId != null) {
                 destinationPicker.setSelectionById(destId);
@@ -336,6 +336,8 @@ public class RouteFragment extends TopFragment {
             layoutDestinationStationClosed.setVisibility(View.GONE);
         }
 
+        MapManager mapm = MapManager.getInstance(getContext());
+
         for (Step step : route) {
             View view = null;
             if (step instanceof EnterStep) {
@@ -387,13 +389,11 @@ public class RouteFragment extends TopFragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                if (mListener != null && mListener.getMainService() != null) {
-                    Map<String, LineStatusCache.Status> statuses = mListener.getLineStatusCache().getLineStatus();
-                    if (statuses.get(line.getId()) != null &&
-                            statuses.get(line.getId()).down) {
-                        LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
-                        disturbancesWarningLayout.setVisibility(View.VISIBLE);
-                    }
+                Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+                if (statuses.get(line.getId()) != null &&
+                        statuses.get(line.getId()).down) {
+                    LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                    disturbancesWarningLayout.setVisibility(View.VISIBLE);
                 }
             } else if (step instanceof ChangeLineStep) {
                 final ChangeLineStep lStep = (ChangeLineStep) step;
@@ -445,13 +445,11 @@ public class RouteFragment extends TopFragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                if (mListener != null && mListener.getMainService() != null) {
-                    Map<String, LineStatusCache.Status> statuses = mListener.getLineStatusCache().getLineStatus();
-                    if (statuses.get(lStep.getTarget().getId()) != null &&
-                            statuses.get(lStep.getTarget().getId()).down) {
-                        LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
-                        disturbancesWarningLayout.setVisibility(View.VISIBLE);
-                    }
+                Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+                if (statuses.get(lStep.getTarget().getId()) != null &&
+                        statuses.get(lStep.getTarget().getId()).down) {
+                    LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                    disturbancesWarningLayout.setVisibility(View.VISIBLE);
                 }
             } else if (step instanceof ExitStep) {
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
@@ -645,7 +643,7 @@ public class RouteFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (getActivity() == null) {
+            if (getActivity() == null || intent.getAction() == null) {
                 return;
             }
             switch (intent.getAction()) {

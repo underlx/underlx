@@ -135,7 +135,7 @@ public class HomeLinesFragment extends Fragment {
     }
 
     private void redraw(Context context) {
-        if (mListener == null || mListener.getLineStatusCache() == null) {
+        if (mListener == null) {
             return;
         }
         List<LineRecyclerViewAdapter.LineItem> items = new ArrayList<>();
@@ -143,7 +143,7 @@ public class HomeLinesFragment extends Fragment {
         Date mostRecentUpdate = new Date();
         int count = 0;
         boolean oneIsOpen = false;
-        for (LineStatusCache.Status s : mListener.getLineStatusCache().getLineStatus().values()) {
+        for (LineStatusCache.Status s : MapManager.getInstance(getContext()).getLineStatusCache().getLineStatus().values()) {
             if (s.line == null) {
                 continue;
             }
@@ -206,8 +206,6 @@ public class HomeLinesFragment extends Fragment {
         void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item);
 
         void onLinesFinishedRefreshing();
-
-        LineStatusCache getLineStatusCache();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

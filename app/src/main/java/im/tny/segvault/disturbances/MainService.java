@@ -79,9 +79,7 @@ import io.realm.RealmResults;
 
 public class MainService extends Service implements MapManager.OnLoadListener {
     private API api;
-    private ConnectionWeighter cweighter = new DisturbanceAwareWeighter(this);
     private WiFiChecker wfc;
-    private LineStatusCache lineStatusCache = new LineStatusCache(this);
     private StatsCache statsCache = new StatsCache(this);
     private PairManager pairManager;
     private Synchronizer synchronizer;
@@ -115,7 +113,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     @Override
     public void onNetworkLoaded(Network network) {
         synchronized (lock) {
-            network.setEdgeWeighter(cweighter);
             S2LS loc = new S2LS(network, new S2LSChangeListener());
             MapManager.getInstance(MainService.this).putS2LS(network.getId(), loc);
             WiFiLocator wl = new WiFiLocator(network);
@@ -140,7 +137,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         MapManager.getInstance(this).setOnUpdateListener(new MapManager.OnUpdateListener() {
             @Override
             public void onNetworkUpdated(Network network) {
-                lineStatusCache.clear();
                 statsCache.clear();
             }
         });
@@ -312,10 +308,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     @Deprecated
     public POI getPOI(String id) {
         return MapManager.getInstance(this).getPOI(id);
-    }
-
-    public LineStatusCache getLineStatusCache() {
-        return lineStatusCache;
     }
 
     public StatsCache getStatsCache() {
@@ -576,7 +568,8 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
 
-        Network snetwork = MapManager.getInstance(this).getNetwork(network);
+        MapManager mapm = MapManager.getInstance(this);
+        Network snetwork = mapm.getNetwork(network);
         if (snetwork == null) {
             return;
         }
@@ -586,9 +579,9 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         }
 
         if (downtime) {
-            lineStatusCache.markLineAsDown(sline, new Date(msgtime));
+            mapm.getLineStatusCache().markLineAsDown(sline, new Date(msgtime));
         } else {
-            lineStatusCache.markLineAsUp(sline);
+            mapm.getLineStatusCache().markLineAsUp(sline);
         }
 
         if (linePref != null && !linePref.contains(line)) {

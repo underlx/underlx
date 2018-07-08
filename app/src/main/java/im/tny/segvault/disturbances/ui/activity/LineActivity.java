@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.LineStatusCache;
-import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
 import im.tny.segvault.disturbances.Util;
@@ -57,9 +57,6 @@ public class LineActivity extends TopActivity {
     private LinearLayout disturbancesWarningLayout;
     private LinearLayout lineLayout;
 
-    MainService mainService;
-    boolean locBound = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,17 +67,7 @@ public class LineActivity extends TopActivity {
             networkId = savedInstanceState.getString(STATE_NETWORK_ID);
             lineId = savedInstanceState.getString(STATE_LINE_ID);
         }
-        Object conn = getLastCustomNonConfigurationInstance();
-        if (conn != null) {
-            // have the service connection survive through activity configuration changes
-            // (e.g. screen orientation changes)
-            mConnection = (LocServiceConnection) conn;
-            mainService = mConnection.getBinder().getService();
-            locBound = true;
-        } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
-        }
+
         setContentView(R.layout.activity_line);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -92,98 +79,76 @@ public class LineActivity extends TopActivity {
         lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
         disturbancesWarningLayout = (LinearLayout) findViewById(R.id.disturbances_warning_layout);
         lineLayout = (LinearLayout) findViewById(R.id.line_layout);
-    }
 
-    private LineActivity.LocServiceConnection mConnection = new LineActivity.LocServiceConnection();
+        MapManager mapm = MapManager.getInstance(LineActivity.this);
 
-    class LocServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
+        Network net = mapm.getNetwork(networkId);
+        Line line = net.getLine(lineId);
 
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            mainService = binder.getService();
-            locBound = true;
+        String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
+        setTitle(title);
+        getSupportActionBar().setTitle(title);
+        AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
+        final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        ctl.setTitle(title);
 
-            Network net = mainService.getNetwork(networkId);
-            Line line = net.getLine(lineId);
+        int color = line.getColor();
+        ctl.setContentScrimColor(color);
+        ctl.setStatusBarScrimColor(color);
+        abl.setBackgroundColor(color);
 
-            String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
-            setTitle(title);
-            getSupportActionBar().setTitle(title);
-            AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-            final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-            ctl.setTitle(title);
+        Drawable drawable = ContextCompat.getDrawable(LineActivity.this, Util.getDrawableResourceIdForLineId(line.getId()));
+        drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-            int color = line.getColor();
-            ctl.setContentScrimColor(color);
-            ctl.setStatusBarScrimColor(color);
-            abl.setBackgroundColor(color);
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35, getResources().getDisplayMetrics());
+        FrameLayout iconFrame = new FrameLayout(LineActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
+        int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            params.setMarginEnd(margin);
+        }
+        params.setMargins(0, 0, margin, 0);
+        iconFrame.setLayoutParams(params);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            iconFrame.setBackgroundDrawable(drawable);
+        } else {
+            iconFrame.setBackground(drawable);
+        }
+        lineIconsLayout.addView(iconFrame);
 
-            Drawable drawable = ContextCompat.getDrawable(LineActivity.this, Util.getDrawableResourceIdForLineId(line.getId()));
-            drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-
-            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35, getResources().getDisplayMetrics());
-            FrameLayout iconFrame = new FrameLayout(LineActivity.this);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
-            int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                params.setMarginEnd(margin);
-            }
-            params.setMargins(0, 0, margin, 0);
-            iconFrame.setLayoutParams(params);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                iconFrame.setBackgroundDrawable(drawable);
-            } else {
-                iconFrame.setBackground(drawable);
-            }
-            lineIconsLayout.addView(iconFrame);
-
-            abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                @Override
-                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
-                        lineIconsLayout.animate().alpha(0);
-                    } else {
-                        lineIconsLayout.animate().alpha(1);
-                    }
+        abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                    lineIconsLayout.animate().alpha(0);
+                } else {
+                    lineIconsLayout.animate().alpha(1);
                 }
-            });
-
-            Map<String, LineStatusCache.Status> statuses = mainService.getLineStatusCache().getLineStatus();
-            if (statuses.get(line.getId()) != null &&
-                    statuses.get(line.getId()).down) {
-                disturbancesWarningLayout.setVisibility(View.VISIBLE);
-            } else {
-                disturbancesWarningLayout.setVisibility(View.GONE);
             }
+        });
 
-            LinearLayout closedLayout = (LinearLayout) findViewById(R.id.closed_info_layout);
-            if (line.isExceptionallyClosed(new Date())) {
-                TextView closedView = (TextView) findViewById(R.id.closed_info_view);
-                Formatter f = new Formatter();
-                DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
-                closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
-
-
-                closedLayout.setVisibility(View.VISIBLE);
-            } else {
-                closedLayout.setVisibility(View.GONE);
-            }
-
-            populateLineView(LineActivity.this, getLayoutInflater(), line, lineLayout);
+        Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+        if (statuses.get(line.getId()) != null &&
+                statuses.get(line.getId()).down) {
+            disturbancesWarningLayout.setVisibility(View.VISIBLE);
+        } else {
+            disturbancesWarningLayout.setVisibility(View.GONE);
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            locBound = false;
+        LinearLayout closedLayout = (LinearLayout) findViewById(R.id.closed_info_layout);
+        if (line.isExceptionallyClosed(new Date())) {
+            TextView closedView = (TextView) findViewById(R.id.closed_info_view);
+            Formatter f = new Formatter();
+            DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
+            closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
+
+
+            closedLayout.setVisibility(View.VISIBLE);
+        } else {
+            closedLayout.setVisibility(View.GONE);
         }
 
-        public MainService.LocalBinder getBinder() {
-            return binder;
-        }
+        populateLineView(LineActivity.this, getLayoutInflater(), line, lineLayout);
     }
 
     @Override

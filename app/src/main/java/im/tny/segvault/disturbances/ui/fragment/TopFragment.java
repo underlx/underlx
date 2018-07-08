@@ -79,8 +79,6 @@ public abstract class TopFragment extends Fragment implements MainAddableFragmen
     public interface OnInteractionListener {
         MainService getMainService();
 
-        LineStatusCache getLineStatusCache();
-
         void checkNavigationDrawerItem(int id);
 
         void switchToPage(String pageString, boolean addToBackStack);

@@ -28,6 +28,7 @@ import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.s2ls.S2LS;
+import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
@@ -60,9 +61,13 @@ public class MapManager {
     private Map<String, Network> networks = new HashMap<>();
     private Map<String, S2LS> locServices = new HashMap<>();
     private List<Network> loadedNotListened = new ArrayList<>();
+    private LineStatusCache lineStatusCache;
+    private ConnectionWeighter cweighter;
 
     private MapManager(Context applicationContext) {
         this.context = applicationContext;
+        lineStatusCache = new LineStatusCache(applicationContext);
+        cweighter = new DisturbanceAwareWeighter(applicationContext);
     }
 
     private OnLoadListener loadListener;
@@ -160,6 +165,10 @@ public class MapManager {
         }
     }
 
+    public LineStatusCache getLineStatusCache() {
+        return lineStatusCache;
+    }
+
     private UpdateTopologyTask currentUpdateTopologyTask = null;
 
     private static class UpdateTopologyTask extends AsyncTask<String, Integer, Boolean> {
@@ -235,6 +244,7 @@ public class MapManager {
 
 
                     Network network = mapManager.saveNetwork(n, apiStations, apiLobbies, apiLines, connections, transfers, pois, info);
+                    mapManager.lineStatusCache.clear();
 
                     if (mapManager.updateListener != null) {
                         mapManager.updateListener.onNetworkUpdated(network);
@@ -595,6 +605,7 @@ public class MapManager {
 
         net.setDatasetAuthors(t.info.authors);
         net.setDatasetVersion(t.info.version);
+        net.setEdgeWeighter(cweighter);
 
         synchronized (lock) {
             networks.put(net.getId(), net);

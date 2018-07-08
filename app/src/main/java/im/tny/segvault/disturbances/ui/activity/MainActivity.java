@@ -821,14 +821,6 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public LineStatusCache getLineStatusCache() {
-        if (locService == null) {
-            return null;
-        }
-        return locService.getLineStatusCache();
-    }
-
-    @Override
     public boolean onSuggestionSelect(int position) {
         return false;
     }

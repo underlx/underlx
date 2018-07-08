@@ -1,5 +1,7 @@
 package im.tny.segvault.disturbances;
 
+import android.content.Context;
+
 import java.util.Date;
 
 import im.tny.segvault.s2ls.routing.NeutralWeighter;
@@ -12,18 +14,18 @@ import im.tny.segvault.subway.Transfer;
  */
 
 public class DisturbanceAwareWeighter extends NeutralWeighter {
-    private MainService mainService;
+    private Context context;
 
 
-    public DisturbanceAwareWeighter(MainService mainService) {
-        this.mainService = mainService;
+    public DisturbanceAwareWeighter(Context context) {
+        this.context = context;
     }
 
     @Override
     public double getEdgeWeight(Network network, Connection connection) {
         double weight = super.getEdgeWeight(network, connection);
         // make transferring to lines with disturbances much "heavier"
-        LineStatusCache.Status s = mainService.getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
+        LineStatusCache.Status s = MapManager.getInstance(context).getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
         if (connection instanceof Transfer || isSource(connection.getSource())) {
             if (!isTarget(connection.getTarget()) && s != null &&
                     (s.down || connection.getTarget().getLine().isExceptionallyClosed(new Date()))) {
