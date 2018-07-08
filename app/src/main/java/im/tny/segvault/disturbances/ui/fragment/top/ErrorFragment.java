@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 
@@ -104,8 +105,8 @@ public class ErrorFragment extends TopFragment {
         }
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -125,7 +126,7 @@ public class ErrorFragment extends TopFragment {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
-                    mListener.updateNetworks(MainService.PRIMARY_NETWORK_ID);
+                    mListener.updateNetworks(MapManager.PRIMARY_NETWORK_ID);
                 }
                 exitErrorScreen();
             }
@@ -189,8 +190,8 @@ public class ErrorFragment extends TopFragment {
                 return;
             }
             switch (intent.getAction()) {
-                case MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (errorType == ErrorType.NO_TOPOLOGY || errorType == ErrorType.TOPOLOGY_DOWNLOADING) {
                         exitErrorScreen();
                     }

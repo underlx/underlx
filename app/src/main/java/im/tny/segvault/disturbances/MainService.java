@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
@@ -75,9 +74,7 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class MainService extends Service {
-    public static final String PRIMARY_NETWORK_ID = "pt-ml";
-
+public class MainService extends Service implements MapManager.OnLoadListener {
     private API api;
     private ConnectionWeighter cweighter = new DisturbanceAwareWeighter(this);
     private WiFiChecker wfc;
@@ -87,7 +84,6 @@ public class MainService extends Service {
     private Synchronizer synchronizer;
 
     private final Object lock = new Object();
-    private Map<String, Network> networks = new HashMap<>();
     private Map<String, S2LS> locServices = new HashMap<>();
 
     private Date creationDate = null;
@@ -114,32 +110,14 @@ public class MainService extends Service {
 
     }
 
-    private void putNetwork(final Network net) {
+    @Override
+    public void onNetworkLoaded(Network network) {
         synchronized (lock) {
-            // create Realm stations for the network if they don't exist already
-            Realm realm = Application.getDefaultRealmInstance(this);
-
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    for (Station s : net.getStations()) {
-                        if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
-                            RStation rs = new RStation();
-                            rs.setStop(s);
-                            rs.setNetwork(net.getId());
-                            realm.copyToRealm(rs);
-                        }
-                    }
-                }
-            });
-            realm.close();
-
-            net.setEdgeWeighter(cweighter);
-            networks.put(net.getId(), net);
-            S2LS loc = new S2LS(net, new S2LSChangeListener());
-            locServices.put(net.getId(), loc);
-            WiFiLocator wl = new WiFiLocator(net);
-            wfc.setLocatorForNetwork(net, wl);
+            network.setEdgeWeighter(cweighter);
+            S2LS loc = new S2LS(network, new S2LSChangeListener());
+            locServices.put(network.getId(), loc);
+            WiFiLocator wl = new WiFiLocator(network);
+            wfc.setLocatorForNetwork(network, wl);
             loc.addNetworkDetector(wl);
             loc.addProximityDetector(wl);
             loc.addLocator(wl);
@@ -155,9 +133,15 @@ public class MainService extends Service {
         api = API.getInstance();
         wfc = new WiFiChecker(this);
         wfc.setScanInterval(10000);
-        if (networks.size() == 0) {
-            loadNetworks();
-        }
+
+        MapManager.getInstance(this).setOnLoadListener(this);
+        MapManager.getInstance(this).setOnUpdateListener(new MapManager.OnUpdateListener() {
+            @Override
+            public void onNetworkUpdated(Network network) {
+                lineStatusCache.clear();
+                statsCache.clear();
+            }
+        });
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
@@ -165,7 +149,7 @@ public class MainService extends Service {
             SharedPreferences.Editor e = sharedPref.edit();
             e.putLong(PreferenceNames.LastAutoTopologyUpdateCheck, new Date().getTime());
             e.apply();
-            checkForTopologyUpdates();
+            MapManager.getInstance(this).checkForTopologyUpdates();
         }
 
         realmForListeners = Application.getDefaultRealmInstance(this);
@@ -196,9 +180,6 @@ public class MainService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (networks.size() == 0) {
-            loadNetworks();
-        }
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_TOPOLOGY_UPDATES:
@@ -207,7 +188,7 @@ public class MainService extends Service {
                         // service started less than 10 seconds ago, no need to check again
                         break;
                     }
-                    checkForTopologyUpdates(true);
+                    MapManager.getInstance(this).checkForTopologyUpdates(true);
                     Log.d("MainService", "onStartCommand updates checked");
                     break;
                 case ACTION_SYNC_TRIPS:
@@ -274,26 +255,6 @@ public class MainService extends Service {
         return Service.START_STICKY;
     }
 
-    private void loadNetworks() {
-        synchronized (lock) {
-            try {
-                Network net = TopologyCache.loadNetwork(this, PRIMARY_NETWORK_ID, api.getEndpoint().toString());
-                putNetwork(net);
-
-                S2LS loc = locServices.get(PRIMARY_NETWORK_ID);
-                Log.d("loadNetworks", String.format("In network? %b", loc.inNetwork()));
-                Log.d("loadNetworks", String.format("Near network? %b", loc.nearNetwork()));
-                Zone z = loc.getLocation();
-                for (Stop s : z.vertexSet()) {
-                    Log.d("loadNetworks", String.format("May be in station %s", s));
-                }
-            } catch (CacheException e) {
-                // cache invalid, attempt to reload topology
-                updateTopology();
-            }
-        }
-    }
-
     public void reloadFCMsubscriptions() {
         FirebaseMessaging fcm = FirebaseMessaging.getInstance();
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
@@ -323,125 +284,38 @@ public class MainService extends Service {
         }
     }
 
-    public void updateTopology() {
-        synchronized (lock) {
-            if (!isTopologyUpdateInProgress()) {
-                cancelTopologyUpdate();
-                currentUpdateTopologyTask = new UpdateTopologyTask();
-                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, PRIMARY_NETWORK_ID);
-            }
-        }
-    }
-
-    public void updateTopology(String... network_ids) {
-        synchronized (lock) {
-            if (!isTopologyUpdateInProgress()) {
-                cancelTopologyUpdate();
-                currentUpdateTopologyTask = new UpdateTopologyTask();
-                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids);
-            }
-        }
-    }
-
-    public void cancelTopologyUpdate() {
-        synchronized (lock) {
-            if (currentUpdateTopologyTask != null) {
-                currentUpdateTopologyTask.cancel(true);
-            }
-        }
-    }
-
-    public boolean isTopologyUpdateInProgress() {
-        synchronized (lock) {
-            return currentUpdateTopologyTask != null;
-        }
-    }
-
-    public void checkForTopologyUpdates() {
-        synchronized (lock) {
-            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
-                    && lastTopologyUpdatesCheckLongAgo()) {
-                lastTopologyUpdatesCheck = new Date();
-                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-                currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(this));
-            }
-        }
-    }
-
-    public void checkForTopologyUpdates(boolean autoUpdate) {
-        synchronized (lock) {
-            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
-                    && lastTopologyUpdatesCheckLongAgo()) {
-                lastTopologyUpdatesCheck = new Date();
-                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask();
-                currentCheckTopologyUpdatesTask.execute(autoUpdate);
-            }
-        }
-    }
-
-    private Date lastTopologyUpdatesCheck = new Date(0);
-
-    private boolean lastTopologyUpdatesCheckLongAgo() {
-        return new Date().getTime() - lastTopologyUpdatesCheck.getTime() > 5000;
-    }
-
+    @Deprecated
     public Collection<Network> getNetworks() {
-        synchronized (lock) {
-            return networks.values();
-        }
+        return MapManager.getInstance(this).getNetworks();
     }
 
+    @Deprecated
     public Network getNetwork(String id) {
-        synchronized (lock) {
-            return networks.get(id);
-        }
+        return MapManager.getInstance(this).getNetwork(id);
+    }
+
+    @Deprecated
+    public List<Station> getAllStations() {
+        return MapManager.getInstance(this).getAllStations();
+    }
+
+    @Deprecated
+    public List<Line> getAllLines() {
+        return MapManager.getInstance(this).getAllLines();
+    }
+
+    public List<POI> getAllPOIs() {
+        return MapManager.getInstance(this).getAllPOIs();
+    }
+
+    public POI getPOI(String id) {
+        return MapManager.getInstance(this).getPOI(id);
     }
 
     public S2LS getS2LS(String networkId) {
         synchronized (lock) {
             return locServices.get(networkId);
         }
-    }
-
-    public List<Station> getAllStations() {
-        List<Station> stations = new ArrayList<>();
-        synchronized (lock) {
-            for (Network n : networks.values()) {
-                stations.addAll(n.getStations());
-            }
-        }
-        return stations;
-    }
-
-    public List<Line> getAllLines() {
-        List<Line> lines = new ArrayList<>();
-        synchronized (lock) {
-            for (Network n : networks.values()) {
-                lines.addAll(n.getLines());
-            }
-        }
-        return lines;
-    }
-
-    public List<POI> getAllPOIs() {
-        List<POI> pois = new ArrayList<>();
-        synchronized (lock) {
-            for (Network n : networks.values()) {
-                pois.addAll(n.getPOIs());
-            }
-        }
-        return pois;
-    }
-
-    public POI getPOI(String id) {
-        synchronized (lock) {
-            for (Network n : networks.values()) {
-                if (n.getPOI(id) != null) {
-                    return n.getPOI(id);
-                }
-            }
-        }
-        return null;
     }
 
     public LineStatusCache getLineStatusCache() {
@@ -582,166 +456,6 @@ public class MainService extends Service {
         return mBinder;
     }
 
-    private UpdateTopologyTask currentUpdateTopologyTask = null;
-
-    private class UpdateTopologyTask extends AsyncTask<String, Integer, Boolean> {
-        protected Boolean doInBackground(String... networkIds) {
-            int net_count = networkIds.length;
-            publishProgress(0);
-            try {
-                for (int cur_net = 0; cur_net < net_count; cur_net++) {
-                    API.Network n = api.getNetwork(networkIds[cur_net]);
-                    publishProgress(5);
-                    if (isCancelled()) break;
-
-                    float netPart = (float) (cur_net + 1) / (float) net_count;
-                    Log.d("UpdateTopologyTask", "Updating network " + n.id);
-
-                    HashMap<String, API.Station> apiStations = new HashMap<>();
-                    for (API.Station s : api.getStations()) {
-                        if (s.network.equals(n.id)) {
-                            apiStations.put(s.id, s);
-                        }
-                    }
-
-                    publishProgress(20);
-                    if (isCancelled()) break;
-
-                    HashMap<String, API.Lobby> apiLobbies = new HashMap<>();
-                    for (API.Lobby l : api.getLobbies()) {
-                        if (l.network.equals(n.id)) {
-                            apiLobbies.put(l.id, l);
-                        }
-                    }
-
-                    publishProgress(40);
-                    if (isCancelled()) break;
-
-                    int line_count = n.lines.size();
-                    int cur_line = 0;
-                    HashMap<String, API.Line> apiLines = new HashMap<>();
-                    for (String lineid : n.lines) {
-                        API.Line l = api.getLine(lineid);
-                        apiLines.put(lineid, l);
-                        cur_line++;
-                        publishProgress(40 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
-                        if (cur_line < line_count) {
-                            cur_line++;
-                        }
-                        if (isCancelled()) break;
-                    }
-                    if (isCancelled()) break;
-
-                    List<API.Connection> connections = api.getConnections();
-
-                    publishProgress(80);
-                    if (isCancelled()) break;
-
-                    List<API.Transfer> transfers = api.getTransfers();
-
-                    publishProgress(90);
-                    if (isCancelled()) break;
-
-                    List<API.POI> pois = api.getPOIs();
-
-                    publishProgress(100);
-
-                    API.DatasetInfo info = api.getDatasetInfo(n.id);
-                    lineStatusCache.clear();
-                    statsCache.clear();
-
-                    TopologyCache.saveNetwork(MainService.this, n, apiStations, apiLobbies, apiLines, connections, transfers, pois, info);
-                    putNetwork(TopologyCache.loadNetwork(MainService.this, n.id, api.getEndpoint().toString()));
-                    if (isCancelled()) break;
-                }
-            } catch (APIException e) {
-                return false;
-            } catch (CacheException e) {
-                return false;
-            }
-            return true;
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-            Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_PROGRESS);
-            intent.putExtra(EXTRA_UPDATE_TOPOLOGY_PROGRESS, progress[0]);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        protected void onPostExecute(Boolean result) {
-            Log.d("UpdateTopologyTask", result.toString());
-            currentUpdateTopologyTask = null;
-            Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_FINISHED);
-            intent.putExtra(EXTRA_UPDATE_TOPOLOGY_FINISHED, result);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        @Override
-        protected void onCancelled() {
-            Log.d("UpdateTopologyTask", "onCancelled");
-            currentUpdateTopologyTask = null;
-            Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_CANCELLED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-    }
-
-    private CheckTopologyUpdatesTask currentCheckTopologyUpdatesTask = null;
-
-    private class CheckTopologyUpdatesTask extends AsyncTask<Boolean, Integer, Boolean> {
-        // returns true if there are updates, false if not
-        private boolean autoUpdate;
-
-        protected Boolean doInBackground(Boolean... autoUpdate) {
-            this.autoUpdate = autoUpdate[0];
-            Log.d("MainService", "CheckTopologyUpdatesTask");
-            try {
-                List<API.DatasetInfo> datasetInfos = api.getDatasetInfos();
-                synchronized (lock) {
-                    for (API.DatasetInfo di : datasetInfos) {
-                        if (!networks.containsKey(di.network)) {
-                            return true;
-                        }
-                        Network net = networks.get(di.network);
-                        if (!di.version.equals(net.getDatasetVersion())) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            } catch (APIException e) {
-                return false;
-            }
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(Boolean result) {
-            if (result) {
-                if (autoUpdate) {
-                    updateTopology();
-                } else {
-                    Intent intent = new Intent(ACTION_TOPOLOGY_UPDATE_AVAILABLE);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                    bm.sendBroadcast(intent);
-                }
-            }
-            currentCheckTopologyUpdatesTask = null;
-        }
-    }
-
-    public static final String ACTION_UPDATE_TOPOLOGY_PROGRESS = "im.tny.segvault.disturbances.action.topology.update.progress";
-    public static final String EXTRA_UPDATE_TOPOLOGY_PROGRESS = "im.tny.segvault.disturbances.extra.topology.update.progress";
-    public static final String ACTION_UPDATE_TOPOLOGY_FINISHED = "im.tny.segvault.disturbances.action.topology.update.finished";
-    public static final String EXTRA_UPDATE_TOPOLOGY_FINISHED = "im.tny.segvault.disturbances.extra.topology.update.finished";
-    public static final String ACTION_UPDATE_TOPOLOGY_CANCELLED = "im.tny.segvault.disturbances.action.topology.update.cancelled";
-
-    public static final String ACTION_TOPOLOGY_UPDATE_AVAILABLE = "im.tny.segvault.disturbances.action.topology.update.available";
-
     public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
     public static final String ACTION_SYNC_TRIPS = "im.tny.segvault.disturbances.action.syncTrips";
 
@@ -855,12 +569,9 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
 
-        Network snetwork;
-        synchronized (lock) {
-            if (!networks.containsKey(network)) {
-                return;
-            }
-            snetwork = networks.get(network);
+        Network snetwork = MapManager.getInstance(this).getNetwork(network);
+        if (snetwork == null) {
+            return;
         }
         Line sline = snetwork.getLine(line);
         if (sline == null) {
@@ -1436,7 +1147,7 @@ public class MainService extends Service {
                         wfc.stopScanning();
                     break;
                 case PreferenceNames.PermanentForeground:
-                    checkStopForeground(getS2LS(PRIMARY_NETWORK_ID));
+                    checkStopForeground(getS2LS(MapManager.PRIMARY_NETWORK_ID));
                     break;
             }
         }

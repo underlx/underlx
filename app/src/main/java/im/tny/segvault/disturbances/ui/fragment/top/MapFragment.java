@@ -53,6 +53,7 @@ import java.util.Map;
 
 import im.tny.segvault.disturbances.BuildConfig;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -148,7 +149,7 @@ public class MapFragment extends TopFragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -742,7 +743,7 @@ public class MapFragment extends TopFragment {
             }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     tryLoad();
                     break;
             }

@@ -40,6 +40,7 @@ import java.util.Set;
 
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.widget.StationPickerView;
@@ -195,12 +196,12 @@ public class RouteFragment extends TopFragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         if (mListener != null && mListener.getMainService() != null) {
-            network = mListener.getMainService().getNetwork(networkId);
+            network = MapManager.getInstance(getContext()).getNetwork(networkId);
             loc = mListener.getMainService().getS2LS(networkId);
             // the network map might not be loaded yet
             if (network != null && loc != null) {
@@ -554,48 +555,6 @@ public class RouteFragment extends TopFragment {
                     iconsLayout.addView(iconView);
                 }
             }
-/*
-            ImageView liftView = (ImageView) view.findViewById(R.id.feature_lift_view);
-            if (station.getFeatures().lift) {
-                liftView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView busView = (ImageView) view.findViewById(R.id.feature_bus_view);
-            if (station.getFeatures().bus) {
-                busView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView boatView = (ImageView) view.findViewById(R.id.feature_boat_view);
-            if (station.getFeatures().boat) {
-                boatView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView trainView = (ImageView) view.findViewById(R.id.feature_train_view);
-            if (station.getFeatures().train) {
-                trainView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView airportView = (ImageView) view.findViewById(R.id.feature_airport_view);
-            if (station.getFeatures().airport) {
-                airportView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView parkingView = (ImageView) view.findViewById(R.id.feature_parking_view);
-            if (station.getFeatures().parking) {
-                parkingView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }
-
-            ImageView bikeView = (ImageView) view.findViewById(R.id.feature_bike_view);
-            if (station.getFeatures().bike) {
-                bikeView.setVisibility(View.VISIBLE);
-                separatorView.setVisibility(View.VISIBLE);
-            }*/
         }
 
         LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
@@ -691,9 +650,9 @@ public class RouteFragment extends TopFragment {
             }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
-                        network = mListener.getMainService().getNetwork(networkId);
+                        network = MapManager.getInstance(context).getNetwork(networkId);
                         loc = mListener.getMainService().getS2LS(networkId);
                         // the network map might not be loaded yet
                         if (network != null && loc != null) {

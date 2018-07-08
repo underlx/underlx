@@ -23,6 +23,7 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
 import im.tny.segvault.disturbances.model.Trip;
@@ -88,7 +89,7 @@ public class UnconfirmedTripsFragment extends Fragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -184,7 +185,7 @@ public class UnconfirmedTripsFragment extends Fragment {
             }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_TRIP_REALM_UPDATED:
                     new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;

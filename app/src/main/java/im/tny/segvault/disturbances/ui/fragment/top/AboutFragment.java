@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.BuildConfig;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.widget.DatasetInfoView;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
@@ -218,7 +219,7 @@ public class AboutFragment extends TopFragment {
         setListViewHeightBasedOnChildren(thirdPartyList);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
         return view;
@@ -333,7 +334,7 @@ public class AboutFragment extends TopFragment {
                 return;
             }
             switch (intent.getAction()) {
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refreshDatasetInfo();
                     break;
             }

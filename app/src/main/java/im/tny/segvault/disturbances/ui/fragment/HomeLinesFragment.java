@@ -27,6 +27,7 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
@@ -105,7 +106,7 @@ public class HomeLinesFragment extends Fragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_STARTED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED);
@@ -232,7 +233,7 @@ public class HomeLinesFragment extends Fragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                     redraw(context);
                     break;
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     break;
             }
         }

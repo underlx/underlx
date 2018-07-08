@@ -20,6 +20,7 @@ import com.github.paolorotolo.appintro.ISlideSelectionListener;
 
 import im.tny.segvault.disturbances.Connectivity;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 
 /**
@@ -65,8 +66,8 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
         refresh();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -78,7 +79,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
             return;
         }
 
-        final MainService m = mListener.getMainService();
+        final MapManager m = MapManager.getInstance(getContext());
 
         if(m.getNetworks().size() == 0) {
             title.setText(R.string.intro_finish_wait_title);
@@ -164,11 +165,11 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
                 return;
             }
             switch (intent.getAction()) {
-                case MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
-                    lastKnownPercentage = intent.getIntExtra(MainService.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
+                case MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS:
+                    lastKnownPercentage = intent.getIntExtra(MapManager.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
                     refresh();
                     break;
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     lastKnownPercentage = 100;
                     refresh();
                     break;

@@ -40,6 +40,7 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.FeedbackUtil;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
 import im.tny.segvault.disturbances.LineStatusCache;
@@ -165,7 +166,7 @@ public class HomeFragment extends TopFragment {
             public void onClick(View v) {
                 Intent stopIntent = new Intent(getContext(), MainService.class);
                 stopIntent.setAction(MainService.ACTION_END_TRIP);
-                stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MainService.PRIMARY_NETWORK_ID);
+                stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MapManager.PRIMARY_NETWORK_ID);
                 getContext().startService(stopIntent);
             }
         });
@@ -219,7 +220,7 @@ public class HomeFragment extends TopFragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
         filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
@@ -232,7 +233,7 @@ public class HomeFragment extends TopFragment {
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         Fragment newFragment = HomeLinesFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
-        newFragment = HomeStatsFragment.newInstance(MainService.PRIMARY_NETWORK_ID);
+        newFragment = HomeStatsFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
         transaction.replace(R.id.stats_card, newFragment);
         transaction.commit();
         refresh(true);
@@ -354,11 +355,11 @@ public class HomeFragment extends TopFragment {
             m.getStatsCache().updateStats();
         }
 
-        Network net = m.getNetwork(MainService.PRIMARY_NETWORK_ID);
+        Network net = MapManager.getInstance(getContext()).getNetwork(MapManager.PRIMARY_NETWORK_ID);
         if (net == null) {
             networkClosedCard.setVisibility(View.GONE);
             unconfirmedTripsCard.setVisibility(View.GONE);
-            m.checkForTopologyUpdates();
+            MapManager.getInstance(getContext()).checkForTopologyUpdates();
         } else if (net.isOpen()) {
             networkClosedCard.setVisibility(View.GONE);
         } else {
@@ -378,7 +379,7 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
-        final S2LS loc = m.getS2LS(MainService.PRIMARY_NETWORK_ID);
+        final S2LS loc = m.getS2LS(MapManager.PRIMARY_NETWORK_ID);
 
         if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
@@ -423,7 +424,7 @@ public class HomeFragment extends TopFragment {
                 public void onClick(View view) {
                     Intent intent = new Intent(getContext(), StationActivity.class);
                     intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MainService.PRIMARY_NETWORK_ID);
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MapManager.PRIMARY_NETWORK_ID);
                     startActivity(intent);
                 }
             });
@@ -538,7 +539,7 @@ public class HomeFragment extends TopFragment {
                     refresh(false);
                     break;
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refresh(true);
                     // fallthrough
                 case MainService.ACTION_CURRENT_TRIP_UPDATED:

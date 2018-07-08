@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Connectivity;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
@@ -125,7 +126,7 @@ public class DisturbanceFragment extends TopFragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -279,7 +280,7 @@ public class DisturbanceFragment extends TopFragment {
             }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }

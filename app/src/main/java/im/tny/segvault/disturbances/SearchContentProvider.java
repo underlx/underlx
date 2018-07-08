@@ -4,8 +4,6 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -19,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
@@ -27,8 +26,6 @@ import im.tny.segvault.subway.Station;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
 
 public class SearchContentProvider extends ContentProvider {
-    private MainService mainService;
-    private boolean serviceBound = false;
     private Sift4 sift4 = new Sift4();
 
     public SearchContentProvider() {
@@ -42,8 +39,6 @@ public class SearchContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        getContext().startService(new Intent(getContext(), MainService.class));
-        getContext().bindService(new Intent(getContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
         return false;
     }
 
@@ -59,9 +54,6 @@ public class SearchContentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        if (!serviceBound) {
-            return null;
-        }
         String query = uri.getLastPathSegment();
         final String normalizedQuery = Normalizer
                 .normalize(query.toString().toLowerCase().trim(), Normalizer.Form.NFD)
@@ -70,8 +62,9 @@ public class SearchContentProvider extends ContentProvider {
         final List<ResultRow> results = new ArrayList<>();
 
         final String locale = Util.getCurrentLanguage(getContext());
+        final MapManager mapm = MapManager.getInstance(getContext());
 
-        for (Station station : mainService.getAllStations()) {
+        for (Station station : mapm.getAllStations()) {
             double distance = getDistance(station.getName(), normalizedQuery);
             if (station.getId().equals(query)) {
                 distance = -5000; // push to top of results
@@ -118,7 +111,7 @@ public class SearchContentProvider extends ContentProvider {
             }
         }
 
-        for (Line line : mainService.getAllLines()) {
+        for (Line line : mapm.getAllLines()) {
             double distance = Double.MAX_VALUE;
             if (line.getId().equals(query)) {
                 distance = -5000; // push to top of results
@@ -142,7 +135,7 @@ public class SearchContentProvider extends ContentProvider {
             }
         }
 
-        for (POI poi : mainService.getAllPOIs()) {
+        for (POI poi : mapm.getAllPOIs()) {
             double distance = Double.MAX_VALUE;
             // it's unlikely anyone will search by POI ID, but let's support it anyway
             if (poi.getId().equals(query)) {
@@ -278,29 +271,5 @@ public class SearchContentProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Implement this to handle requests to delete one or more rows.
         throw new UnsupportedOperationException("Not supported");
-    }
-
-    private MainServiceConnection mConnection = new MainServiceConnection();
-
-    class MainServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            mainService = binder.getService();
-            serviceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            serviceBound = false;
-        }
-
-        public MainService.LocalBinder getBinder() {
-            return binder;
-        }
     }
 }

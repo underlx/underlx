@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.top.AboutFragment;
@@ -104,9 +105,9 @@ public class DatasetInfoView extends LinearLayout {
         });
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
         filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(containingFragment.getContext());
@@ -122,11 +123,11 @@ public class DatasetInfoView extends LinearLayout {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case MainService.ACTION_UPDATE_TOPOLOGY_PROGRESS:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS:
                     updateButton.setEnabled(false);
                     break;
-                case MainService.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                case MainService.ACTION_UPDATE_TOPOLOGY_CANCELLED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED:
                     updateButton.setEnabled(true);
                     break;
                 case MainService.ACTION_CACHE_EXTRAS_PROGRESS:
