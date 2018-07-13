@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -40,9 +41,6 @@ public class TripCorrectionActivity extends TopActivity {
     private String networkId;
     private String tripId;
     private boolean isStandalone;
-
-    MainService locService;
-    boolean locBound = false;
 
     private Network network;
 
@@ -70,17 +68,6 @@ public class TripCorrectionActivity extends TopActivity {
             tripId = savedInstanceState.getString(STATE_TRIP_ID);
             isStandalone = savedInstanceState.getBoolean(STATE_IS_STANDALONE, false);
         }
-        Object conn = getLastCustomNonConfigurationInstance();
-        if (conn != null) {
-            // have the service connection survive through activity configuration changes
-            // (e.g. screen orientation changes)
-            mConnection = (LocServiceConnection) conn;
-            locService = mConnection.getBinder().getService();
-            locBound = true;
-        } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
-        }
 
         setContentView(R.layout.activity_trip_correction);
 
@@ -105,6 +92,10 @@ public class TripCorrectionActivity extends TopActivity {
                 endPicker.focusOnEntry();
             }
         }
+
+        network = Coordinator.get(this).getMapManager().getNetwork(networkId);
+
+        populateUI();
     }
 
     @Override
@@ -321,34 +312,6 @@ public class TripCorrectionActivity extends TopActivity {
             super.onPostExecute(nothing);
 
             finish();
-        }
-    }
-
-    private LocServiceConnection mConnection = new LocServiceConnection();
-
-    class LocServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            locService = binder.getService();
-            locBound = true;
-
-            network = locService.getNetwork(networkId);
-
-            populateUI();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            locBound = false;
-        }
-
-        public MainService.LocalBinder getBinder() {
-            return binder;
         }
     }
 

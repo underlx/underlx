@@ -15,6 +15,7 @@ import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.util.List;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ExtraContentCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
@@ -111,11 +112,8 @@ public class StationTriviaFragment extends Fragment {
     private void update() {
         if (mListener == null)
             return;
-        MainService service = mListener.getMainService();
-        if (service == null)
-            return;
 
-        Network net = service.getNetwork(networkId);
+        Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null)
             return;
         Station station = net.getStation(stationId);
@@ -156,8 +154,6 @@ public class StationTriviaFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
-
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

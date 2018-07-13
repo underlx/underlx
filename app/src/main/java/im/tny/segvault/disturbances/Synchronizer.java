@@ -39,11 +39,11 @@ public class Synchronizer {
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
 
-    public void attemptSync() {
+    public void asyncSync() {
         new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void sync() {
+    public void sync() {
         Log.d("sync", "Waiting for lock");
         synchronized (lock) {
             Log.d("sync", "Lock acquired");

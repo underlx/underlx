@@ -19,6 +19,7 @@ import com.github.paolorotolo.appintro.ISlidePolicy;
 import com.github.paolorotolo.appintro.ISlideSelectionListener;
 
 import im.tny.segvault.disturbances.Connectivity;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -79,7 +80,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
             return;
         }
 
-        final MapManager m = MapManager.getInstance(getContext());
+        final MapManager m = Coordinator.get(getContext()).getMapManager();
 
         if(m.getNetworks().size() == 0) {
             title.setText(R.string.intro_finish_wait_title);

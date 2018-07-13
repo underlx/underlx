@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.StationUse;
@@ -34,27 +35,12 @@ import io.realm.RealmResults;
 
 public class StatsActivity extends TopActivity {
 
-    MainService locService;
-    boolean locBound = false;
-
     List<Statistic> stats = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
-
-        Object conn = getLastCustomNonConfigurationInstance();
-        if (conn != null) {
-            // have the service connection survive through activity configuration changes
-            // (e.g. screen orientation changes)
-            mConnection = (StatsActivity.LocServiceConnection) conn;
-            locService = mConnection.getBinder().getService();
-            locBound = true;
-        } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,7 +105,7 @@ public class StatsActivity extends TopActivity {
                 @Override
                 public void execute(Realm realm) {
                     for (Statistic stat : stats) {
-                        stat.compute(realm, locService.getNetworks());
+                        stat.compute(realm, Coordinator.get(StatsActivity.this).getMapManager().getNetworks());
                     }
                 }
             });
@@ -432,32 +418,6 @@ public class StatsActivity extends TopActivity {
                 return String.format("%.01f", (double) stations / (double) trips);
             }
             return "--";
-        }
-    }
-
-    private LocServiceConnection mConnection = new LocServiceConnection();
-
-    private class LocServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            locService = binder.getService();
-            locBound = true;
-
-            new UpdateStatsTask(stats, (TableLayout) findViewById(R.id.table_layout), getLayoutInflater()).execute();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            locBound = false;
-        }
-
-        public MainService.LocalBinder getBinder() {
-            return binder;
         }
     }
 }

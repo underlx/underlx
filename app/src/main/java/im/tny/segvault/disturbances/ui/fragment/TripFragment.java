@@ -22,6 +22,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.Trip;
@@ -106,13 +107,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         statsLayout = (LinearLayout) view.findViewById(R.id.layout_stats);
         statsView = (TextView) view.findViewById(R.id.stats_view);
 
-        if (mListener == null)
-            return view;
-        MainService service = mListener.getMainService();
-        if (service == null)
-            return view;
-
-        network = service.getNetwork(networkId);
+        network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
 
         correctButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -418,7 +413,6 @@ public class TripFragment extends BottomSheetDialogFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
     }
 }
 

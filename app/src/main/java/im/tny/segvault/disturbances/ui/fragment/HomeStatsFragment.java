@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
@@ -125,11 +126,7 @@ public class HomeStatsFragment extends Fragment {
     }
 
     private void redraw(Context context) {
-        if (mListener == null || mListener.getMainService() == null) {
-            return;
-        }
-
-        StatsCache cache = mListener.getMainService().getStatsCache();
+        StatsCache cache = Coordinator.get(getContext()).getStatsCache();
         if (cache == null) {
             return;
         }
@@ -178,7 +175,7 @@ public class HomeStatsFragment extends Fragment {
         }
 
 
-        Network net = mListener.getMainService().getNetwork(networkId);
+        Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null) {
             return;
         }

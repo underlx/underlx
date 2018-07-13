@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.API;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -136,7 +137,7 @@ public class ReportActivity extends TopActivity {
 
     private void populateLineList() {
         List<Line> lines = new ArrayList<>();
-        for (Network network : MapManager.getInstance(this).getNetworks()) {
+        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
             List<Line> nLines = new ArrayList<>(network.getLines());
             Collections.sort(nLines, new Comparator<Line>() {
                 @Override
@@ -165,7 +166,7 @@ public class ReportActivity extends TopActivity {
             TextView lineNameView = (TextView) view.findViewById(R.id.line_name_view);
             String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
             String lineLine = String.format(getString(R.string.act_report_line_name), lineName);
-            S2LS s2ls = MapManager.getInstance(this).getS2LS(line.getNetwork().getId());
+            S2LS s2ls = Coordinator.get(this).getS2LS(line.getNetwork().getId());
             if (s2ls != null && s2ls.getCurrentTrip() != null) {
                 final Station station = s2ls.getCurrentTrip().getCurrentStop().getStation();
                 if (station.getLines().contains(line)) {

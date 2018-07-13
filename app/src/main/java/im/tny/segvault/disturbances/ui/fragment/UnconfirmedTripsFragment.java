@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -125,10 +126,10 @@ public class UnconfirmedTripsFragment extends Fragment {
         }
 
         protected Boolean doInBackground(Void... v) {
-            while (mListener == null || mListener.getMainService() == null) {
+            while (mListener == null) {
                 return false;
             }
-            Collection<Network> networks = mListener.getMainService().getNetworks();
+            Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : Trip.getMissingConfirmTrips(realm)) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
@@ -174,7 +175,6 @@ public class UnconfirmedTripsFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener extends TripRecyclerViewAdapter.OnListFragmentInteractionListener {
-        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

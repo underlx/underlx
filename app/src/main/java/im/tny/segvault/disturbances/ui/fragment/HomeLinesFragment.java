@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
@@ -143,7 +144,7 @@ public class HomeLinesFragment extends Fragment {
         Date mostRecentUpdate = new Date();
         int count = 0;
         boolean oneIsOpen = false;
-        for (LineStatusCache.Status s : MapManager.getInstance(getContext()).getLineStatusCache().getLineStatus().values()) {
+        for (LineStatusCache.Status s : Coordinator.get(getContext()).getLineStatusCache().getLineStatus().values()) {
             if (s.line == null) {
                 continue;
             }

@@ -25,7 +25,7 @@ public class DisturbanceAwareWeighter extends NeutralWeighter {
     public double getEdgeWeight(Network network, Connection connection) {
         double weight = super.getEdgeWeight(network, connection);
         // make transferring to lines with disturbances much "heavier"
-        LineStatusCache.Status s = MapManager.getInstance(context).getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
+        LineStatusCache.Status s = Coordinator.get(context).getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
         if (connection instanceof Transfer || isSource(connection.getSource())) {
             if (!isTarget(connection.getTarget()) && s != null &&
                     (s.down || connection.getTarget().getLine().isExceptionallyClosed(new Date()))) {

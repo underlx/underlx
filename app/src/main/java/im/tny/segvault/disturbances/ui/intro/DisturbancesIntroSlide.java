@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.Connectivity;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
@@ -64,18 +65,13 @@ public class DisturbancesIntroSlide extends Fragment {
         ((Button) view.findViewById(R.id.select_lines_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Line> lines = new LinkedList<>();
-                if (mListener != null && mListener.getMainService() != null) {
-                    for (Network n : mListener.getMainService().getNetworks()) {
-                        lines.addAll(n.getLines());
+                List<Line> lines = Coordinator.get(getContext()).getMapManager().getAllLines();
+                Collections.sort(lines, new Comparator<Line>() {
+                    @Override
+                    public int compare(Line line, Line t1) {
+                        return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
                     }
-                    Collections.sort(lines, new Comparator<Line>() {
-                        @Override
-                        public int compare(Line line, Line t1) {
-                            return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
-                        }
-                    });
-                }
+                });
 
                 if (lines.size() == 0) {
                     if (Connectivity.isConnected(getContext())) {
@@ -130,7 +126,7 @@ public class DisturbancesIntroSlide extends Fragment {
         Set<String> defaultSet = new HashSet<String>();
         defaultSet.addAll(Arrays.asList(getResources().getStringArray(R.array.default_notif_lines)));
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, defaultSet);
-        if(show) {
+        if (show) {
             linePref.add(lineId);
         } else {
             linePref.remove(lineId);
@@ -159,6 +155,5 @@ public class DisturbancesIntroSlide extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
     }
 }

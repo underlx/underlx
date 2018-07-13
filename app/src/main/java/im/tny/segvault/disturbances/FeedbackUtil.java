@@ -31,22 +31,20 @@ import io.realm.Realm;
 public class FeedbackUtil {
     public static class IncorrectLocation {
         private Context context;
-        private MainService mService;
 
         @Nullable
         private Station incorrectStation = null;
 
         private List<ScanResult> scanResults;
 
-        public IncorrectLocation(Context context, MainService mService, Station incorrectStation) {
-            this(context, mService);
+        public IncorrectLocation(Context context, Station incorrectStation) {
+            this(context);
             this.incorrectStation = incorrectStation;
         }
 
-        public IncorrectLocation(Context context, MainService mService) {
+        public IncorrectLocation(Context context) {
             this.context = context;
-            this.mService = mService;
-            scanResults = mService.getLastWiFiScanResults();
+            scanResults = Coordinator.get(context).getLastWiFiScanResults();
         }
 
         public void showReportWizard() {
@@ -82,7 +80,7 @@ public class FeedbackUtil {
             container.setFocusableInTouchMode(true);
             container.addView(spv);
             spv.setHint(context.getString(R.string.feedback_location_hint));
-            spv.setStations(mService.getAllStations());
+            spv.setStations(Coordinator.get(context).getMapManager().getAllStations());
             spv.setAllStationsSortStrategy(new StationPickerView.AZSortStrategy());
 
             AlertDialog.Builder builder =

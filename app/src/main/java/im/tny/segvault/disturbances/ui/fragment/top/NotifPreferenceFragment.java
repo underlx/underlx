@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.Announcement;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
@@ -122,21 +123,16 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
 
         List<CharSequence> lineNames = new ArrayList<>();
         List<CharSequence> lineIDs = new ArrayList<>();
-        List<Line> lines = new LinkedList<>();
-        if (mListener != null && mListener.getMainService() != null) {
-            for (Network n : mListener.getMainService().getNetworks()) {
-                lines.addAll(n.getLines());
+        List<Line> lines = Coordinator.get(getContext()).getMapManager().getAllLines();
+        Collections.sort(lines, new Comparator<Line>() {
+            @Override
+            public int compare(Line line, Line t1) {
+                return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
             }
-            Collections.sort(lines, new Comparator<Line>() {
-                @Override
-                public int compare(Line line, Line t1) {
-                    return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
-                }
-            });
-            for (Line l : lines) {
-                lineNames.add(Util.getLineNames(getContext(), l)[0]);
-                lineIDs.add(l.getId());
-            }
+        });
+        for (Line l : lines) {
+            lineNames.add(Util.getLineNames(getContext(), l)[0]);
+            lineIDs.add(l.getId());
         }
 
         linesPreference.setEntries(lineNames.toArray(new CharSequence[lineNames.size()]));
@@ -249,9 +245,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d("NotifPreferenceFrag", "onSharedPreferenceChanged " + key);
         if (key.equals(PreferenceNames.NotifsLines) || key.equals(PreferenceNames.AnnouncementSources)) {
-            if (mListener != null && mListener.getMainService() != null) {
-                mListener.getMainService().reloadFCMsubscriptions();
-            }
+            Coordinator.get(getContext()).reloadFCMsubscriptions();
         }
 
 
@@ -295,13 +289,12 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
-        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (getActivity() == null) {
+            if (getActivity() == null || intent.getAction() == null) {
                 return;
             }
             switch (intent.getAction()) {

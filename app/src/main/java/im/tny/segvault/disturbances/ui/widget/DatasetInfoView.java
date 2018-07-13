@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -23,9 +24,6 @@ import im.tny.segvault.disturbances.ui.fragment.top.AboutFragment;
 import im.tny.segvault.subway.Network;
 
 public class DatasetInfoView extends LinearLayout {
-    private TextView nameView;
-    private TextView versionView;
-    private TextView authorsView;
     private Button updateButton;
     private Button cacheAllExtrasButton;
     private Network net;
@@ -67,9 +65,9 @@ public class DatasetInfoView extends LinearLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.dataset_info_view, this);
 
-        nameView = (TextView) findViewById(R.id.dataset_info_name);
-        versionView = (TextView) findViewById(R.id.dataset_info_version);
-        authorsView = (TextView) findViewById(R.id.dataset_info_authors);
+        TextView nameView = (TextView) findViewById(R.id.dataset_info_name);
+        TextView versionView = (TextView) findViewById(R.id.dataset_info_version);
+        TextView authorsView = (TextView) findViewById(R.id.dataset_info_authors);
         updateButton = (Button) findViewById(R.id.dataset_update_button);
         cacheAllExtrasButton = (Button) findViewById(R.id.dataset_cache_all_button);
 
@@ -108,8 +106,8 @@ public class DatasetInfoView extends LinearLayout {
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED);
-        filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
-        filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
+        filter.addAction(Coordinator.ACTION_CACHE_EXTRAS_PROGRESS);
+        filter.addAction(Coordinator.ACTION_CACHE_EXTRAS_FINISHED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(containingFragment.getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -130,10 +128,10 @@ public class DatasetInfoView extends LinearLayout {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_CANCELLED:
                     updateButton.setEnabled(true);
                     break;
-                case MainService.ACTION_CACHE_EXTRAS_PROGRESS:
+                case Coordinator.ACTION_CACHE_EXTRAS_PROGRESS:
                     cacheAllExtrasButton.setEnabled(false);
                     break;
-                case MainService.ACTION_CACHE_EXTRAS_FINISHED:
+                case Coordinator.ACTION_CACHE_EXTRAS_FINISHED:
                     cacheAllExtrasButton.setEnabled(true);
                     break;
             }

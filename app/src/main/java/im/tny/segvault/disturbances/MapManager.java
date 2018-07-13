@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.constraint.solver.Cache;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.evernote.android.job.Job;
+import com.evernote.android.job.JobRequest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
@@ -47,26 +53,14 @@ import io.realm.Realm;
 public class MapManager {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
 
-    private static MapManager singleton;
-
-    public static MapManager getInstance(Context context) {
-        if (singleton == null) {
-            singleton = new MapManager(context.getApplicationContext());
-        }
-        return singleton;
-    }
-
     private Context context;
     private final Object lock = new Object();
     private Map<String, Network> networks = new HashMap<>();
-    private Map<String, S2LS> locServices = new HashMap<>();
     private List<Network> loadedNotListened = new ArrayList<>();
-    private LineStatusCache lineStatusCache;
     private ConnectionWeighter cweighter;
 
-    private MapManager(Context applicationContext) {
+    public MapManager(Context applicationContext) {
         this.context = applicationContext;
-        lineStatusCache = new LineStatusCache(applicationContext);
         cweighter = new DisturbanceAwareWeighter(applicationContext);
     }
 
@@ -152,23 +146,6 @@ public class MapManager {
         return null;
     }
 
-
-    public S2LS getS2LS(String networkId) {
-        synchronized (lock) {
-            return locServices.get(networkId);
-        }
-    }
-
-    public void putS2LS(String networkId, S2LS s2ls) {
-        synchronized (lock) {
-            locServices.put(networkId, s2ls);
-        }
-    }
-
-    public LineStatusCache getLineStatusCache() {
-        return lineStatusCache;
-    }
-
     private UpdateTopologyTask currentUpdateTopologyTask = null;
 
     private static class UpdateTopologyTask extends AsyncTask<String, Integer, Boolean> {
@@ -244,7 +221,7 @@ public class MapManager {
 
 
                     Network network = mapManager.saveNetwork(n, apiStations, apiLobbies, apiLines, connections, transfers, pois, info);
-                    mapManager.lineStatusCache.clear();
+                    Coordinator.get(mapManager.context).getLineStatusCache().clear();
 
                     if (mapManager.updateListener != null) {
                         mapManager.updateListener.onNetworkUpdated(network);
@@ -286,49 +263,71 @@ public class MapManager {
         }
     }
 
-    private CheckTopologyUpdatesTask currentCheckTopologyUpdatesTask = null;
+    public static class CheckUpdatesJob extends Job {
+        public static final String TAG = "job_check_updates";
+        public static final String NO_UPDATE_TAG = "job_check_updates_no";
+        public static final String AUTO_UPDATE_TAG = "job_check_updates_auto";
 
-    private static class CheckTopologyUpdatesTask extends AsyncTask<Boolean, Integer, Boolean> {
-        // returns true if there are updates, false if not
         private boolean autoUpdate;
-        private MapManager mapManager;
 
-        public CheckTopologyUpdatesTask(MapManager mapManager) {
-            this.mapManager = mapManager;
+        public CheckUpdatesJob(String tag) {
+            switch (tag) {
+                case TAG:
+                    autoUpdate = Connectivity.isConnectedWifi(getContext());
+                    break;
+                case NO_UPDATE_TAG:
+                    autoUpdate = false;
+                    break;
+                case AUTO_UPDATE_TAG:
+                    autoUpdate = true;
+                    break;
+            }
         }
 
-        protected Boolean doInBackground(Boolean... autoUpdate) {
-            this.autoUpdate = autoUpdate[0];
-            Log.d("MainService", "CheckTopologyUpdatesTask");
+        @Override
+        @NonNull
+        protected Result onRunJob(Params params) {
+            MapManager mapManager = Coordinator.get(getContext()).getMapManager();
+            List<String> outOfDateNetworks = new ArrayList<>();
             try {
                 List<API.DatasetInfo> datasetInfos = API.getInstance().getDatasetInfos();
                 for (API.DatasetInfo di : datasetInfos) {
                     Network net = mapManager.getNetwork(di.network);
                     if (net == null || !di.version.equals(net.getDatasetVersion())) {
-                        return true;
+                        outOfDateNetworks.add(di.network);
                     }
                 }
-                return false;
             } catch (APIException e) {
-                return false;
+                return Result.RESCHEDULE;
             }
-        }
 
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(Boolean result) {
-            if (result) {
-                if (autoUpdate) {
-                    mapManager.updateTopology();
+            if(!outOfDateNetworks.isEmpty()) {
+                if(autoUpdate) {
+                    String[] networksArray = new String[outOfDateNetworks.size()];
+                    outOfDateNetworks.toArray(networksArray);
+                    Coordinator.get(getContext()).getMapManager().updateTopologySync(networksArray);
                 } else {
                     Intent intent = new Intent(ACTION_TOPOLOGY_UPDATE_AVAILABLE);
                     LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mapManager.context);
                     bm.sendBroadcast(intent);
                 }
             }
-            mapManager.currentCheckTopologyUpdatesTask = null;
+
+            return Result.SUCCESS;
+        }
+
+        public static void schedule() {
+            schedule(true);
+        }
+
+        public static void schedule(boolean updateCurrent) {
+            new JobRequest.Builder(TAG)
+                    .setExecutionWindow(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(36))
+                    .setBackoffCriteria(TimeUnit.MINUTES.toMillis(30), JobRequest.BackoffPolicy.EXPONENTIAL)
+                    .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
+                    .setUpdateCurrent(updateCurrent)
+                    .build()
+                    .schedule();
         }
     }
 
@@ -363,6 +362,23 @@ public class MapManager {
         }
     }
 
+    private boolean updateTopologySync(String... network_ids) {
+        synchronized (lock) {
+            if (!isTopologyUpdateInProgress()) {
+                cancelTopologyUpdate();
+                currentUpdateTopologyTask = new UpdateTopologyTask(this);
+                try {
+                    return currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids).get();
+                } catch (InterruptedException e) {
+                    return false;
+                } catch (ExecutionException e) {
+                    return false;
+                }
+            }
+            return false;
+        }
+    }
+
     public void cancelTopologyUpdate() {
         synchronized (lock) {
             if (currentUpdateTopologyTask != null) {
@@ -379,22 +395,28 @@ public class MapManager {
 
     public void checkForTopologyUpdates() {
         synchronized (lock) {
-            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
-                    && lastTopologyUpdatesCheckLongAgo()) {
+            if (!isTopologyUpdateInProgress() && lastTopologyUpdatesCheckLongAgo()) {
                 lastTopologyUpdatesCheck = new Date();
-                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask(this);
-                currentCheckTopologyUpdatesTask.execute(Connectivity.isConnectedWifi(context));
+                new JobRequest.Builder(CheckUpdatesJob.TAG)
+                        .startNow()
+                        .build()
+                        .schedule();
             }
         }
     }
 
     public void checkForTopologyUpdates(boolean autoUpdate) {
         synchronized (lock) {
-            if (!isTopologyUpdateInProgress() && currentCheckTopologyUpdatesTask == null
-                    && lastTopologyUpdatesCheckLongAgo()) {
+            if (!isTopologyUpdateInProgress() && lastTopologyUpdatesCheckLongAgo()) {
                 lastTopologyUpdatesCheck = new Date();
-                currentCheckTopologyUpdatesTask = new CheckTopologyUpdatesTask(this);
-                currentCheckTopologyUpdatesTask.execute(autoUpdate);
+                String tag = CheckUpdatesJob.NO_UPDATE_TAG;
+                if(autoUpdate) {
+                    tag = CheckUpdatesJob.AUTO_UPDATE_TAG;
+                }
+                new JobRequest.Builder(tag)
+                        .startNow()
+                        .build()
+                        .schedule();
             }
         }
     }

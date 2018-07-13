@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -125,9 +126,7 @@ public class ErrorFragment extends TopFragment {
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mListener != null) {
-                    mListener.updateNetworks(MapManager.PRIMARY_NETWORK_ID);
-                }
+                Coordinator.get(getContext()).getMapManager().updateTopology();
                 exitErrorScreen();
             }
         });
@@ -180,7 +179,6 @@ public class ErrorFragment extends TopFragment {
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
-        void updateNetworks(String... network_ids);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

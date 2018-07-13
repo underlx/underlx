@@ -62,7 +62,7 @@ public class SearchContentProvider extends ContentProvider {
         final List<ResultRow> results = new ArrayList<>();
 
         final String locale = Util.getCurrentLanguage(getContext());
-        final MapManager mapm = MapManager.getInstance(getContext());
+        final MapManager mapm = Coordinator.get(getContext()).getMapManager();
 
         for (Station station : mapm.getAllStations()) {
             double distance = getDistance(station.getName(), normalizedQuery);

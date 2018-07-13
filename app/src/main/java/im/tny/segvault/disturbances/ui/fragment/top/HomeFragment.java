@@ -39,8 +39,11 @@ import java.util.Formatter;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.MapManager;
+import im.tny.segvault.disturbances.RouteUtil;
+import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
 import im.tny.segvault.disturbances.LineStatusCache;
@@ -222,10 +225,10 @@ public class HomeFragment extends TopFragment {
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
-        filter.addAction(MainService.ACTION_CURRENT_TRIP_UPDATED);
-        filter.addAction(MainService.ACTION_CURRENT_TRIP_ENDED);
-        filter.addAction(MainService.ACTION_S2LS_STATUS_CHANGED);
-        filter.addAction(MainService.ACTION_NAVIGATION_ENDED);
+        filter.addAction(S2LSChangeListener.ACTION_CURRENT_TRIP_UPDATED);
+        filter.addAction(S2LSChangeListener.ACTION_CURRENT_TRIP_ENDED);
+        filter.addAction(S2LSChangeListener.ACTION_S2LS_STATUS_CHANGED);
+        filter.addAction(S2LSChangeListener.ACTION_NAVIGATION_ENDED);
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
@@ -260,13 +263,7 @@ public class HomeFragment extends TopFragment {
                 refresh(true);
                 return true;
             case R.id.menu_report_incorrect_location:
-                if (mListener == null)
-                    return true;
-
-                MainService m = mListener.getMainService();
-                if (m == null)
-                    return true;
-                new FeedbackUtil.IncorrectLocation(getContext(), m).showReportWizard();
+                new FeedbackUtil.IncorrectLocation(getContext()).showReportWizard();
                 return true;
         }
 
@@ -317,7 +314,7 @@ public class HomeFragment extends TopFragment {
         if (m == null) {
             return;
         }
-        if (MapManager.getInstance(getContext()).getLineStatusCache().isDisturbanceOngoing()) {
+        if (Coordinator.get(getContext()).getLineStatusCache().isDisturbanceOngoing()) {
             disturbancesButton.setVisibility(View.VISIBLE);
             tripHistoryButton.setVisibility(View.GONE);
         } else {
@@ -346,14 +343,10 @@ public class HomeFragment extends TopFragment {
         if (mListener == null)
             return;
 
-        MainService m = mListener.getMainService();
-        if (m == null)
-            return;
-
-        MapManager mapm = MapManager.getInstance(getContext());
+        MapManager mapm = Coordinator.get(getContext()).getMapManager();
         if (requestOnlineUpdate) {
-            mapm.getLineStatusCache().updateLineStatus();
-            m.getStatsCache().updateStats();
+            Coordinator.get(getContext()).getLineStatusCache().updateLineStatus();
+            Coordinator.get(getContext()).getStatsCache().updateStats();
         }
 
         Network net = mapm.getNetwork(MapManager.PRIMARY_NETWORK_ID);
@@ -380,7 +373,7 @@ public class HomeFragment extends TopFragment {
         if (m == null)
             return;
 
-        final S2LS loc = MapManager.getInstance(getContext()).getS2LS(MapManager.PRIMARY_NETWORK_ID);
+        final S2LS loc = Coordinator.get(getContext()).getS2LS(MapManager.PRIMARY_NETWORK_ID);
 
         if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
@@ -401,7 +394,7 @@ public class HomeFragment extends TopFragment {
                 directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
                 nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
 
-                Stop likelyExit = m.getLikelyNextExit(currentPath.getEdgeList(), 1);
+                Stop likelyExit = RouteUtil.getLikelyNextExit(getContext(), currentPath.getEdgeList(), 1);
                 int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
                 if (next == likelyExit && currentRoute == null) {
                     resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
@@ -433,7 +426,7 @@ public class HomeFragment extends TopFragment {
             curTripIncorrectLocationButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new FeedbackUtil.IncorrectLocation(getContext(), m, station).showReportWizard();
+                    new FeedbackUtil.IncorrectLocation(getContext(), station).showReportWizard();
                 }
             });
 
@@ -450,7 +443,7 @@ public class HomeFragment extends TopFragment {
         if (currentRoute == null) {
             navigationCard.setVisibility(View.GONE);
         } else {
-            MainService.RouteStepInfo info = m.buildRouteStepInfo(currentRoute, currentPath);
+            RouteUtil.RouteStepInfo info = RouteUtil.buildRouteStepInfo(getContext(), currentRoute, currentPath);
             routeTitleView.setText(info.title);
             routeSummaryView.setText(info.summary);
             routeSummaryView.setVisibility(View.VISIBLE);
@@ -543,10 +536,10 @@ public class HomeFragment extends TopFragment {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     refresh(true);
                     // fallthrough
-                case MainService.ACTION_CURRENT_TRIP_UPDATED:
-                case MainService.ACTION_CURRENT_TRIP_ENDED:
-                case MainService.ACTION_S2LS_STATUS_CHANGED:
-                case MainService.ACTION_NAVIGATION_ENDED:
+                case S2LSChangeListener.ACTION_CURRENT_TRIP_UPDATED:
+                case S2LSChangeListener.ACTION_CURRENT_TRIP_ENDED:
+                case S2LSChangeListener.ACTION_S2LS_STATUS_CHANGED:
+                case S2LSChangeListener.ACTION_NAVIGATION_ENDED:
                     refreshCurrentTrip();
                     break;
             }

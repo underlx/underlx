@@ -97,7 +97,7 @@ public class LineStatusCache {
             fis.close();
 
             Map<String, Line> lines = new HashMap<>();
-            for (Line l : MapManager.getInstance(context).getAllLines()) {
+            for (Line l : Coordinator.get(context).getMapManager().getAllLines()) {
                 lines.put(l.getId(), l);
             }
             for (Status s : info.values()) {
@@ -202,7 +202,7 @@ public class LineStatusCache {
             if (!Connectivity.isConnected(context)) {
                 return false;
             }
-            List<Line> lines = new LinkedList<>(MapManager.getInstance(context).getAllLines());
+            List<Line> lines = new LinkedList<>(Coordinator.get(context).getMapManager().getAllLines());
             if(lines.size() == 0) {
                 return false;
             }

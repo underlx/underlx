@@ -23,7 +23,7 @@ public class Application extends android.app.Application {
         LocaleUtil.initializeLocale(getApplicationContext());
         StethoUtils.install(this);
         initRealm(this);
-        JobManager.create(this).addJobCreator(new MainService.LocationJobCreator());
+        JobManager.create(this).addJobCreator(new OurJobCreator());
     }
 
     @Override

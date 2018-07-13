@@ -39,6 +39,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ui.util.AppBarStateChangeListener;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.MainService;
@@ -69,9 +70,6 @@ public class StationActivity extends TopActivity
 
     private LinearLayout lineIconsLayout;
 
-    MainService locService;
-    boolean locBound = false;
-
     private LocalBroadcastManager bm;
 
     @Override
@@ -86,17 +84,7 @@ public class StationActivity extends TopActivity
             networkId = savedInstanceState.getString(STATE_NETWORK_ID);
             stationId = savedInstanceState.getString(STATE_STATION_ID);
         }
-        Object conn = getLastCustomNonConfigurationInstance();
-        if (conn != null) {
-            // have the service connection survive through activity configuration changes
-            // (e.g. screen orientation changes)
-            mConnection = (LocServiceConnection) conn;
-            locService = mConnection.getBinder().getService();
-            locBound = true;
-        } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
-            getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
-        }
+
         setContentView(R.layout.activity_station);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -137,6 +125,94 @@ public class StationActivity extends TopActivity
                 }
             }
         });
+
+        Network net = Coordinator.get(this).getMapManager().getNetwork(networkId);
+        if (net == null) {
+            StationActivity.this.finish();
+            return;
+        }
+        Station station = net.getStation(stationId);
+        if (station == null) {
+            StationActivity.this.finish();
+            return;
+        }
+        worldCoords = station.getWorldCoordinates();
+
+        setTitle(station.getName());
+        getSupportActionBar().setTitle(station.getName());
+        AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
+        final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        ctl.setTitle(station.getName());
+
+        List<Line> lines = new ArrayList<>(station.getLines());
+        Collections.sort(lines, new Comparator<Line>() {
+            @Override
+            public int compare(Line l1, Line l2) {
+                return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
+            }
+        });
+
+        if (lines.size() > 1) {
+            int colors[] = new int[lines.size() * 2];
+            int i = 0;
+            for (Line l : lines) {
+                colors[i++] = l.getColor();
+                colors[i++] = l.getColor();
+            }
+
+            GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+            gd.setCornerRadius(0f);
+            ctl.setContentScrim(gd);
+
+            gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+            gd.setCornerRadius(0f);
+            ctl.setStatusBarScrim(gd);
+
+            gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+            gd.setCornerRadius(0f);
+            if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                abl.setBackgroundDrawable(gd);
+            } else {
+                abl.setBackground(gd);
+            }
+        } else {
+            int color = lines.get(0).getColor();
+            ctl.setContentScrimColor(color);
+            ctl.setStatusBarScrimColor(color);
+            abl.setBackgroundColor(color);
+        }
+
+        for (Line l : lines) {
+            Drawable drawable = ContextCompat.getDrawable(StationActivity.this, Util.getDrawableResourceIdForLineId(l.getId()));
+            drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+
+            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35, getResources().getDisplayMetrics());
+            FrameLayout iconFrame = new FrameLayout(StationActivity.this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
+            int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                params.setMarginEnd(margin);
+            }
+            params.setMargins(0, 0, margin, 0);
+            iconFrame.setLayoutParams(params);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                iconFrame.setBackgroundDrawable(drawable);
+            } else {
+                iconFrame.setBackground(drawable);
+            }
+            lineIconsLayout.addView(iconFrame);
+        }
+
+        abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                    lineIconsLayout.animate().alpha(0);
+                } else {
+                    lineIconsLayout.animate().alpha(1);
+                }
+            }
+        });
     }
 
     @Override
@@ -162,127 +238,8 @@ public class StationActivity extends TopActivity
         return true;
     }
 
-    private StationActivity.LocServiceConnection mConnection = new StationActivity.LocServiceConnection();
-
-    @Override
-    public MainService getMainService() {
-        return locService;
-    }
-
     public int getPreselectedExitId() {
         return exitId;
-    }
-
-    class LocServiceConnection implements ServiceConnection {
-        MainService.LocalBinder binder;
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            binder = (MainService.LocalBinder) service;
-            locService = binder.getService();
-            locBound = true;
-            Intent intent = new Intent(ACTION_MAIN_SERVICE_BOUND);
-            bm.sendBroadcast(intent);
-
-            Network net = locService.getNetwork(networkId);
-            if (net == null) {
-                StationActivity.this.finish();
-                return;
-            }
-            Station station = net.getStation(stationId);
-            if (station == null) {
-                StationActivity.this.finish();
-                return;
-            }
-            worldCoords = station.getWorldCoordinates();
-
-            setTitle(station.getName());
-            getSupportActionBar().setTitle(station.getName());
-            AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-            final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-            ctl.setTitle(station.getName());
-
-            List<Line> lines = new ArrayList<>(station.getLines());
-            Collections.sort(lines, new Comparator<Line>() {
-                @Override
-                public int compare(Line l1, Line l2) {
-                    return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
-                }
-            });
-
-            if (lines.size() > 1) {
-                int colors[] = new int[lines.size() * 2];
-                int i = 0;
-                for (Line l : lines) {
-                    colors[i++] = l.getColor();
-                    colors[i++] = l.getColor();
-                }
-
-                GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-                gd.setCornerRadius(0f);
-                ctl.setContentScrim(gd);
-
-                gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-                gd.setCornerRadius(0f);
-                ctl.setStatusBarScrim(gd);
-
-                gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-                gd.setCornerRadius(0f);
-                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    abl.setBackgroundDrawable(gd);
-                } else {
-                    abl.setBackground(gd);
-                }
-            } else {
-                int color = lines.get(0).getColor();
-                ctl.setContentScrimColor(color);
-                ctl.setStatusBarScrimColor(color);
-                abl.setBackgroundColor(color);
-            }
-
-            for (Line l : lines) {
-                Drawable drawable = ContextCompat.getDrawable(StationActivity.this, Util.getDrawableResourceIdForLineId(l.getId()));
-                drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-
-                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35, getResources().getDisplayMetrics());
-                FrameLayout iconFrame = new FrameLayout(StationActivity.this);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(height, height);
-                int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    params.setMarginEnd(margin);
-                }
-                params.setMargins(0, 0, margin, 0);
-                iconFrame.setLayoutParams(params);
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    iconFrame.setBackgroundDrawable(drawable);
-                } else {
-                    iconFrame.setBackground(drawable);
-                }
-                lineIconsLayout.addView(iconFrame);
-            }
-
-            abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                @Override
-                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
-                        lineIconsLayout.animate().alpha(0);
-                    } else {
-                        lineIconsLayout.animate().alpha(1);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            locBound = false;
-        }
-
-        public MainService.LocalBinder getBinder() {
-            return binder;
-        }
     }
 
     @Override

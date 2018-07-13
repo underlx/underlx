@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -217,7 +218,7 @@ public class TripHistoryFragment extends TopFragment {
                 } catch (InterruptedException e) {
                 }
             }
-            Collection<Network> networks = mListener.getMainService().getNetworks();
+            Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : realm.where(Trip.class).findAll()) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
@@ -297,7 +298,6 @@ public class TripHistoryFragment extends TopFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener extends OnInteractionListener, TripRecyclerViewAdapter.OnListFragmentInteractionListener {
-        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

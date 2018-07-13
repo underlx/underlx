@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.BuildConfig;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
@@ -179,10 +180,10 @@ public class MapFragment extends TopFragment {
     }
 
     private void tryLoad() {
-        if (network != null || mListener == null || mListener.getMainService() == null) {
+        if (network != null) {
             return;
         }
-        network = mListener.getMainService().getNetwork(networkId);
+        network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (network == null) {
             return;
         }
@@ -697,14 +698,9 @@ public class MapFragment extends TopFragment {
         @JavascriptInterface
         public void onStationClicked(String id) {
             if (currentMapStrategy.getMockLocation()) {
-                if (mListener == null)
-                    return;
-                MainService service = mListener.getMainService();
-                if (service == null)
-                    return;
-                Network net = service.getNetwork(networkId);
+                Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
                 if (net != null) {
-                    service.mockLocation(net.getStation(id));
+                    Coordinator.get(getContext()).mockLocation(net.getStation(id));
                 }
             } else {
                 Intent intent = new Intent(getContext(), StationActivity.class);

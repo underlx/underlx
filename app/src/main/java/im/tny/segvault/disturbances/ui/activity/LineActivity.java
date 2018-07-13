@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -80,9 +81,7 @@ public class LineActivity extends TopActivity {
         disturbancesWarningLayout = (LinearLayout) findViewById(R.id.disturbances_warning_layout);
         lineLayout = (LinearLayout) findViewById(R.id.line_layout);
 
-        MapManager mapm = MapManager.getInstance(LineActivity.this);
-
-        Network net = mapm.getNetwork(networkId);
+        Network net = Coordinator.get(this).getMapManager().getNetwork(networkId);
         Line line = net.getLine(lineId);
 
         String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
@@ -127,7 +126,7 @@ public class LineActivity extends TopActivity {
             }
         });
 
-        Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+        Map<String, LineStatusCache.Status> statuses = Coordinator.get(this).getLineStatusCache().getLineStatus();
         if (statuses.get(line.getId()) != null &&
                 statuses.get(line.getId()).down) {
             disturbancesWarningLayout.setVisibility(View.VISIBLE);

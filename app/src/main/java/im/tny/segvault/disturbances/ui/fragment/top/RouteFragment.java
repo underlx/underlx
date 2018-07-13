@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
@@ -175,7 +176,7 @@ public class RouteFragment extends TopFragment {
         navigationStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                S2LS loc = MapManager.getInstance(getContext()).getS2LS(networkId);
+                S2LS loc = Coordinator.get(getContext()).getS2LS(networkId);
                 if (loc != null && route != null) {
                     loc.setCurrentTargetRoute(route, false);
                     switchToPage("nav_home");
@@ -200,8 +201,8 @@ public class RouteFragment extends TopFragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        network = MapManager.getInstance(getContext()).getNetwork(networkId);
-        loc = MapManager.getInstance(getContext()).getS2LS(networkId);
+        network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
+        loc = Coordinator.get(getContext()).getS2LS(networkId);
         // the network map might not be loaded yet
         if (network != null && loc != null) {
             populatePickers();
@@ -336,7 +337,7 @@ public class RouteFragment extends TopFragment {
             layoutDestinationStationClosed.setVisibility(View.GONE);
         }
 
-        MapManager mapm = MapManager.getInstance(getContext());
+        MapManager mapm = Coordinator.get(getContext()).getMapManager();
 
         for (Step step : route) {
             View view = null;
@@ -389,7 +390,7 @@ public class RouteFragment extends TopFragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+                Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
                 if (statuses.get(line.getId()) != null &&
                         statuses.get(line.getId()).down) {
                     LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
@@ -445,7 +446,7 @@ public class RouteFragment extends TopFragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                Map<String, LineStatusCache.Status> statuses = mapm.getLineStatusCache().getLineStatus();
+                Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
                 if (statuses.get(lStep.getTarget().getId()) != null &&
                         statuses.get(lStep.getTarget().getId()).down) {
                     LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
@@ -650,8 +651,8 @@ public class RouteFragment extends TopFragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                     if (mListener != null) {
-                        network = MapManager.getInstance(context).getNetwork(networkId);
-                        loc = MapManager.getInstance(getContext()).getS2LS(networkId);
+                        network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
+                        loc = Coordinator.get(getContext()).getS2LS(networkId);
                         // the network map might not be loaded yet
                         if (network != null && loc != null) {
                             populatePickers();

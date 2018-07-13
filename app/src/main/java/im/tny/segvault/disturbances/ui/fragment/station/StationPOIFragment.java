@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.ui.activity.POIActivity;
 import im.tny.segvault.disturbances.ui.widget.POIView;
@@ -194,11 +195,8 @@ public class StationPOIFragment extends Fragment
     private void update() {
         if (mListener == null)
             return;
-        MainService service = mListener.getMainService();
-        if (service == null)
-            return;
 
-        Network net = service.getNetwork(networkId);
+        Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null)
             return;
         final Station station = net.getStation(stationId);
@@ -359,7 +357,6 @@ public class StationPOIFragment extends Fragment
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

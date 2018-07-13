@@ -1,23 +1,16 @@
 package im.tny.segvault.disturbances;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.net.wifi.ScanResult;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
@@ -27,27 +20,16 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
-import com.evernote.android.job.Job;
-import com.evernote.android.job.JobCreator;
-import com.evernote.android.job.JobRequest;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.Feedback;
-import im.tny.segvault.disturbances.model.NotificationRule;
-import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
@@ -59,39 +41,28 @@ import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.State;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
-import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.routing.EnterStep;
 import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
-import im.tny.segvault.s2ls.wifi.BSSID;
-import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Connection;
-import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class MainService extends Service implements MapManager.OnLoadListener {
-    private API api;
-    private WiFiChecker wfc;
-    private StatsCache statsCache = new StatsCache(this);
-    private PairManager pairManager;
-    private Synchronizer synchronizer;
+import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_BACKGROUND_ID;
+import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_ID;
 
-    private final Object lock = new Object();
+public class MainService extends Service {
+    private API api;
 
     private Date creationDate = null;
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
-
-    private Handler stateTickHandler = null;
 
     private Realm realmForListeners;
 
@@ -111,35 +82,12 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     }
 
     @Override
-    public void onNetworkLoaded(Network network) {
-        synchronized (lock) {
-            S2LS loc = new S2LS(network, new S2LSChangeListener());
-            MapManager.getInstance(MainService.this).putS2LS(network.getId(), loc);
-            WiFiLocator wl = new WiFiLocator(network);
-            wfc.setLocatorForNetwork(network, wl);
-            loc.addNetworkDetector(wl);
-            loc.addProximityDetector(wl);
-            loc.addLocator(wl);
-        }
-    }
-
-    @Override
     public void onCreate() {
         creationDate = new Date();
-        stateTickHandler = new Handler();
         API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
-        wfc = new WiFiChecker(this);
-        wfc.setScanInterval(10000);
-
-        MapManager.getInstance(this).setOnLoadListener(this);
-        MapManager.getInstance(this).setOnUpdateListener(new MapManager.OnUpdateListener() {
-            @Override
-            public void onNetworkUpdated(Network network) {
-                statsCache.clear();
-            }
-        });
+        Coordinator.get(this).getWiFiChecker().setScanInterval(10000);
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
@@ -147,7 +95,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
             SharedPreferences.Editor e = sharedPref.edit();
             e.putLong(PreferenceNames.LastAutoTopologyUpdateCheck, new Date().getTime());
             e.apply();
-            MapManager.getInstance(this).checkForTopologyUpdates();
+            Coordinator.get(this).getMapManager().checkForTopologyUpdates();
         }
 
         realmForListeners = Application.getDefaultRealmInstance(this);
@@ -156,21 +104,13 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
         feedbackRealmResults.addChangeListener(feedbackRealmChangeListener);
 
-        pairManager = new PairManager(getApplicationContext());
-        //pairManager.unpair();
-        API.getInstance().setPairManager(pairManager);
-        if (!pairManager.isPaired()) {
-            pairManager.pairAsync();
-        }
-
-        synchronizer = new Synchronizer(getApplicationContext());
-
-        createNotificationChannels();
+        Coordinator.get(this).registerMainService(this);
     }
 
     @Override
     public void onDestroy() {
-        wfc.stopScanning();
+        Coordinator.get(this).unregisterMainService();
+        Coordinator.get(this).getWiFiChecker().stopScanning();
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
         tripRealmResults.removeChangeListener(tripRealmChangeListener);
@@ -190,43 +130,9 @@ public class MainService extends Service implements MapManager.OnLoadListener {
 
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
-                case ACTION_CHECK_TOPOLOGY_UPDATES:
-                    Log.d("MainService", "onStartCommand CheckUpdates");
-                    if (new Date().getTime() - creationDate.getTime() < TimeUnit.SECONDS.toMillis(10)) {
-                        // service started less than 10 seconds ago, no need to check again
-                        break;
-                    }
-                    MapManager.getInstance(this).checkForTopologyUpdates(true);
-                    Log.d("MainService", "onStartCommand updates checked");
-                    break;
-                case ACTION_SYNC_TRIPS:
-                    Log.d("MainService", "onStartCommand SyncTrips");
-                    synchronizer.attemptSync();
-                    break;
-                case ACTION_DISTURBANCE_NOTIFICATION: {
-                    final String network = intent.getStringExtra(EXTRA_DISTURBANCE_NETWORK);
-                    final String line = intent.getStringExtra(EXTRA_DISTURBANCE_LINE);
-                    final String id = intent.getStringExtra(EXTRA_DISTURBANCE_ID);
-                    final String status = intent.getStringExtra(EXTRA_DISTURBANCE_STATUS);
-                    final boolean downtime = intent.getBooleanExtra(EXTRA_DISTURBANCE_DOWNTIME, false);
-                    final long msgtime = intent.getLongExtra(EXTRA_DISTURBANCE_MSGTIME, 0);
-                    final String msgType = intent.getStringExtra(EXTRA_DISTURBANCE_MSGTYPE);
-                    handleDisturbanceNotification(network, line, id, status, msgType, downtime, msgtime);
-                    break;
-                }
-                case ACTION_ANNOUNCEMENT_NOTIFICATION: {
-                    final String network = intent.getStringExtra(EXTRA_ANNOUNCEMENT_NETWORK);
-                    final String title = intent.getStringExtra(EXTRA_ANNOUNCEMENT_TITLE);
-                    final String body = intent.getStringExtra(EXTRA_ANNOUNCEMENT_BODY);
-                    final String url = intent.getStringExtra(EXTRA_ANNOUNCEMENT_URL);
-                    final String source = intent.getStringExtra(EXTRA_ANNOUNCEMENT_SOURCE);
-                    final long msgtime = intent.getLongExtra(EXTRA_ANNOUNCEMENT_MSGTIME, 0);
-                    handleAnnouncementNotification(network, title, body, url, source, msgtime);
-                    break;
-                }
                 case ACTION_END_TRIP: {
                     final String network = intent.getStringExtra(EXTRA_TRIP_NETWORK);
-                    S2LS loc = MapManager.getInstance(MainService.this).getS2LS(network);
+                    S2LS loc = Coordinator.get(MainService.this).getS2LS(network);
                     if (loc != null) {
                         loc.endCurrentTrip();
                     }
@@ -234,7 +140,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
                 }
                 case ACTION_END_NAVIGATION: {
                     final String network = intent.getStringExtra(EXTRA_NAVIGATION_NETWORK);
-                    S2LS loc = MapManager.getInstance(MainService.this).getS2LS(network);
+                    S2LS loc = Coordinator.get(MainService.this).getS2LS(network);
                     if (loc != null) {
                         loc.setCurrentTargetRoute(null, false);
                     }
@@ -243,164 +149,17 @@ public class MainService extends Service implements MapManager.OnLoadListener {
             }
         }
 
-        reloadFCMsubscriptions();
-
-        UpdateTopologyJob.schedule();
-        SyncTripsJob.schedule();
-
         return Service.START_STICKY;
-    }
-
-    public void reloadFCMsubscriptions() {
-        FirebaseMessaging fcm = FirebaseMessaging.getInstance();
-        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
-        if (linePref != null && linePref.size() != 0) {
-            fcm.subscribeToTopic("disturbances");
-            if (BuildConfig.DEBUG) {
-                fcm.subscribeToTopic("disturbances-debug");
-            }
-        } else {
-            fcm.unsubscribeFromTopic("disturbances");
-            fcm.unsubscribeFromTopic("disturbances-debug");
-        }
-
-        Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
-
-        for (Announcement.Source possibleSource : Announcement.getSources()) {
-            if (sourcePref != null && sourcePref.contains(possibleSource.id)) {
-                fcm.subscribeToTopic("announcements-" + possibleSource.id);
-                if (BuildConfig.DEBUG) {
-                    fcm.subscribeToTopic("announcements-debug-" + possibleSource.id);
-                }
-            } else {
-                fcm.unsubscribeFromTopic("announcements-" + possibleSource.id);
-                fcm.unsubscribeFromTopic("announcements-debug-" + possibleSource.id);
-            }
-        }
-    }
-
-    @Deprecated
-    public Collection<Network> getNetworks() {
-        return MapManager.getInstance(this).getNetworks();
-    }
-
-    @Deprecated
-    public Network getNetwork(String id) {
-        return MapManager.getInstance(this).getNetwork(id);
-    }
-
-    @Deprecated
-    public List<Station> getAllStations() {
-        return MapManager.getInstance(this).getAllStations();
-    }
-
-    @Deprecated
-    public List<Line> getAllLines() {
-        return MapManager.getInstance(this).getAllLines();
-    }
-
-    @Deprecated
-    public List<POI> getAllPOIs() {
-        return MapManager.getInstance(this).getAllPOIs();
-    }
-
-    @Deprecated
-    public POI getPOI(String id) {
-        return MapManager.getInstance(this).getPOI(id);
-    }
-
-    public StatsCache getStatsCache() {
-        return statsCache;
-    }
-
-    // this method can be moved elsewhere
-    public Stop getLikelyNextExit(List<Connection> path, double threshold) {
-        if (path.size() == 0) {
-            return null;
-        }
-        // get the line for the latest connection
-        Connection last = path.get(path.size() - 1);
-        Line line = null;
-        for (Line l : getAllLines()) {
-            if (l.edgeSet().contains(last)) {
-                line = l;
-                break;
-            }
-        }
-        if (line == null) {
-            return null;
-        }
-
-        Set<Stop> alreadyVisited = new HashSet<>();
-        for (Connection c : path) {
-            alreadyVisited.add(c.getSource());
-            alreadyVisited.add(c.getTarget());
-        }
-
-        // get all the stops till the end of the line, after the given connection
-        // (or in the case of circular lines, all stops of the line)
-        Stop maxStop = null;
-        double max = 0;
-        Set<Stop> stops = new HashSet<>();
-        while (stops.add(last.getSource())) {
-            Stop curStop = last.getTarget();
-            if (!alreadyVisited.contains(curStop)) {
-                double r = getLeaveTrainFactorForStop(curStop);
-                if (maxStop == null || r > max) {
-                    maxStop = curStop;
-                    max = r;
-                }
-            }
-            if (line.outDegreeOf(curStop) == 1) {
-                break;
-            }
-            for (Connection outedge : line.outgoingEdgesOf(curStop)) {
-                if (!stops.contains(outedge.getTarget())) {
-                    last = outedge;
-                    break;
-                }
-            }
-        }
-
-        if (max < threshold) {
-            // most relevant station is not relevant enough
-            return null;
-        }
-        return maxStop;
-    }
-
-    // this method can be moved elsewhere
-    public double getLeaveTrainFactorForStop(Stop stop) {
-        Realm realm = Application.getDefaultRealmInstance(this);
-        long entryCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-        long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
-        // number of times user left at this stop to transfer to another line
-        long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-        realm.close();
-        return entryCount * 0.3 + exitCount + transferCount;
-    }
-
-    public List<ScanResult> getLastWiFiScanResults() {
-        return wfc.getLastScanResults();
-    }
-
-    public void mockLocation(Station station) {
-        if (BuildConfig.DEBUG && station.getStops().size() > 0) {
-            List<BSSID> bssids = new ArrayList<>();
-            for (Stop s : station.getStops()) {
-                bssids.addAll(WiFiLocator.getBSSIDsForStop(s));
-            }
-            wfc.updateBSSIDsDebug(bssids);
-        }
     }
 
     // DEBUG:
     public String dumpDebugInfo() {
+        WiFiChecker wfc = Coordinator.get(MainService.this).getWiFiChecker();
+
         String s = "Service created on " + creationDate.toString();
         s += (wfc.isScanning() ? String.format(". WFC scanning every %d s", wfc.getScanInterval() / 1000) : ". WFC not scanning") + "\n";
-        for (Network n : MapManager.getInstance(this).getNetworks()) {
-            S2LS loc = MapManager.getInstance(this).getS2LS(n.getId());
+        for (Network n : Coordinator.get(this).getMapManager().getNetworks()) {
+            S2LS loc = Coordinator.get(this).getS2LS(n.getId());
             s += "Network " + n.getNames("en")[0] + "\n";
             s += "State machine: " + loc.getState().toString() + "\n";
             s += String.format("\tIn network? %b\n\tNear network? %b\n", loc.inNetwork(), loc.nearNetwork());
@@ -431,7 +190,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
             s += "Error testing API authentication\n";
         }
 
-        synchronizer.attemptSync();
+        Coordinator.get(this).getSynchronizer().asyncSync();
 
         return s;
     }
@@ -443,281 +202,6 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         return mBinder;
     }
 
-    public static final String ACTION_CHECK_TOPOLOGY_UPDATES = "im.tny.segvault.disturbances.action.checkTopologyUpdates";
-    public static final String ACTION_SYNC_TRIPS = "im.tny.segvault.disturbances.action.syncTrips";
-
-    public static final String ACTION_CURRENT_TRIP_UPDATED = "im.tny.segvault.disturbances.action.trip.current.updated";
-    public static final String ACTION_CURRENT_TRIP_ENDED = "im.tny.segvault.disturbances.action.trip.current.ended";
-    public static final String ACTION_S2LS_STATUS_CHANGED = "im.tny.segvault.disturbances.action.s2ls.status.changed";
-    public static final String ACTION_NAVIGATION_ENDED = "im.tny.segvault.disturbances.action.navigation.ended";
-
-    public static final String ACTION_CACHE_EXTRAS_PROGRESS = "im.tny.segvault.disturbances.action.cacheextras.progress";
-    public static final String EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT = "im.tny.segvault.disturbances.extra.cacheextras.progress.current";
-    public static final String EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL = "im.tny.segvault.disturbances.extra.cacheextras.progress.total";
-    public static final String ACTION_CACHE_EXTRAS_FINISHED = "im.tny.segvault.disturbances.action.cacheextras.finished";
-    public static final String EXTRA_CACHE_EXTRAS_FINISHED = "im.tny.segvault.disturbances.extra.cacheextras.finished";
-
-    public static class LocationJobCreator implements JobCreator {
-
-        @Override
-        public Job create(String tag) {
-            switch (tag) {
-                case UpdateTopologyJob.TAG:
-                    return new UpdateTopologyJob();
-                case SyncTripsJob.TAG:
-                    return new SyncTripsJob();
-                default:
-                    return null;
-            }
-        }
-    }
-
-    public static class UpdateTopologyJob extends Job {
-        public static final String TAG = "job_update_topology";
-
-        @Override
-        @NonNull
-        protected Result onRunJob(Params params) {
-            Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_CHECK_TOPOLOGY_UPDATES);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getContext().startForegroundService(intent);
-            } else {
-                getContext().startService(intent);
-            }
-            return Result.SUCCESS;
-        }
-
-        public static void schedule() {
-            schedule(true);
-        }
-
-        public static void schedule(boolean updateCurrent) {
-            new JobRequest.Builder(UpdateTopologyJob.TAG)
-                    .setExecutionWindow(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(36))
-                    .setBackoffCriteria(TimeUnit.MINUTES.toMillis(30), JobRequest.BackoffPolicy.EXPONENTIAL)
-                    .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
-                    .setUpdateCurrent(updateCurrent)
-                    .build()
-                    .schedule();
-        }
-    }
-
-    public static class SyncTripsJob extends Job {
-        public static final String TAG = "job_sync_trips";
-
-        @Override
-        @NonNull
-        protected Result onRunJob(Params params) {
-            Intent intent = new Intent(getContext(), MainService.class).setAction(ACTION_SYNC_TRIPS);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                getContext().startForegroundService(intent);
-            } else {
-                getContext().startService(intent);
-            }
-            return Result.SUCCESS;
-        }
-
-        public static void schedule() {
-            schedule(true);
-        }
-
-        public static void schedule(boolean updateCurrent) {
-            new JobRequest.Builder(SyncTripsJob.TAG)
-                    .setExecutionWindow(TimeUnit.HOURS.toMillis(24), TimeUnit.HOURS.toMillis(48))
-                    .setBackoffCriteria(TimeUnit.HOURS.toMillis(1), JobRequest.BackoffPolicy.EXPONENTIAL)
-                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                    .setUpdateCurrent(updateCurrent)
-                    .build()
-                    .schedule();
-        }
-    }
-
-    private static final String ACTION_DISTURBANCE_NOTIFICATION = "im.tny.segvault.disturbances.action.notification.disturbance";
-
-    private static final String EXTRA_DISTURBANCE_NETWORK = "im.tny.segvault.disturbances.extra.notification.disturbance.network";
-    private static final String EXTRA_DISTURBANCE_LINE = "im.tny.segvault.disturbances.extra.notification.disturbance.line";
-    private static final String EXTRA_DISTURBANCE_ID = "im.tny.segvault.disturbances.extra.notification.disturbance.id";
-    private static final String EXTRA_DISTURBANCE_STATUS = "im.tny.segvault.disturbances.extra.notification.disturbance.status";
-    private static final String EXTRA_DISTURBANCE_DOWNTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.downtime";
-    private static final String EXTRA_DISTURBANCE_MSGTIME = "im.tny.segvault.disturbances.extra.notification.disturbance.msgtime";
-    private static final String EXTRA_DISTURBANCE_MSGTYPE = "im.tny.segvault.disturbances.extra.notification.disturbance.msgtype";
-
-    public static void startForDisturbanceNotification(Context context, String network, String line,
-                                                       String id, String status, String msgType,
-                                                       boolean downtime, long messageTime) {
-        Intent intent = new Intent(context, MainService.class);
-        intent.setAction(ACTION_DISTURBANCE_NOTIFICATION);
-        intent.putExtra(EXTRA_DISTURBANCE_NETWORK, network);
-        intent.putExtra(EXTRA_DISTURBANCE_LINE, line);
-        intent.putExtra(EXTRA_DISTURBANCE_ID, id);
-        intent.putExtra(EXTRA_DISTURBANCE_STATUS, status);
-        intent.putExtra(EXTRA_DISTURBANCE_DOWNTIME, downtime);
-        intent.putExtra(EXTRA_DISTURBANCE_MSGTIME, messageTime);
-        intent.putExtra(EXTRA_DISTURBANCE_MSGTYPE, msgType);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
-    }
-
-    private void handleDisturbanceNotification(String network, String line,
-                                               String id, String status, String msgType,
-                                               boolean downtime, long msgtime) {
-        Log.d("MainService", "handleDisturbanceNotification");
-        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
-
-        MapManager mapm = MapManager.getInstance(this);
-        Network snetwork = mapm.getNetwork(network);
-        if (snetwork == null) {
-            return;
-        }
-        Line sline = snetwork.getLine(line);
-        if (sline == null) {
-            return;
-        }
-
-        if (downtime) {
-            mapm.getLineStatusCache().markLineAsDown(sline, new Date(msgtime));
-        } else {
-            mapm.getLineStatusCache().markLineAsUp(sline);
-        }
-
-        if (linePref != null && !linePref.contains(line)) {
-            // notifications disabled for this line
-            return;
-        }
-
-        status = API.Status.translateStatus(MainService.this, status, msgType);
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (!downtime && !sharedPref.getBoolean(PreferenceNames.NotifsServiceResumed, true)) {
-            // notifications for normal service resumed disabled
-            notificationManager.cancel(id.hashCode());
-            return;
-        }
-
-        Realm realm = Application.getDefaultRealmInstance(this);
-        for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
-            if (rule.isEnabled() && rule.applies(new Date(msgtime))) {
-                realm.close();
-                return;
-            }
-        }
-        realm.close();
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        String title = String.format(getString(R.string.notif_disturbance_title), Util.getLineNames(this, sline)[0]);
-
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(title);
-        bigTextStyle.bigText(status);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_DISTURBANCES_ID)
-                .setStyle(bigTextStyle)
-                .setSmallIcon(R.drawable.ic_disturbance_notif)
-                .setColor(sline.getColor())
-                .setContentTitle(title)
-                .setContentText(status)
-                .setAutoCancel(true)
-                .setWhen(msgtime)
-                .setSound(Uri.parse(sharedPref.getString(downtime ? PreferenceNames.NotifsRingtone : PreferenceNames.NotifsRegularizationRingtone, "content://settings/system/notification_sound")))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentIntent(pendingIntent);
-
-        if (sharedPref.getBoolean(downtime ? PreferenceNames.NotifsVibrate : PreferenceNames.NotifsRegularizationVibrate, false)) {
-            notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
-        } else {
-            notificationBuilder.setVibrate(new long[]{0l});
-        }
-
-        notificationManager.notify(id.hashCode(), notificationBuilder.build());
-    }
-
-    private static final String ACTION_ANNOUNCEMENT_NOTIFICATION = "im.tny.segvault.disturbances.action.notification.announcement";
-    private static final String EXTRA_ANNOUNCEMENT_NETWORK = "im.tny.segvault.disturbances.extra.notification.announcement.network";
-    private static final String EXTRA_ANNOUNCEMENT_TITLE = "im.tny.segvault.disturbances.extra.notification.announcement.title";
-    private static final String EXTRA_ANNOUNCEMENT_BODY = "im.tny.segvault.disturbances.extra.notification.announcement.body";
-    private static final String EXTRA_ANNOUNCEMENT_URL = "im.tny.segvault.disturbances.extra.notification.announcement.url";
-    private static final String EXTRA_ANNOUNCEMENT_SOURCE = "im.tny.segvault.disturbances.extra.notification.announcement.source";
-
-    private static final String EXTRA_ANNOUNCEMENT_MSGTIME = "im.tny.segvault.disturbances.extra.notification.announcement.msgtime";
-
-    public static void startForAnnouncementNotification(Context context, String network, String title,
-                                                        String body, String url, String source, long messageTime) {
-        Intent intent = new Intent(context, MainService.class);
-        intent.setAction(ACTION_ANNOUNCEMENT_NOTIFICATION);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_NETWORK, network);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_TITLE, title);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_BODY, body);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_URL, url);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_SOURCE, source);
-        intent.putExtra(EXTRA_ANNOUNCEMENT_MSGTIME, messageTime);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
-    }
-
-    private void handleAnnouncementNotification(String network, String title,
-                                                String body, String url, String sourceId,
-                                                long msgtime) {
-        Log.d("MainService", "handleAnnouncementNotification");
-        SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
-        Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
-
-        Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
-        notificationIntent.setData(Uri.parse(url));
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        Announcement.Source source = Announcement.getSource(sourceId);
-        if (source == null) {
-            return;
-        }
-
-        if (title.isEmpty()) {
-            title = String.format(getString(R.string.notif_announcement_alt_title), getString(source.nameResourceId));
-        }
-
-        if (body.isEmpty()) {
-            body = getString(R.string.frag_announcement_no_text);
-        }
-
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(title);
-        bigTextStyle.bigText(body);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ANNOUNCEMENTS_ID)
-                .setStyle(bigTextStyle)
-                .setSmallIcon(R.drawable.ic_pt_ml_notif)
-                .setColor(source.color)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setAutoCancel(true)
-                .setWhen(msgtime)
-                .setSound(Uri.parse(sharedPref.getString(PreferenceNames.NotifsAnnouncementRingtone, "content://settings/system/notification_sound")))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentIntent(contentIntent);
-
-        if (sharedPref.getBoolean(PreferenceNames.NotifsAnnouncementVibrate, false)) {
-            notificationBuilder.setVibrate(new long[]{0, 100, 100, 150, 150, 200});
-        } else {
-            notificationBuilder.setVibrate(new long[]{0l});
-        }
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(url.hashCode(), notificationBuilder.build());
-    }
-
     private static final int PERMANENT_FOREGROUND_NOTIFICATION_ID = -101;
     private static final int ROUTE_NOTIFICATION_ID = -100;
     public static final String ACTION_END_NAVIGATION = "im.tny.segvault.disturbances.action.route.current.end";
@@ -725,11 +209,11 @@ public class MainService extends Service implements MapManager.OnLoadListener {
     public static final String ACTION_END_TRIP = "im.tny.segvault.disturbances.action.trip.current.end";
     public static final String EXTRA_TRIP_NETWORK = "im.tny.segvault.disturbances.extra.trip.current.end.network";
 
-    private void updateRouteNotification(S2LS loc) {
+    void updateRouteNotification(S2LS loc) {
         updateRouteNotification(loc, false);
     }
 
-    private void updateRouteNotification(S2LS loc, boolean highPriorityNotification) {
+    void updateRouteNotification(S2LS loc, boolean highPriorityNotification) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_home");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
@@ -748,7 +232,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         List<CharSequence> statusLines = new ArrayList<>();
         int color = -1;
         if (currentRoute != null) {
-            RouteStepInfo info = buildRouteStepInfo(currentRoute, currentPath);
+            RouteUtil.RouteStepInfo info = RouteUtil.buildRouteStepInfo(this, currentRoute, currentPath);
             inboxStyle.setSummaryText(info.summary);
             title = info.title;
             statusLines.addAll(info.bodyLines);
@@ -834,232 +318,7 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    public class RouteStepInfo {
-        public CharSequence title;
-        public CharSequence summary;
-        public List<CharSequence> bodyLines = new ArrayList<>();
-        public int color;
-    }
-
-    public RouteStepInfo buildRouteStepInfo(Route currentRoute, Path currentPath) {
-        RouteStepInfo info = new RouteStepInfo();
-
-        info.summary = String.format(getString(R.string.notif_route_navigating_status), currentRoute.getTarget().getName());
-        Step nextStep = currentRoute.getNextStep(currentPath);
-        if (nextStep instanceof EnterStep) {
-            if (currentPath != null && currentPath.getCurrentStop() != null && currentRoute.checkPathStartsRoute(currentPath)) {
-                info.title = String.format(getString(R.string.notif_route_catch_train_title), ((EnterStep) nextStep).getDirection().getName(12));
-            } else {
-                info.title = String.format(getString(R.string.notif_route_enter_station_title), nextStep.getStation().getName(15));
-            }
-            // TODO: show "encurtamentos" warnings here if applicable
-            info.bodyLines.add(String.format(getString(R.string.notif_route_catch_train_status), ((EnterStep) nextStep).getDirection().getName()));
-            info.color = currentRoute.getSourceStop().getLine().getColor();
-        } else if (nextStep instanceof ChangeLineStep) {
-            ChangeLineStep clStep = (ChangeLineStep) nextStep;
-            String lineName = Util.getLineNames(this, clStep.getTarget())[0];
-            String titleStr;
-            if (currentPath != null && currentPath.getCurrentStop() != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                titleStr = String.format(getString(R.string.notif_route_catch_train_line_change_title),
-                        lineName);
-            } else {
-                titleStr = String.format(getString(R.string.notif_route_line_change_title),
-                        nextStep.getStation().getName(10),
-                        lineName);
-            }
-            int lStart = titleStr.indexOf(lineName);
-            int lEnd = lStart + lineName.length();
-            Spannable sb = new SpannableString(titleStr);
-            sb.setSpan(new ForegroundColorSpan(clStep.getTarget().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            info.title = sb;
-
-            // TODO: show "encurtamentos" warnings here if applicable
-            sb = new SpannableString(
-                    String.format(getString(R.string.notif_route_catch_train_status),
-                            clStep.getDirection().getName())
-            );
-            sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            info.bodyLines.add(sb);
-            info.color = clStep.getTarget().getColor();
-        } else if (nextStep instanceof ExitStep) {
-            if (currentPath != null && currentPath.getCurrentStop().getStation() == nextStep.getStation()) {
-                info.title = getString(R.string.notif_route_leave_train_now);
-            } else if (currentPath != null && currentPath.getNextStop() != null &&
-                    new Date().getTime() - currentPath.getCurrentStopEntryTime().getTime() > 30 * 1000 &&
-                    nextStep.getStation() == currentPath.getNextStop().getStation()) {
-                info.title = getString(R.string.notif_route_leave_train_next);
-            } else {
-                info.title = String.format(getString(R.string.notif_route_leave_train), nextStep.getStation().getName(20));
-            }
-            info.color = nextStep.getLine().getColor();
-        }
-
-        return info;
-    }
-
-    public class S2LSChangeListener implements S2LS.EventListener {
-        @Override
-        public void onStateChanged(final S2LS loc) {
-            Log.d("onStateChanged", "State changed");
-
-            stateTickHandler.removeCallbacksAndMessages(null);
-            if (loc.getState().getPreferredTickIntervalMillis() != 0) {
-                doTick(loc.getState());
-            }
-
-            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-            boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
-
-            if (loc.getState() instanceof InNetworkState) {
-                wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
-                if (locationEnabled) {
-                    wfc.startScanning();
-                }
-                if (loc.getCurrentTrip() != null) {
-                    updateRouteNotification(loc);
-                }
-            } else if (loc.getState() instanceof NearNetworkState) {
-                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
-                if (locationEnabled)
-                    wfc.startScanningIfWiFiEnabled();
-                checkStopForeground(loc);
-            } else if (loc.getState() instanceof OffNetworkState) {
-                // wfc.stopScanning(); // TODO only enable this when there are locators besides WiFi
-                wfc.setScanInterval(TimeUnit.MINUTES.toMillis(1));
-                if (locationEnabled)
-                    wfc.startScanningIfWiFiEnabled();
-                checkStopForeground(loc);
-            }
-
-            Intent intent = new Intent(ACTION_S2LS_STATUS_CHANGED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        @Override
-        public void onTripStarted(final S2LS s2ls) {
-            Path path = s2ls.getCurrentTrip();
-            path.addPathChangedListener(new Path.OnPathChangedListener() {
-                private Station prevEndStation = null;
-
-                @Override
-                public void onPathChanged(Path path) {
-                    Log.d("onPathChanged", "Path changed");
-
-                    Intent intent = new Intent(ACTION_CURRENT_TRIP_UPDATED);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                    bm.sendBroadcast(intent);
-
-                    boolean highPrioNotif = false;
-                    if (s2ls.getCurrentTargetRoute() != null) {
-                        Step nextStep = s2ls.getCurrentTargetRoute().getNextStep(path);
-                        highPrioNotif = path.getEndVertex().getStation() != prevEndStation &&
-                                path.getEndVertex().getStation() == nextStep.getStation();
-                    }
-                    prevEndStation = path.getEndVertex().getStation();
-                    updateRouteNotification(s2ls, highPrioNotif);
-                }
-
-                @Override
-                public void onNewStationEnteredNow(Path path) {
-                    if (path.getDirection() == null) {
-                        new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
-                    } else {
-                        new SubmitRealtimeLocationTask().execute(
-                                path.getCurrentStop().getStation().getId(),
-                                path.getDirection().getStation().getId());
-                    }
-                }
-            });
-            new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
-            updateRouteNotification(s2ls);
-        }
-
-        @Override
-        public void onTripEnded(S2LS s2ls, Path path) {
-            String tripId = Trip.persistConnectionPath(path);
-            Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-
-            if (!checkStopForeground(s2ls)) {
-                updateRouteNotification(s2ls);
-            }
-
-            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-            boolean openTripCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenTripCorrection, false);
-            boolean openVisitCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenVisitCorrection, false);
-            if (openTripCorrection && (path.getEdgeList().size() > 0 || openVisitCorrection)) {
-                intent = new Intent(getApplicationContext(), TripCorrectionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, s2ls.getNetwork().getId());
-                intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
-                intent.putExtra(TripCorrectionActivity.EXTRA_IS_STANDALONE, true);
-                startActivity(intent);
-            }
-        }
-
-        @Override
-        public void onRouteProgrammed(S2LS s2ls, Route route) {
-            updateRouteNotification(s2ls);
-        }
-
-        @Override
-        public void onRouteStarted(S2LS s2ls, Path path, Route route) {
-            Log.d("onRouteStarted", "Route started");
-            if (!checkStopForeground(s2ls)) {
-                updateRouteNotification(s2ls);
-            }
-        }
-
-        @Override
-        public void onRouteMistake(S2LS s2ls, Path path, Route route) {
-            Log.d("onRouteMistake", "Route mistake");
-            // recalculate route with current station as origin station
-            s2ls.setCurrentTargetRoute(
-                    Route.calculate(
-                            s2ls.getNetwork(),
-                            path.getEndVertex().getStation(),
-                            route.getTarget()), true);
-            if (!checkStopForeground(s2ls)) {
-                updateRouteNotification(s2ls);
-            }
-        }
-
-        @Override
-        public void onRouteCancelled(S2LS s2ls, Route route) {
-            Log.d("onRouteCancelled", "Route cancelled");
-            if (!checkStopForeground(s2ls)) {
-                updateRouteNotification(s2ls);
-            }
-            Intent intent = new Intent(ACTION_NAVIGATION_ENDED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        @Override
-        public void onRouteCompleted(S2LS s2ls, Path path, Route route) {
-            Log.d("onRouteCompleted", "Route completed");
-            if (!checkStopForeground(s2ls)) {
-                updateRouteNotification(s2ls);
-            }
-            Intent intent = new Intent(ACTION_NAVIGATION_ENDED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
-
-        private void doTick(final State state) {
-            stateTickHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    doTick(state);
-                    state.tick();
-                }
-            }, state.getPreferredTickIntervalMillis());
-        }
-    }
-
-    private boolean checkStopForeground(S2LS loc) {
+    boolean checkStopForeground(S2LS loc) {
         if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
             SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
             boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
@@ -1126,104 +385,17 @@ public class MainService extends Service implements MapManager.OnLoadListener {
         }, 10000);
     }
 
-    public static final String NOTIF_CHANNEL_DISTURBANCES_ID = "notif.disturbances";
-    public static final String NOTIF_CHANNEL_ANNOUNCEMENTS_ID = "notif.announcements";
-    public static final String NOTIF_CHANNEL_REALTIME_ID = "notif.realtime";
-    public static final String NOTIF_CHANNEL_BACKGROUND_ID = "notif.background";
-
-    private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager == null) {
-                return;
-            }
-
-            if (notificationManager.getNotificationChannel("fcm_fallback_notification_channel") == null) {
-                String channelName = getString(R.string.fcm_fallback_notification_channel_label);
-                NotificationChannel channel = new NotificationChannel("fcm_fallback_notification_channel", channelName, NotificationManager.IMPORTANCE_HIGH);
-                notificationManager.createNotificationChannel(channel);
-            }
-
-            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_DISTURBANCES_ID, "Disturbances", NotificationManager.IMPORTANCE_HIGH);
-            channel.setShowBadge(true);
-            notificationManager.createNotificationChannel(channel);
-
-            channel = new NotificationChannel(NOTIF_CHANNEL_ANNOUNCEMENTS_ID, "Announcements", NotificationManager.IMPORTANCE_HIGH);
-            channel.setShowBadge(true);
-            notificationManager.createNotificationChannel(channel);
-
-            channel = new NotificationChannel(NOTIF_CHANNEL_REALTIME_ID, "Real-time", NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            notificationManager.createNotificationChannel(channel);
-
-            channel = new NotificationChannel(NOTIF_CHANNEL_BACKGROUND_ID, "Background", NotificationManager.IMPORTANCE_MIN);
-            channel.setShowBadge(false);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-    private class SubmitRealtimeLocationTask extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            API.RealtimeLocationRequest r = new API.RealtimeLocationRequest();
-            r.s = strings[0];
-            if (strings.length > 1) {
-                r.d = strings[1];
-            }
-            try {
-                api.postRealtimeLocation(r);
-            } catch (APIException e) {
-                // oh well...
-            }
-            return null;
-        }
-    }
-
-    public void cacheAllExtras(String... network_ids) {
-        ExtraContentCache.clearAllCachedExtras(this);
-        for (String id : network_ids) {
-            Network network = getNetwork(id);
-            ExtraContentCache.cacheAllExtras(this, new ExtraContentCache.OnCacheAllListener() {
-                @Override
-                public void onSuccess() {
-                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_FINISHED);
-                    intent.putExtra(EXTRA_CACHE_EXTRAS_FINISHED, true);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                    bm.sendBroadcast(intent);
-                }
-
-                @Override
-                public void onProgress(int current, int total) {
-                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_PROGRESS);
-                    intent.putExtra(EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, current);
-                    intent.putExtra(EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL, total);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                    bm.sendBroadcast(intent);
-                }
-
-                @Override
-                public void onFailure() {
-                    Intent intent = new Intent(ACTION_CACHE_EXTRAS_FINISHED);
-                    intent.putExtra(EXTRA_CACHE_EXTRAS_FINISHED, false);
-                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                    bm.sendBroadcast(intent);
-                }
-            }, network);
-        }
-    }
-
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             switch (key) {
                 case PreferenceNames.LocationEnable:
                     if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
-                        wfc.startScanningIfWiFiEnabled();
+                        Coordinator.get(MainService.this).getWiFiChecker().startScanningIfWiFiEnabled();
                     else
-                        wfc.stopScanning();
+                        Coordinator.get(MainService.this).getWiFiChecker().stopScanning();
                     break;
                 case PreferenceNames.PermanentForeground:
-                    checkStopForeground(MapManager.getInstance(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID));
+                    checkStopForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID));
                     break;
             }
         }

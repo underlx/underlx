@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.BuildConfig;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.widget.DatasetInfoView;
 import im.tny.segvault.disturbances.MainService;
@@ -273,29 +274,20 @@ public class AboutFragment extends TopFragment {
     }
 
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
-        Collection<Network> getNetworks();
-
-        void updateNetworks(String... network_ids);
-
-        void cacheAllExtras(String... network_ids);
     }
 
     public void updateNetworks(String... network_ids) {
-        if (mListener != null) {
-            mListener.updateNetworks(network_ids);
-        }
+        Coordinator.get(getContext()).getMapManager().updateTopology(network_ids);
     }
 
     public void cacheAllExtras(String... network_ids) {
-        if (mListener != null) {
-            mListener.cacheAllExtras(network_ids);
-        }
+        Coordinator.get(getContext()).cacheAllExtras(network_ids);
     }
 
     private void refreshDatasetInfo() {
         if (mListener != null) {
             networksLayout.removeAllViews();
-            for (Network n : mListener.getNetworks()) {
+            for (Network n : Coordinator.get(getContext()).getMapManager().getNetworks()) {
                 DatasetInfoView d = new DatasetInfoView(getContext(), n, this);
                 networksLayout.addView(d);
             }

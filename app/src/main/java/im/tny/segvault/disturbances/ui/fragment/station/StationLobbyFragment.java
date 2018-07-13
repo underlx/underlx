@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -183,11 +184,8 @@ public class StationLobbyFragment extends Fragment {
     private void update() {
         if (mListener == null)
             return;
-        MainService service = mListener.getMainService();
-        if (service == null)
-            return;
 
-        Network net = service.getNetwork(networkId);
+        Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null)
             return;
         final Station station = net.getStation(stationId);
@@ -315,8 +313,6 @@ public class StationLobbyFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
-
         int getPreselectedExitId();
     }
 

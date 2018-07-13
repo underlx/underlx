@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.API;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
@@ -156,8 +157,8 @@ public class MainActivity extends TopActivity
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MapManager.ACTION_TOPOLOGY_UPDATE_AVAILABLE);
-        filter.addAction(MainService.ACTION_CACHE_EXTRAS_PROGRESS);
-        filter.addAction(MainService.ACTION_CACHE_EXTRAS_FINISHED);
+        filter.addAction(Coordinator.ACTION_CACHE_EXTRAS_PROGRESS);
+        filter.addAction(Coordinator.ACTION_CACHE_EXTRAS_FINISHED);
         filter.addAction(FeedbackUtil.ACTION_FEEDBACK_PROVIDED);
         filter.addAction(ReportActivity.ACTION_REPORT_PROVIDED);
         filter.addAction(ACTION_MAIN_SERVICE_BOUND);
@@ -385,9 +386,9 @@ public class MainActivity extends TopActivity
             newFragment = ErrorFragment.newInstance(ErrorFragment.ErrorType.VERSION_TOO_OLD,
                     ((MainAddableFragment) newFragment).getNavDrawerId(),
                     ((MainAddableFragment) newFragment).getNavDrawerIdAsString());
-        } else if (((MainAddableFragment) newFragment).needsTopology() && MapManager.getInstance(this).getNetworks().isEmpty()) {
+        } else if (((MainAddableFragment) newFragment).needsTopology() && Coordinator.get(this).getMapManager().getNetworks().isEmpty()) {
             ErrorFragment.ErrorType type = ErrorFragment.ErrorType.NO_TOPOLOGY;
-            if (MapManager.getInstance(this).isTopologyUpdateInProgress()) {
+            if (Coordinator.get(this).getMapManager().isTopologyUpdateInProgress()) {
                 type = ErrorFragment.ErrorType.TOPOLOGY_DOWNLOADING;
             }
             newFragment = ErrorFragment.newInstance(type,
@@ -475,7 +476,7 @@ public class MainActivity extends TopActivity
     }
 
     public void onStationLinkClicked(String destination, String lobby, String exit) {
-        for (Network network : MapManager.getInstance(this).getNetworks()) {
+        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
             Station station;
             if ((station = network.getStation(destination)) != null) {
                 Intent intent = new Intent(this, StationActivity.class);
@@ -494,7 +495,7 @@ public class MainActivity extends TopActivity
     }
 
     public void onLineLinkClicked(String destination) {
-        for (Network network : MapManager.getInstance(this).getNetworks()) {
+        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
             Line line;
             if ((line = network.getLine(destination)) != null) {
                 Intent intent = new Intent(this, LineActivity.class);
@@ -592,7 +593,7 @@ public class MainActivity extends TopActivity
                                 .setAction(R.string.update_topology_cancel_action, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        MapManager.getInstance(MainActivity.this).cancelTopologyUpdate();
+                                        Coordinator.get(MainActivity.this).getMapManager().cancelTopologyUpdate();
                                     }
                                 });
                     } else {
@@ -621,13 +622,13 @@ public class MainActivity extends TopActivity
                             .setAction(R.string.update_topology_update_action, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    MapManager.getInstance(MainActivity.this).updateTopology();
+                                    Coordinator.get(MainActivity.this).getMapManager().updateTopology();
                                 }
                             }).show();
                     break;
-                case MainService.ACTION_CACHE_EXTRAS_PROGRESS:
-                    final int progressCurrent = intent.getIntExtra(MainService.EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, 0);
-                    final int progressTotal = intent.getIntExtra(MainService.EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL, 1);
+                case Coordinator.ACTION_CACHE_EXTRAS_PROGRESS:
+                    final int progressCurrent = intent.getIntExtra(Coordinator.EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, 0);
+                    final int progressTotal = intent.getIntExtra(Coordinator.EXTRA_CACHE_EXTRAS_PROGRESS_TOTAL, 1);
                     final String msg2 = String.format(getString(R.string.cache_extras_progress), (progressCurrent * 100) / progressTotal);
                     if (cacheExtrasSnackbar == null) {
                         cacheExtrasSnackbar = Snackbar.make(findViewById(R.id.fab), msg2, Snackbar.LENGTH_INDEFINITE);
@@ -638,8 +639,8 @@ public class MainActivity extends TopActivity
                         }
                     }
                     break;
-                case MainService.ACTION_CACHE_EXTRAS_FINISHED:
-                    final boolean success2 = intent.getBooleanExtra(MainService.EXTRA_CACHE_EXTRAS_FINISHED, false);
+                case Coordinator.ACTION_CACHE_EXTRAS_FINISHED:
+                    final boolean success2 = intent.getBooleanExtra(Coordinator.EXTRA_CACHE_EXTRAS_FINISHED, false);
                     if (cacheExtrasSnackbar != null) {
                         cacheExtrasSnackbar.setDuration(Snackbar.LENGTH_LONG);
                         if (success2) {
@@ -671,7 +672,7 @@ public class MainActivity extends TopActivity
                     Fragment currentFragment = getCurrentFragment();
                     Fragment newFragment = null;
                     if (currentFragment instanceof MainAddableFragment) {
-                        MapManager mapm = MapManager.getInstance(MainActivity.this);
+                        MapManager mapm = Coordinator.get(MainActivity.this).getMapManager();
                         if (!API.getInstance().meetsEndpointRequirements(false)) {
                             newFragment = ErrorFragment.newInstance(ErrorFragment.ErrorType.VERSION_TOO_OLD,
                                     ((MainAddableFragment) currentFragment).getNavDrawerId(),
@@ -730,38 +731,15 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public Collection<Network> getNetworks() {
-        if (locBound) {
-            return locService.getNetworks();
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
-    public void updateNetworks(String... network_ids) {
-        MapManager.getInstance(this).updateTopology(network_ids);
-    }
-
-    @Override
-    public void cacheAllExtras(String... network_ids) {
-        if (locBound) {
-            locService.cacheAllExtras(network_ids);
-        }
-    }
-
-    @Override
     public void onListFragmentInteraction(LineRecyclerViewAdapter.LineItem item) {
-        if (locService != null) {
-            for (Network network : locService.getNetworks()) {
-                Line line;
-                if ((line = network.getLine(item.id)) != null) {
-                    Intent intent = new Intent(this, LineActivity.class);
-                    intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
-                    intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
-                    startActivity(intent);
-                    return;
-                }
+        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
+            Line line;
+            if ((line = network.getLine(item.id)) != null) {
+                Intent intent = new Intent(this, LineActivity.class);
+                intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
+                intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                startActivity(intent);
+                return;
             }
         }
     }

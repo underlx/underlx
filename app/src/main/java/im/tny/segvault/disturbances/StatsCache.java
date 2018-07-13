@@ -30,11 +30,9 @@ public class StatsCache {
     private final Object lock = new Object();
     private HashMap<String, Stats> networkStats = new HashMap<>();
     private Context context;
-    private MainService mainService;
 
-    public StatsCache(MainService mainService) {
-        this.context = mainService;
-        this.mainService = mainService;
+    public StatsCache(Context context) {
+        this.context = context.getApplicationContext();
     }
 
     public static class Stats implements Serializable {
@@ -76,7 +74,7 @@ public class StatsCache {
             fis.close();
 
             Map<String, Line> lines = new HashMap<>();
-            for (Line l : mainService.getAllLines()) {
+            for (Line l : Coordinator.get(context).getMapManager().getAllLines()) {
                 lines.put(l.getId(), l);
             }
             for (Stats stats : info.values()) {
@@ -149,7 +147,7 @@ public class StatsCache {
             Date weekAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(7));
             Date monthAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(30));
 
-            for (Network n : mainService.getNetworks()) {
+            for (Network n : Coordinator.get(context).getMapManager().getNetworks()) {
                 try {
                     Stats netStats = new Stats();
 

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ExtraContentCache;
 import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
 import im.tny.segvault.disturbances.MainService;
@@ -121,11 +122,8 @@ public class StationGeneralFragment extends Fragment {
     private void update() {
         if (mListener == null)
             return;
-        MainService service = mListener.getMainService();
-        if (service == null)
-            return;
 
-        Network net = service.getNetwork(networkId);
+        Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null)
             return;
         final Station station = net.getStation(stationId);
@@ -293,7 +291,6 @@ public class StationGeneralFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        MainService getMainService();
     }
 
     private class ConnectionInfoReadyListener implements ExtraContentCache.OnConnectionInfoReadyListener {

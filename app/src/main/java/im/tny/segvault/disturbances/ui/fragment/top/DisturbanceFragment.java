@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Connectivity;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
 import im.tny.segvault.disturbances.MainService;
@@ -199,7 +200,7 @@ public class DisturbanceFragment extends TopFragment {
                 return false;
             }
 
-            Collection<Network> networks = mListener.getMainService().getNetworks();
+            Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
             try {
                 List<API.Disturbance> disturbances = API.getInstance().getDisturbancesSince(new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(14)));
                 for (API.Disturbance d : disturbances) {
@@ -268,8 +269,6 @@ public class DisturbanceFragment extends TopFragment {
      */
     public interface OnListFragmentInteractionListener extends TopFragment.OnInteractionListener {
         void onListFragmentInteraction(DisturbanceRecyclerViewAdapter.DisturbanceItem item);
-
-        MainService getMainService();
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
