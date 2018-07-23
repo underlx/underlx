@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.os.Build;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -68,6 +70,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     private WiFiChecker wiFiChecker;
     private LineStatusCache lineStatusCache;
     private StatsCache statsCache;
+    private Random random = new Random();
 
     private Coordinator(Context context) {
         this.context = context.getApplicationContext();
@@ -134,6 +137,10 @@ public class Coordinator implements MapManager.OnLoadListener {
         return wiFiChecker;
     }
 
+    public Random getRandom() {
+        return random;
+    }
+
     public void registerMainService(MainService mainService) {
         this.mainService = mainService;
         propagateMainServiceReference();
@@ -156,6 +163,9 @@ public class Coordinator implements MapManager.OnLoadListener {
     @Override
     public void onNetworkLoaded(Network network) {
         synchronized (lock) {
+            if(Looper.myLooper() == null) {
+                Looper.prepare();
+            }
             S2LS loc = new S2LS(network, new S2LSChangeListener(context));
             locServices.put(network.getId(), loc);
             WiFiLocator wl = new WiFiLocator(network);

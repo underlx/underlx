@@ -145,13 +145,11 @@ public class MainActivity extends TopActivity
             }
         }
 
-        if (savedInstanceState == null) {
-            // show initial fragment
-            if (newFragment == null) {
-                newFragment = new HomeFragment();
-            }
-            replaceFragment(newFragment, false, false);
+        // show initial fragment
+        if (savedInstanceState == null && newFragment == null) {
+            newFragment = new HomeFragment();
         }
+        replaceFragment(newFragment, false, false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
@@ -203,6 +201,25 @@ public class MainActivity extends TopActivity
 
         // Start the thread
         t.start();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent != null) {
+            String id = intent.getStringExtra(EXTRA_INITIAL_FRAGMENT);
+            if (id != null) {
+                Fragment newFragment = getNewFragment(pageStringToResourceId(id));
+                planRouteTo = intent.getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
+                replaceFragment(newFragment, true, false);
+            }
+
+            if (intent.getBooleanExtra(EXTRA_FROM_INTRO, false)) {
+                showTargetPrompt();
+            }
+        }
+
     }
 
     public static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 10001;

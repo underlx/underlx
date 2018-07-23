@@ -68,7 +68,8 @@ public class FCMService extends FirebaseMessagingService {
         SharedPreferences sharedPref = getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
 
-        MapManager mapm = Coordinator.get(getApplicationContext()).getMapManager();
+        Coordinator coordinator = Coordinator.get(this);
+        MapManager mapm = coordinator.getMapManager();
         Network snetwork = mapm.getNetwork(data.get("network"));
         if (snetwork == null) {
             return;
@@ -80,9 +81,9 @@ public class FCMService extends FirebaseMessagingService {
 
         final boolean downtime = data.get("downtime").equals("true");
         if (downtime) {
-            Coordinator.get(getApplicationContext()).getLineStatusCache().markLineAsDown(sline, new Date(remoteMessage.getSentTime()));
+            coordinator.getLineStatusCache().markLineAsDown(sline, new Date(remoteMessage.getSentTime()));
         } else {
-            Coordinator.get(getApplicationContext()).getLineStatusCache().markLineAsUp(sline);
+            coordinator.getLineStatusCache().markLineAsUp(sline);
         }
 
         if (linePref != null && !linePref.contains(data.get("line"))) {
@@ -112,7 +113,7 @@ public class FCMService extends FirebaseMessagingService {
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, Math.abs(coordinator.getRandom().nextInt()), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String title = String.format(getString(R.string.notif_disturbance_title), Util.getLineNames(this, sline)[0]);
 
@@ -153,7 +154,7 @@ public class FCMService extends FirebaseMessagingService {
 
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
         notificationIntent.setData(Uri.parse(data.get("url")));
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, Math.abs(Coordinator.get(this).getRandom().nextInt()), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Announcement.Source source = Announcement.getSource(data.get("source"));
         if (source == null) {
