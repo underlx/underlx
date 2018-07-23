@@ -122,10 +122,13 @@ public class MainService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
-        if (permanentForeground) {
-            startPermanentForeground();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startTemporaryForeground();
+
+        if(!shouldBeInForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID))) {
+            if (permanentForeground) {
+                startPermanentForeground();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startTemporaryForeground();
+            }
         }
 
         if (intent != null && intent.getAction() != null) {
@@ -318,8 +321,12 @@ public class MainService extends Service {
         proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
     }
 
+    private boolean shouldBeInForeground(S2LS loc) {
+        return loc.getCurrentTargetRoute() != null || loc.getState() instanceof InNetworkState;
+    }
+
     boolean checkStopForeground(S2LS loc) {
-        if (loc.getCurrentTargetRoute() == null && !(loc.getState() instanceof InNetworkState)) {
+        if (!shouldBeInForeground(loc)) {
             SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
             boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
             if (permanentForeground) {

@@ -269,11 +269,12 @@ public class MapManager {
         public static final String AUTO_UPDATE_TAG = "job_check_updates_auto";
 
         private boolean autoUpdate;
+        private boolean updateDependingOnConnectivity = false;
 
         public CheckUpdatesJob(String tag) {
             switch (tag) {
                 case TAG:
-                    autoUpdate = Connectivity.isConnectedWifi(getContext());
+                    updateDependingOnConnectivity = true;
                     break;
                 case NO_UPDATE_TAG:
                     autoUpdate = false;
@@ -302,6 +303,9 @@ public class MapManager {
             }
 
             if(!outOfDateNetworks.isEmpty()) {
+                if(updateDependingOnConnectivity) {
+                    autoUpdate = Connectivity.isConnectedWifi(getContext());
+                }
                 if(autoUpdate) {
                     String[] networksArray = new String[outOfDateNetworks.size()];
                     outOfDateNetworks.toArray(networksArray);
