@@ -88,7 +88,6 @@ public class MainService extends Service {
         API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
         api = API.getInstance();
-        Coordinator.get(this).getWiFiChecker().setScanInterval(10000);
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);

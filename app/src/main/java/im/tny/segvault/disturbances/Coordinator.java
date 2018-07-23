@@ -96,6 +96,7 @@ public class Coordinator implements MapManager.OnLoadListener {
         statsCache = new StatsCache(this.context);
 
         wiFiChecker = new WiFiChecker(this.context);
+        wiFiChecker.setScanInterval(10000);
 
         createNotificationChannels();
         reloadFCMsubscriptions();
