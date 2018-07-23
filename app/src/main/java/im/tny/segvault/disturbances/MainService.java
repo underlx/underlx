@@ -153,6 +153,8 @@ public class MainService extends Service {
             }
         }
 
+        Coordinator.get(this).reloadFCMsubscriptions();
+
         return Service.START_STICKY;
     }
 
