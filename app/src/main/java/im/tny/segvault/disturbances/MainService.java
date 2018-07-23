@@ -54,6 +54,7 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_BACKGROUND_ID;
+import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_HIGH_ID;
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_ID;
 
 public class MainService extends Service {
@@ -123,7 +124,7 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
 
-        if(!shouldBeInForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID))) {
+        if (!shouldBeInForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID))) {
             if (permanentForeground) {
                 startPermanentForeground();
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -275,20 +276,26 @@ public class MainService extends Service {
         }
         singleLineStatus = singleLineStatus.subSequence(0, singleLineStatus.length() - 3);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_REALTIME_ID)
+        String channel = NOTIF_CHANNEL_REALTIME_ID;
+        if (highPriorityNotification) {
+            channel = NOTIF_CHANNEL_REALTIME_HIGH_ID;
+        }
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channel)
                 .setStyle(inboxStyle)
                 .setColor(color)
                 .setContentTitle(title)
                 .setContentText(singleLineStatus)
                 .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true);
 
         if (highPriorityNotification) {
             stopForeground(true);
             notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
             notificationBuilder.setDefaults(NotificationCompat.DEFAULT_VIBRATE);
+        } else {
+            notificationBuilder.setSound(null);
         }
 
         if (currentRoute != null) {
@@ -322,7 +329,7 @@ public class MainService extends Service {
     }
 
     private boolean shouldBeInForeground(S2LS loc) {
-        return loc.getCurrentTargetRoute() != null || loc.getState() instanceof InNetworkState;
+        return loc != null && (loc.getCurrentTargetRoute() != null || loc.getState() instanceof InNetworkState);
     }
 
     boolean checkStopForeground(S2LS loc) {

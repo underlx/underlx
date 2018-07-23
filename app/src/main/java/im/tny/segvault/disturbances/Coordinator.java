@@ -168,6 +168,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     public static final String NOTIF_CHANNEL_DISTURBANCES_ID = "notif.disturbances";
     public static final String NOTIF_CHANNEL_ANNOUNCEMENTS_ID = "notif.announcements";
     public static final String NOTIF_CHANNEL_REALTIME_ID = "notif.realtime";
+    public static final String NOTIF_CHANNEL_REALTIME_HIGH_ID = "notif.realtime.high";
     public static final String NOTIF_CHANNEL_BACKGROUND_ID = "notif.background";
 
     private void createNotificationChannels() {
@@ -193,10 +194,20 @@ public class Coordinator implements MapManager.OnLoadListener {
 
             channel = new NotificationChannel(NOTIF_CHANNEL_REALTIME_ID, "Real-time", NotificationManager.IMPORTANCE_LOW);
             channel.setShowBadge(false);
+            channel.setSound(null, null);
+            channel.enableVibration(false);
+            notificationManager.createNotificationChannel(channel);
+
+            channel = new NotificationChannel(NOTIF_CHANNEL_REALTIME_HIGH_ID, "Real-time important", NotificationManager.IMPORTANCE_HIGH);
+            channel.setShowBadge(false);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 100, 100, 150, 150, 200});
             notificationManager.createNotificationChannel(channel);
 
             channel = new NotificationChannel(NOTIF_CHANNEL_BACKGROUND_ID, "Background", NotificationManager.IMPORTANCE_MIN);
             channel.setShowBadge(false);
+            channel.setSound(null, null);
+            channel.enableVibration(false);
             notificationManager.createNotificationChannel(channel);
         }
     }
