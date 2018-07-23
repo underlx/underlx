@@ -218,6 +218,30 @@ public class MainService extends Service {
         updateRouteNotification(loc, false);
     }
 
+    private class RouteNotificationData {
+        CharSequence title;
+        CharSequence summary;
+        List<Integer> actions = new ArrayList<>();
+    }
+
+    RouteNotificationData lastRouteNotificationData;
+
+    private boolean shouldUpdateRouteNotification(RouteNotificationData newData) {
+        if (lastRouteNotificationData == null) {
+            lastRouteNotificationData = newData;
+            return true;
+        }
+
+        if (!lastRouteNotificationData.summary.equals(newData.summary) ||
+                !lastRouteNotificationData.title.equals(newData.title) ||
+                !lastRouteNotificationData.actions.containsAll(newData.actions) ||
+                !newData.actions.containsAll(lastRouteNotificationData.actions)) {
+            lastRouteNotificationData = newData;
+            return true;
+        }
+        return false;
+    }
+
     void updateRouteNotification(S2LS loc, boolean highPriorityNotification) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_home");
@@ -299,6 +323,10 @@ public class MainService extends Service {
             notificationBuilder.setSound(null);
         }
 
+        RouteNotificationData data = new RouteNotificationData();
+        data.summary = singleLineStatus;
+        data.title = title;
+
         if (currentRoute != null) {
             notificationBuilder.setSmallIcon(R.drawable.ic_navigation_white_24dp);
             Intent stopIntent = new Intent(this, MainService.class);
@@ -307,6 +335,7 @@ public class MainService extends Service {
             PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                     stopIntent, 0);
             notificationBuilder.addAction(R.drawable.ic_close_black_24dp, getString(R.string.notif_route_end_navigation), pendingStopIntent);
+            data.actions.add(1);
         } else {
             notificationBuilder.setSmallIcon(R.drawable.ic_trip_notif);
             if (loc.canRequestEndOfTrip()) {
@@ -316,6 +345,7 @@ public class MainService extends Service {
                 PendingIntent pendingStopIntent = PendingIntent.getService(this, (int) System.currentTimeMillis(),
                         stopIntent, 0);
                 notificationBuilder.addAction(R.drawable.ic_train_off_black_24dp, getString(R.string.notif_route_end_trip), pendingStopIntent);
+                data.actions.add(2);
             }
             Intent reportIntent = new Intent(getApplicationContext(), ReportActivity.class);
             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -324,9 +354,18 @@ public class MainService extends Service {
             PendingIntent pendingReportIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(),
                     reportIntent, 0);
             notificationBuilder.addAction(R.drawable.ic_menu_announcement, getString(R.string.notif_route_report), pendingReportIntent);
+            data.actions.add(3);
         }
 
-        proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
+
+        if(highPriorityNotification) {
+            lastRouteNotificationData = data;
+            proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
+            Log.d("MainService", "Updated route notification (high priority)");
+        } else if(shouldUpdateRouteNotification(data)) {
+            proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
+            Log.d("MainService", "Updated route notification");
+        }
     }
 
     private boolean shouldBeInForeground(S2LS loc) {
