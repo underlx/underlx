@@ -77,6 +77,8 @@ public class ReportActivity extends TopActivity {
 
             }
         });
+
+        populateLineList();
     }
 
     private class SubmitReportTask extends AsyncTask<Void, Void, Boolean> {
