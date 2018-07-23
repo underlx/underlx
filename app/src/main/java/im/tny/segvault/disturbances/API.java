@@ -51,7 +51,10 @@ public class API {
     public void setPairManager(PairManager manager) {
         pairManager = manager;
     }
-    public void setContext(Context context) { this.context = context; }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -188,7 +191,7 @@ public class API {
 
         @JsonIgnore
         public static String translateStatus(Context context, String status, String msgType) {
-            if(context != null) {
+            if (context != null) {
                 switch (msgType) {
                     case "REPORT_BEGIN":
                         return context.getString(R.string.disturbance_status_report_begin);
@@ -461,7 +464,7 @@ public class API {
         synchronized (lock) {
             if (this.endpointMetaInfo == null) {
                 this.endpointMetaInfo = getMetaOnline();
-                if(context != null) {
+                if (context != null) {
                     Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
@@ -471,7 +474,7 @@ public class API {
     }
 
     public boolean meetsEndpointRequirements(boolean goOnline) {
-        if(!goOnline) {
+        if (!goOnline) {
             synchronized (lock) {
                 if (endpointMetaInfo == null) {
                     return true;
@@ -626,8 +629,14 @@ public class API {
     public List<DatasetInfo> getDatasetInfos() throws APIException {
         throwIfRequirementsNotMet();
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("datasets"), false), new TypeReference<List<DatasetInfo>>() {
+            List<DatasetInfo> l = mapper.readValue(getRequest(endpoint.resolve("datasets"), false), new TypeReference<List<DatasetInfo>>() {
             });
+            for (DatasetInfo i : l) {
+                if (i.version == null || i.authors == null || i.network == null) {
+                    throw new APIException(new IOException()).addInfo("Response missing required field");
+                }
+            }
+            return l;
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
@@ -640,7 +649,11 @@ public class API {
     public DatasetInfo getDatasetInfo(String id) throws APIException {
         throwIfRequirementsNotMet();
         try {
-            return mapper.readValue(getRequest(endpoint.resolve("datasets/" + id), false), DatasetInfo.class);
+            DatasetInfo i = mapper.readValue(getRequest(endpoint.resolve("datasets/" + id), false), DatasetInfo.class);
+            if (i.version == null || i.authors == null || i.network == null) {
+                throw new APIException(new IOException()).addInfo("Response missing required field");
+            }
+            return i;
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {
