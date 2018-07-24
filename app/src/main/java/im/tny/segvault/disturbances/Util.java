@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -472,6 +473,14 @@ public class Util {
                 View child = viewGroup.getChildAt(i);
                 setViewAndChildrenEnabled(child, enabled);
             }
+        }
+    }
+
+    public static int tryParseInteger(String string, int defaultValue) {
+        try {
+            return Integer.valueOf(string);
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
     }
 

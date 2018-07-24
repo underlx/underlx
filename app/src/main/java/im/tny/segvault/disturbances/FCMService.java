@@ -35,6 +35,14 @@ public class FCMService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         String from = remoteMessage.getFrom();
         switch (from) {
+            case "/topics/broadcasts":
+                handleBroadcastMessage(remoteMessage);
+                break;
+            case "/topics/broadcasts-debug":
+                if (BuildConfig.DEBUG) {
+                    handleBroadcastMessage(remoteMessage);
+                }
+                break;
             case "/topics/disturbances":
                 handleDisturbanceMessage(remoteMessage);
                 break;
@@ -130,7 +138,7 @@ public class FCMService extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setWhen(remoteMessage.getSentTime())
                 .setSound(Uri.parse(sharedPref.getString(downtime ? PreferenceNames.NotifsRingtone : PreferenceNames.NotifsRegularizationRingtone, "content://settings/system/notification_sound")))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent);
 
         if (sharedPref.getBoolean(downtime ? PreferenceNames.NotifsVibrate : PreferenceNames.NotifsRegularizationVibrate, false)) {
@@ -139,6 +147,9 @@ public class FCMService extends FirebaseMessagingService {
             notificationBuilder.setVibrate(new long[]{0l});
         }
 
+        if (notificationManager == null) {
+            return;
+        }
         notificationManager.notify(data.get("disturbance").hashCode(), notificationBuilder.build());
     }
 
@@ -184,7 +195,7 @@ public class FCMService extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setWhen(remoteMessage.getSentTime())
                 .setSound(Uri.parse(sharedPref.getString(PreferenceNames.NotifsAnnouncementRingtone, "content://settings/system/notification_sound")))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(contentIntent);
 
         if (sharedPref.getBoolean(PreferenceNames.NotifsAnnouncementVibrate, false)) {
@@ -196,6 +207,132 @@ public class FCMService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        if (notificationManager == null) {
+            return;
+        }
         notificationManager.notify(data.get("url").hashCode(), notificationBuilder.build());
+    }
+
+    private void handleBroadcastMessage(RemoteMessage remoteMessage) {
+        Map<String, String> data = remoteMessage.getData();
+        if (!data.containsKey("id") || !data.containsKey("type")) {
+            return;
+        }
+
+        if (data.containsKey("versions") && !data.get("versions").isEmpty()) {
+            String versions = data.get("versions");
+            switch (versions.substring(0, 1)) {
+                case "<": {
+                    int v = Util.tryParseInteger(versions.substring(1), Integer.MAX_VALUE);
+                    if (BuildConfig.VERSION_CODE >= v) {
+                        return;
+                    }
+                    break;
+                }
+                case ">": {
+                    int v = Util.tryParseInteger(versions.substring(1), Integer.MIN_VALUE);
+                    if (BuildConfig.VERSION_CODE <= v) {
+                        return;
+                    }
+                    break;
+                }
+                case "=": {
+                    int v = Util.tryParseInteger(versions.substring(1), Integer.MIN_VALUE);
+                    if (BuildConfig.VERSION_CODE != v) {
+                        return;
+                    }
+                    break;
+                }
+                default:
+                    // assume the filter is a list of versions separated by commas
+                    String[] parts = versions.split(",");
+                    boolean matchesOne = false;
+                    for (String part : parts) {
+                        if (Util.tryParseInteger(part, Integer.MIN_VALUE) == BuildConfig.VERSION_CODE) {
+                            matchesOne = true;
+                            break;
+                        }
+                    }
+                    if (!matchesOne) {
+                        return;
+                    }
+                    break;
+            }
+        }
+
+        if (data.containsKey("locales") && !data.get("locales").isEmpty()) {
+            LocaleUtil.initializeLocale(this);
+            String currentLang = Util.getCurrentLanguage(this);
+            String[] parts = data.get("locales").split(",");
+            // negations are matched as a AND, non-negations as a OR
+            // for example: en,pt,!es,!fr - (en OR pt) AND (NOT es AND NOT fr)
+            // "undefined behavior" if e.g. en,!en appears
+            boolean matchesOne = false;
+            for (String part : parts) {
+                boolean isNegation = part.startsWith("!");
+                String lang = part.substring(isNegation ? 1 : 0);
+                if (isNegation) {
+                    if (currentLang.equals(lang)) {
+                        // not for us
+                        return;
+                    }
+                    matchesOne = true;
+                } else if (currentLang.equals(lang)) {
+                    // explicitly for us
+                    matchesOne = true;
+                    break;
+                }
+            }
+            if (!matchesOne && parts.length > 0) {
+                return;
+            }
+        }
+
+        switch (data.get("type")) {
+            case "notification":
+                handleNotificationMessage(remoteMessage);
+                break;
+        }
+    }
+
+    // to be called by handleBroadcastMessage only!
+    private void handleNotificationMessage(RemoteMessage remoteMessage) {
+        Map<String, String> data = remoteMessage.getData();
+        if (!data.containsKey("title") || !data.containsKey("body")) {
+            return;
+        }
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(data.get("title"));
+        bigTextStyle.bigText(data.get("body"));
+
+        Intent notificationIntent;
+        if (data.containsKey("url") && !data.get("url").isEmpty()) {
+            notificationIntent = new Intent(Intent.ACTION_VIEW);
+            notificationIntent.setData(Uri.parse(data.get("url")));
+        } else {
+            notificationIntent = new Intent(this, MainActivity.class);
+        }
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, Math.abs(Coordinator.get(this).getRandom().nextInt()), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ANNOUNCEMENTS_ID)
+                .setStyle(bigTextStyle)
+                .setSmallIcon(R.drawable.ic_logo_flat_24dp)
+                .setColor(getResources().getColor(R.color.colorPrimary))
+                .setContentTitle(data.get("title"))
+                .setContentText(data.get("body"))
+                .setAutoCancel(true)
+                .setWhen(remoteMessage.getSentTime())
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(contentIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (notificationManager == null) {
+            return;
+        }
+        notificationManager.notify(data.get("id").hashCode(), notificationBuilder.build());
     }
 }

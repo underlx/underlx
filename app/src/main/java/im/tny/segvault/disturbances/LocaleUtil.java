@@ -44,7 +44,7 @@ public class LocaleUtil {
     private static java.util.Locale currentLocale = null;
     private static boolean localeNeedsReloading = true;
     private static java.util.Locale getCurrentLocale(Context context) {
-        if(localeNeedsReloading == true) {
+        if(localeNeedsReloading) {
             SharedPreferences sharedPref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
             String localeString = sharedPref.getString(PreferenceNames.Locale, "auto");
             if(localeString.equals("auto")) {

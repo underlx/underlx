@@ -163,7 +163,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     @Override
     public void onNetworkLoaded(Network network) {
         synchronized (lock) {
-            if(Looper.myLooper() == null) {
+            if (Looper.myLooper() == null) {
                 Looper.prepare();
             }
             S2LS loc = new S2LS(network, new S2LSChangeListener(context));
@@ -225,6 +225,12 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public void reloadFCMsubscriptions() {
         FirebaseMessaging fcm = FirebaseMessaging.getInstance();
+
+        fcm.subscribeToTopic("broadcasts");
+        if (BuildConfig.DEBUG) {
+            fcm.subscribeToTopic("broadcasts-debug");
+        }
+
         SharedPreferences sharedPref = context.getSharedPreferences("notifsettings", MODE_PRIVATE);
         Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
         if (linePref != null && linePref.size() != 0) {
