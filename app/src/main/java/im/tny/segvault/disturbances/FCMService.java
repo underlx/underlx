@@ -292,6 +292,9 @@ public class FCMService extends FirebaseMessagingService {
             case "notification":
                 handleNotificationMessage(remoteMessage);
                 break;
+            case "command":
+                handleCommandMessage(remoteMessage);
+                break;
         }
     }
 
@@ -334,5 +337,29 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
         notificationManager.notify(data.get("id").hashCode(), notificationBuilder.build());
+    }
+
+    // to be called by handleBroadcastMessage only!
+    private void handleCommandMessage(RemoteMessage remoteMessage) {
+        Map<String, String> data = remoteMessage.getData();
+        if (!data.containsKey("command")) {
+            return;
+        }
+
+        switch (data.get("command")) {
+            case "update-topology":
+                Coordinator.get(this).getMapManager().updateTopology();
+                break;
+            case "clear-notifs": {
+                NotificationManager notificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (notificationManager == null) {
+                    return;
+                }
+                notificationManager.cancelAll();
+                break;
+            }
+        }
     }
 }
