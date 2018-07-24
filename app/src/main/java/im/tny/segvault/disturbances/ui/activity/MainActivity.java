@@ -145,11 +145,13 @@ public class MainActivity extends TopActivity
             }
         }
 
-        // show initial fragment
-        if (savedInstanceState == null && newFragment == null) {
-            newFragment = new HomeFragment();
+        if (savedInstanceState == null) {
+            // show initial fragment
+            if (newFragment == null) {
+                newFragment = new HomeFragment();
+            }
+            replaceFragment(newFragment, false, false);
         }
-        replaceFragment(newFragment, false, false);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);
