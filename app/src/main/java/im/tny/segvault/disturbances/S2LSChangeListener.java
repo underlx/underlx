@@ -30,7 +30,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class S2LSChangeListener implements S2LS.EventListener {
     private Context context;
     private MainService mainService;
-    private Handler stateTickHandler = new Handler();
+    private S2LS latestS2LS;
 
     public S2LSChangeListener(Context context) {
         this.context = context.getApplicationContext();
@@ -38,15 +38,28 @@ public class S2LSChangeListener implements S2LS.EventListener {
 
     public void setMainService(@Nullable MainService mainService) {
         this.mainService = mainService;
+
+        if (latestS2LS != null) {
+            mainService.getStateTickHandler().removeCallbacksAndMessages(null);
+            if (latestS2LS.getState().getPreferredTickIntervalMillis() != 0) {
+                doTick(latestS2LS.getState());
+            }
+            latestS2LS = null;
+        }
     }
 
     @Override
     public void onStateChanged(final S2LS loc) {
         Log.d("onStateChanged", "State changed");
 
-        stateTickHandler.removeCallbacksAndMessages(null);
-        if (loc.getState().getPreferredTickIntervalMillis() != 0) {
-            doTick(loc.getState());
+        if (mainService != null) {
+            latestS2LS = null;
+            mainService.getStateTickHandler().removeCallbacksAndMessages(null);
+            if (loc.getState().getPreferredTickIntervalMillis() != 0) {
+                doTick(loc.getState());
+            }
+        } else {
+            latestS2LS = loc;
         }
 
         WiFiChecker wfc = Coordinator.get(context).getWiFiChecker();
@@ -193,30 +206,32 @@ public class S2LSChangeListener implements S2LS.EventListener {
     }
 
     private void doTick(final State state) {
-        stateTickHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doTick(state);
-                state.tick();
-            }
-        }, state.getPreferredTickIntervalMillis());
+        if (mainService != null) {
+            mainService.getStateTickHandler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doTick(state);
+                    state.tick();
+                }
+            }, state.getPreferredTickIntervalMillis());
+        }
     }
 
     private boolean checkStopForeground(S2LS s2ls) {
-        if(mainService != null) {
+        if (mainService != null) {
             return mainService.checkStopForeground(s2ls);
         }
         return true;
     }
 
     private void updateRouteNotification(S2LS s2ls) {
-        if(mainService != null) {
+        if (mainService != null) {
             mainService.updateRouteNotification(s2ls);
         }
     }
 
     private void updateRouteNotification(S2LS s2ls, boolean b) {
-        if(mainService != null) {
+        if (mainService != null) {
             mainService.updateRouteNotification(s2ls, b);
         }
     }

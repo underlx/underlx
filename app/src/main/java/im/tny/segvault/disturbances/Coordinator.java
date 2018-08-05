@@ -163,9 +163,6 @@ public class Coordinator implements MapManager.OnLoadListener {
     @Override
     public void onNetworkLoaded(Network network) {
         synchronized (lock) {
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
             S2LS loc = new S2LS(network, new S2LSChangeListener(context));
             locServices.put(network.getId(), loc);
             WiFiLocator wl = new WiFiLocator(network);
