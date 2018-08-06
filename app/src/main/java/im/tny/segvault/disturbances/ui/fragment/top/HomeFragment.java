@@ -44,6 +44,7 @@ import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
+import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
 import im.tny.segvault.disturbances.LineStatusCache;
@@ -234,10 +235,16 @@ public class HomeFragment extends TopFragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+
         Fragment newFragment = HomeLinesFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
+
         newFragment = HomeStatsFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
         transaction.replace(R.id.stats_card, newFragment);
+
+        newFragment = HomeBackersFragment.newInstance();
+        transaction.replace(R.id.footer_layout, newFragment);
+
         transaction.commit();
         refresh(true);
         refreshCurrentTrip();

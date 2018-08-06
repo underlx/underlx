@@ -7,6 +7,7 @@ package im.tny.segvault.disturbances;
 public class PreferenceNames {
     // settings
     public static final String LastAutoTopologyUpdateCheck = "pref_last_auto_topology_update_check";
+    public static final String LastBackersHTMLUpdateCheck = "pref_last_backers_html_update_check";
     public static final String LocationEnable = "pref_location_enable";
     public static final String AutoOpenTripCorrection = "pref_auto_open_trip_correction";
     public static final String AutoOpenVisitCorrection = "pref_auto_open_visit_correction";

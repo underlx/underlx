@@ -16,16 +16,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -385,6 +390,46 @@ public class API {
                 return new GZIPInputStream(is);
             }
             return is;
+        } catch (MalformedURLException e) {
+            throw new APIException(e).addInfo("Malformed URL on GET request");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException on GET request");
+        }
+    }
+
+    private Map<String, List<String>> headRequest(URI uri, boolean authenticate) throws APIException {
+        try {
+            HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
+
+            h.setConnectTimeout(timeoutMs);
+            h.setReadTimeout(timeoutMs);
+            h.setRequestProperty("Accept", "application/msgpack");
+            h.setRequestProperty("Accept-Encoding", "gzip");
+            if (authenticate && pairManager != null) {
+                String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
+                h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
+            }
+            h.setRequestMethod("HEAD");
+            h.setDoInput(true);
+
+            InputStream is;
+            int code;
+            try {
+                // Will throw IOException if server responds with 401.
+                code = h.getResponseCode();
+            } catch (IOException e) {
+                // Will return 401, because now connection has the correct internal state.
+                code = h.getResponseCode();
+            }
+            if (code < HttpURLConnection.HTTP_BAD_REQUEST) {
+                is = h.getInputStream();
+            } else {
+                is = h.getErrorStream();
+            }
+            if(is != null) {
+                is.close();
+            }
+            return h.getHeaderFields();
         } catch (MalformedURLException e) {
             throw new APIException(e).addInfo("Malformed URL on GET request");
         } catch (IOException e) {
@@ -863,6 +908,47 @@ public class API {
             throw new APIException(e).addInfo("Mapping exception");
         } catch (IOException e) {
             throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    private static SimpleDateFormat httpDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+
+    public Date getBackersLastModified(String locale) throws APIException {
+        throwIfRequirementsNotMet();
+        Map<String, List<String>> headers = headRequest(endpoint.resolve("meta/backers/?locale=" + locale), false);
+        if (headers.get("Last-Modified") == null || headers.get("Last-Modified").size() == 0) {
+            throw new APIException(new IOException("Last-Modified not present in API response"));
+        }
+        String lastModified = headers.get("Last-Modified").get(0);
+        try {
+            return httpDateFormat.parse(lastModified);
+        } catch (ParseException e) {
+            throw new APIException(e).addInfo("ParseException");
+        }
+    }
+
+    public String getBackers(String locale) throws APIException {
+        throwIfRequirementsNotMet();
+        BufferedReader r = null;
+        try {
+            InputStream is = getRequest(endpoint.resolve("meta/backers/?locale=" + locale), false);
+            r = new BufferedReader(new InputStreamReader(is));
+            StringBuilder total = new StringBuilder(is.available());
+            String line;
+            while ((line = r.readLine()) != null) {
+                total.append(line).append('\n');
+            }
+            return total.toString();
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        } finally {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (IOException e) {
+                    throw new APIException(e).addInfo("IOException");
+                }
+            }
         }
     }
 

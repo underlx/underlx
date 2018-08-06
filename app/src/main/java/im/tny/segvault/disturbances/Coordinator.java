@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.os.Build;
 import android.os.Looper;
+import android.support.constraint.solver.Cache;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -70,6 +71,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     private WiFiChecker wiFiChecker;
     private LineStatusCache lineStatusCache;
     private StatsCache statsCache;
+    private CacheManager cacheManager;
     private Random random = new Random();
 
     private Coordinator(Context context) {
@@ -97,6 +99,7 @@ public class Coordinator implements MapManager.OnLoadListener {
 
         lineStatusCache = new LineStatusCache(this.context);
         statsCache = new StatsCache(this.context);
+        cacheManager = new CacheManager(this.context);
 
         wiFiChecker = new WiFiChecker(this.context);
         wiFiChecker.setScanInterval(10000);
@@ -121,6 +124,10 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public StatsCache getStatsCache() {
         return statsCache;
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
 
     public S2LS getS2LS(String networkId) {

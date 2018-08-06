@@ -43,6 +43,7 @@ import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
+import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
 import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
@@ -86,6 +87,7 @@ public class MainActivity extends TopActivity
         AboutFragment.OnFragmentInteractionListener,
         HomeLinesFragment.OnListFragmentInteractionListener,
         HomeStatsFragment.OnFragmentInteractionListener,
+        HomeBackersFragment.OnFragmentInteractionListener,
         AnnouncementFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
