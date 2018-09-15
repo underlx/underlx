@@ -75,7 +75,7 @@
     <string name="frag_route_origin_station">Starting station</string>
     <string name="frag_route_destination_station">Destination station</string>
     <string name="frag_route_instructions">Pick a starting point and a destination to see the recommended route.</string>
-    <string name="developer_website" translatable="false">http://segvault.tny.im</string>
+    <string name="developer_website" translatable="false">https://segvault.tny.im</string>
     <string name="notif_disturbance_title">%s line</string>
     <string name="frag_route_short_cars_warning">In this line, trains are shorter. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
     <string name="frag_route_disturbances_warning">Ongoing disturbances. The waiting time may be longer than usual.</string>
@@ -168,6 +168,8 @@
     <string name="poi_view_website">Website</string>
     <string name="warning_network_closed">The subway network is currently closed. Service will resume at %s.</string>
     <string name="warning_network_about_to_close_transfers">The subway network is about to close, at %1$s. You might not able to perform all line changes and thus fail to get to %2$s.</string>
+    <string name="warning_clock_unadjusted">Your device\'s clock is inaccurate and &appname; might not work correctly. Make sure the time, date and time zone are set correctly.</string>
+    <string name="warning_clock_unadjusted_adjust_clock">Date and time settings</string>
     <string name="frag_announcements_title">Announcements</string>
     <string name="nav_announcements">Announcements</string>
     <string name="frag_announcements_empty">Announcements not available</string>
@@ -352,7 +354,7 @@
     <string name="notif_permanent_foreground_description">\'Keep in foreground\' is enabled in the settings</string>
     <string name="frag_error_missing_topology">Missing network map</string>
     <string name="frag_error_missing_topology_desc">&appname; updated and the previously downloaded network map is no longer compatible. Connect to the internet to download a new network map.</string>
-    <string name="frag_error_topology_download_ongoing">The network map is currently being downloaded...</string>
+    <string name="frag_error_topology_download_ongoing">The network map is currently being downloaded…</string>
     <string name="frag_error_version_too_old">&appname; version too old</string>
     <string name="frag_error_version_too_old_desc">This &appname; version is no longer compatible with the &appname;
         online services. Please update to continue using &appname;.</string>

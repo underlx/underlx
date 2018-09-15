@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.format.DateUtils;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
@@ -44,6 +46,8 @@ public class API {
     private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
     //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
+    private static SimpleDateFormat httpDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+
     public static API getInstance() {
         return singleton;
     }
@@ -52,6 +56,12 @@ public class API {
     private Meta endpointMetaInfo;
     private Object lock = new Object();
     private Context context;
+    private long timeSkew;
+    private boolean checkedTimeSkew;
+
+    public boolean isClockOutOfSync() {
+        return Math.abs(timeSkew) > TimeUnit.MINUTES.toMillis(3) && checkedTimeSkew;
+    }
 
     public void setPairManager(PairManager manager) {
         pairManager = manager;
@@ -60,7 +70,6 @@ public class API {
     public void setContext(Context context) {
         this.context = context;
     }
-
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Meta {
@@ -386,6 +395,18 @@ public class API {
             } else {
                 is = h.getErrorStream();
             }
+
+            Map<String, List<String>> headers = h.getHeaderFields();
+            if (headers.get("Date") != null && headers.get("Date").size() > 0) {
+                try {
+                    Date serverTime = httpDateFormat.parse(headers.get("Date").get(0));
+                    timeSkew = new Date().getTime() - serverTime.getTime();
+                    checkedTimeSkew = true;
+                } catch (ParseException e) {
+                    // oh well
+                }
+            }
+
             if ("gzip".equals(h.getContentEncoding())) {
                 return new GZIPInputStream(is);
             }
@@ -474,6 +495,18 @@ public class API {
             } else {
                 is = h.getErrorStream();
             }
+
+            Map<String, List<String>> headers = h.getHeaderFields();
+            if (headers.get("Date") != null && headers.get("Date").size() > 0) {
+                try {
+                    Date serverTime = httpDateFormat.parse(headers.get("Date").get(0));
+                    timeSkew = new Date().getTime() - serverTime.getTime();
+                    checkedTimeSkew = true;
+                } catch (ParseException e) {
+                    // oh well
+                }
+            }
+
             if ("gzip".equals(h.getContentEncoding())) {
                 return new GZIPInputStream(is);
             }
@@ -910,8 +943,6 @@ public class API {
             throw new APIException(e).addInfo("IOException");
         }
     }
-
-    private static SimpleDateFormat httpDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 
     public Date getBackersLastModified(String locale) throws APIException {
         throwIfRequirementsNotMet();

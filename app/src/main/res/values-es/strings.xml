@@ -113,6 +113,8 @@
     <string name="lobby_exit_view_map">Ver mapa</string>
     <string name="warning_network_closed">La red de Metro se encuentra cerrada. El servicio reabre a las %s.</string>
     <string name="warning_network_about_to_close_transfers">La red de Metro se encuentra a punto de cerrar, a las %1$s. Podrás no conseguir realizar todos los cambios de línea y así podrás no llegar a %2$s.</string>
+    <string name="warning_clock_unadjusted">La hora de tu dispositivo no es correcta y es posible que el &appname; no funcione adecuadamente. Asegúrate de que tanto la fecha y la hora como la zona horaria son las correctas.</string>
+    <string name="warning_clock_unadjusted_adjust_clock">Ajustes de fecha y hora</string>
     <string name="frag_announcements_title">Noticias</string>
     <string name="nav_announcements">Noticias</string>
     <string name="frag_announcements_empty">Noticias indisponibles</string>
@@ -316,7 +318,7 @@
     <string name="frag_settings_prefer_main_names_summary">Preferir mostrar los nombres de las líneas y redes en su idioma original</string>
     <string name="frag_error_missing_topology">Falta de plano de red</string>
     <string name="frag_error_missing_topology_desc">&appname; se actualizó y el plano de red descargado anteriormente ha dejado de ser compatible. Conéctese a Internet para descargar un nuevo plano de red.</string>
-    <string name="frag_error_topology_download_ongoing">El plano de red está siendo actualizado...</string>
+    <string name="frag_error_topology_download_ongoing">El plano de red está siendo actualizado…</string>
     <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
     <string name="frag_error_version_too_old_desc">Esta versión de &appname; ha dejado de ser compatible con los servicios en línea de &appname;. Por favor, atualiza para seguir usando &appname;.</string>
     <string name="frag_error_view_store_page">Ver aplicación en Google Play</string>
