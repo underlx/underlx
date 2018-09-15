@@ -352,6 +352,18 @@ public class API {
         public String category;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class PairConnectionRequest {
+        public String code;
+        public String deviceName;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class PairConnectionResponse {
+        public String result;
+        public String serviceName;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -980,6 +992,21 @@ public class API {
                     throw new APIException(e).addInfo("IOException");
                 }
             }
+        }
+    }
+
+    public PairConnectionResponse postPairConnectionRequest(PairConnectionRequest request) throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            byte[] content = mapper.writeValueAsBytes(request);
+            InputStream is = postRequest(endpoint.resolve("pair/connections"), content, true);
+            return mapper.readValue(is, PairConnectionResponse.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
         }
     }
 

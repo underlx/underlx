@@ -46,6 +46,7 @@ import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
+import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
@@ -282,6 +283,9 @@ public class HomeFragment extends TopFragment {
                 return true;
             case R.id.menu_report_incorrect_location:
                 new FeedbackUtil.IncorrectLocation(getContext()).showReportWizard();
+                return true;
+            case R.id.menu_connect_service:
+                new ServiceConnectUtil.Wizard(getContext()).show();
                 return true;
         }
 

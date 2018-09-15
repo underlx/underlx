@@ -351,6 +351,12 @@
     <string name="act_report_success">Gracias por su contribuición.</string>
     <string name="act_report_error">Ha ocurrido un error al enviar su relato, por favor inténtelo de nuevo.</string>
     <string name="frag_disturbances_bottom"><![CDATA[Vea el historial completo de incidencias en <a href=\'https://perturbacoes.pt/d\'>Perturbações.pt</a>.]]></string>
+    <string name="frag_home_menu_connect_service">Asociar con servicio</string>
+    <string name="service_connect_title">Asociar con servicio</string>
+    <string name="service_connect_enter_code">Introduce el código mostrado por el servicio:</string>
+    <string name="service_connect_action_connect">Asociar</string>
+    <string name="service_connect_error">Oucrrió un error. Asegúrate de que has introducido correctamente el código y intenta de nuevo.</string>
+    <string name="service_connect_success">Esta instalación del &appname; está ahora asociada con: %s.</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>

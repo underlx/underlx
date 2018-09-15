@@ -10,4 +10,8 @@
         android:id="@+id/menu_report_incorrect_location"
         android:title="@string/frag_home_menu_report_incorrect_location"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_connect_service"
+        android:title="@string/frag_home_menu_connect_service"
+        app:showAsAction="never" />
 </menu>
