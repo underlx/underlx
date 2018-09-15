@@ -355,7 +355,7 @@
     <string name="service_connect_title">Asociar con servicio</string>
     <string name="service_connect_enter_code">Introduce el código mostrado por el servicio:</string>
     <string name="service_connect_action_connect">Asociar</string>
-    <string name="service_connect_error">Oucrrió un error. Asegúrate de que has introducido correctamente el código y intenta de nuevo.</string>
+    <string name="service_connect_error">Ha ocurrido un error. Asegúrate de que has introducido adecuadamente el código y inténtalo de nuevo.</string>
     <string name="service_connect_success">Esta instalación del &appname; está ahora asociada con: %s.</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
