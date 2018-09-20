@@ -180,6 +180,12 @@ public class AboutFragment extends TopFragment {
         mlct.put("url", "https://github.com/opacapp/multiline-collapsingtoolbar");
         data.add(mlct);
 
+        Map<String, String> adn = new HashMap<>(3);
+        adn.put("name", "Android Device Names");
+        adn.put("license", "© Jared Rummler - Apache License 2.0");
+        adn.put("url", "https://github.com/jaredrummler/AndroidDeviceNames");
+        data.add(adn);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");

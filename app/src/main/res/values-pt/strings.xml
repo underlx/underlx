@@ -316,7 +316,7 @@
     <string name="frag_settings_prefer_main_names_summary">Preferir mostrar os nomes das linhas e redes no seu idioma original</string>
     <string name="frag_error_missing_topology">Mapa de rede em falta</string>
     <string name="frag_error_missing_topology_desc">O &appname; actualizou e o mapa de rede descarregado anteriormente já não é compatível. Ligue-se à internet para descarregar um novo mapa de rede.</string>
-    <string name="frag_error_topology_download_ongoing">O mapa de rede está a ser actualizado...</string>
+    <string name="frag_error_topology_download_ongoing">O mapa de rede está a ser actualizado…</string>
     <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
     <string name="frag_error_version_too_old_desc">Esta versão do &appname; já não é compatível com os serviços online &appname;. Por favor actualize para poder continuar a usar o &appname;.</string>
     <string name="frag_error_view_store_page">Ver app no Google Play</string>
@@ -349,6 +349,14 @@
     <string name="act_report_success">Obrigado pela sua participação.</string>
     <string name="act_report_error">Ocorreu um erro ao submeter o seu relato, por favor tente novamente.</string>
     <string name="frag_disturbances_bottom"><![CDATA[Veja o histórico completo de perturbações em <a href=\'https://perturbacoes.pt/d\'>Perturbações.pt</a>.]]></string>
+    <string name="warning_clock_unadjusted">O relógio do seu aparelho está desacertado e o &appname; poderá não funcionar correctamente. Certifique-se que tanto a data e hora como o fuso horário estão correctos.</string>
+    <string name="warning_clock_unadjusted_adjust_clock">Definições de data e hora</string>
+    <string name="frag_home_menu_connect_service">Associar com serviço</string>
+    <string name="service_connect_title">Associar com serviço</string>
+    <string name="service_connect_enter_code">Insira o código mostrado pelo serviço:</string>
+    <string name="service_connect_action_connect">Associar</string>
+    <string name="service_connect_error">Ocorreu um erro. Certifique-se que introduziu correctamente o código e tente novamente.</string>
+    <string name="service_connect_success">Esta instalação do &appname; está agora associada com: %s.</string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>

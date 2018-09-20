@@ -113,6 +113,8 @@
     <string name="lobby_exit_view_map">Ver mapa</string>
     <string name="warning_network_closed">La red de Metro se encuentra cerrada. El servicio reabre a las %s.</string>
     <string name="warning_network_about_to_close_transfers">La red de Metro se encuentra a punto de cerrar, a las %1$s. Podrás no conseguir realizar todos los cambios de línea y así podrás no llegar a %2$s.</string>
+    <string name="warning_clock_unadjusted">La hora de tu dispositivo no es correcta y es posible que el &appname; no funcione adecuadamente. Asegúrate de que tanto la fecha y la hora como la zona horaria son las correctas.</string>
+    <string name="warning_clock_unadjusted_adjust_clock">Ajustes de fecha y hora</string>
     <string name="frag_announcements_title">Noticias</string>
     <string name="nav_announcements">Noticias</string>
     <string name="frag_announcements_empty">Noticias indisponibles</string>
@@ -316,7 +318,7 @@
     <string name="frag_settings_prefer_main_names_summary">Preferir mostrar los nombres de las líneas y redes en su idioma original</string>
     <string name="frag_error_missing_topology">Falta de plano de red</string>
     <string name="frag_error_missing_topology_desc">&appname; se actualizó y el plano de red descargado anteriormente ha dejado de ser compatible. Conéctese a Internet para descargar un nuevo plano de red.</string>
-    <string name="frag_error_topology_download_ongoing">El plano de red está siendo actualizado...</string>
+    <string name="frag_error_topology_download_ongoing">El plano de red está siendo actualizado…</string>
     <string name="frag_error_version_too_old">&appname; demasiado desactualizado</string>
     <string name="frag_error_version_too_old_desc">Esta versión de &appname; ha dejado de ser compatible con los servicios en línea de &appname;. Por favor, atualiza para seguir usando &appname;.</string>
     <string name="frag_error_view_store_page">Ver aplicación en Google Play</string>
@@ -349,6 +351,12 @@
     <string name="act_report_success">Gracias por su contribuición.</string>
     <string name="act_report_error">Ha ocurrido un error al enviar su relato, por favor inténtelo de nuevo.</string>
     <string name="frag_disturbances_bottom"><![CDATA[Vea el historial completo de incidencias en <a href=\'https://perturbacoes.pt/d\'>Perturbações.pt</a>.]]></string>
+    <string name="frag_home_menu_connect_service">Asociar con servicio</string>
+    <string name="service_connect_title">Asociar con servicio</string>
+    <string name="service_connect_enter_code">Introduce el código mostrado por el servicio:</string>
+    <string name="service_connect_action_connect">Asociar</string>
+    <string name="service_connect_error">Ha ocurrido un error. Asegúrate de que has introducido adecuadamente el código y inténtalo de nuevo.</string>
+    <string name="service_connect_success">Esta instalación del &appname; está ahora asociada con: %s.</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>

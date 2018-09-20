@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -38,12 +39,14 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 
+import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
+import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
@@ -79,6 +82,7 @@ public class HomeFragment extends TopFragment {
 
     private TextView networkClosedView;
     private CardView networkClosedCard;
+    private CardView clockUnadjustedCard;
     private CardView navigationCard;
     private CardView ongoingTripCard;
     private LinearLayout curStationLayout;
@@ -144,18 +148,19 @@ public class HomeFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        networkClosedCard = (CardView) view.findViewById(R.id.network_closed_card);
-        networkClosedView = (TextView) view.findViewById(R.id.network_closed_view);
+        networkClosedCard = view.findViewById(R.id.network_closed_card);
+        networkClosedView = view.findViewById(R.id.network_closed_view);
+        clockUnadjustedCard = view.findViewById(R.id.clock_unadjusted_card);
 
-        navigationCard = (CardView) view.findViewById(R.id.navigation_card);
-        ongoingTripCard = (CardView) view.findViewById(R.id.ongoing_trip_card);
-        curStationLayout = (LinearLayout) view.findViewById(R.id.cur_station_layout);
-        curStationIconsLayout = (LinearLayout) view.findViewById(R.id.cur_station_icons_layout);
-        curStationNameView = (TextView) view.findViewById(R.id.cur_station_name_view);
-        directionView = (TextView) view.findViewById(R.id.direction_view);
-        nextStationView = (TextView) view.findViewById(R.id.next_station_view);
-        curTripEndButton = (Button) view.findViewById(R.id.cur_trip_end);
-        curTripIncorrectLocationButton = (Button) view.findViewById(R.id.cur_trip_incorrect_location);
+        navigationCard = view.findViewById(R.id.navigation_card);
+        ongoingTripCard = view.findViewById(R.id.ongoing_trip_card);
+        curStationLayout = view.findViewById(R.id.cur_station_layout);
+        curStationIconsLayout = view.findViewById(R.id.cur_station_icons_layout);
+        curStationNameView = view.findViewById(R.id.cur_station_name_view);
+        directionView = view.findViewById(R.id.direction_view);
+        nextStationView = view.findViewById(R.id.next_station_view);
+        curTripEndButton = view.findViewById(R.id.cur_trip_end);
+        curTripIncorrectLocationButton = view.findViewById(R.id.cur_trip_incorrect_location);
 
         routeInstructionsLayout = view.findViewById(R.id.route_instructions_layout);
         routeBodyLayout = view.findViewById(R.id.route_body_layout);
@@ -163,7 +168,7 @@ public class HomeFragment extends TopFragment {
         routeSummaryView = view.findViewById(R.id.route_summary_view);
         navEndButton = view.findViewById(R.id.end_navigation);
 
-        unconfirmedTripsCard = (CardView) view.findViewById(R.id.unconfirmed_trips_card);
+        unconfirmedTripsCard = view.findViewById(R.id.unconfirmed_trips_card);
 
         curTripEndButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,6 +217,13 @@ public class HomeFragment extends TopFragment {
             @Override
             public void onClick(View view) {
                 switchToPage("nav_trip_history");
+            }
+        });
+
+        view.findViewById(R.id.clock_unadjusted_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Settings.ACTION_DATE_SETTINGS));
             }
         });
 
@@ -271,6 +283,9 @@ public class HomeFragment extends TopFragment {
                 return true;
             case R.id.menu_report_incorrect_location:
                 new FeedbackUtil.IncorrectLocation(getContext()).showReportWizard();
+                return true;
+            case R.id.menu_connect_service:
+                new ServiceConnectUtil.Wizard(getContext()).show();
                 return true;
         }
 
@@ -369,6 +384,8 @@ public class HomeFragment extends TopFragment {
             networkClosedView.setText(String.format(getString(R.string.warning_network_closed), f.toString()));
             networkClosedCard.setVisibility(View.VISIBLE);
         }
+
+        clockUnadjustedCard.setVisibility(API.getInstance().isClockOutOfSync() ? View.VISIBLE : View.GONE);
         recomputeShortcutVisibility();
     }
 
