@@ -73,7 +73,6 @@ public class Coordinator implements MapManager.OnLoadListener {
     private Map<String, S2LS> locServices = new HashMap<>();
     private WiFiChecker wiFiChecker;
     private LineStatusCache lineStatusCache;
-    private StatsCache statsCache;
     private CacheManager cacheManager;
     private Random random = new Random();
 
@@ -94,14 +93,11 @@ public class Coordinator implements MapManager.OnLoadListener {
         mapManager.setOnUpdateListener(new MapManager.OnUpdateListener() {
             @Override
             public void onNetworkUpdated(Network network) {
-                if (statsCache != null) {
-                    statsCache.clear();
-                }
+
             }
         });
 
         lineStatusCache = new LineStatusCache(this.context);
-        statsCache = new StatsCache(this.context);
         cacheManager = new CacheManager(this.context);
 
         wiFiChecker = new WiFiChecker(this.context);
@@ -123,10 +119,6 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public LineStatusCache getLineStatusCache() {
         return lineStatusCache;
-    }
-
-    public StatsCache getStatsCache() {
-        return statsCache;
     }
 
     public CacheManager getCacheManager() {

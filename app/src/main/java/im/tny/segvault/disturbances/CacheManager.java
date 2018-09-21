@@ -117,6 +117,27 @@ public class CacheManager {
         }
     }
 
+    public Serializable fetchOrGet(String key, ItemStaleChecker staleChecker, ItemFetcher fetcher) {
+        Serializable data = fetcher.fetchItemData(key);
+        if (data != null) {
+            Item item = new Item();
+            item.data = data;
+            item.key = key;
+            putItem(item);
+            return data;
+        }
+        return get(key, staleChecker);
+    }
+
+    public <T> T fetchOrGet(String key, ItemStaleChecker staleChecker, ItemFetcher fetcher, Class<T> valueType) {
+        Serializable data = fetchOrGet(key, staleChecker, fetcher);
+        try {
+            return valueType.cast(data);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
     public Date getStoreDate(String key) {
         Item item = getItem(key);
         if (item == null) {

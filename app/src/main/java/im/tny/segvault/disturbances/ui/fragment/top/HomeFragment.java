@@ -102,6 +102,8 @@ public class HomeFragment extends TopFragment {
     private TextView routeTitleView;
     private TextView routeSummaryView;
 
+    private HomeStatsFragment statsFragment;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -251,8 +253,8 @@ public class HomeFragment extends TopFragment {
         Fragment newFragment = HomeLinesFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
 
-        newFragment = HomeStatsFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
-        transaction.replace(R.id.stats_card, newFragment);
+        statsFragment = HomeStatsFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
+        transaction.replace(R.id.stats_card, statsFragment);
 
         newFragment = HomeBackersFragment.newInstance();
         transaction.replace(R.id.footer_layout, newFragment);
@@ -368,7 +370,7 @@ public class HomeFragment extends TopFragment {
         MapManager mapm = Coordinator.get(getContext()).getMapManager();
         if (requestOnlineUpdate) {
             Coordinator.get(getContext()).getLineStatusCache().updateLineStatus();
-            Coordinator.get(getContext()).getStatsCache().updateStats();
+            statsFragment.onlineUpdate();
         }
 
         Network net = mapm.getNetwork(MapManager.PRIMARY_NETWORK_ID);
