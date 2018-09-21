@@ -440,7 +440,7 @@ public class Util {
     }
 
     public static String encodeRFC3339(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date)
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).format(date)
                 .replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
     }
 
