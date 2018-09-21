@@ -56,6 +56,9 @@ public class Coordinator implements MapManager.OnLoadListener {
     public static Coordinator get(Context context) {
         if (singleton == null) {
             singleton = new Coordinator(context);
+
+            // force maps to load so onNetworkLoaded is called and the WiFiChecker, etc. is attached to the network
+            singleton.getMapManager().getNetworks();
         }
         return singleton;
     }
