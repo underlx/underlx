@@ -11,11 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Announcement;
+import im.tny.segvault.disturbances.Connectivity;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.fragment.top.AnnouncementFragment;
 
@@ -67,6 +70,12 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
             holder.mDescriptionView.setTypeface(null, Typeface.ITALIC);
         }
 
+        if(!holder.mItem.imageURL.isEmpty() && Connectivity.isConnectedWifi(context)) {
+            Picasso.get().load(holder.mItem.imageURL).into(holder.mImageView);
+        } else {
+            holder.mImageView.setVisibility(View.GONE);
+        }
+
         holder.mSourceView.setImageResource(holder.mItem.source.drawableResourceId);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -91,16 +100,18 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         public final TextView mTitleView;
         public final TextView mDateView;
         public final ImageView mSourceView;
+        public final ImageView mImageView;
         public final TextView mDescriptionView;
         public AnnouncementItem mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTitleView = (TextView) view.findViewById(R.id.title_view);
-            mDateView = (TextView) view.findViewById(R.id.date_view);
-            mSourceView = (ImageView) view.findViewById(R.id.source_view);
-            mDescriptionView = (TextView) view.findViewById(R.id.description_view);
+            mTitleView = view.findViewById(R.id.title_view);
+            mDateView = view.findViewById(R.id.date_view);
+            mImageView = view.findViewById(R.id.image_view);
+            mSourceView = view.findViewById(R.id.source_view);
+            mDescriptionView = view.findViewById(R.id.description_view);
         }
 
         @Override
@@ -113,13 +124,15 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         public final Date pubDate;
         public final String title;
         public final String description;
+        public final String imageURL;
         public final String url;
         public final Announcement.Source source;
 
-        public AnnouncementItem(Date pubDate, String title, String description, String url, Announcement.Source source) {
+        public AnnouncementItem(Date pubDate, String title, String description, String imageURL, String url, Announcement.Source source) {
             this.pubDate = pubDate;
             this.title = title;
             this.description = description;
+            this.imageURL = imageURL;
             this.url = url;
             this.source = source;
         }

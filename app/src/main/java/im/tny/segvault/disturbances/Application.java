@@ -16,7 +16,7 @@ import io.realm.RealmSchema;
  * Created by gabriel on 4/14/17.
  */
 
-public class Application extends android.app.Application {
+public class Application extends android.support.multidex.MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();

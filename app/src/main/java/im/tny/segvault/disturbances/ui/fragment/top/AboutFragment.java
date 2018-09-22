@@ -186,6 +186,12 @@ public class AboutFragment extends TopFragment {
         adn.put("url", "https://github.com/jaredrummler/AndroidDeviceNames");
         data.add(adn);
 
+        Map<String, String> picasso = new HashMap<>(3);
+        picasso.put("name", "Picasso");
+        picasso.put("license", "© Square, Inc. - Apache License 2.0");
+        picasso.put("url", "https://square.github.io/picasso/");
+        data.add(picasso);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");

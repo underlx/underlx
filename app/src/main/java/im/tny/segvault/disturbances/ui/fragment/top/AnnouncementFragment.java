@@ -186,7 +186,7 @@ public class AnnouncementFragment extends TopFragment {
                 List<API.Announcement> announcements = API.getInstance().getAnnouncements();
                 for (API.Announcement a : announcements) {
                     Date date = new Date(a.time[0] * 1000);
-                    items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, a.title, a.body, a.url, Announcement.getSource(a.source)));
+                    items.add(new AnnouncementRecyclerViewAdapter.AnnouncementItem(date, a.title, a.body, a.imageURL, a.url, Announcement.getSource(a.source)));
                 }
             } catch (APIException e) {
                 return false;

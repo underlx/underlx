@@ -13,46 +13,6 @@ import java.util.List;
  */
 
 public class Announcement {
-    private final String network;
-    private final String title;
-    private final String body;
-    private final String url;
-    private final String source;
-    private final Date time;
-
-    public Announcement(String network, String title, String body, String url, String source, Date time) {
-        this.network = network;
-        this.title = title;
-        this.body = body;
-        this.url = url;
-        this.source = source;
-        this.time = time;
-    }
-
-    public String getNetwork() {
-        return network;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public Date getTime() {
-        return time;
-    }
-
     public static class Source {
         public final String id;
         public final int nameResourceId;
