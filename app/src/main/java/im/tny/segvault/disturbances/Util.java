@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -482,6 +483,29 @@ public class Util {
         } catch (NumberFormatException e) {
             return defaultValue;
         }
+    }
+
+    public static void deleteCache(Context context) {
+        try {
+            File dir = context.getCacheDir();
+            deleteDir(dir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String aChildren : children) {
+                boolean success = deleteDir(new File(dir, aChildren));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else
+            return dir != null && dir.isFile() && dir.delete();
     }
 
     // large stack thread pool executor

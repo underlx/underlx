@@ -360,6 +360,9 @@ public class FCMService extends FirebaseMessagingService {
                 notificationManager.cancelAll();
                 break;
             }
+            case "clear-cache":
+                Util.deleteCache(this);
+                break;
         }
     }
 }
