@@ -11,7 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -70,8 +72,12 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
             holder.mDescriptionView.setTypeface(null, Typeface.ITALIC);
         }
 
-        if(!holder.mItem.imageURL.isEmpty() && Connectivity.isConnectedWifi(context)) {
-            Picasso.get().load(holder.mItem.imageURL).into(holder.mImageView);
+        if(!holder.mItem.imageURL.isEmpty()) {
+            RequestCreator rc = Picasso.get().load(holder.mItem.imageURL);
+             if (!Connectivity.isConnectedWifi(context)) {
+                 rc.networkPolicy(NetworkPolicy.OFFLINE);
+             }
+            rc.into(holder.mImageView);
         } else {
             holder.mImageView.setVisibility(View.GONE);
         }
