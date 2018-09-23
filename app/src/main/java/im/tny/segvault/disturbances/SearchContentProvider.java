@@ -19,6 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.transform.Result;
+
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
 import im.tny.segvault.subway.POI;
@@ -61,6 +63,7 @@ public class SearchContentProvider extends ContentProvider {
 
         final List<ResultRow> results = new ArrayList<>();
 
+        LocaleUtil.initializeLocale(getContext());
         final String locale = Util.getCurrentLanguage(getContext());
         final MapManager mapm = Coordinator.get(getContext()).getMapManager();
 
@@ -77,14 +80,10 @@ public class SearchContentProvider extends ContentProvider {
                 }
             }
 
+            boolean addedStation = false;
             if (distance < Double.MAX_VALUE) {
-                ResultRow row = new ResultRow();
-                row.title = station.getName();
-                row.subtitle = String.format(getContext().getString(R.string.search_station_subtitle), Util.getNetworkNames(getContext(), station.getNetwork())[0]);
-                row.drawable = R.drawable.network_pt_ml;
-                row.intentData = "station:" + station.getId();
-                row.distance = distance;
-                results.add(row);
+                addedStation = true;
+                results.add(buildResultRowForStation(station, distance));
             }
 
             for (Lobby lobby : station.getLobbies()) {
@@ -107,6 +106,61 @@ public class SearchContentProvider extends ContentProvider {
                     }
                     // do not add the same exit twice
                     if (added) break;
+                }
+            }
+
+            // let users search for the name of some station features
+            if(!addedStation) {
+                for (String tag : station.getAllTags()) {
+                    if(query.equals(tag)) {
+                        results.add(buildResultRowForStation(station, distance));
+                        break;
+                    }
+                    switch (tag) {
+                        case "a_store":
+                            distance = getDistance(getContext().getString(R.string.frag_station_stores), normalizedQuery);
+                            break;
+                        case "a_wc":
+                            distance = getDistance(getContext().getString(R.string.frag_station_wc), normalizedQuery);
+                            break;
+                        case "c_airport":
+                            distance = getDistance(getContext().getString(R.string.frag_station_airport), normalizedQuery);
+                            break;
+                        case "c_bike":
+                            distance = getDistance(getContext().getString(R.string.frag_station_shared_bikes), normalizedQuery);
+                            break;
+                        case "c_boat":
+                            distance = getDistance(getContext().getString(R.string.frag_station_boat), normalizedQuery);
+                            break;
+                        case "c_bus":
+                            distance = getDistance(getContext().getString(R.string.frag_station_bus), normalizedQuery);
+                            break;
+                        case "c_parking":
+                            distance = getDistance(getContext().getString(R.string.frag_station_car_parking), normalizedQuery);
+                            break;
+                        case "c_taxi":
+                            distance = getDistance(getContext().getString(R.string.frag_station_taxi), normalizedQuery);
+                            break;
+                        case "c_train":
+                            distance = getDistance(getContext().getString(R.string.frag_station_train), normalizedQuery);
+                            break;
+                        case "s_lostfound":
+                            distance = getDistance(getContext().getString(R.string.frag_station_lostfound), normalizedQuery);
+                            break;
+                        case "s_ticket1":
+                        case "s_ticket2":
+                        case "s_ticket3":
+                            distance = getDistance(getContext().getString(R.string.frag_station_ticket_office), normalizedQuery);
+                            break;
+                        case "s_urgent_pass":
+                            distance = getDistance(getContext().getString(R.string.frag_station_urgent_ticket), normalizedQuery);
+                            break;
+                        default:
+                            continue;
+                    }
+                    if (distance < Double.MAX_VALUE) {
+                        results.add(buildResultRowForStation(station, distance));
+                    }
                 }
             }
         }
@@ -192,6 +246,16 @@ public class SearchContentProvider extends ContentProvider {
         }
 
         return cursor;
+    }
+
+    private ResultRow buildResultRowForStation(Station station, double distance) {
+        ResultRow row = new ResultRow();
+        row.title = station.getName();
+        row.subtitle = String.format(getContext().getString(R.string.search_station_subtitle), Util.getNetworkNames(getContext(), station.getNetwork())[0]);
+        row.drawable = R.drawable.network_pt_ml;
+        row.intentData = "station:" + station.getId();
+        row.distance = distance;
+        return row;
     }
 
     private ResultRow buildResultRowForExit(Station station, Lobby lobby, Lobby.Exit exit, double distance, String matchStreet) {
