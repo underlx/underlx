@@ -187,7 +187,7 @@ public class POIActivity extends TopActivity {
         });
 
         LinearLayout stationsLayout = (LinearLayout) findViewById(R.id.stations_layout);
-        for (Station station : Coordinator.get(this).getMapManager().getAllStations()) {
+        for (final Station station : Coordinator.get(this).getMapManager().getAllStations()) {
             if (station.getPOIs().contains(poi)) {
                 View stepview = getLayoutInflater().inflate(R.layout.path_station, stationsLayout, false);
 
@@ -231,7 +231,18 @@ public class POIActivity extends TopActivity {
                     crossView.setVisibility(View.VISIBLE);
                 }
 
-                RouteFragment.populateStationView(POIActivity.this, station, stepview);
+                RouteFragment.populateStationView(POIActivity.this, station, stepview, true, false);
+
+                stepview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(POIActivity.this, StationActivity.class);
+                        intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                        intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                        startActivity(intent);
+                    }
+                });
+
                 stationsLayout.addView(stepview);
             }
         }

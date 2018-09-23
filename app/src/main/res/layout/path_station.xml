@@ -27,7 +27,7 @@
             android:layout_marginLeft="-15dp"
             android:layout_marginTop="15dp"
             android:layout_toRightOf="@id/time_view"
-            android:visibility="gone"></FrameLayout>
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/right_line_stripe_layout"
@@ -36,7 +36,7 @@
             android:layout_marginRight="-76dp"
             android:layout_marginTop="15dp"
             android:layout_toLeftOf="@id/time_view"
-            android:visibility="gone"></FrameLayout>
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/prev_line_stripe_layout"
@@ -44,7 +44,7 @@
             android:layout_height="match_parent"
             android:layout_marginBottom="23dp"
             android:layout_marginRight="10dp"
-            android:layout_toRightOf="@id/time_view"></FrameLayout>
+            android:layout_toRightOf="@id/time_view" />
 
         <FrameLayout
             android:id="@+id/next_line_stripe_layout"
@@ -52,7 +52,7 @@
             android:layout_height="match_parent"
             android:layout_marginRight="10dp"
             android:layout_marginTop="23dp"
-            android:layout_toRightOf="@id/time_view"></FrameLayout>
+            android:layout_toRightOf="@id/time_view" />
 
         <ImageView
             android:id="@+id/station_dot_image"
