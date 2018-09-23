@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -30,13 +31,14 @@ import static android.content.Context.MODE_PRIVATE;
 public class S2LSChangeListener implements S2LS.EventListener {
     private Context context;
     private MainService mainService;
-    private S2LS latestS2LS;
+    private S2LS latestS2LS; // stores a S2LS reference until MainService wakes up
+    // so that we can call getPreferredTickIntervalMillis on the current state when it does
 
     public S2LSChangeListener(Context context) {
         this.context = context.getApplicationContext();
     }
 
-    public void setMainService(@Nullable MainService mainService) {
+    public void setMainService(MainService mainService) {
         this.mainService = mainService;
 
         if (latestS2LS != null) {
@@ -60,6 +62,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
             }
         } else {
             latestS2LS = loc;
+            requestStartMainService();
         }
 
         WiFiChecker wfc = Coordinator.get(context).getWiFiChecker();
@@ -214,12 +217,16 @@ public class S2LSChangeListener implements S2LS.EventListener {
                     state.tick();
                 }
             }, state.getPreferredTickIntervalMillis());
+        } else {
+            requestStartMainService();
         }
     }
 
     private boolean checkStopForeground(S2LS s2ls) {
         if (mainService != null) {
             return mainService.checkStopForeground(s2ls);
+        } else {
+            requestStartMainService();
         }
         return true;
     }
@@ -227,12 +234,25 @@ public class S2LSChangeListener implements S2LS.EventListener {
     private void updateRouteNotification(S2LS s2ls) {
         if (mainService != null) {
             mainService.updateRouteNotification(s2ls);
+        } else {
+            requestStartMainService();
         }
     }
 
     private void updateRouteNotification(S2LS s2ls, boolean b) {
         if (mainService != null) {
             mainService.updateRouteNotification(s2ls, b);
+        } else {
+            requestStartMainService();
+        }
+    }
+
+    private void requestStartMainService() {
+        Intent startIntent = new Intent(context, MainService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(startIntent);
+        } else {
+            context.startService(startIntent);
         }
     }
 
