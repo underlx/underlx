@@ -357,6 +357,7 @@
     <string name="service_connect_action_connect">Asociar</string>
     <string name="service_connect_error">Ha ocurrido un error. Asegúrate de que has introducido adecuadamente el código y inténtalo de nuevo.</string>
     <string name="service_connect_success">Esta instalación del &appname; está ahora asociada con: %s.</string>
+    <string name="frag_favorite_stations_title">Estaciones favoritas</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>

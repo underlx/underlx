@@ -226,11 +226,6 @@ public class POIActivity extends TopActivity {
                     leftLineStripeLayout.setBackground(gd);
                 }
 
-                ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
-                if (station.isAlwaysClosed()) {
-                    crossView.setVisibility(View.VISIBLE);
-                }
-
                 RouteFragment.populateStationView(POIActivity.this, station, stepview, true, false);
 
                 stepview.setOnClickListener(new View.OnClickListener() {

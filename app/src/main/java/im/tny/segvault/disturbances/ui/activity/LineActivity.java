@@ -225,11 +225,6 @@ public class LineActivity extends TopActivity {
                 }
             }
 
-            ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
-            if (station.isAlwaysClosed()) {
-                crossView.setVisibility(View.VISIBLE);
-            }
-
             stepview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

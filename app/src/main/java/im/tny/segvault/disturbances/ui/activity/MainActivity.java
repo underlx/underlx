@@ -44,6 +44,7 @@ import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
+import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
 import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
@@ -88,6 +89,7 @@ public class MainActivity extends TopActivity
         HomeLinesFragment.OnListFragmentInteractionListener,
         HomeStatsFragment.OnFragmentInteractionListener,
         HomeBackersFragment.OnFragmentInteractionListener,
+        HomeFavoriteStationsFragment.OnListFragmentInteractionListener,
         AnnouncementFragment.OnListFragmentInteractionListener,
         DisturbanceFragment.OnListFragmentInteractionListener,
         NotifPreferenceFragment.OnFragmentInteractionListener,
@@ -95,7 +97,8 @@ public class MainActivity extends TopActivity
         TripHistoryFragment.OnListFragmentInteractionListener,
         TripFragment.OnFragmentInteractionListener,
         ErrorFragment.OnFragmentInteractionListener,
-        UnconfirmedTripsFragment.OnListFragmentInteractionListener, SearchView.OnQueryTextListener {
+        UnconfirmedTripsFragment.OnListFragmentInteractionListener,
+        SearchView.OnQueryTextListener {
 
     private MainService locService;
     private boolean locBound = false;
@@ -566,6 +569,14 @@ public class MainActivity extends TopActivity
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
+    }
+
+    @Override
+    public void onListFragmentStationSelected(Station station) {
+        Intent intent = new Intent(this, StationActivity.class);
+        intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+        intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+        startActivity(intent);
     }
 
     class LocServiceConnection implements ServiceConnection {

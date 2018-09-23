@@ -48,6 +48,7 @@ import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
+import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
 import im.tny.segvault.disturbances.LineStatusCache;
@@ -64,6 +65,7 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
@@ -94,6 +96,7 @@ public class HomeFragment extends TopFragment {
     private Button curTripEndButton;
     private Button navEndButton;
     private CardView unconfirmedTripsCard;
+    private CardView favoriteStationsCard;
     private Button disturbancesButton;
     private Button tripHistoryButton;
 
@@ -171,6 +174,7 @@ public class HomeFragment extends TopFragment {
         navEndButton = view.findViewById(R.id.end_navigation);
 
         unconfirmedTripsCard = view.findViewById(R.id.unconfirmed_trips_card);
+        favoriteStationsCard = view.findViewById(R.id.favorite_stations_card);
 
         curTripEndButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -245,6 +249,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(S2LSChangeListener.ACTION_S2LS_STATUS_CHANGED);
         filter.addAction(S2LSChangeListener.ACTION_NAVIGATION_ENDED);
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_FAVORITE_STATIONS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -350,6 +355,7 @@ public class HomeFragment extends TopFragment {
     private void refresh(boolean requestOnlineUpdate) {
         Realm realm = Application.getDefaultRealmInstance(getContext());
         boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
+        boolean hasFavoriteStations = realm.where(RStation.class).equalTo("favorite", true).count() > 0;
         realm.close();
 
         if (hasTripsToConfirm) {
@@ -362,6 +368,18 @@ public class HomeFragment extends TopFragment {
             }
         } else {
             unconfirmedTripsCard.setVisibility(View.GONE);
+        }
+
+        if (hasFavoriteStations) {
+            if (favoriteStationsCard.getVisibility() == View.GONE) {
+                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1);
+                transaction.replace(R.id.favorite_stations_card, newFragment);
+                transaction.commitAllowingStateLoss();
+                favoriteStationsCard.setVisibility(View.VISIBLE);
+            }
+        } else {
+            favoriteStationsCard.setVisibility(View.GONE);
         }
 
         if (mListener == null)
@@ -556,6 +574,7 @@ public class HomeFragment extends TopFragment {
             switch (intent.getAction()) {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                 case MainService.ACTION_TRIP_REALM_UPDATED:
+                case MainService.ACTION_FAVORITE_STATIONS_UPDATED:
                     refresh(false);
                     break;
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:

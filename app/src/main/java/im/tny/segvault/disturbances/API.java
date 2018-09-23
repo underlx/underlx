@@ -54,7 +54,7 @@ public class API {
 
     private PairManager pairManager;
     private Meta endpointMetaInfo;
-    private Object lock = new Object();
+    private final Object lock = new Object();
     private Context context;
     private long timeSkew;
     private boolean checkedTimeSkew;

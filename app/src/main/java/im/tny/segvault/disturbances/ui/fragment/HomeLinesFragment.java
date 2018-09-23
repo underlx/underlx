@@ -27,12 +27,10 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
-import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
-import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.disturbances.ui.adapter.LineRecyclerViewAdapter;
 
 /**

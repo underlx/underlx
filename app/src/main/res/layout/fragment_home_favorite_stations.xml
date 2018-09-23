@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/frag_favorite_stations_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list"
+        android:name="im.tny.segvault.disturbances.HomeFavoriteStationsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="im.tny.segvault.disturbances.ui.fragment.top.HomeFavoriteStationsFragment"
+        tools:listitem="@layout/path_station" />
+</LinearLayout>

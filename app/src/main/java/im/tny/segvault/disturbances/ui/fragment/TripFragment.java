@@ -318,10 +318,6 @@ public class TripFragment extends BottomSheetDialogFragment {
 
             RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
 
-            ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
-            if (c.getSource().getStation().isAlwaysClosed()) {
-                crossView.setVisibility(View.VISIBLE);
-            }
             stepview.setPadding(stepviewPadding, 0, stepviewPadding, 0);
             root.addView(stepview);
 
@@ -346,11 +342,6 @@ public class TripFragment extends BottomSheetDialogFragment {
                     DateUtils.formatDateTime(context,
                             path.getEntryTime(i).getTime(),
                             DateUtils.FORMAT_SHOW_TIME));
-        }
-
-        ImageView crossView = (ImageView) stepview.findViewById(R.id.station_cross_image);
-        if (c.getTarget().getStation().isAlwaysClosed()) {
-            crossView.setVisibility(View.VISIBLE);
         }
 
         final Station station = c.getTarget().getStation();

@@ -337,8 +337,6 @@ public class RouteFragment extends TopFragment {
             layoutDestinationStationClosed.setVisibility(View.GONE);
         }
 
-        MapManager mapm = Coordinator.get(getContext()).getMapManager();
-
         for (Step step : route) {
             View view = null;
             if (step instanceof EnterStep) {
@@ -527,16 +525,21 @@ public class RouteFragment extends TopFragment {
     }
 
     public static void populateStationView(final Context context, final Station station, View view, boolean showInfoIcons, boolean setOnClickListener) {
-        TextView stationView = (TextView) view.findViewById(R.id.station_view);
+        TextView stationView = view.findViewById(R.id.station_view);
         stationView.setText(station.getName());
 
         if (station.isExceptionallyClosed(station.getNetwork(), new Date())) {
             stationView.setTextColor(Color.GRAY);
         }
 
+        ImageView crossView = view.findViewById(R.id.station_cross_image);
+        if (crossView != null && station.isAlwaysClosed()) {
+            crossView.setVisibility(View.VISIBLE);
+        }
+
         if (showInfoIcons) {
-            View separatorView = (View) view.findViewById(R.id.feature_separator_view);
-            LinearLayout iconsLayout = (LinearLayout) view.findViewById(R.id.icons_layout);
+            View separatorView = view.findViewById(R.id.feature_separator_view);
+            LinearLayout iconsLayout = view.findViewById(R.id.icons_layout);
 
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

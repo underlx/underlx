@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.model.Feedback;
+import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
@@ -105,6 +106,8 @@ public class MainService extends Service {
         tripRealmResults.addChangeListener(tripRealmChangeListener);
         feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
         feedbackRealmResults.addChangeListener(feedbackRealmChangeListener);
+        favStationsRealmResults = realmForListeners.where(RStation.class).equalTo("favorite", true).findAll();
+        favStationsRealmResults.addChangeListener(favStationsRealmChangeListener);
 
         Coordinator.get(this).registerMainService(this);
     }
@@ -117,6 +120,7 @@ public class MainService extends Service {
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
         tripRealmResults.removeChangeListener(tripRealmChangeListener);
         feedbackRealmResults.removeChangeListener(feedbackRealmChangeListener);
+        favStationsRealmResults.removeChangeListener(favStationsRealmChangeListener);
         realmForListeners.close();
     }
 
@@ -481,6 +485,18 @@ public class MainService extends Service {
         @Override
         public void onChange(RealmResults<Feedback> element) {
             Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        }
+    };
+
+    public static final String ACTION_FAVORITE_STATIONS_UPDATED = "im.tny.segvault.disturbances.action.realm.station.favorite.updated";
+
+    private RealmResults<RStation> favStationsRealmResults;
+    private final RealmChangeListener<RealmResults<RStation>> favStationsRealmChangeListener = new RealmChangeListener<RealmResults<RStation>>() {
+        @Override
+        public void onChange(RealmResults<RStation> element) {
+            Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
             bm.sendBroadcast(intent);
         }
