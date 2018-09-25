@@ -32,7 +32,6 @@ import static android.content.Context.MODE_PRIVATE;
 public class S2LSChangeListener implements S2LS.EventListener {
     private Context context;
     private MainService mainService;
-    // so that we can call getPreferredTickIntervalMillis on the current state when it does
 
     public S2LSChangeListener(Context context) {
         this.context = context.getApplicationContext();
