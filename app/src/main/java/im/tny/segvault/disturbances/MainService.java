@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -67,8 +68,6 @@ public class MainService extends Service {
     private final IBinder mBinder = new LocalBinder();
 
     private Realm realmForListeners;
-
-    private Handler stateTickHandler = new Handler();
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -207,11 +206,6 @@ public class MainService extends Service {
     }
 
     // END OF DEBUG
-
-
-    public Handler getStateTickHandler() {
-        return stateTickHandler;
-    }
 
     @Override
     public IBinder onBind(Intent intent) {

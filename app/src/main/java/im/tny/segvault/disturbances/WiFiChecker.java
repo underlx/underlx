@@ -10,6 +10,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
@@ -34,7 +36,7 @@ class WiFiChecker {
     private Map<String, WiFiLocator> locators = new HashMap<>();
     private long scanInterval = 30000;
     private WifiManager wifiMan;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isScanning;
     private List<ScanResult> wifiList = new ArrayList<>();
     private Context context;
@@ -132,6 +134,11 @@ class WiFiChecker {
         @Override
         public void onReceive(Context c, Intent intent) {
             Log.d("WiFiChecker", "onReceive");
+            S2LS mainS2LS = Coordinator.get(context).getS2LS(MapManager.PRIMARY_NETWORK_ID);
+            if (mainS2LS != null) {
+                mainS2LS.tick();
+            }
+
             SharedPreferences sharedPref = c.getSharedPreferences("settings", MODE_PRIVATE);
             if (!sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
                 return;

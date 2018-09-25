@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -31,38 +32,25 @@ import static android.content.Context.MODE_PRIVATE;
 public class S2LSChangeListener implements S2LS.EventListener {
     private Context context;
     private MainService mainService;
-    private S2LS latestS2LS; // stores a S2LS reference until MainService wakes up
     // so that we can call getPreferredTickIntervalMillis on the current state when it does
 
     public S2LSChangeListener(Context context) {
         this.context = context.getApplicationContext();
     }
 
+    private Handler stateTickHandler = new Handler(Looper.getMainLooper());
+
     public void setMainService(MainService mainService) {
         this.mainService = mainService;
-
-        if (latestS2LS != null) {
-            mainService.getStateTickHandler().removeCallbacksAndMessages(null);
-            if (latestS2LS.getState().getPreferredTickIntervalMillis() != 0) {
-                doTick(latestS2LS.getState());
-            }
-            latestS2LS = null;
-        }
     }
 
     @Override
     public void onStateChanged(final S2LS loc) {
         Log.d("onStateChanged", "State changed");
 
-        if (mainService != null) {
-            latestS2LS = null;
-            mainService.getStateTickHandler().removeCallbacksAndMessages(null);
-            if (loc.getState().getPreferredTickIntervalMillis() != 0) {
-                doTick(loc.getState());
-            }
-        } else {
-            latestS2LS = loc;
-            requestStartMainService();
+        stateTickHandler.removeCallbacksAndMessages(null);
+        if (loc.getState().getPreferredTickIntervalMillis() != 0) {
+            doTick(loc.getState());
         }
 
         WiFiChecker wfc = Coordinator.get(context).getWiFiChecker();
@@ -209,17 +197,13 @@ public class S2LSChangeListener implements S2LS.EventListener {
     }
 
     private void doTick(final State state) {
-        if (mainService != null) {
-            mainService.getStateTickHandler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    doTick(state);
-                    state.tick();
-                }
-            }, state.getPreferredTickIntervalMillis());
-        } else {
-            requestStartMainService();
-        }
+        stateTickHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doTick(state);
+                state.tick();
+            }
+        }, state.getPreferredTickIntervalMillis());
     }
 
     private boolean checkStopForeground(S2LS s2ls) {

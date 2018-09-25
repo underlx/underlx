@@ -1,5 +1,8 @@
 package im.tny.segvault.s2ls;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Zone;
 
@@ -8,8 +11,8 @@ import im.tny.segvault.subway.Zone;
  */
 
 public class LeavingNetworkState extends InNetworkState {
-    private final static int TICKS_UNTIL_LEFT = 10; // assuming a tick occurs more or less every 30 seconds
-    private int ticksSinceLeft = 0;
+    private final static long MS_UNTIL_LEFT = TimeUnit.MINUTES.toMillis(5);
+    private Date enteredState = new Date();
 
     protected LeavingNetworkState(S2LS s2ls) {
         super(s2ls);
@@ -32,8 +35,7 @@ public class LeavingNetworkState extends InNetworkState {
 
     @Override
     public void tick() {
-        ticksSinceLeft++;
-        if (ticksSinceLeft >= TICKS_UNTIL_LEFT && !getS2LS().detectInNetwork()) {
+        if (new Date().getTime() >= enteredState.getTime() + MS_UNTIL_LEFT && !getS2LS().detectInNetwork()) {
             if (getS2LS().detectNearNetwork()) {
                 setState(new NearNetworkState(getS2LS()));
             } else {
