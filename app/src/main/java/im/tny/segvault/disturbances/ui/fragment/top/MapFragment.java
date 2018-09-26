@@ -101,6 +101,7 @@ public class MapFragment extends TopFragment {
     private LinearLayout filtersLayout;
     private FrameLayout container;
     private Button clearFiltersButton;
+    private MenuItem filterItem;
 
     private String networkId;
     private Network network;
@@ -269,6 +270,9 @@ public class MapFragment extends TopFragment {
             currentMapStrategy.setMockLocation(mockLocationMode);
             currentMapStrategy.initialize(container, selectedMap);
         }
+        if(filterItem != null) {
+            filterItem.setVisible(strategy.isFilterable());
+        }
     }
 
     public static class FilterDialogFragment extends DialogFragment {
@@ -383,7 +387,7 @@ public class MapFragment extends TopFragment {
             }
         }
 
-        if(stationsToShow.size() == 0) {
+        if (stationsToShow.size() == 0) {
             new AlertDialog.Builder(getContext())
                     .setMessage(R.string.frag_map_filter_no_match)
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -410,6 +414,8 @@ public class MapFragment extends TopFragment {
 
     private abstract class MapStrategy {
         abstract public void initialize(FrameLayout parent, Network.Plan map);
+
+        abstract public boolean isFilterable();
 
         public void zoomIn() {
         }
@@ -471,6 +477,11 @@ public class MapFragment extends TopFragment {
         }
 
         @Override
+        public boolean isFilterable() {
+            return false;
+        }
+
+        @Override
         public void zoomIn() {
             webview.zoomIn();
         }
@@ -508,6 +519,11 @@ public class MapFragment extends TopFragment {
             mapView.onResume(); // needed to get the map to display immediately
 
             mapView.getMapAsync(this);
+        }
+
+        @Override
+        public boolean isFilterable() {
+            return true;
         }
 
         @Override
@@ -774,6 +790,11 @@ public class MapFragment extends TopFragment {
             if (BuildConfig.DEBUG && sharedPref.getBoolean(PreferenceNames.DeveloperMode, false)) {
                 menu.findItem(R.id.menu_mock_location).setVisible(true);
             }
+        }
+
+        filterItem = menu.findItem(R.id.menu_filter);
+        if(currentMapStrategy != null) {
+            filterItem.setVisible(currentMapStrategy.isFilterable());
         }
 
         new Handler().post(new Runnable() {
