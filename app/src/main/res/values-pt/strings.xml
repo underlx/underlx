@@ -358,6 +358,13 @@
     <string name="service_connect_error">Ocorreu um erro. Certifique-se que introduziu correctamente o código e tente novamente.</string>
     <string name="service_connect_success">Esta instalação do &appname; está agora associada com: %s.</string>
     <string name="frag_favorite_stations_title">Estações favoritas</string>
+    <string name="frag_map_filter">Filtrar</string>
+    <string name="frag_map_filter_title">Filtrar estações por atributo</string>
+    <string name="frag_map_filter_intersection">Mostrar todos os seleccionados</string>
+    <string name="frag_map_filter_union">Mostrar quaisquer dos seleccionados</string>
+    <string name="frag_map_filter_no_match">O filtro que pediu não corresponde a quaisquer estações.</string>
+    <string name="frag_map_filters_applied">Filtros aplicados</string>
+    <string name="frag_map_clear_filters">Desligar filtros</string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>

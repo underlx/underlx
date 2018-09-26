@@ -351,6 +351,53 @@ public class Util {
         }
     }
 
+    public static String getStringForStationTag(Context context, String tag) {
+        switch (tag) {
+            case "a_store":
+                return context.getString(R.string.frag_station_stores);
+            case "a_wc":
+                return context.getString(R.string.frag_station_wc);
+            case "a_wifi":
+                return context.getString(R.string.frag_station_wifi);
+            case "c_airport":
+                return context.getString(R.string.frag_station_airport);
+            case "c_bike":
+                return context.getString(R.string.frag_station_shared_bikes);
+            case "c_boat":
+                return context.getString(R.string.frag_station_boat);
+            case "c_bus":
+                return context.getString(R.string.frag_station_bus);
+            case "c_parking":
+                return context.getString(R.string.frag_station_car_parking);
+            case "c_taxi":
+                return context.getString(R.string.frag_station_taxi);
+            case "c_train":
+                return context.getString(R.string.frag_station_train);
+            case "m_escalator_platform":
+                return context.getString(R.string.frag_station_escalator_platform);
+            case "m_escalator_surface":
+                return context.getString(R.string.frag_station_escalator_surface);
+            case "m_lift_platform":
+                return context.getString(R.string.frag_station_lift_platform);
+            case "m_lift_surface":
+                return context.getString(R.string.frag_station_lift_surface);
+            case "m_platform":
+                return context.getString(R.string.frag_station_wheelchair_platform);
+            case "m_stepfree":
+                return context.getString(R.string.frag_station_reduced_mobility);
+            case "s_lostfound":
+                return context.getString(R.string.frag_station_lostfound);
+            case "s_ticket1":
+            case "s_ticket2":
+            case "s_ticket3":
+                return context.getString(R.string.frag_station_ticket_office);
+            case "s_urgent_pass":
+                return context.getString(R.string.frag_station_urgent_ticket);
+            default:
+                return "";
+        }
+    }
+
     public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId, int tintColor) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());

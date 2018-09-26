@@ -58,7 +58,7 @@
     <string name="frag_notif_vibrate">Vibrer</string>
     <string name="frag_route_destination_station">À</string>
     <string name="frag_route_origin_station">De</string>
-    <string name="frag_route_instructions">Choisissez une station de départ et une station d\'arrivée pour voir l'itinéraire recommandé.</string>
+    <string name="frag_route_instructions">Choisissez une station de départ et une station d\'arrivée pour voir l\'itinéraire recommandé.</string>
     <string name="frag_route_title">Planifier un trajet</string>
     <string name="frag_route_line_name">Ligne %s</string>
     <string name="frag_route_direction"><![CDATA[Direction <font color=\'black\'><big>%s</big></font>]]></string>
@@ -111,7 +111,7 @@
     <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
     <string name="lobby_exit_view_map">Voir carte</string>
     <string name="warning_network_closed">Le réseau du Métro est fermé. Le réseau rouvre à %s.</string>
-    <string name="warning_network_about_to_close_transfers">Le réseau du Métro est près de fermer, à %1$s. Vous pouvez ne pas être capable d\'effectuer toutes les changes de ligne, et en tant que tel, vous pouvez ne pas être capable d'arriver à %2$s.</string>
+    <string name="warning_network_about_to_close_transfers">Le réseau du Métro est près de fermer, à %1$s. Vous pouvez ne pas être capable d\'effectuer toutes les changes de ligne, et en tant que tel, vous pouvez ne pas être capable d\'arriver à %2$s.</string>
     <string name="warning_clock_unadjusted">L\'horloge de votre appareil est incorrecte et c\'est possible que l\'&appname; ne fonctionne pas proprement. Assurez-vous que la date, l\'heure et le fuseau horaire sont corrects.</string>
     <string name="warning_clock_unadjusted_adjust_clock">Paramètres de date et d\'heure</string>
     <string name="frag_announcements_title">Actualités</string>
@@ -159,7 +159,7 @@
     <string name="act_trip_correction_start_station">Station de départ</string>
     <string name="act_trip_correction_end_station">Station d\'arrivée</string>
     <string name="act_trip_correction_title">Modifier enregistrement du trajet</string>
-    <string name="act_trip_correction_instructions">Vérifiez si les stations de départ et d\'arrivée sont correctes et modifiez-les s'il est nécessaire.</string>
+    <string name="act_trip_correction_instructions">Vérifiez si les stations de départ et d\'arrivée sont correctes et modifiez-les s\'il est nécessaire.</string>
     <string name="act_trip_correction_save">Sauvegarder les modifications</string>
     <string name="act_trip_correction_correct">Confirmer des modification</string>
     <string name="frag_trip_correct">Modifier</string>
@@ -189,7 +189,7 @@
     <string name="intro_finish_try_again">Répéter</string>
     <string name="intro_finish_downloading">En obtenant le plan du réseau - %d%% complet</string>
     <string name="intro_finish_done_title">L\'app est prête à commencer.  Appréciez &appname;.</string>
-    <string name="intro_finish_done_desc">En utilisant &appname;, n'oubliez pas que l'app est:\n- encore en développement\n- c'est pas une app officielle ou officiellement reconnue \n- c'est un projet collaboratif sans but lucratif</string>
+    <string name="intro_finish_done_desc">En utilisant &appname;, n\'oubliez pas que l\'app est:\n- encore en développement\n- c\'est pas une app officielle ou officiellement reconnue \n- c\'est un projet collaboratif sans but lucratif</string>
     <string name="intro_finish_get_started">Commencer</string>
     <string name="frag_stats_updated">Mis à jour %s</string>
     <string name="frag_stats_title">Statistiques</string>
@@ -358,6 +358,13 @@
     <string name="service_connect_error">Une erreur s\'est produite. Assurez-vous d\'avoir introduit le code correctement et essayez à nouveau.</string>
     <string name="service_connect_success">Cette installation d\'&appname; est désormais associée à: %s.</string>
     <string name="frag_favorite_stations_title">Stations favorites</string>
+    <string name="frag_map_filter">Filtrer</string>
+    <string name="frag_map_filter_title">Filtrer des stations par caractéristique</string>
+    <string name="frag_map_filter_intersection">Touts les sélectionés</string>
+    <string name="frag_map_filter_union">Chacun des sélectionés</string>
+    <string name="frag_map_filter_no_match">Le filtre choisi ne correspond à aucune station.</string>
+    <string name="frag_map_filters_applied">Filtres appliqués</string>
+    <string name="frag_map_clear_filters">Désactiver des filtres</string>
 
     <string name="disturbance_status_report_begin">Les utilisateurs ont rapporté des problèmes en la circulation</string>
     <string name="disturbance_status_report_confirm">Plusieurs utilisateurs ont confirmé des problèmes en la circulation</string>

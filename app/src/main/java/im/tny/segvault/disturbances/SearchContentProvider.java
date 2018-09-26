@@ -118,42 +118,20 @@ public class SearchContentProvider extends ContentProvider {
                     }
                     switch (tag) {
                         case "a_store":
-                            distance = getDistance(getContext().getString(R.string.frag_station_stores), normalizedQuery);
-                            break;
                         case "a_wc":
-                            distance = getDistance(getContext().getString(R.string.frag_station_wc), normalizedQuery);
-                            break;
                         case "c_airport":
-                            distance = getDistance(getContext().getString(R.string.frag_station_airport), normalizedQuery);
-                            break;
                         case "c_bike":
-                            distance = getDistance(getContext().getString(R.string.frag_station_shared_bikes), normalizedQuery);
-                            break;
                         case "c_boat":
-                            distance = getDistance(getContext().getString(R.string.frag_station_boat), normalizedQuery);
-                            break;
                         case "c_bus":
-                            distance = getDistance(getContext().getString(R.string.frag_station_bus), normalizedQuery);
-                            break;
                         case "c_parking":
-                            distance = getDistance(getContext().getString(R.string.frag_station_car_parking), normalizedQuery);
-                            break;
                         case "c_taxi":
-                            distance = getDistance(getContext().getString(R.string.frag_station_taxi), normalizedQuery);
-                            break;
                         case "c_train":
-                            distance = getDistance(getContext().getString(R.string.frag_station_train), normalizedQuery);
-                            break;
                         case "s_lostfound":
-                            distance = getDistance(getContext().getString(R.string.frag_station_lostfound), normalizedQuery);
-                            break;
                         case "s_ticket1":
                         case "s_ticket2":
                         case "s_ticket3":
-                            distance = getDistance(getContext().getString(R.string.frag_station_ticket_office), normalizedQuery);
-                            break;
                         case "s_urgent_pass":
-                            distance = getDistance(getContext().getString(R.string.frag_station_urgent_ticket), normalizedQuery);
+                            distance = getDistance(Util.getStringForStationTag(getContext(), tag), normalizedQuery);
                             break;
                         default:
                             continue;
