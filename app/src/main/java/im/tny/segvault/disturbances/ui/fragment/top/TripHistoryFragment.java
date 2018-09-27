@@ -209,6 +209,7 @@ public class TripHistoryFragment extends TopFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            getSwipeRefreshLayout().setRefreshing(true);
         }
 
         protected Boolean doInBackground(Void... v) {
@@ -283,7 +284,7 @@ public class TripHistoryFragment extends TopFragment {
             } else {
                 emptyView.setVisibility(View.VISIBLE);
             }
-
+            getSwipeRefreshLayout().setRefreshing(false);
         }
     }
 
