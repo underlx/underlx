@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances.ui.adapter;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
@@ -77,19 +78,19 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             holder.iconLayout.setBackground(drawable);
         }
 
-        if(holder.mItem.ended) {
+        if (holder.mItem.ended) {
             holder.mOngoingView.setVisibility(View.GONE);
         } else {
             holder.mOngoingView.setVisibility(View.VISIBLE);
         }
 
-        if(!holder.mItem.notes.isEmpty()) {
+        if (!holder.mItem.notes.isEmpty()) {
             holder.notesView.setHtml(holder.mItem.notes, new HtmlHttpImageGetter(holder.notesView, null, true));
             holder.notesLayout.setVisibility(View.VISIBLE);
         }
 
         holder.mLayout.removeAllViews();
-        for(DisturbanceItem.Status s : mValues.get(position).statuses) {
+        for (DisturbanceItem.Status s : mValues.get(position).statuses) {
             holder.mLayout.addView(new StatusView(holder.mView.getContext(), s));
         }
 
@@ -126,6 +127,17 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                 context.startActivity(Intent.createChooser(sendIntent, null));
             }
         });
+        holder.webButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id)));
+                try {
+                    context.startActivity(browserIntent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
+                }
+            }
+        });
     }
 
     @Override
@@ -142,20 +154,22 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         public final FrameLayout iconLayout;
         public final LinearLayout notesLayout;
         public final HtmlTextView notesView;
+        public final ImageButton webButton;
         public final ImageButton shareButton;
         public DisturbanceItem mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mLayout = (LinearLayout) view.findViewById(R.id.disturbance_status_layout);
-            mLineNameView = (TextView) view.findViewById(R.id.line_name_view);
-            mDateView = (TextView) view.findViewById(R.id.date_view);
-            mOngoingView = (TextView) view.findViewById(R.id.ongoing_view);
-            iconLayout = (FrameLayout) view.findViewById(R.id.frame_icon);
-            notesLayout = (LinearLayout) view.findViewById(R.id.disturbance_notes_layout);
-            notesView = (HtmlTextView) view.findViewById(R.id.disturbance_notes_view);
-            shareButton = (ImageButton) view.findViewById(R.id.share_button);
+            mLayout = view.findViewById(R.id.disturbance_status_layout);
+            mLineNameView = view.findViewById(R.id.line_name_view);
+            mDateView = view.findViewById(R.id.date_view);
+            mOngoingView = view.findViewById(R.id.ongoing_view);
+            iconLayout = view.findViewById(R.id.frame_icon);
+            notesLayout = view.findViewById(R.id.disturbance_notes_layout);
+            notesView = view.findViewById(R.id.disturbance_notes_view);
+            webButton = view.findViewById(R.id.web_button);
+            shareButton = view.findViewById(R.id.share_button);
         }
 
         @Override
@@ -186,11 +200,11 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             String name = "Unknown line";
             String netId = "";
             int color = 0;
-            for(Network n : networks) {
-                if(n.getId().equals(disturbance.network)) {
+            for (Network n : networks) {
+                if (n.getId().equals(disturbance.network)) {
                     netId = n.getId();
-                    for(Line l : n.getLines()) {
-                        if(l.getId().equals(disturbance.line) && context != null) {
+                    for (Line l : n.getLines()) {
+                        if (l.getId().equals(disturbance.line) && context != null) {
                             name = Util.getLineNames(context, l)[0];
                             color = l.getColor();
                             break;
@@ -202,7 +216,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.lineColor = color;
             this.networkId = netId;
             statuses = new ArrayList<>();
-            for(API.Status s : disturbance.statuses) {
+            for (API.Status s : disturbance.statuses) {
                 String text = s.translateStatus(context);
 
                 statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime, s.isOfficial()));
@@ -238,6 +252,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
     private static class StatusView extends LinearLayout {
         private DisturbanceItem.Status status;
+
         public StatusView(Context context, DisturbanceItem.Status status) {
             super(context);
             this.setOrientation(HORIZONTAL);
@@ -281,13 +296,13 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             timeView.setText(DateUtils.formatDateTime(context, status.date.getTime(), DateUtils.FORMAT_SHOW_TIME));
             statusView.setText(status.status);
 
-            if(status.isDowntime) {
+            if (status.isDowntime) {
                 iconView.setVisibility(GONE);
             } else {
                 iconView.setVisibility(VISIBLE);
             }
 
-            if(!status.isOfficial) {
+            if (!status.isOfficial) {
                 communityView.setVisibility(VISIBLE);
             }
         }

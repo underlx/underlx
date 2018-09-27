@@ -14,7 +14,7 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
