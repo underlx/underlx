@@ -14,6 +14,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -69,6 +70,8 @@ public class StatsActivity extends TopActivity {
         stats.add(new TotalTimeStatistic(30));
         stats.add(new AverageSpeedStatistic(30));
         stats.add(new AverageStationsStatistic(30));
+
+        new UpdateStatsTask(this, stats, (TableLayout) findViewById(R.id.table_layout), getLayoutInflater()).execute();
     }
 
     @Override
@@ -81,31 +84,40 @@ public class StatsActivity extends TopActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class UpdateStatsTask extends AsyncTask<Void, Integer, Boolean> {
+    private static class UpdateStatsTask extends AsyncTask<Void, Integer, Boolean> {
         private List<Statistic> stats;
-        private TableLayout table;
+        private WeakReference<TableLayout> tableRef;
         private LayoutInflater inflater;
+        private WeakReference<Context> contextRef;
 
-        public UpdateStatsTask(List<Statistic> stats, TableLayout table, LayoutInflater inflater) {
+        public UpdateStatsTask(Context context, List<Statistic> stats, TableLayout table, LayoutInflater inflater) {
+            this.contextRef = new WeakReference<>(context);
             this.stats = stats;
-            this.table = table;
+            this.tableRef = new WeakReference<>(table);
             this.inflater = inflater;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            table.removeAllViews();
+            TableLayout table = tableRef.get();
+            if (table != null) {
+                table.removeAllViews();
+            }
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            Realm realm = Application.getDefaultRealmInstance(StatsActivity.this);
+            final Context context = contextRef.get();
+            if (context == null) {
+                return false;
+            }
+            Realm realm = Application.getDefaultRealmInstance(context);
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
                     for (Statistic stat : stats) {
-                        stat.compute(realm, Coordinator.get(StatsActivity.this).getMapManager().getNetworks());
+                        stat.compute(realm, Coordinator.get(context).getMapManager().getNetworks());
                     }
                 }
             });
@@ -116,8 +128,11 @@ public class StatsActivity extends TopActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
 
-            for (Statistic stat : stats) {
-                stat.addToTable(inflater, table);
+            TableLayout table = tableRef.get();
+            if (table != null) {
+                for (Statistic stat : stats) {
+                    stat.addToTable(inflater, table);
+                }
             }
         }
     }
@@ -134,10 +149,10 @@ public class StatsActivity extends TopActivity {
             TableRow.LayoutParams trParams = new TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
 
-            TextView name = (TextView) tr.findViewById(R.id.name_view);
+            TextView name = tr.findViewById(R.id.name_view);
             name.setText(getNameStringId());
 
-            TextView value = (TextView) tr.findViewById(R.id.value_view);
+            TextView value = tr.findViewById(R.id.value_view);
             value.setText(getValue(table.getContext()));
 
             table.addView(tr, new TableLayout.LayoutParams(
