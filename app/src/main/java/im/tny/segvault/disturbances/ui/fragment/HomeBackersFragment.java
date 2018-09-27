@@ -95,6 +95,9 @@ public class HomeBackersFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... voids) {
+            if (top.getContext() == null) {
+                return null;
+            }
             CacheManager cm = Coordinator.get(top.getContext()).getCacheManager();
             String html = cm.get(buildCacheKey(), String.class);
             publishProgress(html);
