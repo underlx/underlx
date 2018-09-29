@@ -49,7 +49,6 @@ public class IntroActivity extends AppIntro2 implements
             mainService = mConnection.getBinder().getService();
             locBound = true;
         } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
             getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
         }
 

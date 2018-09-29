@@ -7,7 +7,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
@@ -396,6 +399,22 @@ public class Util {
             default:
                 return "";
         }
+    }
+
+    public static Drawable getColoredDrawableResource(Context context, int id, int color) {
+        Drawable background = ContextCompat.getDrawable(context, id);
+        if (background == null) {
+            return null;
+        }
+        background = background.mutate();
+        if (background instanceof ShapeDrawable) {
+            ((ShapeDrawable) background).getPaint().setColor(color);
+        } else if (background instanceof GradientDrawable) {
+            ((GradientDrawable) background).setColor(color);
+        } else if (background instanceof ColorDrawable) {
+            ((ColorDrawable) background).setColor(color);
+        }
+        return background;
     }
 
     public static BitmapDescriptor getBitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId, int tintColor) {

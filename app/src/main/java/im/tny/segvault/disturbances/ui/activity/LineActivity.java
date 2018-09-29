@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -177,52 +179,93 @@ public class LineActivity extends TopActivity {
 
             FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
             FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+            FrameLayout backLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.back_line_stripe_layout);
+            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            centerLineStripeLayout.setVisibility(View.VISIBLE);
             FrameLayout leftLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.left_line_stripe_layout);
             FrameLayout rightLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.right_line_stripe_layout);
 
             if (i == 0) {
                 prevLineStripeLayout.setVisibility(View.GONE);
                 nextLineStripeLayout.setBackgroundColor(lineColor);
+
+                Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_top, lineColor);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    centerLineStripeLayout.setBackground(background);
+                } else {
+                    centerLineStripeLayout.setBackgroundDrawable(background);
+                }
             } else if (i == stations.size() - 1) {
                 prevLineStripeLayout.setBackgroundColor(lineColor);
                 nextLineStripeLayout.setVisibility(View.GONE);
+
+                Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_bottom, lineColor);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    centerLineStripeLayout.setBackground(background);
+                } else {
+                    centerLineStripeLayout.setBackgroundDrawable(background);
+                }
             } else {
                 prevLineStripeLayout.setBackgroundColor(lineColor);
                 nextLineStripeLayout.setBackgroundColor(lineColor);
+                centerLineStripeLayout.setBackgroundColor(lineColor);
             }
 
+            int rightColor = 0;
+            int leftColor = 0;
             if (station.getLines().size() > 1) {
                 for (Stop stop : station.getStops()) {
                     if (stop.getLine() != line) {
-                        rightLineStripeLayout.setVisibility(View.VISIBLE);
-
-                        GradientDrawable gd = new GradientDrawable(
-                                GradientDrawable.Orientation.RIGHT_LEFT,
-                                new int[]{0, stop.getLine().getColor()});
-                        gd.setCornerRadius(0f);
-
-                        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                            rightLineStripeLayout.setBackgroundDrawable(gd);
-                        } else {
-                            rightLineStripeLayout.setBackground(gd);
-                        }
-
+                        rightColor = stop.getLine().getColor();
                         if (stop.getLine().outDegreeOf(stop) > 1) {
-                            leftLineStripeLayout.setVisibility(View.VISIBLE);
-                            gd = new GradientDrawable(
-                                    GradientDrawable.Orientation.LEFT_RIGHT,
-                                    new int[]{0, stop.getLine().getColor()});
-                            gd.setCornerRadius(0f);
-
-                            if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                                leftLineStripeLayout.setBackgroundDrawable(gd);
-                            } else {
-                                leftLineStripeLayout.setBackground(gd);
-                            }
+                            leftColor = stop.getLine().getColor();
                         }
                         break;
                     }
                 }
+            }
+
+            if (rightColor != 0) {
+                rightLineStripeLayout.setVisibility(View.VISIBLE);
+
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.RIGHT_LEFT,
+                        new int[]{0, rightColor});
+                gd.setCornerRadius(0f);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    rightLineStripeLayout.setBackgroundDrawable(gd);
+                } else {
+                    rightLineStripeLayout.setBackground(gd);
+                }
+            }
+            if (leftColor != 0) {
+                leftLineStripeLayout.setVisibility(View.VISIBLE);
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.LEFT_RIGHT,
+                        new int[]{0, leftColor});
+                gd.setCornerRadius(0f);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    leftLineStripeLayout.setBackgroundDrawable(gd);
+                } else {
+                    leftLineStripeLayout.setBackground(gd);
+                }
+            }
+
+            // fill gap left by rounded corners of top/bottom
+            if((leftColor != 0 || rightColor != 0) && (i == 0 || i == stations.size() - 1)) {
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.LEFT_RIGHT,
+                        new int[]{leftColor, rightColor});
+                gd.setCornerRadius(0f);
+
+                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    backLineStripeLayout.setBackgroundDrawable(gd);
+                } else {
+                    backLineStripeLayout.setBackground(gd);
+                }
+                backLineStripeLayout.setVisibility(View.VISIBLE);
             }
 
             stepview.setOnClickListener(new View.OnClickListener() {

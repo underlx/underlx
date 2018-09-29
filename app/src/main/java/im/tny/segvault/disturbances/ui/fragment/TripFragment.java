@@ -3,6 +3,9 @@ package im.tny.segvault.disturbances.ui.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -25,6 +28,7 @@ import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
@@ -222,6 +226,8 @@ public class TripFragment extends BottomSheetDialogFragment {
             FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
             prevLineStripeLayout.setVisibility(View.GONE);
             nextLineStripeLayout.setVisibility(View.GONE);
+            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            centerLineStripeLayout.setVisibility(View.VISIBLE);
 
             TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
             if (path.getManualEntry(0)) {
@@ -243,6 +249,12 @@ public class TripFragment extends BottomSheetDialogFragment {
                     context.startActivity(intent);
                 }
             });
+            Drawable gd = Util.getColoredDrawableResource(context, R.drawable.station_line_single, station.getLines().get(0).getColor());
+            if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                centerLineStripeLayout.setBackgroundDrawable(gd);
+            } else {
+                centerLineStripeLayout.setBackground(gd);
+            }
 
             RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
             stepview.setPadding(stepviewPadding, 0, stepviewPadding, 0);
@@ -263,6 +275,8 @@ public class TripFragment extends BottomSheetDialogFragment {
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
             FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
+            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            centerLineStripeLayout.setVisibility(View.VISIBLE);
             FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
 
             if (isFirst) {
@@ -271,6 +285,13 @@ public class TripFragment extends BottomSheetDialogFragment {
                 int lineColor = line.getColor();
 
                 prevLineStripeLayout.setVisibility(View.GONE);
+                Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_top, lineColor);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    centerLineStripeLayout.setBackground(background);
+                } else {
+                    centerLineStripeLayout.setBackgroundDrawable(background);
+                }
+                centerLineStripeLayout.setVisibility(View.VISIBLE);
                 nextLineStripeLayout.setBackgroundColor(lineColor);
 
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
@@ -291,6 +312,18 @@ public class TripFragment extends BottomSheetDialogFragment {
                 int nextLineColor = targetLine.getColor();
                 prevLineStripeLayout.setBackgroundColor(prevLineColor);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
+
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        new int[]{prevLineColor, nextLineColor});
+                gd.setCornerRadius(0f);
+
+                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    centerLineStripeLayout.setBackgroundDrawable(gd);
+                } else {
+                    centerLineStripeLayout.setBackground(gd);
+                }
+                centerLineStripeLayout.setVisibility(View.VISIBLE);
 
                 TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
                 // left side of the outer && is a small hack to fix time not displaying when the
@@ -329,9 +362,17 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         int lineColor = c.getSource().getLine().getColor();
         FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
+        FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
         FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
 
         prevLineStripeLayout.setBackgroundColor(lineColor);
+        Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_bottom, lineColor);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            centerLineStripeLayout.setBackground(background);
+        } else {
+            centerLineStripeLayout.setBackgroundDrawable(background);
+        }
+        centerLineStripeLayout.setVisibility(View.VISIBLE);
         nextLineStripeLayout.setVisibility(View.GONE);
 
         TextView timeView = (TextView) stepview.findViewById(R.id.time_view);

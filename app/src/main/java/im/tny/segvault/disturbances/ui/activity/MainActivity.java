@@ -120,7 +120,6 @@ public class MainActivity extends TopActivity
             locService = mConnection.getBinder().getService();
             locBound = true;
         } else if (!locBound) {
-            startService(new Intent(this, MainService.class));
             getApplicationContext().bindService(new Intent(getApplicationContext(), MainService.class), mConnection, Context.BIND_AUTO_CREATE);
         }
 

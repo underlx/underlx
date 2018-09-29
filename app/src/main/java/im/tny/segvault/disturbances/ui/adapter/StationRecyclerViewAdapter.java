@@ -62,6 +62,8 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
 
         FrameLayout leftLineStripeLayout = holder.mView.findViewById(R.id.left_line_stripe_layout);
         leftLineStripeLayout.setVisibility(View.VISIBLE);
+        FrameLayout backLineStripeLayout = holder.mView.findViewById(R.id.back_line_stripe_layout);
+        backLineStripeLayout.setVisibility(View.VISIBLE);
         FrameLayout rightLineStripeLayout = holder.mView.findViewById(R.id.right_line_stripe_layout);
         rightLineStripeLayout.setVisibility(View.VISIBLE);
 
@@ -74,6 +76,17 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
             rightLineStripeLayout.setBackgroundDrawable(gd);
         } else {
             rightLineStripeLayout.setBackground(gd);
+        }
+
+        gd = new GradientDrawable(
+                GradientDrawable.Orientation.RIGHT_LEFT,
+                new int[]{station.getLines().get(0).getColor(), station.getLines().get(station.getLines().size() > 1 ? 1 : 0).getColor()});
+        gd.setCornerRadius(0f);
+
+        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            backLineStripeLayout.setBackgroundDrawable(gd);
+        } else {
+            backLineStripeLayout.setBackground(gd);
         }
 
         gd = new GradientDrawable(

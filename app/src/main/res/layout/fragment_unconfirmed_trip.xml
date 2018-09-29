@@ -23,6 +23,19 @@
             android:layout_marginRight="10dp">
 
             <FrameLayout
+                android:id="@+id/top_line_stripe_layout"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="6dp" />
+
+            <FrameLayout
+                android:id="@+id/bottom_line_stripe_layout"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_gravity="bottom"/>
+
+            <FrameLayout
                 android:id="@+id/line_stripe_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -34,7 +47,7 @@
                 android:layout_width="10dp"
                 android:layout_height="10dp"
                 android:layout_marginTop="8dp"
-                android:src="@drawable/ic_station_dot" />
+                android:src="@drawable/station_dot_white" />
 
             <ImageView
                 android:id="@+id/second_dot_view"
@@ -42,7 +55,7 @@
                 android:layout_height="10dp"
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="6dp"
-                android:src="@drawable/ic_station_dot" />
+                android:src="@drawable/station_dot_white" />
         </FrameLayout>
 
         <LinearLayout

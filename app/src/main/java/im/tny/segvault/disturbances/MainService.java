@@ -109,6 +109,7 @@ public class MainService extends Service {
         favStationsRealmResults.addChangeListener(favStationsRealmChangeListener);
 
         Coordinator.get(this).registerMainService(this);
+        Coordinator.get(this).reloadFCMsubscriptions();
     }
 
     @Override
@@ -156,8 +157,6 @@ public class MainService extends Service {
                 }
             }
         }
-
-        Coordinator.get(this).reloadFCMsubscriptions();
 
         return Service.START_STICKY;
     }
@@ -386,6 +385,7 @@ public class MainService extends Service {
             } else {
                 stopForeground(true);
             }
+            lastRouteNotificationData = null;
             return true;
         }
         return false;

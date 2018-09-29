@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances.ui.adapter;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
@@ -79,8 +81,14 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
         if (holder.mItem.isVisit) {
             holder.destinationLayout.setVisibility(View.GONE);
-            holder.lineLayout.setVisibility(View.GONE);
             holder.secondDotView.setVisibility(View.GONE);
+
+            Drawable background = Util.getColoredDrawableResource(holder.originView.getContext(), R.drawable.station_line_single, Color.GRAY);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                holder.lineLayout.setBackground(background);
+            } else {
+                holder.lineLayout.setBackgroundDrawable(background);
+            }
         } else {
             holder.destinationView.setText(holder.mItem.destName);
             holder.destinationView.setTextColor(holder.mItem.destColor);
@@ -109,6 +117,20 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                 holder.lineLayout.setBackgroundDrawable(gd);
             } else {
                 holder.lineLayout.setBackground(gd);
+            }
+
+            Drawable background = Util.getColoredDrawableResource(holder.originView.getContext(), R.drawable.station_line_top, colors[0]);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                holder.topLineLayout.setBackground(background);
+            } else {
+                holder.topLineLayout.setBackgroundDrawable(background);
+            }
+
+            background = Util.getColoredDrawableResource(holder.originView.getContext(), R.drawable.station_line_bottom, colors[colors.length-1]);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                holder.bottomLineLayout.setBackground(background);
+            } else {
+                holder.bottomLineLayout.setBackgroundDrawable(background);
             }
         }
 
@@ -154,6 +176,8 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final TextView originTimeView;
         public final TextView destinationView;
         public final TextView destinationTimeView;
+        public final FrameLayout topLineLayout;
+        public final FrameLayout bottomLineLayout;
         public final FrameLayout lineLayout;
         public final LinearLayout destinationLayout;
         public final ImageView secondDotView;
@@ -169,6 +193,8 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             originTimeView = (TextView) view.findViewById(R.id.origin_time_view);
             destinationView = (TextView) view.findViewById(R.id.destination_view);
             destinationTimeView = (TextView) view.findViewById(R.id.destination_time_view);
+            topLineLayout = (FrameLayout) view.findViewById(R.id.top_line_stripe_layout);
+            bottomLineLayout = (FrameLayout) view.findViewById(R.id.bottom_line_stripe_layout);
             lineLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
             destinationLayout = (LinearLayout) view.findViewById(R.id.destination_layout);
             secondDotView = (ImageView) view.findViewById(R.id.second_dot_view);
