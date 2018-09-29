@@ -164,6 +164,7 @@ public class CacheManager {
     public void put(String key, Serializable data) {
         Item item = new Item();
         item.data = data;
+        item.storeDate = new Date();
         item.key = key;
         putItem(item);
     }

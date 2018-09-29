@@ -71,51 +71,40 @@ public class LineStatusCache {
         }
     }
 
-    private final String LINE_STATUS_CACHE_FILENAME = "LineStatusCache";
+    private static class StatusCache implements Serializable {
+        private HashMap<String, Status> info;
+        StatusCache(HashMap<String, Status> info) {
+            this.info = info;
+        }
+    }
+
+    private final String LINE_STATUS_CACHE_KEY = "LineStatus";
 
     private void cacheLineStatus(HashMap<String, Status> info) {
-        try {
-            FileOutputStream fos = new FileOutputStream(new File(context.getCacheDir(), LINE_STATUS_CACHE_FILENAME));
-            ObjectOutputStream os = new ObjectOutputStream(fos);
-            os.writeObject(info);
-            os.close();
-            fos.close();
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
-            e.printStackTrace();
-        }
+        CacheManager cm = Coordinator.get(context).getCacheManager();
+        cm.put(LINE_STATUS_CACHE_KEY, new StatusCache(info));
     }
 
     private HashMap<String, Status> readLineStatus() {
-        HashMap<String, Status> info;
-        try {
-            FileInputStream fis = new FileInputStream(new File(context.getCacheDir(), LINE_STATUS_CACHE_FILENAME));
-            ObjectInputStream is = new ObjectInputStream(fis);
-            info = (HashMap) is.readObject();
-            is.close();
-            fis.close();
-
-            Map<String, Line> lines = new HashMap<>();
-            for (Line l : Coordinator.get(context).getMapManager().getAllLines()) {
-                lines.put(l.getId(), l);
-            }
-            for (Status s : info.values()) {
-                if (!(s instanceof Status)) {
-                    throw new Exception();
-                }
-                s.line = lines.get(s.id);
-            }
-        } catch (Exception e) {
-            // oh well, we'll have to do without cache
-            // caching is best-effort
+        CacheManager cm = Coordinator.get(context).getCacheManager();
+        StatusCache sc = cm.get(LINE_STATUS_CACHE_KEY, StatusCache.class);
+        if (sc == null) {
             return null;
         }
-        return info;
+        Map<String, Line> lines = new HashMap<>();
+        for (Line l : Coordinator.get(context).getMapManager().getAllLines()) {
+            lines.put(l.getId(), l);
+        }
+        for (Status s : sc.info.values()) {
+            if (s == null) {
+                return null;
+            }
+            s.line = lines.get(s.id);
+        }
+        return sc.info;
     }
 
     public Map<String, Status> getLineStatus() {
-        HashMap<String, Status> statuses = new HashMap<>();
         synchronized (lock) {
             if (lineStatuses.isEmpty()) {
                 lineStatuses = readLineStatus();
@@ -123,9 +112,8 @@ public class LineStatusCache {
                     lineStatuses = new HashMap<>();
                 }
             }
-            statuses.putAll(lineStatuses);
+            return new HashMap<>(lineStatuses);
         }
-        return statuses;
     }
 
     public Status getLineStatus(String id) {
@@ -143,8 +131,8 @@ public class LineStatusCache {
     public boolean isDisturbanceOngoing() {
         synchronized (lock) {
             Map<String, Status> statuses = getLineStatus();
-            for(Status status : statuses.values()) {
-                if(status.down) {
+            for (Status status : statuses.values()) {
+                if (status.down) {
                     return true;
                 }
             }
@@ -203,7 +191,7 @@ public class LineStatusCache {
                 return false;
             }
             List<Line> lines = new LinkedList<>(Coordinator.get(context).getMapManager().getAllLines());
-            if(lines.size() == 0) {
+            if (lines.size() == 0) {
                 return false;
             }
             try {
