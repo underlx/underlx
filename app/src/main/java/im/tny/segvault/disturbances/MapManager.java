@@ -246,7 +246,9 @@ public class MapManager {
 
         protected void onPostExecute(Boolean result) {
             Log.d("UpdateTopologyTask", result.toString());
-            mapManager.currentUpdateTopologyTask = null;
+            synchronized (mapManager.lock) {
+                mapManager.currentUpdateTopologyTask = null;
+            }
             Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_FINISHED);
             intent.putExtra(EXTRA_UPDATE_TOPOLOGY_FINISHED, result);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mapManager.context);
@@ -256,7 +258,9 @@ public class MapManager {
         @Override
         protected void onCancelled() {
             Log.d("UpdateTopologyTask", "onCancelled");
-            mapManager.currentUpdateTopologyTask = null;
+            synchronized (mapManager.lock) {
+                mapManager.currentUpdateTopologyTask = null;
+            }
             Intent intent = new Intent(ACTION_UPDATE_TOPOLOGY_CANCELLED);
             LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mapManager.context);
             bm.sendBroadcast(intent);
@@ -371,14 +375,15 @@ public class MapManager {
             if (!isTopologyUpdateInProgress()) {
                 cancelTopologyUpdate();
                 currentUpdateTopologyTask = new UpdateTopologyTask(this);
-                try {
-                    return currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids).get();
-                } catch (InterruptedException e) {
-                    return false;
-                } catch (ExecutionException e) {
-                    return false;
-                }
+            } else {
+                return false;
             }
+        }
+        try {
+            return currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, network_ids).get();
+        } catch (InterruptedException e) {
+            return false;
+        } catch (ExecutionException e) {
             return false;
         }
     }

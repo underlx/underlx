@@ -32,6 +32,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -506,6 +507,8 @@ public class MapFragment extends TopFragment {
         private Map<Marker, Station> stationsOfExitMarkers = new HashMap<>();
         private Map<Marker, Lobby.Exit> exitsOfExitMarkers = new HashMap<>();
         private Map<Marker, String> markerLinks = new HashMap<>();
+        private boolean mapLayoutReady = false;
+        private boolean mapReady = false;
 
         @Override
         public void initialize(FrameLayout parent, Network.Plan map) {
@@ -513,6 +516,21 @@ public class MapFragment extends TopFragment {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             mapView.setLayoutParams(lp);
             parent.addView(mapView);
+
+            final ViewTreeObserver vto = mapView.getViewTreeObserver();
+            if (vto.isAlive()) {
+                vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    public void onGlobalLayout() {
+                        mapLayoutReady = true;
+                        if(mapReady) {
+                            onMapReady(googleMap);
+                        }
+                        // remove the listener... or we'll be doing this a lot.
+                        ViewTreeObserver obs = mapView.getViewTreeObserver();
+                        obs.removeGlobalOnLayoutListener(this);
+                    }
+                });
+            }
 
             mapView.onCreate(savedInstanceState);
 
@@ -545,6 +563,10 @@ public class MapFragment extends TopFragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             this.googleMap = googleMap;
+            mapReady = true;
+            if(!mapLayoutReady) {
+                return;
+            }
             googleMap.getUiSettings().setZoomControlsEnabled(false);
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
