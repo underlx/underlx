@@ -132,7 +132,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_web_accent_24dp"
+                app:srcCompat="@drawable/ic_web_accent_24dp"
                 android:tint="#8a8a8a" />
 
             <ImageButton
@@ -141,7 +141,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_share_black_24dp"
+                app:srcCompat="@drawable/ic_share_black_24dp"
                 android:tint="#8a8a8a" />
         </LinearLayout>
     </LinearLayout>

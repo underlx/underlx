@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -27,7 +28,7 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_marginTop="15dp"
-            android:src="@drawable/ic_station_dot" />
+            app:srcCompat="@drawable/ic_station_dot" />
     </FrameLayout>
 
     <LinearLayout
@@ -55,7 +56,7 @@
                 android:layout_height="20dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginTop="2dp"
-                android:src="@drawable/ic_warning_black_24dp"
+                app:srcCompat="@drawable/ic_warning_black_24dp"
                 android:tint="@color/colorWarning" />
 
             <TextView

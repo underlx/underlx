@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/segvault" />
+        app:srcCompat="@drawable/segvault" />
 
     <TextView
         android:layout_width="match_parent"

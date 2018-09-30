@@ -27,8 +27,10 @@
             android:id="@+id/navigation_start_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:drawableLeft="@drawable/ic_navigation_white_24dp"
+            android:drawableStart="@drawable/layer_navigation_white_24dp"
+            android:drawableLeft="@drawable/layer_navigation_white_24dp"
             android:drawablePadding="5dp"
             android:text="@string/frag_route_start_navigation"
             android:theme="@style/AppTheme.ColoredButton" />
@@ -46,16 +48,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
+            android:paddingBottom="@dimen/activity_vertical_margin">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -95,8 +97,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:hint="@string/frag_route_swap_choices"
-                    android:src="@drawable/ic_swap_vert_black_24dp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_swap_vert_black_24dp" />
             </LinearLayout>
 
             <CheckBox
@@ -131,10 +133,10 @@
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginRight="5dp"
                     android:layout_marginTop="2dp"
-                    android:src="@drawable/ic_warning_black_24dp"
-                    android:tint="@color/colorWarning" />
+                    android:layout_marginRight="5dp"
+                    android:tint="@color/colorWarning"
+                    app:srcCompat="@drawable/ic_warning_black_24dp" />
 
                 <TextView
                     android:id="@+id/network_closed_view"
@@ -154,10 +156,10 @@
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginRight="5dp"
                     android:layout_marginTop="2dp"
-                    android:src="@drawable/ic_error_black_24dp"
-                    android:tint="@color/colorError" />
+                    android:layout_marginRight="5dp"
+                    android:tint="@color/colorError"
+                    app:srcCompat="@drawable/ic_error_black_24dp" />
 
                 <TextView
                     android:id="@+id/origin_station_closed_view"
@@ -184,10 +186,10 @@
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginRight="5dp"
                     android:layout_marginTop="2dp"
-                    android:src="@drawable/ic_error_black_24dp"
-                    android:tint="@color/colorError" />
+                    android:layout_marginRight="5dp"
+                    android:tint="@color/colorError"
+                    app:srcCompat="@drawable/ic_error_black_24dp" />
 
                 <TextView
                     android:id="@+id/destination_station_closed_view"

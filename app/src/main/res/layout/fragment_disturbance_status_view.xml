@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="5dp"
         android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/time_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:maxWidth="66dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="#000000" />
@@ -28,8 +29,8 @@
             android:layout_height="15sp"
             android:layout_gravity="center_vertical"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_people_black_24dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_people_black_24dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -43,8 +44,8 @@
             android:id="@+id/status_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -53,9 +54,9 @@
             android:layout_width="20sp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
             android:layout_weight="0"
-            android:src="@drawable/ic_done_black" />
+            app:srcCompat="@drawable/ic_done_black" />
     </LinearLayout>
 </merge>

@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -26,9 +27,9 @@
                 android:id="@+id/route_instructions_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="5dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -54,9 +55,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="8dp"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -80,9 +81,9 @@
                     android:layout_gravity="start"
                     android:layout_marginLeft="@dimen/text_margin"
                     android:layout_marginRight="@dimen/text_margin"
-                    android:drawableLeft="@drawable/ic_close_accent_24dp"
+                    android:drawableStart="@drawable/layer_close_accent_24dp"
+                    android:drawableLeft="@drawable/layer_close_accent_24dp"
                     android:drawablePadding="10dp"
-                    android:drawableStart="@drawable/ic_close_accent_24dp"
                     android:text="@string/frag_home_end_navigation"
                     android:textAlignment="textStart" />
             </LinearLayout>
@@ -107,9 +108,9 @@
                 android:id="@+id/cur_station_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/text_margin"
                 android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="@dimen/text_margin"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -139,9 +140,9 @@
                 android:id="@+id/next_station_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <LinearLayout
@@ -165,9 +166,9 @@
                     android:layout_gravity="start"
                     android:layout_marginLeft="@dimen/text_margin"
                     android:layout_marginRight="@dimen/text_margin"
-                    android:drawableLeft="@drawable/ic_report_problem_black_24dp"
+                    android:drawableStart="@drawable/layer_report_problem_black_24dp"
+                    android:drawableLeft="@drawable/layer_report_problem_black_24dp"
                     android:drawablePadding="10dp"
-                    android:drawableStart="@drawable/ic_report_problem_black_24dp"
                     android:text="@string/frag_home_incorrect_location"
                     android:textAlignment="textStart" />
 
@@ -179,9 +180,9 @@
                     android:layout_gravity="start"
                     android:layout_marginLeft="@dimen/text_margin"
                     android:layout_marginRight="@dimen/text_margin"
-                    android:drawableLeft="@drawable/ic_train_off_accent_24dp"
+                    android:drawableStart="@drawable/layer_train_off_accent_24dp"
+                    android:drawableLeft="@drawable/layer_train_off_accent_24dp"
                     android:drawablePadding="10dp"
-                    android:drawableStart="@drawable/ic_train_off_accent_24dp"
                     android:text="@string/frag_home_end_trip"
                     android:textAlignment="textStart" />
 
@@ -195,8 +196,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="8dp"
-        card_view:cardCornerRadius="4dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        card_view:cardCornerRadius="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -206,20 +207,20 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginTop="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
-                android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginBottom="8dp"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginEnd="5dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginTop="2dp"
-                    android:src="@drawable/ic_warning_black_24dp"
-                    android:tint="@color/colorWarning" />
+                    android:tint="@color/colorWarning"
+                    app:srcCompat="@drawable/ic_warning_black_24dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -235,6 +236,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:background="#FFE0E0E0" />
+
             <Button
                 android:id="@+id/clock_unadjusted_button"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
@@ -243,9 +245,9 @@
                 android:layout_gravity="start"
                 android:layout_marginLeft="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin"
-                android:drawableLeft="@drawable/ic_access_time_accent_24dp"
+                android:drawableStart="@drawable/layer_access_time_accent_24dp"
+                android:drawableLeft="@drawable/layer_access_time_accent_24dp"
                 android:drawablePadding="10dp"
-                android:drawableStart="@drawable/ic_access_time_accent_24dp"
                 android:text="@string/warning_clock_unadjusted_adjust_clock"
                 android:textAlignment="textStart" />
         </LinearLayout>
@@ -268,11 +270,11 @@
             <ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_marginTop="2dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
-                android:src="@drawable/ic_warning_black_24dp"
-                android:tint="@color/colorWarning" />
+                android:tint="@color/colorWarning"
+                app:srcCompat="@drawable/ic_warning_black_24dp" />
 
             <TextView
                 android:id="@+id/network_closed_view"
@@ -310,9 +312,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
-                android:drawableTop="@drawable/ic_directions_black_24dp"
-                android:paddingBottom="8dp"
+                android:drawableTop="@drawable/layer_directions_black_24dp"
                 android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/nav_plan_route"
                 android:textSize="12sp" />
 
@@ -323,9 +325,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
-                android:drawableTop="@drawable/ic_menu_map"
-                android:paddingBottom="8dp"
+                android:drawableTop="@drawable/layer_menu_map"
                 android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/nav_map"
                 android:textSize="12sp" />
 
@@ -336,9 +338,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
-                android:drawableTop="@drawable/ic_menu_announcement"
-                android:paddingBottom="8dp"
+                android:drawableTop="@drawable/layer_menu_announcement"
                 android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:singleLine="true"
                 android:text="@string/nav_disturbances"
                 android:textSize="12sp" />
@@ -350,9 +352,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
-                android:drawableTop="@drawable/ic_history_black_24dp"
-                android:paddingBottom="8dp"
+                android:drawableTop="@drawable/layer_history_black_24dp"
                 android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:text="@string/nav_trip_history"
                 android:textSize="12sp" />
         </LinearLayout>

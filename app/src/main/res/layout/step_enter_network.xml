@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -41,7 +42,7 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_alignBottom="@id/top_line_stripe_layout"
-            android:src="@drawable/station_dot_white" />
+            app:srcCompat="@drawable/station_dot_white" />
     </RelativeLayout>
 
     <LinearLayout
@@ -98,7 +99,7 @@
                 android:layout_height="20dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_error_black_24dp"
+                app:srcCompat="@drawable/ic_error_black_24dp"
                 android:tint="@color/colorError" />
 
             <TextView
@@ -121,7 +122,7 @@
                 android:layout_height="20dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_warning_black_24dp"
+                app:srcCompat="@drawable/ic_warning_black_24dp"
                 android:tint="@color/colorWarning" />
 
             <TextView

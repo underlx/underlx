@@ -17,7 +17,7 @@
         android:minHeight="70dp"
         android:padding="0dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_facebook_box_natural_24dp" />
+        app:srcCompat="@drawable/ic_facebook_box_natural_24dp" />
 
     <ImageButton
         android:id="@+id/twitter_button"
@@ -28,7 +28,7 @@
         android:minHeight="70dp"
         android:padding="0dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_twitter_natural_24dp" />
+        app:srcCompat="@drawable/ic_twitter_natural_24dp" />
 
     <ImageButton
         android:id="@+id/discord_button"
@@ -39,7 +39,7 @@
         android:minHeight="70dp"
         android:padding="0dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_discord_natural_24dp" />
+        app:srcCompat="@drawable/ic_discord_natural_24dp" />
 
     <ImageButton
         android:id="@+id/github_button"
@@ -50,5 +50,5 @@
         android:minHeight="70dp"
         android:padding="0dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_github_natural_24dp" />
+        app:srcCompat="@drawable/ic_github_natural_24dp" />
 </LinearLayout>

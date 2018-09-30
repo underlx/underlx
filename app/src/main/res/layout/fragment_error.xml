@@ -28,7 +28,7 @@
             android:layout_marginBottom="20dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_warning_black_24dp"
+            app:srcCompat="@drawable/ic_warning_black_24dp"
             android:tint="@color/colorWarning" />
 
         <TextView

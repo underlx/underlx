@@ -148,7 +148,7 @@
                 android:layout_width="32dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="16dp"
-                android:src="@drawable/ic_trophy_black_24dp" />
+                app:srcCompat="@drawable/ic_trophy_black_24dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

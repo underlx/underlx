@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,10 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_vertical_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:paddingBottom="@dimen/activity_vertical_margin">
 
         <LinearLayout
             android:id="@+id/closed_info_layout"
@@ -25,10 +26,10 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginRight="5dp"
                 android:layout_marginTop="2dp"
-                android:src="@drawable/ic_info_black_24dp"
-                android:tint="@color/colorInfo" />
+                android:layout_marginRight="5dp"
+                android:tint="@color/colorInfo"
+                app:srcCompat="@drawable/ic_info_black_24dp" />
 
             <TextView
                 android:id="@+id/closed_info_view"
@@ -85,8 +86,8 @@
             android:id="@+id/feature_bus_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -94,8 +95,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_directions_bus_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_directions_bus_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -110,8 +111,8 @@
             android:id="@+id/feature_boat_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -119,8 +120,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_directions_boat_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_directions_boat_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,8 +136,8 @@
             android:id="@+id/feature_train_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -144,8 +145,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_train_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_train_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -160,8 +161,8 @@
             android:id="@+id/feature_airport_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -169,8 +170,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_local_airport_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_local_airport_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -184,8 +185,8 @@
             android:id="@+id/feature_taxi_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -193,8 +194,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_local_taxi_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_local_taxi_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -217,8 +218,8 @@
             android:id="@+id/feature_stepfree_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -226,8 +227,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_wheelchair_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_wheelchair_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -242,8 +243,8 @@
             android:id="@+id/feature_lift_surface_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -251,8 +252,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_elevator"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_elevator" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -267,8 +268,8 @@
             android:id="@+id/feature_escalator_surface_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -276,8 +277,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_escalator_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_escalator_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -292,8 +293,8 @@
             android:id="@+id/feature_lift_platform_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -301,8 +302,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_elevator"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_elevator" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -316,8 +317,8 @@
             android:id="@+id/feature_escalator_platform_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -325,8 +326,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_escalator_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_escalator_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -341,8 +342,8 @@
             android:id="@+id/feature_wheelchair_platform_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -350,8 +351,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_wheelchair_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_wheelchair_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -390,8 +391,8 @@
             android:id="@+id/service_park_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -399,8 +400,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_local_parking_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_local_parking_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -415,8 +416,8 @@
             android:id="@+id/service_bike_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -424,8 +425,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_directions_bike_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_directions_bike_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -439,8 +440,8 @@
             android:id="@+id/service_ticket_office_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -448,8 +449,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_cards_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_cards_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -463,8 +464,8 @@
             android:id="@+id/service_urgent_tickets_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -472,8 +473,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_cards_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_cards_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -487,8 +488,8 @@
             android:id="@+id/service_lostfound_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -496,8 +497,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_account_balance_wallet_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_account_balance_wallet_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -511,8 +512,8 @@
             android:id="@+id/service_wc_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -520,8 +521,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_wc_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_wc_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -535,8 +536,8 @@
             android:id="@+id/service_stores_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -544,8 +545,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_gift_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_gift_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -559,8 +560,8 @@
             android:id="@+id/service_wifi_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -568,8 +569,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/ic_wifi_black_24dp"
-                android:tint="@color/colorPrimaryLight" />
+                android:tint="@color/colorPrimaryLight"
+                app:srcCompat="@drawable/ic_wifi_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -583,8 +584,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
             android:layout_marginTop="6dp"
+            android:layout_marginBottom="4dp"
             android:text="@string/frag_station_statistics"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
