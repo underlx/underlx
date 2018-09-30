@@ -126,7 +126,7 @@ public class UnconfirmedTripsFragment extends Fragment {
         }
 
         protected Boolean doInBackground(Void... v) {
-            while (mListener == null) {
+            if (mListener == null) {
                 return false;
             }
             Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();

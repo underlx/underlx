@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -345,8 +346,16 @@ public class RouteFragment extends TopFragment {
                 final Line line = step.getLine();
 
                 int lineColor = line.getColor();
-                FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
+                FrameLayout lineStripeLayout = view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
+
+                FrameLayout topLineStripeLayout = view.findViewById(R.id.top_line_stripe_layout);
+                Drawable background = Util.getColoredDrawableResource(getContext(), R.drawable.station_line_top, lineColor);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    topLineStripeLayout.setBackground(background);
+                } else {
+                    topLineStripeLayout.setBackgroundDrawable(background);
+                }
 
                 populateStationView(getActivity(), step.getStation(), view);
 
@@ -384,14 +393,14 @@ public class RouteFragment extends TopFragment {
                                 ((EnterStep) step).getDirection().getName())));
 
                 if (line.getUsualCarCount() < network.getUsualCarCount()) {
-                    LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
+                    LinearLayout carsWarningLayout = view.findViewById(R.id.cars_warning_layout);
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
                 Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
                 if (statuses.get(line.getId()) != null &&
                         statuses.get(line.getId()).down) {
-                    LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                    LinearLayout disturbancesWarningLayout = view.findViewById(R.id.disturbances_warning_layout);
                     disturbancesWarningLayout.setVisibility(View.VISIBLE);
                 }
             } else if (step instanceof ChangeLineStep) {
@@ -399,30 +408,42 @@ public class RouteFragment extends TopFragment {
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
 
                 int prevLineColor = lStep.getLine().getColor();
-                FrameLayout prevLineStripeLayout = (FrameLayout) view.findViewById(R.id.prev_line_stripe_layout);
+                FrameLayout prevLineStripeLayout = view.findViewById(R.id.prev_line_stripe_layout);
                 prevLineStripeLayout.setBackgroundColor(prevLineColor);
 
                 int nextLineColor = lStep.getTarget().getColor();
-                FrameLayout nextLineStripeLayout = (FrameLayout) view.findViewById(R.id.next_line_stripe_layout);
+                FrameLayout nextLineStripeLayout = view.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setBackgroundColor(nextLineColor);
+
+                FrameLayout middleLineStripeLayout = view.findViewById(R.id.middle_line_stripe_layout);
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        new int[]{prevLineColor, nextLineColor});
+                gd.setCornerRadius(0f);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    middleLineStripeLayout.setBackgroundDrawable(gd);
+                } else {
+                    middleLineStripeLayout.setBackground(gd);
+                }
 
                 populateStationView(getActivity(), lStep.getStation(), view);
 
                 Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(lStep.getTarget().getId()));
                 drawable.setColorFilter(nextLineColor, PorterDuff.Mode.SRC_ATOP);
 
-                FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
+                FrameLayout iconFrame = view.findViewById(R.id.frame_icon);
                 if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                     iconFrame.setBackgroundDrawable(drawable);
                 } else {
                     iconFrame.setBackground(drawable);
                 }
 
-                TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
+                TextView lineView = view.findViewById(R.id.line_name_view);
                 lineView.setText(String.format(getString(R.string.frag_route_line_name), Util.getLineNames(getContext(), lStep.getTarget())[0]));
                 lineView.setTextColor(nextLineColor);
 
-                LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                LinearLayout lineLayout = view.findViewById(R.id.line_layout);
                 lineLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -440,22 +461,30 @@ public class RouteFragment extends TopFragment {
                                 lStep.getDirection().getName())));
 
                 if (lStep.getTarget().getUsualCarCount() < network.getUsualCarCount()) {
-                    LinearLayout carsWarningLayout = (LinearLayout) view.findViewById(R.id.cars_warning_layout);
+                    LinearLayout carsWarningLayout = view.findViewById(R.id.cars_warning_layout);
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
                 Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
                 if (statuses.get(lStep.getTarget().getId()) != null &&
                         statuses.get(lStep.getTarget().getId()).down) {
-                    LinearLayout disturbancesWarningLayout = (LinearLayout) view.findViewById(R.id.disturbances_warning_layout);
+                    LinearLayout disturbancesWarningLayout = view.findViewById(R.id.disturbances_warning_layout);
                     disturbancesWarningLayout.setVisibility(View.VISIBLE);
                 }
             } else if (step instanceof ExitStep) {
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
 
                 int lineColor = step.getLine().getColor();
-                FrameLayout lineStripeLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
+                FrameLayout lineStripeLayout = view.findViewById(R.id.line_stripe_layout);
                 lineStripeLayout.setBackgroundColor(lineColor);
+
+                FrameLayout bottomLineStripeLayout = view.findViewById(R.id.bottom_line_stripe_layout);
+                Drawable background = Util.getColoredDrawableResource(getContext(), R.drawable.station_line_bottom, lineColor);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    bottomLineStripeLayout.setBackground(background);
+                } else {
+                    bottomLineStripeLayout.setBackgroundDrawable(background);
+                }
 
                 populateStationView(getActivity(), step.getStation(), view);
             }
