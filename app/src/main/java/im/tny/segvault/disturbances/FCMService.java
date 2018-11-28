@@ -1,6 +1,5 @@
 package im.tny.segvault.disturbances;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -99,7 +98,7 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        String status = API.Status.translateStatus(getApplicationContext(), data.get("status"), data.get("msgType"));
+        String status = Util.translateLineStatus(getApplicationContext(), data.get("status"), data.get("msgType"));
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

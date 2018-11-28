@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.CacheManager;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -62,23 +63,7 @@ public class HomeBackersFragment extends Fragment {
 
     private void setContent(String html) {
         contentView.setHtml(html);
-        contentView.setText(RichTextUtils.replaceAll((Spanned) contentView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new RichTextUtils.ClickSpan.OnClickListener() {
-            @Override
-            public void onClick(String url) {
-                if (mListener == null) {
-                    return;
-                }
-                if (url.startsWith("help:")) {
-                    mListener.onHelpLinkClicked(url.substring(5));
-                } else if (url.startsWith("station:")) {
-                    mListener.onStationLinkClicked(url.substring(8));
-                } else if (url.startsWith("mailto:")) {
-                    mListener.onMailtoLinkClicked(url.substring(7));
-                } else {
-                    mListener.onLinkClicked(url);
-                }
-            }
-        }));
+        contentView.setText(RichTextUtils.replaceAll((Spanned) contentView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
     }
 
     private static class RetrieveBackersTask extends AsyncTask<Void, String, String> implements
@@ -178,13 +163,6 @@ public class HomeBackersFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnFragmentInteractionListener {
-        void onHelpLinkClicked(String destination);
-
-        void onStationLinkClicked(String destination);
-
-        void onMailtoLinkClicked(String address);
-
-        void onLinkClicked(String destination);
+    public interface OnFragmentInteractionListener extends InternalLinkHandler.FallbackLinkHandler {
     }
 }

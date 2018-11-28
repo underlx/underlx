@@ -137,14 +137,20 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     }
 
     private Map<String, Station> stations = new HashMap<>();
+    private Map<String, Station> stationNames = new HashMap<>();
 
     public Station getStation(String id) {
         return stations.get(id);
     }
 
+    public Station getStationByName(String name) {
+        return stationNames.get(name);
+    }
+
     public Collection<Station> getStations() {
         return stations.values();
     }
+
 
     private Map<String, POI> pois = new HashMap<>();
 
@@ -166,6 +172,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         if (s == null) {
             s = stop.getStation();
             stations.put(stop.getStation().getId(), s);
+            stationNames.put(stop.getStation().getName(), s);
         }
         return super.addVertex(stop);
     }
@@ -176,6 +183,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         s.removeVertex(stop);
         if (s.vertexSet().size() == 0) {
             stations.remove(stop.getStation().getId());
+            stationNames.remove(stop.getStation().getName());
         }
         return super.removeVertex(stop);
     }

@@ -41,6 +41,7 @@ import java.util.Map;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
@@ -482,75 +483,17 @@ public class MainActivity extends TopActivity
     }
 
     @Override
-    public void onHelpLinkClicked(String destination) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(destination));
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
-    @Override
-    public void onStationLinkClicked(String destination) {
-        onStationLinkClicked(destination, null);
-    }
-
-    public void onStationLinkClicked(String destination, String lobby) {
-        onStationLinkClicked(destination, lobby, null);
-    }
-
-    public void onStationLinkClicked(String destination, String lobby, String exit) {
-        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
-            Station station;
-            if ((station = network.getStation(destination)) != null) {
-                Intent intent = new Intent(this, StationActivity.class);
-                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, network.getId());
-                if (lobby != null && !lobby.isEmpty()) {
-                    intent.putExtra(StationActivity.EXTRA_LOBBY_ID, lobby);
-                }
-                if (exit != null && !exit.isEmpty()) {
-                    intent.putExtra(StationActivity.EXTRA_EXIT_ID, Integer.parseInt(exit));
-                }
-                startActivity(intent);
-                return;
+    public void onClick(String url) {
+        if (url.startsWith("help:")) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(url.substring(5)));
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            if (browserIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(browserIntent);
             }
-        }
-    }
-
-    public void onLineLinkClicked(String destination) {
-        for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
-            Line line;
-            if ((line = network.getLine(destination)) != null) {
-                Intent intent = new Intent(this, LineActivity.class);
-                intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
-                intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
-                startActivity(intent);
-                return;
-            }
-        }
-    }
-
-    public void onPOILinkClicked(String destination) {
-        Intent intent = new Intent(this, POIActivity.class);
-        intent.putExtra(POIActivity.EXTRA_POI_ID, destination);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onMailtoLinkClicked(String address) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void onLinkClicked(String destination) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(destination));
-        if (browserIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(browserIntent);
         }
     }
 
@@ -840,26 +783,7 @@ public class MainActivity extends TopActivity
         int intentDataColumn = cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA);
         String intentData = cursor.getString(intentDataColumn);
 
-        String[] parts = intentData.split(":");
-        switch (parts[0]) {
-            case "station":
-                if (parts.length > 3 && parts[2].equals("lobby")) {
-                    if (parts.length > 5 && parts[4].equals("exit")) {
-                        onStationLinkClicked(parts[1], parts[3], parts[5]);
-                    } else {
-                        onStationLinkClicked(parts[1], parts[3]);
-                    }
-                } else {
-                    onStationLinkClicked(parts[1]);
-                }
-                break;
-            case "line":
-                onLineLinkClicked(parts[1]);
-                break;
-            case "poi":
-                onPOILinkClicked(parts[1]);
-                break;
-        }
+        InternalLinkHandler.onClick(this, intentData, null);
         searchView.setIconified(true);
         searchView.clearFocus();
         // call your request, do some stuff..

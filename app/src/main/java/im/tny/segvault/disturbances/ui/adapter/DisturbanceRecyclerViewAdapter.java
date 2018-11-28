@@ -9,7 +9,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 
 import im.tny.segvault.disturbances.API;
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment.OnListFragmentInteractionListener;
@@ -217,7 +220,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.networkId = netId;
             statuses = new ArrayList<>();
             for (API.Status s : disturbance.statuses) {
-                String text = s.translateStatus(context);
+                Spannable text = Util.enrichLineStatus(context, s.translateStatus(context), s.msgType, new InternalLinkHandler(context));
 
                 statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime, s.isOfficial()));
             }
@@ -236,11 +239,11 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
         public static class Status {
             public final Date date;
-            public final String status;
+            public final Spannable status;
             public final boolean isDowntime;
             public final boolean isOfficial;
 
-            public Status(Date date, String status, boolean isDowntime, boolean isOfficial) {
+            public Status(Date date, Spannable status, boolean isDowntime, boolean isOfficial) {
                 this.date = date;
                 this.status = status;
                 this.isDowntime = isDowntime;
@@ -295,6 +298,8 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
             timeView.setText(DateUtils.formatDateTime(context, status.date.getTime(), DateUtils.FORMAT_SHOW_TIME));
             statusView.setText(status.status);
+            statusView.setClickable(true);
+            statusView.setMovementMethod(LinkMovementMethod.getInstance());
 
             if (status.isDowntime) {
                 iconView.setVisibility(GONE);

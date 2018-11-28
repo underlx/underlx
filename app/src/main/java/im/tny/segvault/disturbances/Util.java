@@ -18,12 +18,16 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ClickableSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
@@ -43,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
+import im.tny.segvault.subway.Station;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -504,6 +509,69 @@ public class Util {
             return new String[]{names[1], names[0]};
         }
         return names;
+    }
+
+    public static String translateLineStatus(Context context, String status, String msgType) {
+        if (context != null) {
+            switch (msgType) {
+                case "REPORT_BEGIN":
+                    return context.getString(R.string.disturbance_status_report_begin);
+                case "REPORT_CONFIRM":
+                    return context.getString(R.string.disturbance_status_report_confirm);
+                case "REPORT_RECONFIRM":
+                    return context.getString(R.string.disturbance_status_report_reconfirm);
+                case "REPORT_SOLVED":
+                    return context.getString(R.string.disturbance_status_report_solved);
+            }
+        }
+        return status;
+    }
+
+    public interface OnLineStatusSpanClickListener {
+        void onClick(String url);
+    }
+
+    @JsonIgnore
+    public static Spannable enrichLineStatus(Context context, String status, String msgType, final OnLineStatusSpanClickListener listener) {
+        Spannable sb = new SpannableString(status);
+        if (context == null || msgType == null) {
+            return sb;
+        }
+        if (!msgType.startsWith("ML_") || !msgType.contains("_BETWEEN_")) {
+            return sb;
+        }
+        int firstStationStartIdx = status.indexOf("entre as estações ") + "entre as estações ".length();
+        int firstStationEndIdx = firstStationStartIdx + status.substring(firstStationStartIdx).indexOf(" e ");
+        int secondStationStartIdx = firstStationEndIdx + " e ".length();
+        int secondStationEndIdx = secondStationStartIdx + 3 + status.substring(secondStationStartIdx + 3).indexOf(".");
+        String firstStationName = status.substring(firstStationStartIdx, firstStationEndIdx).trim().replace("S.", "São");
+        String secondStationName = status.substring(secondStationStartIdx, secondStationEndIdx).trim().replace("S.", "São");
+        Network network = Coordinator.get(context).getMapManager().getNetwork("pt-ml");
+        final Station firstStation = network.getStationByName(firstStationName);
+        final Station secondStation = network.getStationByName(secondStationName);
+
+        // their messages sometimes have a extra space before the name of the first station...
+        while (status.charAt(firstStationStartIdx) == ' ' && firstStationStartIdx < firstStationEndIdx) {
+            firstStationStartIdx++;
+        }
+
+        if (firstStation != null) {
+            sb.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View view) {
+                    listener.onClick("station:" + firstStation.getId());
+                }
+            }, firstStationStartIdx, firstStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (secondStation != null) {
+            sb.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View view) {
+                    listener.onClick("station:" + secondStation.getId());
+                }
+            }, secondStationStartIdx, secondStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return sb;
     }
 
     public static String encodeRFC3339(Date date) {

@@ -66,6 +66,7 @@ import javax.annotation.Nullable;
 
 import im.tny.segvault.disturbances.BuildConfig;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
@@ -707,21 +708,7 @@ public class MapFragment extends TopFragment {
             if (link == null) {
                 return;
             }
-
-            String[] parts = link.split(":");
-            switch (parts[0]) {
-                case "station":
-                    if (parts.length > 3 && parts[2].equals("lobby")) {
-                        if (parts.length > 5 && parts[4].equals("exit")) {
-                            mListener.onStationLinkClicked(parts[1], parts[3], parts[5]);
-                        } else {
-                            mListener.onStationLinkClicked(parts[1], parts[3]);
-                        }
-                    } else {
-                        mListener.onStationLinkClicked(parts[1]);
-                    }
-                    break;
-            }
+            InternalLinkHandler.onClick(getContext(), link, null);
         }
 
         @Override
@@ -984,12 +971,6 @@ public class MapFragment extends TopFragment {
      */
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
         MainService getMainService();
-
-        void onStationLinkClicked(String destination);
-
-        void onStationLinkClicked(String destination, String lobby);
-
-        void onStationLinkClicked(String destination, String lobby, String exit);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

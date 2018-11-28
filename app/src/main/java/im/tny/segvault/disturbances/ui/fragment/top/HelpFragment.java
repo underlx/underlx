@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.disturbances.Util;
@@ -115,23 +116,7 @@ public class HelpFragment extends TopFragment {
             linearLayout.addView(htmltv);
 
             htmltv.setHtml(contents[i]);
-            htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new RichTextUtils.ClickSpan.OnClickListener() {
-                @Override
-                public void onClick(String url) {
-                    if (mListener == null) {
-                        return;
-                    }
-                    if (url.startsWith("help:")) {
-                        mListener.onHelpLinkClicked(url.substring(5));
-                    } else if (url.startsWith("station:")) {
-                        mListener.onStationLinkClicked(url.substring(8));
-                    } else if (url.startsWith("mailto:")) {
-                        mListener.onMailtoLinkClicked(url.substring(7));
-                    } else {
-                        mListener.onLinkClicked(url);
-                    }
-                }
-            }));
+            htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
 
             if(contents.length > 1 && i < contents.length - 1) {
                 View view = getLayoutInflater().inflate(R.layout.help_contactlinks_view, linearLayout, true);
@@ -203,10 +188,7 @@ public class HelpFragment extends TopFragment {
         return buf.toString();
     }
 
-    public interface OnFragmentInteractionListener extends OnInteractionListener {
-        void onHelpLinkClicked(String destination);
-        void onStationLinkClicked(String destination);
-        void onMailtoLinkClicked(String address);
-        void onLinkClicked(String destination);
+    public interface OnFragmentInteractionListener extends OnInteractionListener, InternalLinkHandler.FallbackLinkHandler {
+
     }
 }

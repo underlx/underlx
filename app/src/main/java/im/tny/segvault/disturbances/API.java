@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.DateUtils;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -204,24 +203,7 @@ public class API {
 
         @JsonIgnore
         public String translateStatus(Context context) {
-            return translateStatus(context, status, msgType);
-        }
-
-        @JsonIgnore
-        public static String translateStatus(Context context, String status, String msgType) {
-            if (context != null) {
-                switch (msgType) {
-                    case "REPORT_BEGIN":
-                        return context.getString(R.string.disturbance_status_report_begin);
-                    case "REPORT_CONFIRM":
-                        return context.getString(R.string.disturbance_status_report_confirm);
-                    case "REPORT_RECONFIRM":
-                        return context.getString(R.string.disturbance_status_report_reconfirm);
-                    case "REPORT_SOLVED":
-                        return context.getString(R.string.disturbance_status_report_solved);
-                }
-            }
-            return status;
+            return Util.translateLineStatus(context, status, msgType);
         }
 
         @JsonIgnore
