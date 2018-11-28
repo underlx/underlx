@@ -92,6 +92,10 @@ public class Path implements GraphPath<Stop, Connection> {
 
     public void setEndVertex(Stop vertex) {
         List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new LeastHopsWeighter()).getEdgeList();
+        if (cs == null) {
+            // can't extend path to this stop
+            return;
+        }
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on
@@ -134,6 +138,10 @@ public class Path implements GraphPath<Stop, Connection> {
         // now go from the program-made start
         Date time = times.get(0).first;
         List<Connection> cs = Route.getShortestPath(graph, vertex, startVertex, new LeastHopsWeighter()).getEdgeList();
+        if (cs == null) {
+            // can't extend path to this stop
+            return;
+        }
         int size = cs.size();
         int insertPos = 0;
         for (int i = 0; i < size; i++) {
@@ -170,6 +178,10 @@ public class Path implements GraphPath<Stop, Connection> {
         // now go from the program-made end
         Date time = times.get(times.size() - 1).second;
         List<Connection> cs = Route.getShortestPath(graph, endVertex, vertex, new LeastHopsWeighter()).getEdgeList();
+        if (cs == null) {
+            // can't extend path to this stop
+            return;
+        }
         int size = cs.size();
         for (int i = 0; i < size; i++) {
             // never add a transfer as the last step (i.e. always assume user will keep going on

@@ -433,7 +433,7 @@ public class MainActivity extends TopActivity
             /*getSupportFragmentManager().popBackStack();
             transaction.addToBackStack(null);*/
         }
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
     }
 
     @Override
@@ -488,7 +488,7 @@ public class MainActivity extends TopActivity
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(url.substring(5)));
             transaction.addToBackStack(null);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         } else {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             if (browserIntent.resolveActivity(getPackageManager()) != null) {

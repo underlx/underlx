@@ -294,6 +294,10 @@ public class RouteFragment extends TopFragment {
         Route realtimeRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection());
         Route neutralRoute = Route.calculate(network, originPicker.getSelection(), destinationPicker.getSelection(),
                 new NeutralWeighter(), new NeutralQualifier());
+        if (realtimeRoute == null || neutralRoute == null) {
+            // can't compute a route between the two stations
+            return;
+        }
         if (useRealtimeCheckbox.isChecked()) {
             route = realtimeRoute;
         } else {

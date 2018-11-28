@@ -80,14 +80,15 @@ public class HomeBackersFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... voids) {
-            if (top.getContext() == null) {
+            Context context = top.getContext();
+            if (context == null) {
                 return null;
             }
-            CacheManager cm = Coordinator.get(top.getContext()).getCacheManager();
+            CacheManager cm = Coordinator.get(context).getCacheManager();
             String html = cm.get(buildCacheKey(), String.class);
             publishProgress(html);
 
-            SharedPreferences sharedPref = top.getContext().getSharedPreferences("settings", MODE_PRIVATE);
+            SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
             if (html != null &&
                     new Date().getTime() - sharedPref.getLong(PreferenceNames.LastBackersHTMLUpdateCheck, 0) < TimeUnit.DAYS.toMillis(1)) {
                 return null;

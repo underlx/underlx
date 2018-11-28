@@ -26,17 +26,25 @@ import im.tny.segvault.subway.Transfer;
  */
 
 public class Route extends ArrayList<Step> {
+    @Nullable
     public static Route calculate(Network network, Station source, Station target) {
         return calculate(network, source, target, null, null);
     }
 
+    @Nullable
     public static Route calculate(Network network, Station source, Station target, @Nullable ConnectionWeighter weighter) {
         return calculate(network, source, target, weighter, null);
     }
 
+    @Nullable
     public static Route calculate(Network network, Station source, Station target, @Nullable ConnectionWeighter weighter, @Nullable IAlternativeQualifier qualifier) {
         // 1st part: find the shortest path
         GraphPath path = getShortestPath(network, source, target, weighter, qualifier);
+
+        if (path == null) {
+            // can't compute a path between source and target
+            return null;
+        }
 
         // 2nd part: turn the path into a Route
         return new Route(path);
@@ -46,6 +54,7 @@ public class Route extends ArrayList<Step> {
         return getShortestPath(network, source, target, weighter, null);
     }
 
+    @Nullable
     public static GraphPath getShortestPath(final Network network, Station source, Station target, @Nullable IEdgeWeighter weighter, @Nullable IAlternativeQualifier qualifier) {
         // given that we want to treat stations with transfers as a single station,
         // consider all the possibilities and choose the one with the shortest path:
@@ -79,6 +88,7 @@ public class Route extends ArrayList<Step> {
         return getShortestPath(network, possibleSources, possibleTargets, weighter);
     }
 
+    @Nullable
     public static GraphPath getShortestPath(Network network, Stop source, Stop target, @Nullable IEdgeWeighter weighter) {
         List<Stop> possibleSources = new ArrayList<>(1);
         possibleSources.add(source);
@@ -87,6 +97,7 @@ public class Route extends ArrayList<Step> {
         return getShortestPath(network, possibleSources, possibleTargets, weighter);
     }
 
+    @Nullable
     public static GraphPath getShortestPath(Network network, List<Stop> possibleSources, List<Stop> possibleTargets, @Nullable IEdgeWeighter weighter) {
         AStarShortestPath as = new AStarShortestPath(network);
         AStarAdmissibleHeuristic heuristic = new AStarAdmissibleHeuristic<Stop>() {
@@ -109,7 +120,13 @@ public class Route extends ArrayList<Step> {
                     pSource.putMeta("is_route_source", true);
                     pTarget.putMeta("is_route_target", true);
 
-                    paths.add(as.getShortestPath(pSource, pTarget, heuristic));
+                    try {
+                        paths.add(as.getShortestPath(pSource, pTarget, heuristic));
+                    } catch(IllegalArgumentException ex) {
+                        // pSource or pTarget are somehow not part of the network
+                        // (a topology update took place?)
+                        // try to carry on anyway
+                    }
                     pSource.putMeta("is_route_source", null);
                     pTarget.putMeta("is_route_target", null);
                 }

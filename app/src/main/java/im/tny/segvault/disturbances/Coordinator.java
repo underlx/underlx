@@ -227,7 +227,14 @@ public class Coordinator implements MapManager.OnLoadListener {
     }
 
     public void reloadFCMsubscriptions() {
-        FirebaseMessaging fcm = FirebaseMessaging.getInstance();
+        FirebaseMessaging fcm;
+        try {
+            fcm = FirebaseMessaging.getInstance();
+        } catch (IllegalStateException ex) {
+            // it doesn't say anywhere in the docs why this would happen,
+            // but people all over the world suspect it's because it takes some time for FCM to acquire the tokens it needs
+            return;
+        }
 
         fcm.subscribeToTopic("broadcasts");
         if (BuildConfig.DEBUG) {

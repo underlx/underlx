@@ -264,7 +264,7 @@ public class HomeFragment extends TopFragment {
         newFragment = HomeBackersFragment.newInstance();
         transaction.replace(R.id.footer_layout, newFragment);
 
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         refresh(true);
         refreshCurrentTrip();
         return view;
