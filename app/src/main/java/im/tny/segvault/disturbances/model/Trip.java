@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
@@ -177,10 +179,12 @@ public class Trip extends RealmObject {
     }
 
 
+    @Nullable
     public static String persistConnectionPath(Path path) {
         return persistConnectionPath(path, null);
     }
 
+    @Nullable
     public static String persistConnectionPath(Path path, String replaceTrip) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
@@ -265,6 +269,18 @@ public class Trip extends RealmObject {
             trip.setUserConfirmed(true);
             trip.setSynced(false);
         } else {
+            // intervals overlap if (StartA <= EndB) and (EndA >= StartB)
+            // our A is the station use in the DB we want to check
+            // our B is this whole trip
+            Date startB = uses.get(0).getEntryDate();
+            Date endB = uses.get(uses.size()-1).getLeaveDate();
+            boolean hasOverlap = realm.where(Trip.class).lessThanOrEqualTo("path.entryDate", endB).greaterThanOrEqualTo("path.leaveDate", startB).count() > 0;
+            if (hasOverlap) {
+                // this trip overlaps with a previous trip. this should never happen, but if it does, we'll prevent shenanigans here
+                realm.cancelTransaction();
+                realm.close();
+                return null;
+            }
             trip = realm.createObject(Trip.class, UUID.randomUUID().toString());
             trip.setUserConfirmed(false);
         }

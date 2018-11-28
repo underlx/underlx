@@ -125,6 +125,10 @@ public class S2LSChangeListener implements S2LS.EventListener {
     @Override
     public void onTripEnded(S2LS s2ls, Path path) {
         String tripId = Trip.persistConnectionPath(path);
+        if (tripId == null) {
+            // trip was not saved for some reason (maybe it overlaps with an existing trip)
+            return;
+        }
         Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.sendBroadcast(intent);

@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -43,8 +44,11 @@ import im.tny.segvault.disturbances.exception.APIException;
  */
 
 public class API {
-    private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
-    //private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
+    // there's no risk of leaking the context because we're doing context.getApplicationContext()
+    // see https://stackoverflow.com/questions/39840818/android-googles-contradiction-on-singleton-pattern/39841446#39841446
+    @SuppressLint("StaticFieldLeak")
+    //private static API singleton = new API(URI.create("https://api.perturbacoes.tny.im/v1/"), 10000);
+    private static API singleton = new API(URI.create("http://10.0.3.2:12000/v1/"), 10000);
 
     private static SimpleDateFormat httpDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 
@@ -68,7 +72,7 @@ public class API {
     }
 
     public void setContext(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

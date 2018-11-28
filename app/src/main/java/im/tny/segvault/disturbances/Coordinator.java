@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -51,11 +52,14 @@ import im.tny.segvault.subway.Stop;
 import static android.content.Context.MODE_PRIVATE;
 
 public class Coordinator implements MapManager.OnLoadListener {
+    // there's no risk of leaking the context because we're doing context.getApplicationContext()
+    // see https://stackoverflow.com/questions/39840818/android-googles-contradiction-on-singleton-pattern/39841446#39841446
+    @SuppressLint("StaticFieldLeak")
     private static Coordinator singleton;
 
-    public static Coordinator get(Context context) {
+    public static synchronized Coordinator get(Context context) {
         if (singleton == null) {
-            singleton = new Coordinator(context);
+            singleton = new Coordinator(context.getApplicationContext());
 
             // force maps to load so onNetworkLoaded is called and the WiFiChecker, etc. is attached to the network
             singleton.getMapManager().getNetworks();
