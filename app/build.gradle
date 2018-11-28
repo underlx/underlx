@@ -14,7 +14,7 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '28.0.2'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
@@ -24,6 +24,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
+    }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
     buildTypes {
         release {
@@ -51,7 +55,7 @@ dependencies {
     implementation 'org.msgpack:jackson-dataformat-msgpack:0.8.13'
     implementation 'com.evernote:android-job:1.2.6'
     implementation 'info.debatty:java-string-similarity:1.1.0'
-    implementation 'org.sufficientlysecure:html-textview:3.5'
+    implementation 'org.sufficientlysecure:html-textview:3.6'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
     implementation 'uk.co.samuelwall:material-tap-target-prompt:2.9.0'
     ext.supportLibsVersion = "27.1.1"
@@ -64,7 +68,7 @@ dependencies {
     implementation "com.android.support:exifinterface:$supportLibsVersion"
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
-    implementation 'net.xpece.android:support-preference:2.2.0'
+    implementation 'net.xpece.android:support-preference:2.3.2'
     implementation 'com.code-troopers.betterpickers:library:3.1.0'
     implementation "com.android.support:appcompat-v7:$supportLibsVersion"
     implementation "com.android.support:preference-v7:$supportLibsVersion"
