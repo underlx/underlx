@@ -32,13 +32,16 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# Intellij
+
+# IntelliJ
 *.iml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
+.idea/assetWizardSettings.xml
 .idea/dictionaries
 .idea/libraries
+.idea/caches
 
 # Keystore files
 *.jks
@@ -53,6 +56,13 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
 
 # Ospylac
 app/src/debug/java/im/tny/segvault/disturbances/Ospylac.java
