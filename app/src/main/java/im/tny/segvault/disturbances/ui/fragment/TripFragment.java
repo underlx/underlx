@@ -224,8 +224,8 @@ public class TripFragment extends BottomSheetDialogFragment {
 
             FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
             FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
-            prevLineStripeLayout.setVisibility(View.GONE);
-            nextLineStripeLayout.setVisibility(View.GONE);
+            prevLineStripeLayout.setVisibility(View.INVISIBLE);
+            nextLineStripeLayout.setVisibility(View.INVISIBLE);
             FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
             centerLineStripeLayout.setVisibility(View.VISIBLE);
 
@@ -284,7 +284,7 @@ public class TripFragment extends BottomSheetDialogFragment {
 
                 int lineColor = line.getColor();
 
-                prevLineStripeLayout.setVisibility(View.GONE);
+                prevLineStripeLayout.setVisibility(View.INVISIBLE);
                 Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_top, lineColor);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     centerLineStripeLayout.setBackground(background);
@@ -373,7 +373,7 @@ public class TripFragment extends BottomSheetDialogFragment {
             centerLineStripeLayout.setBackgroundDrawable(background);
         }
         centerLineStripeLayout.setVisibility(View.VISIBLE);
-        nextLineStripeLayout.setVisibility(View.GONE);
+        nextLineStripeLayout.setVisibility(View.INVISIBLE);
 
         TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
         if (path.getManualEntry(i)) {

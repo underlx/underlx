@@ -2,31 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="?attr/selectableItemBackground"
     android:clipChildren="false"
-    android:focusable="true"
-    android:orientation="horizontal">
+    android:focusable="true">
+    <!-- this LinearLayout is not redundant! See https://stackoverflow.com/a/33997626 -->
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:minWidth="71dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/time_view"
             android:layout_width="46dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="12:34"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
 
         <FrameLayout
             android:id="@+id/left_line_stripe_layout"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="0dp"
             android:layout_marginRight="0dp"
+            android:layout_toStartOf="@+id/station_dot_image"
             android:layout_toLeftOf="@+id/station_dot_image"
             android:visibility="visible" />
 
@@ -34,41 +34,50 @@
             android:id="@+id/right_line_stripe_layout"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="0dp"
             android:layout_marginRight="0dp"
+            android:layout_toEndOf="@+id/station_dot_image"
             android:layout_toRightOf="@+id/station_dot_image"
             android:visibility="visible" />
 
-        <FrameLayout
-            android:id="@+id/prev_line_stripe_layout"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_alignParentTop="true"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="10dp"
             android:layout_marginRight="10dp"
-            android:layout_toRightOf="@id/time_view" />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@id/time_view"
+            android:layout_toRightOf="@id/time_view"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/prev_line_stripe_layout"
+                android:layout_width="15dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:id="@+id/center_line_stripe_layout"
+                android:layout_width="15dp"
+                android:layout_height="21dp"
+                android:visibility="gone" />
+
+            <FrameLayout
+                android:id="@+id/next_line_stripe_layout"
+                android:layout_width="15dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
 
         <FrameLayout
             android:id="@+id/back_line_stripe_layout"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginTop="15dp"
-            android:layout_toRightOf="@id/time_view"
-            android:visibility="gone" />
-
-        <FrameLayout
-            android:id="@+id/next_line_stripe_layout"
-            android:layout_width="15dp"
-            android:layout_height="match_parent"
-            android:layout_below="@id/station_dot_image"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="10dp"
-            android:layout_toRightOf="@id/time_view" />
-
-        <FrameLayout
-            android:id="@+id/center_line_stripe_layout"
-            android:layout_width="15dp"
-            android:layout_height="21dp"
-            android:layout_marginTop="12dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/time_view"
             android:layout_toRightOf="@id/time_view"
             android:visibility="gone" />
 
@@ -76,7 +85,8 @@
             android:id="@+id/station_dot_image"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/time_view"
             android:layout_toRightOf="@id/time_view"
             app:srcCompat="@drawable/station_dot_white" />
 
@@ -84,20 +94,32 @@
             android:id="@+id/station_cross_image"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-9dp"
             android:layout_marginLeft="-9dp"
-            android:layout_marginTop="6.5dp"
+            android:layout_toEndOf="@id/time_view"
             android:layout_toRightOf="@id/time_view"
-            app:srcCompat="@drawable/ic_close_white_24dp"
             android:tint="@color/colorError"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_close_white_24dp" />
 
-        <include
-            layout="@layout/station_include"
+        <LinearLayout
+            android:id="@+id/station_include_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="10dp"
-            android:layout_toRightOf="@id/station_dot_image" />
+            android:layout_toEndOf="@id/station_dot_image"
+            android:layout_toRightOf="@id/station_dot_image"
+            android:paddingTop="6dp"
+            android:paddingBottom="10dp">
+
+            <include
+                layout="@layout/station_include"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
     </RelativeLayout>
 </LinearLayout>

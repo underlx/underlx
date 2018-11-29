@@ -186,7 +186,7 @@ public class LineActivity extends TopActivity {
             FrameLayout rightLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.right_line_stripe_layout);
 
             if (i == 0) {
-                prevLineStripeLayout.setVisibility(View.GONE);
+                prevLineStripeLayout.setVisibility(View.INVISIBLE);
                 nextLineStripeLayout.setBackgroundColor(lineColor);
 
                 Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_top, lineColor);
@@ -197,7 +197,7 @@ public class LineActivity extends TopActivity {
                 }
             } else if (i == stations.size() - 1) {
                 prevLineStripeLayout.setBackgroundColor(lineColor);
-                nextLineStripeLayout.setVisibility(View.GONE);
+                nextLineStripeLayout.setVisibility(View.INVISIBLE);
 
                 Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_bottom, lineColor);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
