@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
@@ -59,6 +61,28 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
             case "mailto":
                 onMailtoLinkClicked(context, url.substring(7));
                 break;
+            case "http":
+            case "https": {
+                Uri uri = Uri.parse(url);
+                String host = uri.getHost();
+                int port = uri.getPort() == -1 ? 80 : uri.getPort();
+                if (("perturbacoes.pt".equals(host) || "www.perturbacoes.pt".equals(host)) && (port == 80 || port == 443)) {
+                    List<String> segments = uri.getPathSegments();
+                    if (segments.size() >= 2) {
+                        switch(segments.get(0)) {
+                            case "s":
+                            case "stations":
+                                onStationLinkClicked(context, segments.get(1));
+                                return;
+                            case "l":
+                            case "lines":
+                                onLineLinkClicked(context, segments.get(1));
+                                return;
+                        }
+                    }
+                }
+                // fallthrough
+            }
             default:
                 if (fallbackHandler != null) {
                     fallbackHandler.onClick(url);

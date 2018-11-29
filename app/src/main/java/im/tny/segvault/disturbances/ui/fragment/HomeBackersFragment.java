@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.Serializable;
@@ -62,7 +63,7 @@ public class HomeBackersFragment extends Fragment {
     }
 
     private void setContent(String html) {
-        contentView.setHtml(html);
+        contentView.setHtml(html, new HtmlHttpImageGetter(contentView, null, true));
         contentView.setText(RichTextUtils.replaceAll((Spanned) contentView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
     }
 

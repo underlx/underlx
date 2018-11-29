@@ -10,8 +10,10 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
+import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
+import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 
@@ -89,6 +92,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
         if (!holder.mItem.notes.isEmpty()) {
             holder.notesView.setHtml(holder.mItem.notes, new HtmlHttpImageGetter(holder.notesView, null, true));
+            holder.notesView.setText(RichTextUtils.replaceAll((Spanned) holder.notesView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(context)));
             holder.notesLayout.setVisibility(View.VISIBLE);
         }
 
