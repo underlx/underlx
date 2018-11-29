@@ -166,7 +166,7 @@ public class HomeLinesFragment extends Fragment {
             return;
         }
         if (!oneIsOpen) {
-            reportButton.setVisibility(View.GONE);
+            reportButton.setEnabled(false);
         }
 
         Collections.sort(items, new Comparator<LineRecyclerViewAdapter.LineItem>() {
@@ -216,10 +216,10 @@ public class HomeLinesFragment extends Fragment {
             switch (intent.getAction()) {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_STARTED:
                     progressBar.setVisibility(View.VISIBLE);
-                    reportButton.setVisibility(View.GONE);
+                    reportButton.setEnabled(false);
                     break;
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
-                    reportButton.setVisibility(View.VISIBLE);
+                    reportButton.setEnabled(true);
                     // fallthrough
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_FAILED:
                     if (mListener != null) {
