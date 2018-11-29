@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances.ui.activity;
 
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,8 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -153,11 +156,29 @@ public class LineActivity extends TopActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.line, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.menu_share_webprofile:
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.link_format_line), lineId));
+                try {
+                    startActivity(shareIntent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
+                }
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

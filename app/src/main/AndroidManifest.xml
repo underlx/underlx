@@ -73,7 +73,7 @@
 
         <activity
             android:name=".ui.activity.StationActivity"
-            android:label="@string/activity_loading_title"
+            android:label="@string/app_name"
             android:parentActivityName=".ui.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -82,7 +82,7 @@
         </activity>
         <activity
             android:name=".ui.activity.LineActivity"
-            android:label="@string/activity_loading_title"
+            android:label="@string/app_name"
             android:parentActivityName=".ui.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -91,7 +91,7 @@
         </activity>
         <activity
             android:name=".ui.activity.POIActivity"
-            android:label="@string/activity_loading_title"
+            android:label="@string/app_name"
             android:parentActivityName=".ui.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -146,6 +146,29 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".InternalLinkHandler$Activity"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="perturbacoes.pt" />
+                <data android:host="www.perturbacoes.pt" />
+                <data android:pathPrefix="/l/" />
+                <data android:pathPrefix="/lines/" />
+                <data android:pathPrefix="/s/" />
+                <data android:pathPrefix="/stations/" />
+            </intent-filter>
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

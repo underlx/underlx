@@ -3,6 +3,8 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import java.util.List;
 
@@ -152,6 +154,22 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(destination));
         if (browserIntent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(browserIntent);
+        }
+    }
+
+    public static class Activity extends AppCompatActivity {
+        public Activity() {
+            // constructor as activity. only to be used by Android
+        }
+
+        @Override
+        protected void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            if (Intent.ACTION_VIEW.equals(getIntent().getAction()) && getIntent().getData() != null) {
+                InternalLinkHandler.onClick(this, getIntent().getData().toString(), null);
+            }
+            finish();
         }
     }
 }
