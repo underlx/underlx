@@ -176,36 +176,18 @@ public class HomeFragment extends TopFragment {
         unconfirmedTripsCard = view.findViewById(R.id.unconfirmed_trips_card);
         favoriteStationsCard = view.findViewById(R.id.favorite_stations_card);
 
-        curTripEndButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent stopIntent = new Intent(getContext(), MainService.class);
-                stopIntent.setAction(MainService.ACTION_END_TRIP);
-                stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MapManager.PRIMARY_NETWORK_ID);
-                getContext().startService(stopIntent);
-            }
+        curTripEndButton.setOnClickListener(v -> {
+            Intent stopIntent = new Intent(getContext(), MainService.class);
+            stopIntent.setAction(MainService.ACTION_END_TRIP);
+            stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MapManager.PRIMARY_NETWORK_ID);
+            getContext().startService(stopIntent);
         });
 
-        view.findViewById(R.id.plan_route_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchToPage("nav_plan_route");
-            }
-        });
-        view.findViewById(R.id.map_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchToPage("nav_map");
-            }
-        });
+        view.findViewById(R.id.plan_route_button).setOnClickListener(view15 -> switchToPage("nav_plan_route"));
+        view.findViewById(R.id.map_button).setOnClickListener(view14 -> switchToPage("nav_map"));
 
         disturbancesButton = view.findViewById(R.id.disturbances_button);
-        disturbancesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchToPage("nav_disturbances");
-            }
-        });
+        disturbancesButton.setOnClickListener(view13 -> switchToPage("nav_disturbances"));
         disturbancesButton.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -219,26 +201,11 @@ public class HomeFragment extends TopFragment {
         });
 
         tripHistoryButton = view.findViewById(R.id.trip_history_button);
-        tripHistoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchToPage("nav_trip_history");
-            }
-        });
+        tripHistoryButton.setOnClickListener(view12 -> switchToPage("nav_trip_history"));
 
-        view.findViewById(R.id.clock_unadjusted_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(Settings.ACTION_DATE_SETTINGS));
-            }
-        });
+        view.findViewById(R.id.clock_unadjusted_button).setOnClickListener(view1 -> startActivity(new Intent(Settings.ACTION_DATE_SETTINGS)));
 
-        getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh(true);
-            }
-        });
+        getSwipeRefreshLayout().setOnRefreshListener(() -> refresh(true));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -457,22 +424,14 @@ public class HomeFragment extends TopFragment {
             }
             redrawCurrentStationLineIcons(station);
             curStationLayout.setVisibility(View.VISIBLE);
-            curStationLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getContext(), StationActivity.class);
-                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MapManager.PRIMARY_NETWORK_ID);
-                    startActivity(intent);
-                }
+            curStationLayout.setOnClickListener(view -> {
+                Intent intent = new Intent(getContext(), StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MapManager.PRIMARY_NETWORK_ID);
+                startActivity(intent);
             });
 
-            curTripIncorrectLocationButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new FeedbackUtil.IncorrectLocation(getContext(), station).showReportWizard();
-                }
-            });
+            curTripIncorrectLocationButton.setOnClickListener(view -> new FeedbackUtil.IncorrectLocation(getContext(), station).showReportWizard());
 
             if (loc.canRequestEndOfTrip()) {
                 curTripEndButton.setVisibility(View.VISIBLE);
@@ -504,14 +463,11 @@ public class HomeFragment extends TopFragment {
                 routeBodyLayout.addView(tv);
             }
 
-            navEndButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent stopIntent = new Intent(getContext(), MainService.class);
-                    stopIntent.setAction(MainService.ACTION_END_NAVIGATION);
-                    stopIntent.putExtra(MainService.EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
-                    getContext().startService(stopIntent);
-                }
+            navEndButton.setOnClickListener(view -> {
+                Intent stopIntent = new Intent(getContext(), MainService.class);
+                stopIntent.setAction(MainService.ACTION_END_NAVIGATION);
+                stopIntent.putExtra(MainService.EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
+                getContext().startService(stopIntent);
             });
             routeInstructionsLayout.setVisibility(View.VISIBLE);
             navigationCard.setVisibility(View.VISIBLE);
@@ -521,12 +477,7 @@ public class HomeFragment extends TopFragment {
     private void redrawCurrentStationLineIcons(Station station) {
         curStationIconsLayout.removeAllViews();
         List<Line> lines = new ArrayList<>(station.getLines());
-        Collections.sort(lines, new Comparator<Line>() {
-            @Override
-            public int compare(Line l1, Line l2) {
-                return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
-            }
-        });
+        Collections.sort(lines, (l1, l2) -> Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder()));
 
         for (Line l : lines) {
             Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(l.getId()));

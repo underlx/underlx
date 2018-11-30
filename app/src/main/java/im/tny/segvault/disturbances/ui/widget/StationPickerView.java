@@ -175,29 +175,17 @@ public class StationPickerView extends LinearLayout implements LocationListener 
         clearButton = findViewById(R.id.button_clear);
         myLocationButton = findViewById(R.id.button_my_location);
 
-        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View arg1, int pos,
-                                    long id) {
-                selection = (Station) parent.getItemAtPosition(pos);
-                weakSelection = false;
-                if (onStationSelectedListener != null) {
-                    onStationSelectedListener.onStationSelected(selection);
-                }
+        textView.setOnItemClickListener((parent, arg1, pos, id) -> {
+            selection = (Station) parent.getItemAtPosition(pos);
+            weakSelection = false;
+            if (onStationSelectedListener != null) {
+                onStationSelectedListener.onStationSelected(selection);
             }
         });
-        textView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                textView.showDropDown();
-            }
-        });
-        clearButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                textView.setText("");
-                focusOnEntry();
-            }
+        textView.setOnClickListener(v -> textView.showDropDown());
+        clearButton.setOnClickListener(view -> {
+            textView.setText("");
+            focusOnEntry();
         });
 
         textView.addTextChangedListener(new TextWatcher() {
@@ -221,14 +209,11 @@ public class StationPickerView extends LinearLayout implements LocationListener 
                 showHideClearButton();
             }
         });
-        textView.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (weakSelection && hasFocus) {
-                    textView.setText("");
-                }
-                showHideClearButton();
+        textView.setOnFocusChangeListener((view, hasFocus) -> {
+            if (weakSelection && hasFocus) {
+                textView.setText("");
             }
+            showHideClearButton();
         });
 
         if (!this.allowMyLocation) {
@@ -237,17 +222,14 @@ public class StationPickerView extends LinearLayout implements LocationListener 
             myLocationButton.setVisibility(VISIBLE);
         }
 
-        myLocationButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - TimeUnit.MINUTES.toMillis(1)) {
-                        // use the recent location fix
-                        selectNearestStation(location);
-                    } else {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, StationPickerView.this);
-                    }
+        myLocationButton.setOnClickListener(view -> {
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                if (location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - TimeUnit.MINUTES.toMillis(1)) {
+                    // use the recent location fix
+                    selectNearestStation(location);
+                } else {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, StationPickerView.this);
                 }
             }
         });
@@ -404,12 +386,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
                         }
                     }
                 }
-                Collections.sort(filteredList, new Comparator<Station>() {
-                    @Override
-                    public int compare(Station station, Station t1) {
-                        return distances.get(station).compareTo(distances.get(t1));
-                    }
-                });
+                Collections.sort(filteredList, (station, t1) -> distances.get(station).compareTo(distances.get(t1)));
             }
             results.values = filteredList;
             results.count = filteredList.size();
@@ -460,12 +437,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
             // Get the data item from filtered list.
             Station station = filteredStations.get(position);
             List<Line> lines = new ArrayList<>(station.getLines());
-            Collections.sort(lines, Collections.reverseOrder(new Comparator<Line>() {
-                @Override
-                public int compare(Line l1, Line l2) {
-                    return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
-                }
-            }));
+            Collections.sort(lines, Collections.reverseOrder((l1, l2) -> Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder())));
 
             Line line = lines.get(0);
 
@@ -658,12 +630,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
     public static class AZSortStrategy implements AllStationsSortStrategy {
         @Override
         public void sortStations(List<Station> stations) {
-            Collections.sort(stations, new Comparator<Station>() {
-                @Override
-                public int compare(Station station, Station t1) {
-                    return station.getName().compareTo(t1.getName());
-                }
-            });
+            Collections.sort(stations, (station, t1) -> station.getName().compareTo(t1.getName()));
         }
     }
 
@@ -675,16 +642,13 @@ public class StationPickerView extends LinearLayout implements LocationListener 
         public void sortStations(List<Station> stations) {
             // ensure this is created in the right thread
             realm = Realm.getDefaultInstance();
-            Collections.sort(stations, new Comparator<Station>() {
-                @Override
-                public int compare(Station station, Station t1) {
-                    // order by decreasing score, then A-Z
-                    int result = Double.compare(getScore(t1), getScore(station));
-                    if (result == 0) {
-                        return station.getName().compareTo(t1.getName());
-                    }
-                    return result;
+            Collections.sort(stations, (station, t1) -> {
+                // order by decreasing score, then A-Z
+                int result = Double.compare(getScore(t1), getScore(station));
+                if (result == 0) {
+                    return station.getName().compareTo(t1.getName());
                 }
+                return result;
             });
             realm.close();
         }
@@ -728,12 +692,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
         @Override
         public void sortStations(List<Station> stations) {
             final BellmanFordShortestPath<Stop, Connection> bfsp = new BellmanFordShortestPath<Stop, Connection>(network, startVertex);
-            Collections.sort(stations, new Comparator<Station>() {
-                @Override
-                public int compare(Station station, Station t1) {
-                    return Double.compare(getStationWeight(station, bfsp), getStationWeight(t1, bfsp));
-                }
-            });
+            Collections.sort(stations, (station, t1) -> Double.compare(getStationWeight(station, bfsp), getStationWeight(t1, bfsp)));
 
         }
 

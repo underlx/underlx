@@ -57,16 +57,8 @@ public class FeedbackUtil {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.feedback_location_title)
                     .setMessage(R.string.feedback_location_where_are_you)
-                    .setPositiveButton(R.string.feedback_location_in_subway, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            askCurrentStation();
-                        }
-                    })
-                    .setNegativeButton(R.string.feedback_location_outside, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            sendReport(null);
-                        }
-                    }).show();
+                    .setPositiveButton(R.string.feedback_location_in_subway, (dialog, whichButton) -> askCurrentStation())
+                    .setNegativeButton(R.string.feedback_location_outside, (dialog, whichButton) -> sendReport(null)).show();
         }
 
         private void askCurrentStation() {
@@ -87,42 +79,19 @@ public class FeedbackUtil {
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.feedback_location_title)
                             .setMessage(R.string.feedback_location_select_station)
-                            .setPositiveButton(R.string.feedback_location_action_select, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (spv.getSelection() != null) {
-                                        sendReport(spv.getSelection());
-                                    } else {
-                                        askCurrentStation();
-                                    }
+                            .setPositiveButton(R.string.feedback_location_action_select, (dialog, which) -> {
+                                if (spv.getSelection() != null) {
+                                    sendReport(spv.getSelection());
+                                } else {
+                                    askCurrentStation();
                                 }
                             })
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            })
+                            .setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
                             .setView(container);
             final AlertDialog dialog = builder.create();
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(spv.getSelection() != null);
-                }
-            });
-            spv.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
-                @Override
-                public void onStationSelected(Station station) {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                }
-            });
-            spv.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
-                @Override
-                public void onSelectionLost() {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                }
-            });
+            dialog.setOnShowListener(dialog1 -> ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(spv.getSelection() != null));
+            spv.setOnStationSelectedListener(station -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
+            spv.setOnSelectionLostListener(() -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false));
 
             dialog.show();
         }

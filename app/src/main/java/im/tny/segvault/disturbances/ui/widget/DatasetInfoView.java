@@ -89,18 +89,8 @@ public class DatasetInfoView extends LinearLayout {
         }
         authorsView.setText(authors.substring(0, authors.length() - 2));
 
-        updateButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                containingFragment.updateNetworks(net.getId());
-            }
-        });
-        cacheAllExtrasButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                containingFragment.cacheAllExtras(net.getId());
-            }
-        });
+        updateButton.setOnClickListener(view -> containingFragment.updateNetworks(net.getId()));
+        cacheAllExtrasButton.setOnClickListener(view -> containingFragment.cacheAllExtras(net.getId()));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS);

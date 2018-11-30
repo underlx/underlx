@@ -234,12 +234,7 @@ public class DisturbanceFragment extends TopFragment {
                     Snackbar.make(getFloatingActionButton(), R.string.frag_disturbance_updated, Snackbar.LENGTH_SHORT).show();
                 } else {
                     Snackbar.make(getFloatingActionButton(), R.string.error_no_connection, Snackbar.LENGTH_SHORT)
-                            .setAction(getString(R.string.error_no_connection_action_retry), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                                }
-                            }).show();
+                            .setAction(getString(R.string.error_no_connection_action_retry), view -> new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)).show();
                 }
             } else {
                 initialRefresh = false;

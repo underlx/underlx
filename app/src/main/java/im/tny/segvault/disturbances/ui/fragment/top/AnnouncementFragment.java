@@ -116,12 +116,7 @@ public class AnnouncementFragment extends TopFragment {
 
         new AnnouncementFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new AnnouncementFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        });
+        getSwipeRefreshLayout().setOnRefreshListener(() -> new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
         return view;
     }
 
@@ -192,12 +187,7 @@ public class AnnouncementFragment extends TopFragment {
                 return false;
             }
 
-            Collections.sort(items, Collections.reverseOrder(new Comparator<AnnouncementRecyclerViewAdapter.AnnouncementItem>() {
-                @Override
-                public int compare(AnnouncementRecyclerViewAdapter.AnnouncementItem announcementItem, AnnouncementRecyclerViewAdapter.AnnouncementItem t1) {
-                    return Long.valueOf(announcementItem.pubDate.getTime()).compareTo(Long.valueOf(t1.pubDate.getTime()));
-                }
-            }));
+            Collections.sort(items, Collections.reverseOrder((announcementItem, t1) -> Long.valueOf(announcementItem.pubDate.getTime()).compareTo(Long.valueOf(t1.pubDate.getTime()))));
             return true;
         }
 
@@ -227,12 +217,7 @@ public class AnnouncementFragment extends TopFragment {
                     Snackbar.make(getFloatingActionButton(), R.string.frag_announcements_updated, Snackbar.LENGTH_SHORT).show();
                 } else {
                     Snackbar.make(getFloatingActionButton(), R.string.error_no_connection, Snackbar.LENGTH_SHORT)
-                            .setAction(getString(R.string.error_no_connection_action_retry), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    new AnnouncementFragment.UpdateDataTask().executeOnExecutor(THREAD_POOL_EXECUTOR);
-                                }
-                            }).show();
+                            .setAction(getString(R.string.error_no_connection_action_retry), view -> new UpdateDataTask().executeOnExecutor(THREAD_POOL_EXECUTOR)).show();
                 }
             } else {
                 initialRefresh = false;

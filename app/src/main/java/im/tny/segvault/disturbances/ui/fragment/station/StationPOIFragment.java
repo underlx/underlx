@@ -209,30 +209,22 @@ public class StationPOIFragment extends Fragment
         // POIs
         pois = station.getPOIs();
 
-        Collections.sort(pois, new Comparator<POI>() {
-            @Override
-            public int compare(POI o1, POI o2) {
-                return o1.getNames(lang)[0].compareTo(o2.getNames(lang)[0]);
-            }
-        });
+        Collections.sort(pois, (o1, o2) -> o1.getNames(lang)[0].compareTo(o2.getNames(lang)[0]));
 
         for (POI poi : pois) {
             POIView v = new POIView(getContext(), poi);
-            v.setInteractionListener(new POIView.OnViewInteractionListener() {
-                @Override
-                public void onPOIClicked(POI poi) {
-                    if (googleMap == null || !mapLayoutReady) {
-                        return;
-                    }
-                    Marker marker = markers.get(poi);
-                    if (marker != null) {
-                        marker.showInfoWindow();
-                    }
-                    poiScrollView.fullScroll(NestedScrollView.FOCUS_UP);
-                    googleMap.animateCamera(
-                            CameraUpdateFactory.newCameraPosition(
-                                    CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
+            v.setInteractionListener(poi1 -> {
+                if (googleMap == null || !mapLayoutReady) {
+                    return;
                 }
+                Marker marker = markers.get(poi1);
+                if (marker != null) {
+                    marker.showInfoWindow();
+                }
+                poiScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                googleMap.animateCamera(
+                        CameraUpdateFactory.newCameraPosition(
+                                CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
             });
             poisLayout.addView(v);
         }
@@ -256,13 +248,10 @@ public class StationPOIFragment extends Fragment
             });
         }
 
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap mMap) {
-                googleMap = mMap;
+        mapView.getMapAsync(mMap -> {
+            googleMap = mMap;
 
-                trySetupMap(station, pois, lobbyColors, lang);
-            }
+            trySetupMap(station, pois, lobbyColors, lang);
         });
     }
 

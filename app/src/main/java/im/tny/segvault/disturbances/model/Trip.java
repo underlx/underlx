@@ -293,14 +293,14 @@ public class Trip extends RealmObject {
 
     public static void confirm(final String id) {
         Realm realm = Realm.getDefaultInstance();
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                Trip trip = realm.where(Trip.class).equalTo("id", id).findFirst();
-                trip.setUserConfirmed(true);
-                trip.setSynced(false);
-                realm.copyToRealm(trip);
+        realm.executeTransaction(realm1 -> {
+            Trip trip = realm1.where(Trip.class).equalTo("id", id).findFirst();
+            if(trip == null) {
+                return;
             }
+            trip.setUserConfirmed(true);
+            trip.setSynced(false);
+            realm1.copyToRealm(trip);
         });
         realm.close();
     }

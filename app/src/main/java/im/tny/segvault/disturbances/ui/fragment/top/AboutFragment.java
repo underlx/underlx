@@ -90,12 +90,9 @@ public class AboutFragment extends TopFragment {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
         ImageView segvaultLogo = view.findViewById(R.id.segvault_logo_view);
-        segvaultLogo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.developer_website)));
-                startActivity(browserIntent);
-            }
+        segvaultLogo.setOnClickListener(view1 -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.developer_website)));
+            startActivity(browserIntent);
         });
 
         networksLayout = view.findViewById(R.id.about_networks);
@@ -210,25 +207,17 @@ public class AboutFragment extends TopFragment {
 
         thirdPartyList.setAdapter(adapter);
 
-        thirdPartyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                String url = ((Map<String, String>) parent.getItemAtPosition(position)).get("url");
-                if (url != null) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(browserIntent);
-                }
+        thirdPartyList.setOnItemClickListener((parent, view12, position, id) -> {
+            String url = ((Map<String, String>) parent.getItemAtPosition(position)).get("url");
+            if (url != null) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browserIntent);
             }
         });
 
         thirdPartyList.setFocusable(false); // avoid having the view scroll to the list on load
-        thirdPartyList.setOnTouchListener(new View.OnTouchListener() {
-            // Setting on Touch Listener for handling the touch inside ScrollView
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return false;
-            }
-        });
+        // Setting on Touch Listener for handling the touch inside ScrollView
+        thirdPartyList.setOnTouchListener((v, event) -> false);
         setListViewHeightBasedOnChildren(thirdPartyList);
 
         IntentFilter filter = new IntentFilter();
@@ -254,12 +243,7 @@ public class AboutFragment extends TopFragment {
             AlertDialog.Builder builder =
                     new AlertDialog.Builder(getContext()).
                             setMessage(R.string.frag_about_qrcode_desc).
-                            setPositiveButton(R.string.frag_about_qrcode_close, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            }).
+                            setPositiveButton(R.string.frag_about_qrcode_close, (dialog, which) -> dialog.dismiss()).
                             setView(image);
             builder.create().show();
             return true;

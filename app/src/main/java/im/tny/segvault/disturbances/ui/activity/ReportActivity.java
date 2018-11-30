@@ -70,13 +70,7 @@ public class ReportActivity extends TopActivity {
 
         linesLayout = findViewById(R.id.lines_layout);
         sendButton = findViewById(R.id.send_button);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new SubmitReportTask().execute();
-
-            }
-        });
+        sendButton.setOnClickListener(view -> new SubmitReportTask().execute());
 
         populateLineList();
     }
@@ -141,12 +135,7 @@ public class ReportActivity extends TopActivity {
         List<Line> lines = new ArrayList<>();
         for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
             List<Line> nLines = new ArrayList<>(network.getLines());
-            Collections.sort(nLines, new Comparator<Line>() {
-                @Override
-                public int compare(Line t0, Line t1) {
-                    return Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder());
-                }
-            });
+            Collections.sort(nLines, (t0, t1) -> Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder()));
             lines.addAll(nLines);
         }
 
@@ -154,16 +143,13 @@ public class ReportActivity extends TopActivity {
         for (final Line line : lines) {
             View view = getLayoutInflater().inflate(R.layout.checkbox_report_line, linesLayout, false);
             final CheckBox lineCheckbox = view.findViewById(R.id.line_checkbox);
-            lineCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if (b) {
-                        checkedLines.add(line);
-                    } else {
-                        checkedLines.remove(line);
-                    }
-                    sendButton.setEnabled(checkedLines.size() > 0);
+            lineCheckbox.setOnCheckedChangeListener((compoundButton, b) -> {
+                if (b) {
+                    checkedLines.add(line);
+                } else {
+                    checkedLines.remove(line);
                 }
+                sendButton.setEnabled(checkedLines.size() > 0);
             });
             TextView lineNameView = view.findViewById(R.id.line_name_view);
             String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
@@ -181,12 +167,7 @@ public class ReportActivity extends TopActivity {
             nameSpannable.setSpan(new ForegroundColorSpan(line.getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             lineNameView.setText(nameSpannable);
-            View.OnClickListener cbOnClick = new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    lineCheckbox.performClick();
-                }
-            };
+            View.OnClickListener cbOnClick = view1 -> lineCheckbox.performClick();
 
             TextView lineClosedView = view.findViewById(R.id.line_closed_view);
             if (!line.isOpen()) {

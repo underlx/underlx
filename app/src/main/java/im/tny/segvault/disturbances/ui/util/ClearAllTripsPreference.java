@@ -30,23 +30,9 @@ public class ClearAllTripsPreference extends DialogPreference
         dialog.setTitle(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_title));
         dialog.setMessage(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_desc));
         dialog.setCancelable(true);
-        dialog.setPositiveButton(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_delete), new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                new ClearAllTripsTask().execute();
-            }
-        });
+        dialog.setPositiveButton(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_delete), (dialog1, which) -> new ClearAllTripsTask().execute());
 
-        dialog.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dlg, int which)
-            {
-                dlg.cancel();
-            }
-        });
+        dialog.setNegativeButton(android.R.string.cancel, (dlg, which) -> dlg.cancel());
 
         AlertDialog al = dialog.create();
         this.dialog = al;
@@ -63,12 +49,9 @@ public class ClearAllTripsPreference extends DialogPreference
         @Override
         protected Void doInBackground(Void... voids) {
             Realm realm = Application.getDefaultRealmInstance(getContext());
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    realm.where(Trip.class).findAll().deleteAllFromRealm();
-                    realm.where(StationUse.class).findAll().deleteAllFromRealm();
-                }
+            realm.executeTransaction(realm1 -> {
+                realm1.where(Trip.class).findAll().deleteAllFromRealm();
+                realm1.where(StationUse.class).findAll().deleteAllFromRealm();
             });
             realm.close();
             return null;

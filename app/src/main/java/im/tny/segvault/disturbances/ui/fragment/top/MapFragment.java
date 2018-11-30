@@ -187,12 +187,7 @@ public class MapFragment extends TopFragment {
         this.container = view.findViewById(R.id.map_container);
         filtersLayout = view.findViewById(R.id.filters_layout);
         clearFiltersButton = view.findViewById(R.id.clear_filters_button);
-        clearFiltersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                clearFilter();
-            }
-        });
+        clearFiltersButton.setOnClickListener(view12 -> clearFilter());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -212,12 +207,9 @@ public class MapFragment extends TopFragment {
                 getResources().getDimensionPixelOffset(R.dimen.fab_margin),
                 getResources().getDimensionPixelOffset(R.dimen.fab_margin));
         fab.setLayoutParams(params);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (network != null) {
-                    switchMap(network.getMaps(), true);
-                }
+        fab.setOnClickListener(view1 -> {
+            if (network != null) {
+                switchMap(network.getMaps(), true);
             }
         });
 
@@ -304,56 +296,43 @@ public class MapFragment extends TopFragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.frag_map_filter_title)
                     .setMultiChoiceItems(optionTextsArray, checkedItems,
-                            new DialogInterface.OnMultiChoiceClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which,
-                                                    boolean isChecked) {
-                                    if (isChecked) {
-                                        selectedTagSets.add(optionTagSets.get(which));
-                                    } else {
-                                        selectedTagSets.remove(optionTagSets.get(which));
-                                    }
-                                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(selectedTagSets.size() > 0);
-                                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(selectedTagSets.size() > 0);
+                            (dialog, which, isChecked) -> {
+                                if (isChecked) {
+                                    selectedTagSets.add(optionTagSets.get(which));
+                                } else {
+                                    selectedTagSets.remove(optionTagSets.get(which));
                                 }
+                                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(selectedTagSets.size() > 0);
+                                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(selectedTagSets.size() > 0);
                             })
                     // Set the action buttons
-                    .setPositiveButton(R.string.frag_map_filter_intersection, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            MapFragment frag = (MapFragment) getTargetFragment();
-                            if (frag != null) {
-                                frag.applyFilter(selectedTagSets, MapFilterType.INTERSECTION);
-                            }
+                    .setPositiveButton(R.string.frag_map_filter_intersection, (dialog, id) -> {
+                        MapFragment frag12 = (MapFragment) getTargetFragment();
+                        if (frag12 != null) {
+                            frag12.applyFilter(selectedTagSets, MapFilterType.INTERSECTION);
                         }
                     })
-                    .setNegativeButton(R.string.frag_map_filter_union, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            MapFragment frag = (MapFragment) getTargetFragment();
-                            if (frag != null) {
-                                frag.applyFilter(selectedTagSets, MapFilterType.UNION);
-                            }
+                    .setNegativeButton(R.string.frag_map_filter_union, (dialog, id) -> {
+                        MapFragment frag1 = (MapFragment) getTargetFragment();
+                        if (frag1 != null) {
+                            frag1.applyFilter(selectedTagSets, MapFilterType.UNION);
                         }
                     });
 
             AlertDialog dialog = builder.create();
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                    Context context = getContext();
-                    if (context == null) {
-                        return;
-                    }
-                    DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-                    // limit listview height to 1/2 of the screen height to avoid buttons going in a scrollview
-                    ListView lv = ((AlertDialog) dialog).getListView();
-                    ViewGroup.LayoutParams lp = lv.getLayoutParams();
-                    lp.height = displayMetrics.heightPixels / 2;
-                    lv.requestLayout();
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(selectedTagSets.size() > 0);
-                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(selectedTagSets.size() > 0);
+            dialog.setOnShowListener(dialog1 -> {
+                Context context = getContext();
+                if (context == null) {
+                    return;
                 }
+                DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+                // limit listview height to 1/2 of the screen height to avoid buttons going in a scrollview
+                ListView lv = ((AlertDialog) dialog1).getListView();
+                ViewGroup.LayoutParams lp = lv.getLayoutParams();
+                lp.height = displayMetrics.heightPixels / 2;
+                lv.requestLayout();
+                ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(selectedTagSets.size() > 0);
+                ((AlertDialog) dialog1).getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(selectedTagSets.size() > 0);
             });
             return dialog;
         }
@@ -392,11 +371,7 @@ public class MapFragment extends TopFragment {
         if (stationsToShow.size() == 0) {
             new AlertDialog.Builder(getContext())
                     .setMessage(R.string.frag_map_filter_no_match)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            dialog.dismiss();
-                        }
-                    }).show();
+                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> dialog.dismiss()).show();
             return;
         }
 
@@ -573,12 +548,9 @@ public class MapFragment extends TopFragment {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 googleMap.setMyLocationEnabled(true);
             } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION);
-                        }
+                getActivity().runOnUiThread(() -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_FINE_LOCATION);
                     }
                 });
             }
@@ -732,12 +704,7 @@ public class MapFragment extends TopFragment {
                 LinearLayout stationIconsLayout = view.findViewById(R.id.station_icons_layout);
 
                 List<Line> lines = new ArrayList<>(station.getLines());
-                Collections.sort(lines, new Comparator<Line>() {
-                    @Override
-                    public int compare(Line l1, Line l2) {
-                        return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
-                    }
-                });
+                Collections.sort(lines, (l1, l2) -> Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder()));
 
                 for (Line l : lines) {
                     Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(l.getId()));
@@ -806,12 +773,7 @@ public class MapFragment extends TopFragment {
             filterItem.setVisible(currentMapStrategy.isFilterable());
         }
 
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                showTargetPrompt();
-            }
-        });
+        new Handler().post(() -> showTargetPrompt());
     }
 
     @Override
@@ -906,18 +868,15 @@ public class MapFragment extends TopFragment {
                 .setTarget(R.id.fab)
                 .setPrimaryText(R.string.frag_map_switch_type_taptarget_title)
                 .setSecondaryText(R.string.frag_map_switch_type_taptarget_subtitle)
-                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
-                    @Override
-                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
-                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
-                            // User has pressed the prompt target
-                            Context context = getContext();
-                            if (context != null) {
-                                SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
-                                SharedPreferences.Editor e = sharedPref.edit();
-                                e.putBoolean("fuse_first_map_open", false);
-                                e.apply();
-                            }
+                .setPromptStateChangeListener((prompt, state) -> {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
+                        // User has pressed the prompt target
+                        Context context1 = getContext();
+                        if (context1 != null) {
+                            SharedPreferences sharedPref = context1.getSharedPreferences("settings", MODE_PRIVATE);
+                            SharedPreferences.Editor e = sharedPref.edit();
+                            e.putBoolean("fuse_first_map_open", false);
+                            e.apply();
                         }
                     }
                 })

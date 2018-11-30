@@ -147,32 +147,17 @@ public class TripCorrectionActivity extends TopActivity {
         startPicker.setWeakSelection(originalPath.getStartVertex().getStation());
         endPicker.setWeakSelection(originalPath.getEndVertex().getStation());
 
-        StationPickerView.OnStationSelectedListener onStationSelectedListener = new StationPickerView.OnStationSelectedListener() {
-            @Override
-            public void onStationSelected(Station station) {
-                redrawPath();
-            }
-        };
+        StationPickerView.OnStationSelectedListener onStationSelectedListener = station -> redrawPath();
         startPicker.setOnStationSelectedListener(onStationSelectedListener);
         endPicker.setOnStationSelectedListener(onStationSelectedListener);
 
-        StationPickerView.OnSelectionLostListener onSelectionLostListener = new StationPickerView.OnSelectionLostListener() {
-            @Override
-            public void onSelectionLost() {
-                redrawPath();
-            }
-        };
+        StationPickerView.OnSelectionLostListener onSelectionLostListener = () -> redrawPath();
         startPicker.setOnSelectionLostListener(onSelectionLostListener);
         endPicker.setOnSelectionLostListener(onSelectionLostListener);
 
         redrawPath();
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveChanges();
-            }
-        });
+        saveButton.setOnClickListener(v -> saveChanges());
     }
 
     private void redrawPath() {
@@ -205,12 +190,7 @@ public class TripCorrectionActivity extends TopActivity {
                             final int idxOnTrip = i - manualOffset;
                             if (canRemoveVertex(idxOnTrip)) {
                                 stepview.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
-                                stepview.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        removeVertex(idxOnTrip);
-                                    }
-                                });
+                                stepview.findViewById(R.id.delete_button).setOnClickListener(v -> removeVertex(idxOnTrip));
                             }
                         }
 

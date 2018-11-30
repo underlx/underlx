@@ -57,18 +57,10 @@ public class ServiceConnectUtil {
             container.addView(input);
             builder.setView(container);
 
-            builder.setPositiveButton(R.string.service_connect_action_connect, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // this listener will be overwritten below
-                }
+            builder.setPositiveButton(R.string.service_connect_action_connect, (dialog, which) -> {
+                // this listener will be overwritten below
             });
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
+            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
 
             final AlertDialog dialog = builder.create();
 
@@ -90,17 +82,14 @@ public class ServiceConnectUtil {
             });
             dialog.show();
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(input.getText().length() > 0);
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
-                    dialog.setCancelable(false);
-                    dialog.setMessage(context.getString(R.string.status_loading));
-                    input.setEnabled(false);
-                    new SendTask(context, dialog).execute(input.getText().toString());
-                    // do nothing, SendTask will close the dialog
-                }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
+                dialog.setCancelable(false);
+                dialog.setMessage(context.getString(R.string.status_loading));
+                input.setEnabled(false);
+                new SendTask(context, dialog).execute(input.getText().toString());
+                // do nothing, SendTask will close the dialog
             });
         }
 

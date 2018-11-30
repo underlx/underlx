@@ -130,12 +130,9 @@ public class TripHistoryFragment extends TopFragment {
         // fix scroll fling. less than ideal, but apparently there's still no other solution
         recyclerView.setNestedScrollingEnabled(false);
 
-        view.findViewById(R.id.stats_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), StatsActivity.class);
-                startActivity(intent);
-            }
+        view.findViewById(R.id.stats_button).setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), StatsActivity.class);
+            startActivity(intent);
         });
 
         IntentFilter filter = new IntentFilter();
@@ -238,12 +235,7 @@ public class TripHistoryFragment extends TopFragment {
             if (items.size() == 0) {
                 return false;
             }
-            Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder(new Comparator<TripRecyclerViewAdapter.TripItem>() {
-                @Override
-                public int compare(TripRecyclerViewAdapter.TripItem tripItem, TripRecyclerViewAdapter.TripItem t1) {
-                    return Long.valueOf(tripItem.originTime.getTime()).compareTo(Long.valueOf(t1.originTime.getTime()));
-                }
-            }));
+            Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder((tripItem, t1) -> Long.valueOf(tripItem.originTime.getTime()).compareTo(Long.valueOf(t1.originTime.getTime()))));
             return true;
         }
 

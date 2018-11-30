@@ -51,45 +51,37 @@ public class AnnouncementsIntroSlide extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_intro_announcements, container, false);
 
-        view.findViewById(R.id.select_sources_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        view.findViewById(R.id.select_sources_button).setOnClickListener(v -> {
 
-                view.findViewById(R.id.description_layout).setVisibility(View.GONE);
-                view.findViewById(R.id.select_sources_button).setVisibility(View.GONE);
+            view.findViewById(R.id.description_layout).setVisibility(View.GONE);
+            view.findViewById(R.id.select_sources_button).setVisibility(View.GONE);
 
-                LinearLayout checkboxLayout = view.findViewById(R.id.checkbox_layout);
+            LinearLayout checkboxLayout = view.findViewById(R.id.checkbox_layout);
 
-                SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
-                Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
+            SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
+            Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);
 
-                for (final Announcement.Source s : Announcement.getSources()) {
-                    AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
-                    checkBox.setText(getString(s.nameResourceId));
-                    checkBox.setTextColor(Color.WHITE);
-                    ColorStateList colorStateList = new ColorStateList(
-                            new int[][]{
-                                    new int[]{-android.R.attr.state_checked}, // unchecked
-                                    new int[]{android.R.attr.state_checked}, // checked
-                            },
-                            new int[]{s.color, s.color,}
-                    );
-                    CompoundButtonCompat.setButtonTintList(checkBox, colorStateList);
+            for (final Announcement.Source s : Announcement.getSources()) {
+                AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
+                checkBox.setText(getString(s.nameResourceId));
+                checkBox.setTextColor(Color.WHITE);
+                ColorStateList colorStateList = new ColorStateList(
+                        new int[][]{
+                                new int[]{-android.R.attr.state_checked}, // unchecked
+                                new int[]{android.R.attr.state_checked}, // checked
+                        },
+                        new int[]{s.color, s.color,}
+                );
+                CompoundButtonCompat.setButtonTintList(checkBox, colorStateList);
 
-                    checkBox.setChecked(sourcePref == null || sourcePref.contains(s.id));
+                checkBox.setChecked(sourcePref == null || sourcePref.contains(s.id));
 
-                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            updateShowAnnouncementNotifs(s.id, isChecked);
-                        }
-                    });
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> updateShowAnnouncementNotifs(s.id, isChecked));
 
-                    checkboxLayout.addView(checkBox);
-                }
-
-                view.findViewById(R.id.sources_layout).setVisibility(View.VISIBLE);
+                checkboxLayout.addView(checkBox);
             }
+
+            view.findViewById(R.id.sources_layout).setVisibility(View.VISIBLE);
         });
 
         return view;

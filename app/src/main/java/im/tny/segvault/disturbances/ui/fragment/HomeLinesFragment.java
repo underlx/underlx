@@ -92,12 +92,9 @@ public class HomeLinesFragment extends Fragment {
         updateInformationView = view.findViewById(R.id.update_information);
         reportButton = view.findViewById(R.id.report_button);
 
-        reportButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getContext(), ReportActivity.class);
-                startActivity(intent);
-            }
+        reportButton.setOnClickListener(view1 -> {
+            Intent intent = new Intent(getContext(), ReportActivity.class);
+            startActivity(intent);
         });
 
         // fix scroll fling. less than ideal, but apparently there's still no other solution
@@ -169,12 +166,7 @@ public class HomeLinesFragment extends Fragment {
             reportButton.setEnabled(false);
         }
 
-        Collections.sort(items, new Comparator<LineRecyclerViewAdapter.LineItem>() {
-            @Override
-            public int compare(LineRecyclerViewAdapter.LineItem lineItem, LineRecyclerViewAdapter.LineItem t1) {
-                return Integer.valueOf(lineItem.order).compareTo(t1.order);
-            }
-        });
+        Collections.sort(items, (lineItem, t1) -> Integer.valueOf(lineItem.order).compareTo(t1.order));
 
         recyclerView.setAdapter(new LineRecyclerViewAdapter(items, mListener));
         recyclerView.invalidate();

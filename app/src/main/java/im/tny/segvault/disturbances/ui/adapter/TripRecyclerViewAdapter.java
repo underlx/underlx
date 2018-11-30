@@ -134,32 +134,23 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             }
         }
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    mListener.onListFragmentClick(holder.mItem);
-                }
+        holder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                mListener.onListFragmentClick(holder.mItem);
             }
         });
         holder.mView.setLongClickable(true);
 
         if (homeScreenList) {
-            holder.confirmButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (null != mListener) {
-                        mListener.onListFragmentConfirmButtonClick(holder.mItem);
-                    }
+            holder.confirmButton.setOnClickListener(v -> {
+                if (null != mListener) {
+                    mListener.onListFragmentConfirmButtonClick(holder.mItem);
                 }
             });
 
-            holder.correctButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (null != mListener) {
-                        mListener.onListFragmentCorrectButtonClick(holder.mItem);
-                    }
+            holder.correctButton.setOnClickListener(v -> {
+                if (null != mListener) {
+                    mListener.onListFragmentCorrectButtonClick(holder.mItem);
                 }
             });
         }

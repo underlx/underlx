@@ -313,12 +313,7 @@ public class HomeStatsFragment extends Fragment {
 
         List<Line> lines = new ArrayList<>(net.getLines());
 
-        Collections.sort(lines, new Comparator<Line>() {
-            @Override
-            public int compare(Line t0, Line t1) {
-                return Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder());
-            }
-        });
+        Collections.sort(lines, (t0, t1) -> Integer.valueOf(t0.getOrder()).compareTo(t1.getOrder()));
 
         lineStatsLayout.removeAllViews();
         TableRow header = (TableRow) getActivity().getLayoutInflater().inflate(R.layout.line_stats_header, lineStatsLayout, false);

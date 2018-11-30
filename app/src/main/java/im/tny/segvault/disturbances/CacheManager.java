@@ -174,12 +174,7 @@ public class CacheManager {
     }
 
     public <T> void range(ItemIterator<T> iterator, Class<T> valueType) {
-        File[] files = context.getCacheDir().listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.getName().startsWith("cm-");
-            }
-        });
+        File[] files = context.getCacheDir().listFiles(file -> file.getName().startsWith("cm-"));
         if (files == null) {
             return;
         }

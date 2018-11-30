@@ -160,18 +160,15 @@ public class LobbyView extends LinearLayout {
             tv.setLayoutParams(lp);
             Button b = new Button(context, null, R.attr.viewMapButtonStyle);
             b.setText(R.string.lobby_exit_view_map);
-            b.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                            Uri.parse(String.format(
-                                    Locale.ROOT, "https://www.google.com/maps/search/?api=1&query=%f,%f",
-                                    exit.worldCoord[0], exit.worldCoord[1])));
-                    try {
-                        context.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        // oh well
-                    }
+            b.setOnClickListener(view -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(String.format(
+                                Locale.ROOT, "https://www.google.com/maps/search/?api=1&query=%f,%f",
+                                exit.worldCoord[0], exit.worldCoord[1])));
+                try {
+                    context.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
                 }
             });
             lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0);
@@ -184,12 +181,9 @@ public class LobbyView extends LinearLayout {
             TypedArray ta = getContext().obtainStyledAttributes(attrs);
             ViewCompat.setBackground(exitLayout, ta.getDrawable(0));
             ta.recycle();
-            exitLayout.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (interactionListener != null) {
-                        interactionListener.onExitClicked(exit);
-                    }
+            exitLayout.setOnClickListener(view -> {
+                if (interactionListener != null) {
+                    interactionListener.onExitClicked(exit);
                 }
             });
             exitsLayout.addView(exitLayout);

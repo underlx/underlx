@@ -64,50 +64,38 @@ public class POIView extends LinearLayout {
             secondNameView.setVisibility(VISIBLE);
             secondNameView.setText(names[1]);
         }
-        OnClickListener clickListener = new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getContext(), POIActivity.class);
-                intent.putExtra(POIActivity.EXTRA_POI_ID, poi.getId());
-                getContext().startActivity(intent);
-            }
+        OnClickListener clickListener = view12 -> {
+            Intent intent = new Intent(getContext(), POIActivity.class);
+            intent.putExtra(POIActivity.EXTRA_POI_ID, poi.getId());
+            getContext().startActivity(intent);
         };
         nameView.setOnClickListener(clickListener);
         secondNameView.setOnClickListener(clickListener);
 
-        findViewById(R.id.poi_map_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                        Uri.parse(String.format(
-                                Locale.ROOT, "https://www.google.com/maps/search/?api=1&query=%f,%f",
-                                poi.getWorldCoord()[0], poi.getWorldCoord()[1])));
-                try {
-                    context.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    // oh well
-                }
+        findViewById(R.id.poi_map_button).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(String.format(
+                            Locale.ROOT, "https://www.google.com/maps/search/?api=1&query=%f,%f",
+                            poi.getWorldCoord()[0], poi.getWorldCoord()[1])));
+            try {
+                context.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                // oh well
             }
         });
 
-        findViewById(R.id.poi_website_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(poi.getWebURL()));
-                try {
-                    context.startActivity(browserIntent);
-                } catch (ActivityNotFoundException e) {
-                    // oh well
-                }
+        findViewById(R.id.poi_website_button).setOnClickListener(v -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(poi.getWebURL()));
+            try {
+                context.startActivity(browserIntent);
+            } catch (ActivityNotFoundException e) {
+                // oh well
             }
         });
 
-        findViewById(R.id.poi_on_map_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (interactionListener != null) {
-                    interactionListener.onPOIClicked(poi);
-                }
+        findViewById(R.id.poi_on_map_button).setOnClickListener(view1 -> {
+            if (interactionListener != null) {
+                interactionListener.onPOIClicked(poi);
             }
         });
 

@@ -433,67 +433,53 @@ public class MainService extends Service {
 
         isTempForeground = true;
         startForeground(PERMANENT_FOREGROUND_NOTIFICATION_ID, notificationBuilder.build());
-        tempForegroundHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isTempForeground) {
-                    stopForeground(true);
-                    isTempForeground = false;
-                }
+        tempForegroundHandler.postDelayed(() -> {
+            if (isTempForeground) {
+                stopForeground(true);
+                isTempForeground = false;
             }
         }, 10000);
     }
 
-    private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            switch (key) {
-                case PreferenceNames.LocationEnable:
-                    if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
-                        Coordinator.get(MainService.this).getWiFiChecker().startScanningIfWiFiEnabled();
-                    else
-                        Coordinator.get(MainService.this).getWiFiChecker().stopScanning();
-                    break;
-                case PreferenceNames.PermanentForeground:
-                    checkStopForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID));
-                    break;
-            }
+    private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = (prefs, key) -> {
+        switch (key) {
+            case PreferenceNames.LocationEnable:
+                if (prefs.getBoolean(PreferenceNames.LocationEnable, true))
+                    Coordinator.get(MainService.this).getWiFiChecker().startScanningIfWiFiEnabled();
+                else
+                    Coordinator.get(MainService.this).getWiFiChecker().stopScanning();
+                break;
+            case PreferenceNames.PermanentForeground:
+                checkStopForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID));
+                break;
         }
     };
 
     public static final String ACTION_TRIP_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.trip.updated";
 
     private RealmResults<Trip> tripRealmResults;
-    private final RealmChangeListener<RealmResults<Trip>> tripRealmChangeListener = new RealmChangeListener<RealmResults<Trip>>() {
-        @Override
-        public void onChange(RealmResults<Trip> element) {
-            Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
+    private final RealmChangeListener<RealmResults<Trip>> tripRealmChangeListener = element -> {
+        Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+        bm.sendBroadcast(intent);
     };
 
     public static final String ACTION_FEEDBACK_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.feedback.updated";
 
     private RealmResults<Feedback> feedbackRealmResults;
-    private final RealmChangeListener<RealmResults<Feedback>> feedbackRealmChangeListener = new RealmChangeListener<RealmResults<Feedback>>() {
-        @Override
-        public void onChange(RealmResults<Feedback> element) {
-            Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
+    private final RealmChangeListener<RealmResults<Feedback>> feedbackRealmChangeListener = element -> {
+        Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+        bm.sendBroadcast(intent);
     };
 
     public static final String ACTION_FAVORITE_STATIONS_UPDATED = "im.tny.segvault.disturbances.action.realm.station.favorite.updated";
 
     private RealmResults<RStation> favStationsRealmResults;
-    private final RealmChangeListener<RealmResults<RStation>> favStationsRealmChangeListener = new RealmChangeListener<RealmResults<RStation>>() {
-        @Override
-        public void onChange(RealmResults<RStation> element) {
-            Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
-            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-            bm.sendBroadcast(intent);
-        }
+    private final RealmChangeListener<RealmResults<RStation>> favStationsRealmChangeListener = element -> {
+        Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+        bm.sendBroadcast(intent);
     };
 
 }

@@ -171,37 +171,28 @@ public class MainActivity extends TopActivity
         bm = LocalBroadcastManager.getInstance(this);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
-                boolean isFirstStart = sharedPref.getBoolean("fuse_first_run", true);
+        Thread t = new Thread(() -> {
+            SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
+            boolean isFirstStart = sharedPref.getBoolean("fuse_first_run", true);
 
-                if (isFirstStart) {
-                    // intro will request permission for us
-                    final Intent i = new Intent(MainActivity.this, IntroActivity.class);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity(i);
-                            finish();
+            if (isFirstStart) {
+                // intro will request permission for us
+                final Intent i = new Intent(MainActivity.this, IntroActivity.class);
+                runOnUiThread(() -> {
+                    startActivity(i);
+                    finish();
+                });
+            } else {
+                boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
+                if (locationEnabled &&
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                        checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    runOnUiThread(() -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
                         }
                     });
-                } else {
-                    boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
-                    if (locationEnabled &&
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
-                                }
-                            }
-                        });
 
-                    }
                 }
             }
         });
@@ -236,12 +227,9 @@ public class MainActivity extends TopActivity
                 .setTarget(Util.getToolbarNavigationIcon(findViewById(R.id.toolbar)))
                 .setPrimaryText(R.string.act_main_nav_taptarget_title)
                 .setSecondaryText(R.string.act_main_nav_taptarget_subtitle)
-                .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
-                    @Override
-                    public void onPromptStateChanged(MaterialTapTargetPrompt prompt, int state) {
-                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
-                            // User has pressed the prompt target
-                        }
+                .setPromptStateChangeListener((prompt, state) -> {
+                    if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED) {
+                        // User has pressed the prompt target
                     }
                 })
                 .setFocalColour(ContextCompat.getColor(this, R.color.colorAccent))
@@ -564,12 +552,7 @@ public class MainActivity extends TopActivity
                     final String msg = String.format(getString(R.string.update_topology_progress), progress);
                     if (topologyUpdateSnackbar == null) {
                         topologyUpdateSnackbar = Snackbar.make(findViewById(R.id.fab), msg, Snackbar.LENGTH_INDEFINITE)
-                                .setAction(R.string.update_topology_cancel_action, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Coordinator.get(MainActivity.this).getMapManager().cancelTopologyUpdate();
-                                    }
-                                });
+                                .setAction(R.string.update_topology_cancel_action, view -> Coordinator.get(MainActivity.this).getMapManager().cancelTopologyUpdate());
                     } else {
                         topologyUpdateSnackbar.setText(msg);
                     }
@@ -593,12 +576,7 @@ public class MainActivity extends TopActivity
                     break;
                 case MapManager.ACTION_TOPOLOGY_UPDATE_AVAILABLE:
                     Snackbar.make(findViewById(R.id.fab), R.string.update_topology_available, 10000)
-                            .setAction(R.string.update_topology_update_action, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Coordinator.get(MainActivity.this).getMapManager().updateTopology();
-                                }
-                            }).show();
+                            .setAction(R.string.update_topology_update_action, view -> Coordinator.get(MainActivity.this).getMapManager().updateTopology()).show();
                     break;
                 case Coordinator.ACTION_CACHE_EXTRAS_PROGRESS:
                     final int progressCurrent = intent.getIntExtra(Coordinator.EXTRA_CACHE_EXTRAS_PROGRESS_CURRENT, 0);

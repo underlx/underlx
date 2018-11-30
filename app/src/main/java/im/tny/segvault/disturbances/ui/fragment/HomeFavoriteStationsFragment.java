@@ -140,12 +140,9 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 return true;
             }
 
-            Collections.sort(items, new Comparator<StationRecyclerViewAdapter.StationItem>() {
-                @Override
-                public int compare(StationRecyclerViewAdapter.StationItem stationItem, StationRecyclerViewAdapter.StationItem t1) {
-                    // sorting by ID is not ideal but at least it's stable
-                    return stationItem.id.compareTo(t1.id);
-                }
+            Collections.sort(items, (stationItem, t1) -> {
+                // sorting by ID is not ideal but at least it's stable
+                return stationItem.id.compareTo(t1.id);
             });
             return true;
         }

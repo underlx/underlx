@@ -644,16 +644,13 @@ public class MapManager {
             // create Realm stations for the network if they don't exist already
             Realm realm = Application.getDefaultRealmInstance(context);
 
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    for (Station s : net.getStations()) {
-                        if (realm.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
-                            RStation rs = new RStation();
-                            rs.setStop(s);
-                            rs.setNetwork(net.getId());
-                            realm.copyToRealm(rs);
-                        }
+            realm.executeTransaction(realm1 -> {
+                for (Station s : net.getStations()) {
+                    if (realm1.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
+                        RStation rs = new RStation();
+                        rs.setStop(s);
+                        rs.setNetwork(net.getId());
+                        realm1.copyToRealm(rs);
                     }
                 }
             });

@@ -120,33 +120,21 @@ public class HelpFragment extends TopFragment {
 
             if(contents.length > 1 && i < contents.length - 1) {
                 View view = getLayoutInflater().inflate(R.layout.help_contactlinks_view, linearLayout, true);
-                view.findViewById(R.id.facebook_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.facebook_project_url)));
-                        startActivity(browserIntent);
-                    }
+                view.findViewById(R.id.facebook_button).setOnClickListener(view14 -> {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.facebook_project_url)));
+                    startActivity(browserIntent);
                 });
-                view.findViewById(R.id.twitter_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.twitter_project_url)));
-                        startActivity(browserIntent);
-                    }
+                view.findViewById(R.id.twitter_button).setOnClickListener(view13 -> {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.twitter_project_url)));
+                    startActivity(browserIntent);
                 });
-                view.findViewById(R.id.discord_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.discord_server_url)));
-                        startActivity(browserIntent);
-                    }
+                view.findViewById(R.id.discord_button).setOnClickListener(view12 -> {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.discord_server_url)));
+                    startActivity(browserIntent);
                 });
-                view.findViewById(R.id.github_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_project_url)));
-                        startActivity(browserIntent);
-                    }
+                view.findViewById(R.id.github_button).setOnClickListener(view1 -> {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.github_project_url)));
+                    startActivity(browserIntent);
                 });
             }
         }

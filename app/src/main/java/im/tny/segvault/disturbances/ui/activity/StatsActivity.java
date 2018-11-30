@@ -113,12 +113,9 @@ public class StatsActivity extends TopActivity {
                 return false;
             }
             Realm realm = Application.getDefaultRealmInstance(context);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    for (Statistic stat : stats) {
-                        stat.compute(realm, Coordinator.get(context).getMapManager().getNetworks());
-                    }
+            realm.executeTransaction(realm1 -> {
+                for (Statistic stat : stats) {
+                    stat.compute(realm1, Coordinator.get(context).getMapManager().getNetworks());
                 }
             });
             return true;

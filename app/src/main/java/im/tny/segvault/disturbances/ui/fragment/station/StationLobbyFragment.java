@@ -202,21 +202,18 @@ public class StationLobbyFragment extends Fragment {
         int curLobbyColorIdx = 0;
         for (Lobby lobby : station.getLobbies()) {
             LobbyView v = new LobbyView(getContext(), lobby, lobbyColors[curLobbyColorIdx]);
-            v.setInteractionListener(new LobbyView.OnViewInteractionListener() {
-                @Override
-                public void onExitClicked(Lobby.Exit exit) {
-                    if (googleMap == null || !mapLayoutReady) {
-                        return;
-                    }
-                    Marker marker = markers.get(exit);
-                    if (marker != null) {
-                        marker.showInfoWindow();
-                    }
-                    lobbyScrollView.fullScroll(NestedScrollView.FOCUS_UP);
-                    googleMap.animateCamera(
-                            CameraUpdateFactory.newCameraPosition(
-                                    CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
+            v.setInteractionListener(exit -> {
+                if (googleMap == null || !mapLayoutReady) {
+                    return;
                 }
+                Marker marker = markers.get(exit);
+                if (marker != null) {
+                    marker.showInfoWindow();
+                }
+                lobbyScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                googleMap.animateCamera(
+                        CameraUpdateFactory.newCameraPosition(
+                                CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
             });
             lobbiesLayout.addView(v);
             curLobbyColorIdx = (curLobbyColorIdx + 1) % lobbyColors.length;
@@ -237,13 +234,10 @@ public class StationLobbyFragment extends Fragment {
             });
         }
 
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap mMap) {
-                googleMap = mMap;
+        mapView.getMapAsync(mMap -> {
+            googleMap = mMap;
 
-                trySetupMap(station, lobbyColors, preselExit);
-            }
+            trySetupMap(station, lobbyColors, preselExit);
         });
     }
 

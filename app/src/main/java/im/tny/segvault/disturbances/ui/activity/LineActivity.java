@@ -120,14 +120,11 @@ public class LineActivity extends TopActivity {
         }
         lineIconsLayout.addView(iconFrame);
 
-        abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
-                    lineIconsLayout.animate().alpha(0);
-                } else {
-                    lineIconsLayout.animate().alpha(1);
-                }
+        abl.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                lineIconsLayout.animate().alpha(0);
+            } else {
+                lineIconsLayout.animate().alpha(1);
             }
         });
 
@@ -289,14 +286,11 @@ public class LineActivity extends TopActivity {
                 backLineStripeLayout.setVisibility(View.VISIBLE);
             }
 
-            stepview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, StationActivity.class);
-                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                    context.startActivity(intent);
-                }
+            stepview.setOnClickListener(view -> {
+                Intent intent = new Intent(context, StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                context.startActivity(intent);
             });
 
             RouteFragment.populateStationView(context, station, stepview, true, false);

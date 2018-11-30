@@ -113,34 +113,22 @@ public class TripFragment extends BottomSheetDialogFragment {
 
         network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
 
-        correctButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), TripCorrectionActivity.class);
-                intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, networkId);
-                intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
-                startActivity(intent);
-            }
+        correctButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), TripCorrectionActivity.class);
+            intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, networkId);
+            intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
+            startActivity(intent);
         });
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(R.string.frag_trip_delete_confirm_title)
-                        .setMessage(R.string.frag_trip_delete_confirm_desc)
-                        .setPositiveButton(R.string.frag_trip_delete, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteTrip();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                            }
-                        })
-                        .show();
-            }
+        deleteButton.setOnClickListener(view1 -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle(R.string.frag_trip_delete_confirm_title)
+                    .setMessage(R.string.frag_trip_delete_confirm_desc)
+                    .setPositiveButton(R.string.frag_trip_delete, (dialog, which) -> deleteTrip())
+                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                        // do nothing
+                    })
+                    .show();
         });
         this.inflater = inflater;
         refreshUI();
@@ -240,14 +228,11 @@ public class TripFragment extends BottomSheetDialogFragment {
             }
 
             final Station station = path.getStartVertex().getStation();
-            stepview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, StationActivity.class);
-                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                    context.startActivity(intent);
-                }
+            stepview.setOnClickListener(view -> {
+                Intent intent = new Intent(context, StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                context.startActivity(intent);
             });
             Drawable gd = Util.getColoredDrawableResource(context, R.drawable.station_line_single, station.getLines().get(0).getColor());
             if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -339,14 +324,11 @@ public class TripFragment extends BottomSheetDialogFragment {
             }
 
             final Station station = c.getSource().getStation();
-            stepview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, StationActivity.class);
-                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                    context.startActivity(intent);
-                }
+            stepview.setOnClickListener(view -> {
+                Intent intent = new Intent(context, StationActivity.class);
+                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                context.startActivity(intent);
             });
 
             RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
@@ -386,14 +368,11 @@ public class TripFragment extends BottomSheetDialogFragment {
         }
 
         final Station station = c.getTarget().getStation();
-        stepview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, StationActivity.class);
-                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                context.startActivity(intent);
-            }
+        stepview.setOnClickListener(view -> {
+            Intent intent = new Intent(context, StationActivity.class);
+            intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+            intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+            context.startActivity(intent);
         });
 
         RouteFragment.populateStationView(context, station, stepview, showInfoIcons, false);
@@ -420,14 +399,11 @@ public class TripFragment extends BottomSheetDialogFragment {
 
     private void deleteTrip() {
         Realm realm = Application.getDefaultRealmInstance(getContext());
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-                if (trip != null) {
-                    trip.getPath().deleteAllFromRealm();
-                    trip.deleteFromRealm();
-                }
+        realm.executeTransaction(realm1 -> {
+            Trip trip = realm1.where(Trip.class).equalTo("id", tripId).findFirst();
+            if (trip != null) {
+                trip.getPath().deleteAllFromRealm();
+                trip.deleteFromRealm();
             }
         });
         realm.close();

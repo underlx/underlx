@@ -57,44 +57,41 @@ public class Synchronizer {
                 return;
             }
             Realm realm = Application.getDefaultRealmInstance(context);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    RealmResults<Trip> unsyncedTrips = realm.where(Trip.class).equalTo("synced", false).findAll();
-                    for (Trip t : unsyncedTrips) {
-                        API.TripRequest request = tripToAPIRequest(t);
-                        try {
-                            if (t.isSubmitted()) {
-                                // submit update, if possible
-                                if (t.canBeCorrected()) {
-                                    API.getInstance().putTrip(request);
-                                    t.setSynced(true);
-                                    t.setSubmitted(true);
-                                }
-                            } else {
-                                // submit new
-                                API.getInstance().postTrip(request);
+            realm.executeTransaction(realm1 -> {
+                RealmResults<Trip> unsyncedTrips = realm1.where(Trip.class).equalTo("synced", false).findAll();
+                for (Trip t : unsyncedTrips) {
+                    API.TripRequest request = tripToAPIRequest(t);
+                    try {
+                        if (t.isSubmitted()) {
+                            // submit update, if possible
+                            if (t.canBeCorrected()) {
+                                API.getInstance().putTrip(request);
                                 t.setSynced(true);
                                 t.setSubmitted(true);
                             }
-                        } catch (APIException e) {
-                            t.registerSyncFailure();
-                            if(t.isFailedToSync()) {
-                                // give up on this one
-                                t.setSynced(true);
-                            }
+                        } else {
+                            // submit new
+                            API.getInstance().postTrip(request);
+                            t.setSynced(true);
+                            t.setSubmitted(true);
+                        }
+                    } catch (APIException e) {
+                        t.registerSyncFailure();
+                        if(t.isFailedToSync()) {
+                            // give up on this one
+                            t.setSynced(true);
                         }
                     }
+                }
 
-                    RealmResults<im.tny.segvault.disturbances.model.Feedback> unsyncedFeedback = realm.where(im.tny.segvault.disturbances.model.Feedback.class).equalTo("synced", false).findAll();
-                    for (im.tny.segvault.disturbances.model.Feedback f : unsyncedFeedback) {
-                        API.Feedback request = feedbackToAPIRequest(f);
-                        try {
-                            API.getInstance().postFeedback(request);
-                            f.setSynced(true);
-                        } catch (APIException e) {
-                            e.printStackTrace();
-                        }
+                RealmResults<im.tny.segvault.disturbances.model.Feedback> unsyncedFeedback = realm1.where(im.tny.segvault.disturbances.model.Feedback.class).equalTo("synced", false).findAll();
+                for (im.tny.segvault.disturbances.model.Feedback f : unsyncedFeedback) {
+                    API.Feedback request = feedbackToAPIRequest(f);
+                    try {
+                        API.getInstance().postFeedback(request);
+                        f.setSynced(true);
+                    } catch (APIException e) {
+                        e.printStackTrace();
                     }
                 }
             });

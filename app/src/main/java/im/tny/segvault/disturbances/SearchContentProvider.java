@@ -194,12 +194,7 @@ public class SearchContentProvider extends ContentProvider {
 
         // TODO search train services, bus services, trivia, etc.
 
-        Collections.sort(results, new Comparator<ResultRow>() {
-            @Override
-            public int compare(ResultRow row, ResultRow t1) {
-                return Double.compare(row.distance, t1.distance);
-            }
-        });
+        Collections.sort(results, (row, t1) -> Double.compare(row.distance, t1.distance));
 
         if (results.size() == 0) {
             ResultRow row = new ResultRow();

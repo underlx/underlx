@@ -88,12 +88,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
                 image.setImageResource(R.drawable.ic_frowning_intro);
                 description.setText(R.string.intro_finish_connect_desc);
                 button.setText(R.string.intro_finish_try_again);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        m.updateTopology();
-                    }
-                });
+                button.setOnClickListener(v -> m.updateTopology());
                 button.setVisibility(View.VISIBLE);
             } else {
                 image.setImageResource(R.drawable.ic_hourglass_flowing_sand_intro);
@@ -106,12 +101,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
             image.setImageResource(R.drawable.ic_ok_hand_intro);
             description.setText(R.string.intro_finish_done_desc);
             button.setText(R.string.intro_finish_get_started);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.onDonePressed(FinishIntroSlide.this);
-                }
-            });
+            button.setOnClickListener(v -> mListener.onDonePressed(FinishIntroSlide.this));
             button.setVisibility(View.VISIBLE);
             canLeave = true;
         }

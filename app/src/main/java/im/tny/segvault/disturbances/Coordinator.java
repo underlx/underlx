@@ -94,11 +94,8 @@ public class Coordinator implements MapManager.OnLoadListener {
 
         mapManager = new MapManager(this.context);
         mapManager.setOnLoadListener(this);
-        mapManager.setOnUpdateListener(new MapManager.OnUpdateListener() {
-            @Override
-            public void onNetworkUpdated(Network network) {
+        mapManager.setOnUpdateListener(network -> {
 
-            }
         });
 
         lineStatusCache = new LineStatusCache(this.context);

@@ -62,60 +62,47 @@ public class DisturbancesIntroSlide extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_intro_disturbances, container, false);
 
-        view.findViewById(R.id.select_lines_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<Line> lines = Coordinator.get(getContext()).getMapManager().getAllLines();
-                Collections.sort(lines, new Comparator<Line>() {
-                    @Override
-                    public int compare(Line line, Line t1) {
-                        return Integer.valueOf(line.getOrder()).compareTo(t1.getOrder());
-                    }
-                });
+        view.findViewById(R.id.select_lines_button).setOnClickListener(v -> {
+            List<Line> lines = Coordinator.get(getContext()).getMapManager().getAllLines();
+            Collections.sort(lines, (line, t1) -> Integer.valueOf(line.getOrder()).compareTo(t1.getOrder()));
 
-                if (lines.size() == 0) {
-                    if (Connectivity.isConnected(getContext())) {
-                        Snackbar.make(view, R.string.intro_disturbances_misc_error, Snackbar.LENGTH_LONG).show();
-                    } else {
-                        Snackbar.make(view, R.string.intro_disturbances_connection_error, Snackbar.LENGTH_LONG).show();
-                    }
-                    return;
+            if (lines.size() == 0) {
+                if (Connectivity.isConnected(getContext())) {
+                    Snackbar.make(view, R.string.intro_disturbances_misc_error, Snackbar.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(view, R.string.intro_disturbances_connection_error, Snackbar.LENGTH_LONG).show();
                 }
-                view.findViewById(R.id.description_layout).setVisibility(View.GONE);
-                view.findViewById(R.id.select_lines_button).setVisibility(View.GONE);
-
-                LinearLayout checkboxLayout = view.findViewById(R.id.checkbox_layout);
-
-                SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
-                Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
-
-                for (final Line l : lines) {
-                    AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
-                    checkBox.setText(Util.getLineNames(getContext(), l)[0]);
-                    checkBox.setTextColor(Color.WHITE);
-                    ColorStateList colorStateList = new ColorStateList(
-                            new int[][]{
-                                    new int[]{-android.R.attr.state_checked}, // unchecked
-                                    new int[]{android.R.attr.state_checked}, // checked
-                            },
-                            new int[]{l.getColor(), l.getColor(),}
-                    );
-                    CompoundButtonCompat.setButtonTintList(checkBox, colorStateList);
-
-                    checkBox.setChecked(linePref == null || linePref.contains(l.getId()));
-
-                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            updateShowLineNotifs(l.getId(), isChecked);
-                        }
-                    });
-
-                    checkboxLayout.addView(checkBox);
-                }
-
-                view.findViewById(R.id.lines_layout).setVisibility(View.VISIBLE);
+                return;
             }
+            view.findViewById(R.id.description_layout).setVisibility(View.GONE);
+            view.findViewById(R.id.select_lines_button).setVisibility(View.GONE);
+
+            LinearLayout checkboxLayout = view.findViewById(R.id.checkbox_layout);
+
+            SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
+            Set<String> linePref = sharedPref.getStringSet(PreferenceNames.NotifsLines, null);
+
+            for (final Line l : lines) {
+                AppCompatCheckBox checkBox = new AppCompatCheckBox(view.getContext());
+                checkBox.setText(Util.getLineNames(getContext(), l)[0]);
+                checkBox.setTextColor(Color.WHITE);
+                ColorStateList colorStateList = new ColorStateList(
+                        new int[][]{
+                                new int[]{-android.R.attr.state_checked}, // unchecked
+                                new int[]{android.R.attr.state_checked}, // checked
+                        },
+                        new int[]{l.getColor(), l.getColor(),}
+                );
+                CompoundButtonCompat.setButtonTintList(checkBox, colorStateList);
+
+                checkBox.setChecked(linePref == null || linePref.contains(l.getId()));
+
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> updateShowLineNotifs(l.getId(), isChecked));
+
+                checkboxLayout.addView(checkBox);
+            }
+
+            view.findViewById(R.id.lines_layout).setVisibility(View.VISIBLE);
         });
 
         return view;

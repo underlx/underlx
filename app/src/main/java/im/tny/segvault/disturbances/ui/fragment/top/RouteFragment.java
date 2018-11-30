@@ -164,33 +164,22 @@ public class RouteFragment extends TopFragment {
         layoutInstructions = view.findViewById(R.id.layout_instructions);
         layoutBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
         swapButton = view.findViewById(R.id.swap_button);
-        swapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Station o = originPicker.getSelection();
-                originPicker.setSelection(destinationPicker.getSelection());
-                destinationPicker.setSelection(o);
-                tryPlanRoute();
-            }
+        swapButton.setOnClickListener(view12 -> {
+            Station o = originPicker.getSelection();
+            originPicker.setSelection(destinationPicker.getSelection());
+            destinationPicker.setSelection(o);
+            tryPlanRoute();
         });
         navigationStartButton = view.findViewById(R.id.navigation_start_button);
-        navigationStartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                S2LS loc = Coordinator.get(getContext()).getS2LS(networkId);
-                if (loc != null && route != null) {
-                    loc.setCurrentTargetRoute(route, false);
-                    switchToPage("nav_home");
-                }
+        navigationStartButton.setOnClickListener(view1 -> {
+            S2LS loc = Coordinator.get(getContext()).getS2LS(networkId);
+            if (loc != null && route != null) {
+                loc.setCurrentTargetRoute(route, false);
+                switchToPage("nav_home");
             }
         });
         useRealtimeCheckbox = view.findViewById(R.id.use_realtime_check);
-        useRealtimeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                tryPlanRoute();
-            }
-        });
+        useRealtimeCheckbox.setOnCheckedChangeListener((compoundButton, b) -> tryPlanRoute());
         routeEtaView = view.findViewById(R.id.route_eta_view);
 
         originPicker = view.findViewById(R.id.origin_picker);
@@ -223,19 +212,11 @@ public class RouteFragment extends TopFragment {
 
         originPicker.setStations(stations);
         originPicker.setAllStationsSortStrategy(new StationPickerView.EnterFrequencySortStrategy());
-        originPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
-            @Override
-            public void onStationSelected(Station station) {
-                destinationPicker.focusOnEntry();
-                tryPlanRoute();
-            }
+        originPicker.setOnStationSelectedListener(station -> {
+            destinationPicker.focusOnEntry();
+            tryPlanRoute();
         });
-        originPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
-            @Override
-            public void onSelectionLost() {
-                hideRoute();
-            }
-        });
+        originPicker.setOnSelectionLostListener(() -> hideRoute());
         if (!loc.inNetwork()) {
             originPicker.setAllowMyLocation(true);
         }
@@ -246,25 +227,17 @@ public class RouteFragment extends TopFragment {
 
         destinationPicker.setStations(stations);
         destinationPicker.setAllStationsSortStrategy(new StationPickerView.ExitFrequencySortStrategy());
-        destinationPicker.setOnStationSelectedListener(new StationPickerView.OnStationSelectedListener() {
-            @Override
-            public void onStationSelected(Station station) {
-                tryPlanRoute();
-                destinationPicker.clearFocus();
-                // Check if no view has focus:
-                View view = getActivity().getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
+        destinationPicker.setOnStationSelectedListener(station -> {
+            tryPlanRoute();
+            destinationPicker.clearFocus();
+            // Check if no view has focus:
+            View view = getActivity().getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         });
-        destinationPicker.setOnSelectionLostListener(new StationPickerView.OnSelectionLostListener() {
-            @Override
-            public void onSelectionLost() {
-                hideRoute();
-            }
-        });
+        destinationPicker.setOnSelectionLostListener(() -> hideRoute());
 
         if (mListener != null) {
             String destId = mListener.getRouteDestination();
@@ -379,14 +352,11 @@ public class RouteFragment extends TopFragment {
                     lineView.setTextColor(lineColor);
 
                     LinearLayout lineLayout = view.findViewById(R.id.line_layout);
-                    lineLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getContext(), LineActivity.class);
-                            intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
-                            intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
-                            startActivity(intent);
-                        }
+                    lineLayout.setOnClickListener(v -> {
+                        Intent intent = new Intent(getContext(), LineActivity.class);
+                        intent.putExtra(LineActivity.EXTRA_LINE_ID, line.getId());
+                        intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                        startActivity(intent);
                     });
                     lineLayout.setVisibility(View.VISIBLE);
                 }
@@ -448,14 +418,11 @@ public class RouteFragment extends TopFragment {
                 lineView.setTextColor(nextLineColor);
 
                 LinearLayout lineLayout = view.findViewById(R.id.line_layout);
-                lineLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getContext(), LineActivity.class);
-                        intent.putExtra(LineActivity.EXTRA_LINE_ID, lStep.getTarget().getId());
-                        intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
-                        startActivity(intent);
-                    }
+                lineLayout.setOnClickListener(v -> {
+                    Intent intent = new Intent(getContext(), LineActivity.class);
+                    intent.putExtra(LineActivity.EXTRA_LINE_ID, lStep.getTarget().getId());
+                    intent.putExtra(LineActivity.EXTRA_NETWORK_ID, network.getId());
+                    startActivity(intent);
                 });
                 lineLayout.setVisibility(View.VISIBLE);
 
@@ -595,15 +562,12 @@ public class RouteFragment extends TopFragment {
         LinearLayout stationLayout = view.findViewById(R.id.station_layout);
 
         if (setOnClickListener) {
-            stationLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (context != null) {
-                        Intent intent = new Intent(context, StationActivity.class);
-                        intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                        intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                        context.startActivity(intent);
-                    }
+            stationLayout.setOnClickListener(view1 -> {
+                if (context != null) {
+                    Intent intent = new Intent(context, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    context.startActivity(intent);
                 }
             });
         }

@@ -61,12 +61,7 @@ class WiFiChecker {
         if(wifiMan != null) {
             wifiMan.startScan();
         }
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doScan();
-            }
-        }, scanInterval);
+        handler.postDelayed(() -> doScan(), scanInterval);
     }
 
     public void stopScanning() {
@@ -154,12 +149,7 @@ class WiFiChecker {
             wifiList = wifiMan.getScanResults();
             List<BSSID> bssids = new ArrayList<>();
             // sort by descending signal strength
-            Collections.sort(wifiList, Collections.<ScanResult>reverseOrder(new Comparator<ScanResult>() {
-                @Override
-                public int compare(ScanResult scanResult, ScanResult t1) {
-                    return scanResult.level - t1.level;
-                }
-            }));
+            Collections.sort(wifiList, Collections.<ScanResult>reverseOrder((scanResult, t1) -> scanResult.level - t1.level));
             for (ScanResult s : wifiList) {
                 bssids.add(new BSSID(s.BSSID));
                 Log.d("WiFiChecker", s.BSSID);

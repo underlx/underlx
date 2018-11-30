@@ -200,12 +200,9 @@ public class S2LSChangeListener implements S2LS.EventListener {
     }
 
     private void doTick(final State state) {
-        stateTickHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doTick(state);
-                state.tick();
-            }
+        stateTickHandler.postDelayed(() -> {
+            doTick(state);
+            state.tick();
         }, state.getPreferredTickIntervalMillis());
     }
 

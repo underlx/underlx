@@ -40,15 +40,12 @@ public class NotifScheduleActivity extends TopActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         listView = findViewById(R.id.rules_view);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String ruleId = ((Map<String, String>) parent.getItemAtPosition(position)).get("id");
-                if (ruleId != null) {
-                    Intent intent = new Intent(NotifScheduleActivity.this, EditNotifScheduleActivity.class);
-                    intent.putExtra(EditNotifScheduleActivity.EXTRA_RULE_ID, ruleId);
-                    startActivity(intent);
-                }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            String ruleId = ((Map<String, String>) parent.getItemAtPosition(position)).get("id");
+            if (ruleId != null) {
+                Intent intent = new Intent(NotifScheduleActivity.this, EditNotifScheduleActivity.class);
+                intent.putExtra(EditNotifScheduleActivity.EXTRA_RULE_ID, ruleId);
+                startActivity(intent);
             }
         });
 
@@ -59,12 +56,9 @@ public class NotifScheduleActivity extends TopActivity {
         listView.setAdapter(adapter);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(NotifScheduleActivity.this, EditNotifScheduleActivity.class);
-                startActivity(intent);
-            }
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(NotifScheduleActivity.this, EditNotifScheduleActivity.class);
+            startActivity(intent);
         });
 
         realmForListeners = Application.getDefaultRealmInstance(this);
@@ -77,16 +71,13 @@ public class NotifScheduleActivity extends TopActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             Realm realm = Application.getDefaultRealmInstance(NotifScheduleActivity.this);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    data.clear();
-                    for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
-                        Map<String, String> item = new HashMap<>(2);
-                        item.put("desc", rule.getDescription(NotifScheduleActivity.this));
-                        item.put("id", rule.getId());
-                        data.add(item);
-                    }
+            realm.executeTransaction(realm1 -> {
+                data.clear();
+                for (NotificationRule rule : realm1.where(NotificationRule.class).findAll()) {
+                    Map<String, String> item = new HashMap<>(2);
+                    item.put("desc", rule.getDescription(NotifScheduleActivity.this));
+                    item.put("id", rule.getId());
+                    data.add(item);
                 }
             });
             realm.close();
@@ -123,10 +114,5 @@ public class NotifScheduleActivity extends TopActivity {
         realmForListeners.close();
     }
 
-    private RealmChangeListener realmListener = new RealmChangeListener() {
-        @Override
-        public void onChange(Object o) {
-            new UpdateDataTask().execute();
-        }
-    };
+    private RealmChangeListener realmListener = o -> new UpdateDataTask().execute();
 }

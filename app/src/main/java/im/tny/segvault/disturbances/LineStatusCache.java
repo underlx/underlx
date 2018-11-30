@@ -202,13 +202,10 @@ public class LineStatusCache {
                         if (d.line.equals(l.getId()) && !d.ended) {
                             foundDisturbance = true;
                             LineStatusCache.Status status;
-                            Collections.sort(d.statuses, new Comparator<API.Status>() {
-                                @Override
-                                public int compare(API.Status o1, API.Status o2) {
-                                    long lhs = o1.time[0];
-                                    long rhs = o2.time[0];
-                                    return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
-                                }
+                            Collections.sort(d.statuses, (o1, o2) -> {
+                                long lhs = o1.time[0];
+                                long rhs = o2.time[0];
+                                return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
                             });
 
                             if (d.statuses.get(d.statuses.size() - 1).status.contains("interrompida")) {

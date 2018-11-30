@@ -104,14 +104,11 @@ public class StationActivity extends TopActivity
         }
 
         bm = LocalBroadcastManager.getInstance(this);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(StationActivity.this, MainActivity.class);
-                intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_plan_route");
-                intent.putExtra(MainActivity.EXTRA_PLAN_ROUTE_TO_STATION, stationId);
-                startActivity(intent);
-            }
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(StationActivity.this, MainActivity.class);
+            intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_plan_route");
+            intent.putExtra(MainActivity.EXTRA_PLAN_ROUTE_TO_STATION, stationId);
+            startActivity(intent);
         });
 
         AppBarLayout appBarLayout = findViewById(R.id.app_bar);
@@ -145,12 +142,7 @@ public class StationActivity extends TopActivity
         ctl.setTitle(station.getName());
 
         List<Line> lines = new ArrayList<>(station.getLines());
-        Collections.sort(lines, new Comparator<Line>() {
-            @Override
-            public int compare(Line l1, Line l2) {
-                return Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder());
-            }
-        });
+        Collections.sort(lines, (l1, l2) -> Integer.valueOf(l1.getOrder()).compareTo(l2.getOrder()));
 
         if (lines.size() > 1) {
             int colors[] = new int[lines.size() * 2];
@@ -203,14 +195,11 @@ public class StationActivity extends TopActivity
             lineIconsLayout.addView(iconFrame);
         }
 
-        abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
-                    lineIconsLayout.animate().alpha(0);
-                } else {
-                    lineIconsLayout.animate().alpha(1);
-                }
+        abl.addOnOffsetChangedListener((appBarLayout1, verticalOffset) -> {
+            if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                lineIconsLayout.animate().alpha(0);
+            } else {
+                lineIconsLayout.animate().alpha(1);
             }
         });
     }

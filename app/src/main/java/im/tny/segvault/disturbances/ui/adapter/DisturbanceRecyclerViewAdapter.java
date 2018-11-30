@@ -111,48 +111,36 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             holder.mLayout.addView(new StatusView(holder.mView.getContext(), s));
         }
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+        holder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                mListener.onListFragmentInteraction(holder.mItem);
             }
         });
 
-        View.OnClickListener lineClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, LineActivity.class);
-                intent.putExtra(LineActivity.EXTRA_LINE_ID, holder.mItem.lineId);
-                intent.putExtra(LineActivity.EXTRA_NETWORK_ID, holder.mItem.networkId);
-                context.startActivity(intent);
-            }
+        View.OnClickListener lineClickListener = v -> {
+            Intent intent = new Intent(context, LineActivity.class);
+            intent.putExtra(LineActivity.EXTRA_LINE_ID, holder.mItem.lineId);
+            intent.putExtra(LineActivity.EXTRA_NETWORK_ID, holder.mItem.networkId);
+            context.startActivity(intent);
         };
 
         holder.mLineNameView.setOnClickListener(lineClickListener);
         holder.iconLayout.setOnClickListener(lineClickListener);
-        holder.shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.setType("text/plain");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id));
-                context.startActivity(Intent.createChooser(sendIntent, null));
-            }
+        holder.shareButton.setOnClickListener(view -> {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id));
+            context.startActivity(Intent.createChooser(sendIntent, null));
         });
-        holder.webButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id)));
-                try {
-                    context.startActivity(browserIntent);
-                } catch (ActivityNotFoundException e) {
-                    // oh well
-                }
+        holder.webButton.setOnClickListener(view -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id)));
+            try {
+                context.startActivity(browserIntent);
+            } catch (ActivityNotFoundException e) {
+                // oh well
             }
         });
     }
@@ -238,12 +226,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
 
                 statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime, s.isOfficial()));
             }
-            Collections.sort(statuses, new Comparator<Status>() {
-                @Override
-                public int compare(Status o1, Status o2) {
-                    return o1.date.compareTo(o2.date);
-                }
-            });
+            Collections.sort(statuses, (o1, o2) -> o1.date.compareTo(o2.date));
         }
 
         @Override

@@ -142,14 +142,11 @@ public class POIActivity extends TopActivity {
         final LinearLayout iconLayout = findViewById(R.id.icon_layout);
         iconLayout.addView(iconFrame);
 
-        abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
-                    iconLayout.animate().alpha(0);
-                } else {
-                    iconLayout.animate().alpha(1);
-                }
+        abl.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            if (ctl.getHeight() + verticalOffset < 2.5 * ViewCompat.getMinimumHeight(ctl)) {
+                iconLayout.animate().alpha(0);
+            } else {
+                iconLayout.animate().alpha(1);
             }
         });
         // end of POI icon
@@ -157,32 +154,26 @@ public class POIActivity extends TopActivity {
         if (!poi.getWebURL().isEmpty()) {
             Button webpageButton = findViewById(R.id.webpage_button);
             webpageButton.setVisibility(View.VISIBLE);
-            webpageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(poi.getWebURL()));
-                    try {
-                        startActivity(browserIntent);
-                    } catch (ActivityNotFoundException e) {
-                        // oh well
-                    }
+            webpageButton.setOnClickListener(view -> {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(poi.getWebURL()));
+                try {
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException e) {
+                    // oh well
                 }
             });
         }
 
         Button mapButton = findViewById(R.id.map_button);
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                        Uri.parse(String.format(
-                                "https://www.google.com/maps/search/?api=1&query=%f,%f",
-                                poi.getWorldCoord()[0], poi.getWorldCoord()[1])));
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    // oh well
-                }
+        mapButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(String.format(
+                            "https://www.google.com/maps/search/?api=1&query=%f,%f",
+                            poi.getWorldCoord()[0], poi.getWorldCoord()[1])));
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                // oh well
             }
         });
 
@@ -241,14 +232,11 @@ public class POIActivity extends TopActivity {
 
                 RouteFragment.populateStationView(POIActivity.this, station, stepview, true, false);
 
-                stepview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(POIActivity.this, StationActivity.class);
-                        intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                        intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                        startActivity(intent);
-                    }
+                stepview.setOnClickListener(view -> {
+                    Intent intent = new Intent(POIActivity.this, StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    startActivity(intent);
                 });
 
                 stationsLayout.addView(stepview);
@@ -268,13 +256,10 @@ public class POIActivity extends TopActivity {
             });
         }
 
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap mMap) {
-                googleMap = mMap;
+        mapView.getMapAsync(mMap -> {
+            googleMap = mMap;
 
-                trySetupMap(poi, names[0]);
-            }
+            trySetupMap(poi, names[0]);
         });
     }
 

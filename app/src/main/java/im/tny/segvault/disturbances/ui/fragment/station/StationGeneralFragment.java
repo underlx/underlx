@@ -208,60 +208,35 @@ public class StationGeneralFragment extends Fragment {
         Button busButton = view.findViewById(R.id.connections_bus_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BUS)) {
             busButton.setVisibility(View.VISIBLE);
-            busButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BUS, station);
-                }
-            });
+            busButton.setOnClickListener(view -> ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BUS, station));
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
         Button boatButton = view.findViewById(R.id.connections_boat_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BOAT)) {
             boatButton.setVisibility(View.VISIBLE);
-            boatButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BOAT, station);
-                }
-            });
+            boatButton.setOnClickListener(view -> ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BOAT, station));
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
         Button trainButton = view.findViewById(R.id.connections_train_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_TRAIN)) {
             trainButton.setVisibility(View.VISIBLE);
-            trainButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_TRAIN, station);
-                }
-            });
+            trainButton.setOnClickListener(view -> ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_TRAIN, station));
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
         Button parkButton = view.findViewById(R.id.connections_park_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_PARK)) {
             parkButton.setVisibility(View.VISIBLE);
-            parkButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_PARK, station);
-                }
-            });
+            parkButton.setOnClickListener(view -> ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_PARK, station));
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 
         Button bikeButton = view.findViewById(R.id.connections_bike_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BIKE)) {
             bikeButton.setVisibility(View.VISIBLE);
-            bikeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BIKE, station);
-                }
-            });
+            bikeButton.setOnClickListener(view -> ExtraContentCache.getConnectionInfo(getContext(), new ConnectionInfoReadyListener(), Station.CONNECTION_TYPE_BIKE, station));
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 

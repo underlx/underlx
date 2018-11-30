@@ -123,12 +123,9 @@ public class ErrorFragment extends TopFragment {
     private void setUpMissingTopologyError() {
         errorTitleView.setText(R.string.frag_error_missing_topology);
         errorMessageView.setText(getString(R.string.frag_error_missing_topology_desc));
-        retryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Coordinator.get(getContext()).getMapManager().updateTopology();
-                exitErrorScreen();
-            }
+        retryButton.setOnClickListener(view -> {
+            Coordinator.get(getContext()).getMapManager().updateTopology();
+            exitErrorScreen();
         });
     }
 
@@ -142,15 +139,12 @@ public class ErrorFragment extends TopFragment {
         errorTitleView.setText(R.string.frag_error_version_too_old);
         errorMessageView.setText(R.string.frag_error_version_too_old_desc);
         retryButton.setText(R.string.frag_error_view_store_page);
-        retryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final String appPackageName = getContext().getPackageName();
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                } catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                }
+        retryButton.setOnClickListener(view -> {
+            final String appPackageName = getContext().getPackageName();
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
             }
         });
     }
