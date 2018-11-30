@@ -446,7 +446,7 @@ public class API {
             } else {
                 is = h.getErrorStream();
             }
-            if(is != null) {
+            if (is != null) {
                 is.close();
             }
             return h.getHeaderFields();
@@ -775,6 +775,20 @@ public class API {
                     URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"));
             return mapper.readValue(getRequest(endpoint.resolve(url), false), new TypeReference<List<Disturbance>>() {
             });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public Disturbance getDisturbance(String id) throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            String url = String.format("disturbances/%s?omitduplicatestatus=true", id);
+            return mapper.readValue(getRequest(endpoint.resolve(url), false), Disturbance.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

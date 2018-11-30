@@ -1,9 +1,11 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.annotation.Nullable;
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
 import im.tny.segvault.disturbances.ui.activity.POIActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
+import im.tny.segvault.disturbances.ui.fragment.DisturbanceDialogFragment;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -60,6 +63,9 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
             case "poi":
                 onPOILinkClicked(context, parts[1]);
                 break;
+            case "disturbance":
+                onDisturbanceLinkClicked(context, parts[1]);
+                break;
             case "mailto":
                 onMailtoLinkClicked(context, url.substring(7));
                 break;
@@ -71,7 +77,7 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
                 if (("perturbacoes.pt".equals(host) || "www.perturbacoes.pt".equals(host)) && (port == 80 || port == 443)) {
                     List<String> segments = uri.getPathSegments();
                     if (segments.size() >= 2) {
-                        switch(segments.get(0)) {
+                        switch (segments.get(0)) {
                             case "s":
                             case "stations":
                                 onStationLinkClicked(context, segments.get(1));
@@ -79,6 +85,10 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
                             case "l":
                             case "lines":
                                 onLineLinkClicked(context, segments.get(1));
+                                return;
+                            case "d":
+                            case "disturbances":
+                                onDisturbanceLinkClicked(context, segments.get(1));
                                 return;
                         }
                     }
@@ -135,6 +145,12 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
         }
     }
 
+    public static void onDisturbanceLinkClicked(Context context, String destination) {
+        Intent intent = new Intent(context, DisturbanceActivity.class);
+        intent.putExtra(DisturbanceActivity.EXTRA_DISTURBANCE_ID, destination);
+        context.startActivity(intent);
+    }
+
     public static void onPOILinkClicked(Context context, String destination) {
         Intent intent = new Intent(context, POIActivity.class);
         intent.putExtra(POIActivity.EXTRA_POI_ID, destination);
@@ -157,18 +173,52 @@ public class InternalLinkHandler implements RichTextUtils.ClickSpan.OnClickListe
         }
     }
 
-    public static class Activity extends AppCompatActivity {
+    public static class Activity extends AppCompatActivity implements DialogInterface.OnDismissListener {
         public Activity() {
-            // constructor as activity. only to be used by Android
         }
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            onNewIntent(getIntent());
+        }
 
-            if (Intent.ACTION_VIEW.equals(getIntent().getAction()) && getIntent().getData() != null) {
-                InternalLinkHandler.onClick(this, getIntent().getData().toString(), null);
-            }
+        @Override
+        protected void onNewIntent(Intent intent) {
+            super.onNewIntent(intent);
+
+            InternalLinkHandler.onClick(this, intent.getData().toString(), null);
+            finish();
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialogInterface) {
+            finish();
+        }
+    }
+
+    public static class DisturbanceActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
+        public DisturbanceActivity() {
+        }
+
+        @Override
+        protected void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            onNewIntent(getIntent());
+        }
+
+        @Override
+        protected void onNewIntent(Intent intent) {
+            super.onNewIntent(intent);
+
+            DialogFragment newFragment = DisturbanceDialogFragment.newInstance(intent.getStringExtra(EXTRA_DISTURBANCE_ID));
+            newFragment.show(getSupportFragmentManager(), "disturbance");
+        }
+
+        public static final String EXTRA_DISTURBANCE_ID = "im.tny.segvault.disturbances.extra.MainActivity.disturbanceid";
+
+        @Override
+        public void onDismiss(DialogInterface dialogInterface) {
             finish();
         }
     }

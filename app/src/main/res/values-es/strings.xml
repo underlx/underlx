@@ -365,6 +365,7 @@
     <string name="frag_map_filter_no_match">El filtro no corresponde a ninguna estación.</string>
     <string name="frag_map_filters_applied">Filtros aplicados</string>
     <string name="frag_map_clear_filters">Inhabilitar filtros</string>
+    <string name="frag_disturbance_close">Cerrar</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>

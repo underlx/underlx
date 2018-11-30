@@ -382,6 +382,7 @@
     <string name="service_connect_error">An error occurred. Make sure you entered the correct code and try again.</string>
     <string name="service_connect_success">This &appname; install is now connected with: %s.</string>
     <string name="frag_favorite_stations_title">Favorite stations</string>
+    <string name="frag_disturbance_close">Close</string>
 
     <string name="disturbance_status_report_begin">Users reported service disruptions</string>
     <string name="disturbance_status_report_confirm">Several users confirmed service disruptions</string>

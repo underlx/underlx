@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
@@ -54,22 +55,31 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
     private final List<DisturbanceItem> mValues;
     private final OnListFragmentInteractionListener mListener;
     private Context context;
+    private boolean withCards = true;
 
     public DisturbanceRecyclerViewAdapter(List<DisturbanceItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
 
+    public DisturbanceRecyclerViewAdapter(List<DisturbanceItem> items, OnListFragmentInteractionListener listener, boolean withCards) {
+        mValues = items;
+        mListener = listener;
+        this.withCards = withCards;
+    }
+
+
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_disturbance, parent, false);
+                .inflate(withCards ? R.layout.fragment_disturbance : R.layout.fragment_disturbance_nocard, parent, false);
         context = parent.getContext();
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mLineNameView.setText(String.format(holder.mView.getContext().getString(R.string.frag_disturbance_line), holder.mItem.lineName));
         holder.mLineNameView.setTextColor(holder.mItem.lineColor);
