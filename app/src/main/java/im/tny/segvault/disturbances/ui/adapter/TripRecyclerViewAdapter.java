@@ -189,18 +189,18 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            originView = (TextView) view.findViewById(R.id.origin_view);
-            originTimeView = (TextView) view.findViewById(R.id.origin_time_view);
-            destinationView = (TextView) view.findViewById(R.id.destination_view);
-            destinationTimeView = (TextView) view.findViewById(R.id.destination_time_view);
-            topLineLayout = (FrameLayout) view.findViewById(R.id.top_line_stripe_layout);
-            bottomLineLayout = (FrameLayout) view.findViewById(R.id.bottom_line_stripe_layout);
-            lineLayout = (FrameLayout) view.findViewById(R.id.line_stripe_layout);
-            destinationLayout = (LinearLayout) view.findViewById(R.id.destination_layout);
-            secondDotView = (ImageView) view.findViewById(R.id.second_dot_view);
+            originView = view.findViewById(R.id.origin_view);
+            originTimeView = view.findViewById(R.id.origin_time_view);
+            destinationView = view.findViewById(R.id.destination_view);
+            destinationTimeView = view.findViewById(R.id.destination_time_view);
+            topLineLayout = view.findViewById(R.id.top_line_stripe_layout);
+            bottomLineLayout = view.findViewById(R.id.bottom_line_stripe_layout);
+            lineLayout = view.findViewById(R.id.line_stripe_layout);
+            destinationLayout = view.findViewById(R.id.destination_layout);
+            secondDotView = view.findViewById(R.id.second_dot_view);
             if (homeScreenList) {
-                confirmButton = (Button) view.findViewById(R.id.confirm_button);
-                correctButton = (Button) view.findViewById(R.id.correct_button);
+                confirmButton = view.findViewById(R.id.confirm_button);
+                correctButton = view.findViewById(R.id.correct_button);
             } else {
                 confirmButton = null;
                 correctButton = null;

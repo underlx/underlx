@@ -71,18 +71,18 @@ public class TripCorrectionActivity extends TopActivity {
 
         setContentView(R.layout.activity_trip_correction);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (isStandalone) {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
         }
 
-        startPicker = (StationPickerView) findViewById(R.id.start_picker);
-        endPicker = (StationPickerView) findViewById(R.id.end_picker);
-        pathLayout = (LinearLayout) findViewById(R.id.path_layout);
-        buttonsLayout = (LinearLayout) findViewById(R.id.buttons_layout);
-        saveButton = (Button) findViewById(R.id.save_button);
+        startPicker = findViewById(R.id.start_picker);
+        endPicker = findViewById(R.id.end_picker);
+        pathLayout = findViewById(R.id.path_layout);
+        buttonsLayout = findViewById(R.id.buttons_layout);
+        saveButton = findViewById(R.id.save_button);
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean(STATE_START_FOCUSED, false)) {

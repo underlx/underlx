@@ -171,9 +171,9 @@ public class StationPickerView extends LinearLayout implements LocationListener 
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.station_picker_view, this);
 
-        textView = (InstantAutoComplete) findViewById(R.id.text_station);
-        clearButton = (ImageButton) findViewById(R.id.button_clear);
-        myLocationButton = (ImageButton) findViewById(R.id.button_my_location);
+        textView = findViewById(R.id.text_station);
+        clearButton = findViewById(R.id.button_clear);
+        myLocationButton = findViewById(R.id.button_my_location);
 
         textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -475,20 +475,20 @@ public class StationPickerView extends LinearLayout implements LocationListener 
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.row_station, parent, false);
 
-            TextView name = (TextView) convertView.findViewById(R.id.text_name);
+            TextView name = convertView.findViewById(R.id.text_name);
             name.setText(station.getName());
 
             Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.circle);
             drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 
-            FrameLayout icon = (FrameLayout) convertView.findViewById(R.id.frame_circle);
+            FrameLayout icon = convertView.findViewById(R.id.frame_circle);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                 icon.setBackgroundDrawable(drawable);
             } else {
                 icon.setBackground(drawable);
             }
 
-            ImageView subicon = (ImageView) convertView.findViewById(R.id.image_icon);
+            ImageView subicon = convertView.findViewById(R.id.image_icon);
 
             Drawable mWrappedDrawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLine(line)).mutate();
             mWrappedDrawable = DrawableCompat.wrap(mWrappedDrawable);
@@ -507,7 +507,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
 
                 Bitmap bmp = getBitmapFromVectorDrawable(getContext(), drawable, 2, 1);
 
-                icon = (FrameLayout) convertView.findViewById(R.id.frame_half_circle);
+                icon = convertView.findViewById(R.id.frame_half_circle);
                 icon.setVisibility(VISIBLE);
                 if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                     icon.setBackgroundDrawable(new BitmapDrawable(getResources(), bmp));
@@ -515,7 +515,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
                     icon.setBackground(new BitmapDrawable(getResources(), bmp));
                 }
 
-                subicon = (ImageView) convertView.findViewById(R.id.image_half_icon);
+                subicon = convertView.findViewById(R.id.image_half_icon);
 
                 mWrappedDrawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLine(line)).mutate();
                 mWrappedDrawable = DrawableCompat.wrap(mWrappedDrawable);

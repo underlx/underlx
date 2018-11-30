@@ -57,8 +57,8 @@ public class POIView extends LinearLayout {
         String lang = l.getLanguage();
         String[] names = poi.getNames(lang);
 
-        nameView = (TextView) findViewById(R.id.poi_name);
-        secondNameView = (TextView) findViewById(R.id.poi_second_name);
+        nameView = findViewById(R.id.poi_name);
+        secondNameView = findViewById(R.id.poi_second_name);
         nameView.setText(names[0]);
         if (names.length > 1) {
             secondNameView.setVisibility(VISIBLE);

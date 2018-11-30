@@ -49,9 +49,9 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements
         if (mListener != null) {
             mListener.checkNavigationDrawerItem(R.id.nav_settings);
         }
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.hide();
-        SwipeRefreshLayout srl = (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
+        SwipeRefreshLayout srl = getActivity().findViewById(R.id.swipe_container);
         srl.setEnabled(false);
         return view;
     }

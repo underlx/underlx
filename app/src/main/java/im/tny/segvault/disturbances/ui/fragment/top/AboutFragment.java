@@ -89,7 +89,7 @@ public class AboutFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
-        ImageView segvaultLogo = (ImageView) view.findViewById(R.id.segvault_logo_view);
+        ImageView segvaultLogo = view.findViewById(R.id.segvault_logo_view);
         segvaultLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,14 +98,14 @@ public class AboutFragment extends TopFragment {
             }
         });
 
-        networksLayout = (LinearLayout) view.findViewById(R.id.about_networks);
+        networksLayout = view.findViewById(R.id.about_networks);
         refreshDatasetInfo();
 
-        TextView versionView = (TextView) view.findViewById(R.id.about_version);
+        TextView versionView = view.findViewById(R.id.about_version);
         versionView.setText(String.format(getResources().getString(R.string.frag_about_version),
                 String.format("%s #%d", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)));
 
-        ListView thirdPartyList = (ListView) view.findViewById(R.id.about_thirdparty);
+        ListView thirdPartyList = view.findViewById(R.id.about_thirdparty);
 
         List<Map<String, String>> data = new ArrayList<>();
         Map<String, String> jgrapht = new HashMap<>(3);

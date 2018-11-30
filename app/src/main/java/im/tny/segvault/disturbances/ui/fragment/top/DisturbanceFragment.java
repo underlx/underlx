@@ -108,8 +108,8 @@ public class DisturbanceFragment extends TopFragment {
 
         // Set the adapter
         Context context = view.getContext();
-        emptyView = (TextView) view.findViewById(R.id.no_disturbances_view);
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        emptyView = view.findViewById(R.id.no_disturbances_view);
+        recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {

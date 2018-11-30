@@ -24,7 +24,7 @@ public abstract class TopFragment extends Fragment implements MainAddableFragmen
         if (mListener != null) {
             mListener.checkNavigationDrawerItem(getNavDrawerId());
         }
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         if (withFab) {
             fab.show();
 
@@ -41,7 +41,7 @@ public abstract class TopFragment extends Fragment implements MainAddableFragmen
         }
         fab.setOnClickListener(null);
 
-        SwipeRefreshLayout srl = (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
+        SwipeRefreshLayout srl = getActivity().findViewById(R.id.swipe_container);
         srl.setEnabled(withRefresh);
         srl.setRefreshing(false);
         srl.setOnRefreshListener(null);

@@ -114,12 +114,12 @@ public class TripHistoryFragment extends TopFragment {
 
         // Set the adapter
         Context context = view.getContext();
-        emptyView = (TextView) view.findViewById(R.id.no_trips_view);
-        tripCountView = (TextView) view.findViewById(R.id.trip_count_view);
-        tripTotalLengthView = (TextView) view.findViewById(R.id.trip_total_length_view);
-        tripTotalTimeView = (TextView) view.findViewById(R.id.trip_total_time_view);
-        tripAverageSpeedView = (TextView) view.findViewById(R.id.trip_average_speed_view);
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        emptyView = view.findViewById(R.id.no_trips_view);
+        tripCountView = view.findViewById(R.id.trip_count_view);
+        tripTotalLengthView = view.findViewById(R.id.trip_total_length_view);
+        tripTotalTimeView = view.findViewById(R.id.trip_total_time_view);
+        tripAverageSpeedView = view.findViewById(R.id.trip_average_speed_view);
+        recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {

@@ -89,9 +89,9 @@ public class ErrorFragment extends TopFragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_error, container, false);
 
-        errorTitleView = (TextView) rootView.findViewById(R.id.error_title_view);
-        errorMessageView = (TextView) rootView.findViewById(R.id.error_message_view);
-        retryButton = (Button) rootView.findViewById(R.id.retry_button);
+        errorTitleView = rootView.findViewById(R.id.error_title_view);
+        errorMessageView = rootView.findViewById(R.id.error_message_view);
+        retryButton = rootView.findViewById(R.id.retry_button);
 
         switch (errorType) {
             case NO_TOPOLOGY:

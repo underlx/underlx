@@ -75,16 +75,16 @@ public class LineActivity extends TopActivity {
         }
 
         setContentView(R.layout.activity_line);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
-        disturbancesWarningLayout = (LinearLayout) findViewById(R.id.disturbances_warning_layout);
-        lineLayout = (LinearLayout) findViewById(R.id.line_layout);
+        lineIconsLayout = findViewById(R.id.line_icons_layout);
+        disturbancesWarningLayout = findViewById(R.id.disturbances_warning_layout);
+        lineLayout = findViewById(R.id.line_layout);
 
         Network net = Coordinator.get(this).getMapManager().getNetwork(networkId);
         Line line = net.getLine(lineId);
@@ -92,8 +92,8 @@ public class LineActivity extends TopActivity {
         String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
         setTitle(title);
         getSupportActionBar().setTitle(title);
-        AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-        final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        AppBarLayout abl = findViewById(R.id.app_bar);
+        final CollapsingToolbarLayout ctl = findViewById(R.id.toolbar_layout);
         ctl.setTitle(title);
 
         int color = line.getColor();
@@ -139,9 +139,9 @@ public class LineActivity extends TopActivity {
             disturbancesWarningLayout.setVisibility(View.GONE);
         }
 
-        LinearLayout closedLayout = (LinearLayout) findViewById(R.id.closed_info_layout);
+        LinearLayout closedLayout = findViewById(R.id.closed_info_layout);
         if (line.isExceptionallyClosed(new Date())) {
-            TextView closedView = (TextView) findViewById(R.id.closed_info_view);
+            TextView closedView = findViewById(R.id.closed_info_view);
             Formatter f = new Formatter();
             DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
             closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
@@ -195,16 +195,16 @@ public class LineActivity extends TopActivity {
 
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
-            TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+            TextView timeView = stepview.findViewById(R.id.time_view);
             timeView.setVisibility(View.INVISIBLE);
 
-            FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
-            FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
-            FrameLayout backLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.back_line_stripe_layout);
-            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            FrameLayout prevLineStripeLayout = stepview.findViewById(R.id.prev_line_stripe_layout);
+            FrameLayout nextLineStripeLayout = stepview.findViewById(R.id.next_line_stripe_layout);
+            FrameLayout backLineStripeLayout = stepview.findViewById(R.id.back_line_stripe_layout);
+            FrameLayout centerLineStripeLayout = stepview.findViewById(R.id.center_line_stripe_layout);
             centerLineStripeLayout.setVisibility(View.VISIBLE);
-            FrameLayout leftLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.left_line_stripe_layout);
-            FrameLayout rightLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.right_line_stripe_layout);
+            FrameLayout leftLineStripeLayout = stepview.findViewById(R.id.left_line_stripe_layout);
+            FrameLayout rightLineStripeLayout = stepview.findViewById(R.id.right_line_stripe_layout);
 
             if (i == 0) {
                 prevLineStripeLayout.setVisibility(View.INVISIBLE);

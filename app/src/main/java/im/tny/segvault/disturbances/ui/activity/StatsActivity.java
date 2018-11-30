@@ -43,7 +43,7 @@ public class StatsActivity extends TopActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -71,7 +71,7 @@ public class StatsActivity extends TopActivity {
         stats.add(new AverageSpeedStatistic(30));
         stats.add(new AverageStationsStatistic(30));
 
-        new UpdateStatsTask(this, stats, (TableLayout) findViewById(R.id.table_layout), getLayoutInflater()).execute();
+        new UpdateStatsTask(this, stats, findViewById(R.id.table_layout), getLayoutInflater()).execute();
     }
 
     @Override
@@ -188,7 +188,7 @@ public class StatsActivity extends TopActivity {
             TableRow.LayoutParams trParams = new TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
 
-            TextView name = (TextView) tr.findViewById(R.id.name_view);
+            TextView name = tr.findViewById(R.id.name_view);
             name.setText(getNameStringId());
 
             table.addView(tr, new TableLayout.LayoutParams(

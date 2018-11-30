@@ -86,17 +86,17 @@ public class StationActivity extends TopActivity
         }
 
         setContentView(R.layout.activity_station);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = findViewById(R.id.fab);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        lineIconsLayout = (LinearLayout) findViewById(R.id.line_icons_layout);
+        lineIconsLayout = findViewById(R.id.line_icons_layout);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        ViewPager pager = findViewById(R.id.pager);
         pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId, lobbyId));
         tabLayout.setupWithViewPager(pager);
         if(lobbyId != null && !lobbyId.isEmpty()) {
@@ -114,7 +114,7 @@ public class StationActivity extends TopActivity
             }
         });
 
-        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        AppBarLayout appBarLayout = findViewById(R.id.app_bar);
         appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener() {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state) {
@@ -140,8 +140,8 @@ public class StationActivity extends TopActivity
 
         setTitle(station.getName());
         getSupportActionBar().setTitle(station.getName());
-        AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-        final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        AppBarLayout abl = findViewById(R.id.app_bar);
+        final CollapsingToolbarLayout ctl = findViewById(R.id.toolbar_layout);
         ctl.setTitle(station.getName());
 
         List<Line> lines = new ArrayList<>(station.getLines());

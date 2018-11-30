@@ -202,7 +202,7 @@ public class MapFragment extends TopFragment {
 
         this.savedInstanceState = savedInstanceState;
 
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
         fab.setImageResource(R.drawable.ic_swap_horiz_white_24dp);
         CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -729,7 +729,7 @@ public class MapFragment extends TopFragment {
 
                 RouteFragment.populateStationView(getContext(), station, view);
 
-                LinearLayout stationIconsLayout = (LinearLayout) view.findViewById(R.id.station_icons_layout);
+                LinearLayout stationIconsLayout = view.findViewById(R.id.station_icons_layout);
 
                 List<Line> lines = new ArrayList<>(station.getLines());
                 Collections.sort(lines, new Comparator<Line>() {
@@ -761,8 +761,8 @@ public class MapFragment extends TopFragment {
                     stationIconsLayout.addView(iconFrame);
                 }
 
-                TextView lobbyNameView = (TextView) view.findViewById(R.id.lobby_name_view);
-                TextView exitNameView = (TextView) view.findViewById(R.id.exit_name_view);
+                TextView lobbyNameView = view.findViewById(R.id.lobby_name_view);
+                TextView exitNameView = view.findViewById(R.id.exit_name_view);
                 Lobby.Exit exit = exitsOfExitMarkers.get(marker);
                 if (exit != null) {
                     Lobby lobby = exitMarkers.get(marker);

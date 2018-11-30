@@ -58,7 +58,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
 
         setContentView(R.layout.activity_edit_notif_schedule);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -95,9 +95,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
                 endTimeItem.put("desc", "");
                 data.add(endTimeItem);
 
-                listView = (ListView)
-
-                        findViewById(R.id.list_view);
+                listView = findViewById(R.id.list_view);
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

@@ -74,7 +74,7 @@ public class LobbyView extends LinearLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.lobby_view, this);
 
-        nameView = (TextView) findViewById(R.id.lobby_name);
+        nameView = findViewById(R.id.lobby_name);
         String titleStr = String.format(context.getString(R.string.frag_station_lobby_name), lobby.getName());
 
         int lStart = titleStr.indexOf(lobby.getName());
@@ -84,7 +84,7 @@ public class LobbyView extends LinearLayout {
         nameView.setText(sb);
 
         // Schedule
-        scheduleLayout = (LinearLayout) findViewById(R.id.lobby_schedule_layout);
+        scheduleLayout = findViewById(R.id.lobby_schedule_layout);
 
         boolean weekdaysAllTheSame = true;
         for (int i = 2; i < 6; i++) {
@@ -134,7 +134,7 @@ public class LobbyView extends LinearLayout {
         }
 
         // Exits
-        exitsLayout = (LinearLayout) findViewById(R.id.lobby_exits_layout);
+        exitsLayout = findViewById(R.id.lobby_exits_layout);
         for (final Lobby.Exit exit : lobby.getExits()) {
             LinearLayout exitLayout = new LinearLayout(context);
             exitLayout.setOrientation(HORIZONTAL);

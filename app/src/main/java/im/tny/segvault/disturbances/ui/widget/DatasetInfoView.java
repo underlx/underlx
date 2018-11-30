@@ -65,11 +65,11 @@ public class DatasetInfoView extends LinearLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.dataset_info_view, this);
 
-        TextView nameView = (TextView) findViewById(R.id.dataset_info_name);
-        TextView versionView = (TextView) findViewById(R.id.dataset_info_version);
-        TextView authorsView = (TextView) findViewById(R.id.dataset_info_authors);
-        updateButton = (Button) findViewById(R.id.dataset_update_button);
-        cacheAllExtrasButton = (Button) findViewById(R.id.dataset_cache_all_button);
+        TextView nameView = findViewById(R.id.dataset_info_name);
+        TextView versionView = findViewById(R.id.dataset_info_version);
+        TextView authorsView = findViewById(R.id.dataset_info_authors);
+        updateButton = findViewById(R.id.dataset_update_button);
+        cacheAllExtrasButton = findViewById(R.id.dataset_cache_all_button);
 
         String[] names = Util.getNetworkNames(context, net);
         if(names.length == 1) {

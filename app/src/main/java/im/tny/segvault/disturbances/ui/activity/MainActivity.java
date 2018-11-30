@@ -125,16 +125,16 @@ public class MainActivity extends TopActivity
         }
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         Fragment newFragment = null;
@@ -233,7 +233,7 @@ public class MainActivity extends TopActivity
 
     private void showTargetPrompt() {
         new MaterialTapTargetPrompt.Builder(MainActivity.this)
-                .setTarget(Util.getToolbarNavigationIcon((Toolbar) findViewById(R.id.toolbar)))
+                .setTarget(Util.getToolbarNavigationIcon(findViewById(R.id.toolbar)))
                 .setPrimaryText(R.string.act_main_nav_taptarget_title)
                 .setSecondaryText(R.string.act_main_nav_taptarget_subtitle)
                 .setPromptStateChangeListener(new MaterialTapTargetPrompt.PromptStateChangeListener() {
@@ -277,7 +277,7 @@ public class MainActivity extends TopActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -477,7 +477,7 @@ public class MainActivity extends TopActivity
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -720,13 +720,13 @@ public class MainActivity extends TopActivity
 
     @Override
     public void onLinesFinishedRefreshing() {
-        SwipeRefreshLayout srl = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        SwipeRefreshLayout srl = findViewById(R.id.swipe_container);
         srl.setRefreshing(false);
     }
 
     @Override
     public void onStatsFinishedRefreshing() {
-        SwipeRefreshLayout srl = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        SwipeRefreshLayout srl = findViewById(R.id.swipe_container);
         srl.setRefreshing(false);
     }
 

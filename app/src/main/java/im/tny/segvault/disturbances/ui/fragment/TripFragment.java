@@ -102,14 +102,14 @@ public class TripFragment extends BottomSheetDialogFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_trip, container, false);
 
-        layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
+        layoutRoute = view.findViewById(R.id.layout_route);
 
-        stationNamesView = (TextView) view.findViewById(R.id.station_names_view);
-        dateView = (TextView) view.findViewById(R.id.date_view);
-        correctButton = (Button) view.findViewById(R.id.correct_button);
-        deleteButton = (Button) view.findViewById(R.id.delete_button);
-        statsLayout = (LinearLayout) view.findViewById(R.id.layout_stats);
-        statsView = (TextView) view.findViewById(R.id.stats_view);
+        stationNamesView = view.findViewById(R.id.station_names_view);
+        dateView = view.findViewById(R.id.date_view);
+        correctButton = view.findViewById(R.id.correct_button);
+        deleteButton = view.findViewById(R.id.delete_button);
+        statsLayout = view.findViewById(R.id.layout_stats);
+        statsView = view.findViewById(R.id.stats_view);
 
         network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
 
@@ -222,14 +222,14 @@ public class TripFragment extends BottomSheetDialogFragment {
         if (el.size() == 0) {
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
-            FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
-            FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+            FrameLayout prevLineStripeLayout = stepview.findViewById(R.id.prev_line_stripe_layout);
+            FrameLayout nextLineStripeLayout = stepview.findViewById(R.id.next_line_stripe_layout);
             prevLineStripeLayout.setVisibility(View.INVISIBLE);
             nextLineStripeLayout.setVisibility(View.INVISIBLE);
-            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            FrameLayout centerLineStripeLayout = stepview.findViewById(R.id.center_line_stripe_layout);
             centerLineStripeLayout.setVisibility(View.VISIBLE);
 
-            TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+            TextView timeView = stepview.findViewById(R.id.time_view);
             if (path.getManualEntry(0)) {
                 timeView.setVisibility(View.INVISIBLE);
             } else {
@@ -274,10 +274,10 @@ public class TripFragment extends BottomSheetDialogFragment {
 
             View stepview = inflater.inflate(R.layout.path_station, root, false);
 
-            FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
-            FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
+            FrameLayout prevLineStripeLayout = stepview.findViewById(R.id.prev_line_stripe_layout);
+            FrameLayout centerLineStripeLayout = stepview.findViewById(R.id.center_line_stripe_layout);
             centerLineStripeLayout.setVisibility(View.VISIBLE);
-            FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+            FrameLayout nextLineStripeLayout = stepview.findViewById(R.id.next_line_stripe_layout);
 
             if (isFirst) {
                 Line line = c.getSource().getLine();
@@ -294,7 +294,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 centerLineStripeLayout.setVisibility(View.VISIBLE);
                 nextLineStripeLayout.setBackgroundColor(lineColor);
 
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                TextView timeView = stepview.findViewById(R.id.time_view);
                 if (path.getManualEntry(i)) {
                     timeView.setVisibility(View.INVISIBLE);
                 } else {
@@ -325,7 +325,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                 }
                 centerLineStripeLayout.setVisibility(View.VISIBLE);
 
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                TextView timeView = stepview.findViewById(R.id.time_view);
                 // left side of the outer && is a small hack to fix time not displaying when the
                 // start of the path was extended with the first step getting replaced by a transfer
                 if (path.getManualEntry(i) && !(c instanceof Transfer && !path.getManualEntry(i + 1))) {
@@ -361,9 +361,9 @@ public class TripFragment extends BottomSheetDialogFragment {
         View stepview = inflater.inflate(R.layout.path_station, root, false);
 
         int lineColor = c.getSource().getLine().getColor();
-        FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
-        FrameLayout centerLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.center_line_stripe_layout);
-        FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+        FrameLayout prevLineStripeLayout = stepview.findViewById(R.id.prev_line_stripe_layout);
+        FrameLayout centerLineStripeLayout = stepview.findViewById(R.id.center_line_stripe_layout);
+        FrameLayout nextLineStripeLayout = stepview.findViewById(R.id.next_line_stripe_layout);
 
         prevLineStripeLayout.setBackgroundColor(lineColor);
         Drawable background = Util.getColoredDrawableResource(context, R.drawable.station_line_bottom, lineColor);
@@ -375,7 +375,7 @@ public class TripFragment extends BottomSheetDialogFragment {
         centerLineStripeLayout.setVisibility(View.VISIBLE);
         nextLineStripeLayout.setVisibility(View.INVISIBLE);
 
-        TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+        TextView timeView = stepview.findViewById(R.id.time_view);
         if (path.getManualEntry(i)) {
             timeView.setVisibility(View.INVISIBLE);
         } else {

@@ -104,7 +104,7 @@ public class HelpFragment extends TopFragment {
     }
 
     private void setHtmlFromHelpFile(String file) {
-        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout);
+        LinearLayout linearLayout = rootView.findViewById(R.id.linear_layout);
         linearLayout.removeAllViews();
 
         String[] contents = getHelpFileContents(file).split("<contactlinks/>");

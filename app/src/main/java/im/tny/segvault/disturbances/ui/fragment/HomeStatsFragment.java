@@ -96,12 +96,12 @@ public class HomeStatsFragment extends Fragment {
 
         Context context = view.getContext();
 
-        lineStatsLayout = (TableLayout) view.findViewById(R.id.line_stats_layout);
-        progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);
-        lastDisturbanceView = (HtmlTextView) view.findViewById(R.id.last_disturbance_view);
-        usersOnlineView = (TextView) view.findViewById(R.id.users_online_view);
+        lineStatsLayout = view.findViewById(R.id.line_stats_layout);
+        progressBar = view.findViewById(R.id.loading_indicator);
+        lastDisturbanceView = view.findViewById(R.id.last_disturbance_view);
+        usersOnlineView = view.findViewById(R.id.users_online_view);
         progressBar.setVisibility(View.VISIBLE);
-        updateInformationView = (TextView) view.findViewById(R.id.update_information);
+        updateInformationView = view.findViewById(R.id.update_information);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -339,7 +339,7 @@ public class HomeStatsFragment extends Fragment {
             }
 
             TableRow row = (TableRow) getActivity().getLayoutInflater().inflate(R.layout.line_stats_row, lineStatsLayout, false);
-            TextView lineNameView = (TextView) row.findViewById(R.id.line_name_view);
+            TextView lineNameView = row.findViewById(R.id.line_name_view);
             lineNameView.setText(Util.getLineNames(getContext(), line)[0]);
             lineNameView.setTextColor(line.getColor());
 

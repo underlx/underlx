@@ -112,10 +112,10 @@ public class StationLobbyFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        lobbiesLayout = (LinearLayout) view.findViewById(R.id.lobbies_layout);
-        lobbyScrollView = (NestedScrollView) view.findViewById(R.id.lobby_scroll_view);
+        lobbiesLayout = view.findViewById(R.id.lobbies_layout);
+        lobbyScrollView = view.findViewById(R.id.lobby_scroll_view);
 
-        mapView = (ScrollFixMapView) view.findViewById(R.id.map_view);
+        mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
 
         mapView.onResume(); // needed to get the map to display immediately

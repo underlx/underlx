@@ -64,14 +64,14 @@ public class POIActivity extends TopActivity {
         }
 
         setContentView(R.layout.activity_poi);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mapView = (ScrollFixMapView) findViewById(R.id.map_view);
+        mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
 
         try {
@@ -91,13 +91,13 @@ public class POIActivity extends TopActivity {
         final String[] names = poi.getNames(Util.getCurrentLanguage(POIActivity.this));
         setTitle(names[0]);
         getSupportActionBar().setTitle(names[0]);
-        AppBarLayout abl = (AppBarLayout) findViewById(R.id.app_bar);
-        final CollapsingToolbarLayout ctl = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        AppBarLayout abl = findViewById(R.id.app_bar);
+        final CollapsingToolbarLayout ctl = findViewById(R.id.toolbar_layout);
         ctl.setTitle(names[0]);
 
         if (names.length > 1) {
             getSupportActionBar().setSubtitle(names[1]);
-            final TextView subtitle = (TextView) findViewById(R.id.action_bar_subtitle);
+            final TextView subtitle = findViewById(R.id.action_bar_subtitle);
             subtitle.setText(names[1]);
             ctl.setExpandedTitleMarginBottom(subtitle.getHeight() * 3);
 
@@ -139,7 +139,7 @@ public class POIActivity extends TopActivity {
         } else {
             iconFrame.setBackground(drawable);
         }
-        final LinearLayout iconLayout = (LinearLayout) findViewById(R.id.icon_layout);
+        final LinearLayout iconLayout = findViewById(R.id.icon_layout);
         iconLayout.addView(iconFrame);
 
         abl.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
@@ -155,7 +155,7 @@ public class POIActivity extends TopActivity {
         // end of POI icon
 
         if (!poi.getWebURL().isEmpty()) {
-            Button webpageButton = (Button) findViewById(R.id.webpage_button);
+            Button webpageButton = findViewById(R.id.webpage_button);
             webpageButton.setVisibility(View.VISIBLE);
             webpageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -170,7 +170,7 @@ public class POIActivity extends TopActivity {
             });
         }
 
-        Button mapButton = (Button) findViewById(R.id.map_button);
+        Button mapButton = findViewById(R.id.map_button);
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -186,24 +186,24 @@ public class POIActivity extends TopActivity {
             }
         });
 
-        LinearLayout stationsLayout = (LinearLayout) findViewById(R.id.stations_layout);
+        LinearLayout stationsLayout = findViewById(R.id.stations_layout);
         for (final Station station : Coordinator.get(this).getMapManager().getAllStations()) {
             if (station.getPOIs().contains(poi)) {
                 View stepview = getLayoutInflater().inflate(R.layout.path_station, stationsLayout, false);
 
-                TextView timeView = (TextView) stepview.findViewById(R.id.time_view);
+                TextView timeView = stepview.findViewById(R.id.time_view);
                 timeView.setVisibility(View.INVISIBLE);
 
-                FrameLayout prevLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.prev_line_stripe_layout);
+                FrameLayout prevLineStripeLayout = stepview.findViewById(R.id.prev_line_stripe_layout);
                 prevLineStripeLayout.setVisibility(View.GONE);
-                FrameLayout nextLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.next_line_stripe_layout);
+                FrameLayout nextLineStripeLayout = stepview.findViewById(R.id.next_line_stripe_layout);
                 nextLineStripeLayout.setVisibility(View.GONE);
 
-                FrameLayout leftLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.left_line_stripe_layout);
+                FrameLayout leftLineStripeLayout = stepview.findViewById(R.id.left_line_stripe_layout);
                 leftLineStripeLayout.setVisibility(View.VISIBLE);
                 FrameLayout backLineStripeLayout = stepview.findViewById(R.id.back_line_stripe_layout);
                 backLineStripeLayout.setVisibility(View.VISIBLE);
-                FrameLayout rightLineStripeLayout = (FrameLayout) stepview.findViewById(R.id.right_line_stripe_layout);
+                FrameLayout rightLineStripeLayout = stepview.findViewById(R.id.right_line_stripe_layout);
                 rightLineStripeLayout.setVisibility(View.VISIBLE);
 
                 GradientDrawable gd = new GradientDrawable(

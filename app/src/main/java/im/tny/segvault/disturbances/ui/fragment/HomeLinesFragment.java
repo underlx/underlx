@@ -80,17 +80,17 @@ public class HomeLinesFragment extends Fragment {
 
         // Set the adapter
         Context context = view.getContext();
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
         recyclerView.setVisibility(View.GONE);
-        progressBar = (ProgressBar) view.findViewById(R.id.loading_indicator);
+        progressBar = view.findViewById(R.id.loading_indicator);
         progressBar.setVisibility(View.VISIBLE);
-        updateInformationView = (TextView) view.findViewById(R.id.update_information);
-        reportButton = (Button) view.findViewById(R.id.report_button);
+        updateInformationView = view.findViewById(R.id.update_information);
+        reportButton = view.findViewById(R.id.report_button);
 
         reportButton.setOnClickListener(new View.OnClickListener() {
             @Override

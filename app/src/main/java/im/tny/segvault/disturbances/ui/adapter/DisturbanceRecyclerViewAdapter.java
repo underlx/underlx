@@ -305,10 +305,10 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             inflater.inflate(R.layout.fragment_disturbance_status_view, this);
 
-            TextView timeView = (TextView) findViewById(R.id.time_view);
-            ImageView communityView = (ImageView) findViewById(R.id.community_view);
-            TextView statusView = (TextView) findViewById(R.id.status_view);
-            ImageView iconView = (ImageView) findViewById(R.id.icon_view);
+            TextView timeView = findViewById(R.id.time_view);
+            ImageView communityView = findViewById(R.id.community_view);
+            TextView statusView = findViewById(R.id.status_view);
+            ImageView iconView = findViewById(R.id.icon_view);
 
             timeView.setText(DateUtils.formatDateTime(context, status.date.getTime(), DateUtils.FORMAT_SHOW_TIME));
             statusView.setText(status.status);

@@ -134,9 +134,9 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mNameView = (TextView) view.findViewById(R.id.line_name_view);
-            mStatusDescView = (TextView) view.findViewById(R.id.line_status_desc_view);
-            mStatusView = (ImageView) view.findViewById(R.id.line_status_view);
+            mNameView = view.findViewById(R.id.line_name_view);
+            mStatusDescView = view.findViewById(R.id.line_status_desc_view);
+            mStatusView = view.findViewById(R.id.line_status_view);
         }
 
         @Override

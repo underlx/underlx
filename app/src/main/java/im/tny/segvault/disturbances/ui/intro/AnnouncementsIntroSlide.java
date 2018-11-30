@@ -51,14 +51,14 @@ public class AnnouncementsIntroSlide extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_intro_announcements, container, false);
 
-        ((Button) view.findViewById(R.id.select_sources_button)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.select_sources_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 view.findViewById(R.id.description_layout).setVisibility(View.GONE);
                 view.findViewById(R.id.select_sources_button).setVisibility(View.GONE);
 
-                LinearLayout checkboxLayout = (LinearLayout) view.findViewById(R.id.checkbox_layout);
+                LinearLayout checkboxLayout = view.findViewById(R.id.checkbox_layout);
 
                 SharedPreferences sharedPref = getContext().getSharedPreferences("notifsettings", Context.MODE_PRIVATE);
                 Set<String> sourcePref = sharedPref.getStringSet(PreferenceNames.AnnouncementSources, null);

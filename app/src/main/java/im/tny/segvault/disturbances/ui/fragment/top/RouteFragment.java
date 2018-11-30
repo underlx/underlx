@@ -154,16 +154,16 @@ public class RouteFragment extends TopFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_route, container, false);
 
-        layoutNetworkClosed = (LinearLayout) view.findViewById(R.id.network_closed_layout);
-        viewNetworkClosed = (TextView) view.findViewById(R.id.network_closed_view);
-        layoutRoute = (LinearLayout) view.findViewById(R.id.layout_route);
-        layoutOriginStationClosed = (LinearLayout) view.findViewById(R.id.origin_station_closed_layout);
-        layoutDestinationStationClosed = (LinearLayout) view.findViewById(R.id.destination_station_closed_layout);
-        viewOriginStationClosed = (TextView) view.findViewById(R.id.origin_station_closed_view);
-        viewDestinationStationClosed = (TextView) view.findViewById(R.id.destination_station_closed_view);
-        layoutInstructions = (LinearLayout) view.findViewById(R.id.layout_instructions);
-        layoutBottomSheet = (RelativeLayout) view.findViewById(R.id.bottom_sheet_layout);
-        swapButton = (ImageButton) view.findViewById(R.id.swap_button);
+        layoutNetworkClosed = view.findViewById(R.id.network_closed_layout);
+        viewNetworkClosed = view.findViewById(R.id.network_closed_view);
+        layoutRoute = view.findViewById(R.id.layout_route);
+        layoutOriginStationClosed = view.findViewById(R.id.origin_station_closed_layout);
+        layoutDestinationStationClosed = view.findViewById(R.id.destination_station_closed_layout);
+        viewOriginStationClosed = view.findViewById(R.id.origin_station_closed_view);
+        viewDestinationStationClosed = view.findViewById(R.id.destination_station_closed_view);
+        layoutInstructions = view.findViewById(R.id.layout_instructions);
+        layoutBottomSheet = view.findViewById(R.id.bottom_sheet_layout);
+        swapButton = view.findViewById(R.id.swap_button);
         swapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -173,7 +173,7 @@ public class RouteFragment extends TopFragment {
                 tryPlanRoute();
             }
         });
-        navigationStartButton = (Button) view.findViewById(R.id.navigation_start_button);
+        navigationStartButton = view.findViewById(R.id.navigation_start_button);
         navigationStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -184,17 +184,17 @@ public class RouteFragment extends TopFragment {
                 }
             }
         });
-        useRealtimeCheckbox = (CheckBox) view.findViewById(R.id.use_realtime_check);
+        useRealtimeCheckbox = view.findViewById(R.id.use_realtime_check);
         useRealtimeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 tryPlanRoute();
             }
         });
-        routeEtaView = (TextView) view.findViewById(R.id.route_eta_view);
+        routeEtaView = view.findViewById(R.id.route_eta_view);
 
-        originPicker = (StationPickerView) view.findViewById(R.id.origin_picker);
-        destinationPicker = (StationPickerView) view.findViewById(R.id.destination_picker);
+        originPicker = view.findViewById(R.id.origin_picker);
+        destinationPicker = view.findViewById(R.id.destination_picker);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -367,18 +367,18 @@ public class RouteFragment extends TopFragment {
                     Drawable drawable = ContextCompat.getDrawable(getContext(), Util.getDrawableResourceIdForLineId(line.getId()));
                     drawable.setColorFilter(lineColor, PorterDuff.Mode.SRC_ATOP);
 
-                    FrameLayout iconFrame = (FrameLayout) view.findViewById(R.id.frame_icon);
+                    FrameLayout iconFrame = view.findViewById(R.id.frame_icon);
                     if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                         iconFrame.setBackgroundDrawable(drawable);
                     } else {
                         iconFrame.setBackground(drawable);
                     }
 
-                    TextView lineView = (TextView) view.findViewById(R.id.line_name_view);
+                    TextView lineView = view.findViewById(R.id.line_name_view);
                     lineView.setText(String.format(getString(R.string.frag_route_line_name), Util.getLineNames(getContext(), line)[0]));
                     lineView.setTextColor(lineColor);
 
-                    LinearLayout lineLayout = (LinearLayout) view.findViewById(R.id.line_layout);
+                    LinearLayout lineLayout = view.findViewById(R.id.line_layout);
                     lineLayout.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -391,7 +391,7 @@ public class RouteFragment extends TopFragment {
                     lineLayout.setVisibility(View.VISIBLE);
                 }
 
-                TextView directionView = (TextView) view.findViewById(R.id.direction_view);
+                TextView directionView = view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
                                 ((EnterStep) step).getDirection().getName())));
@@ -459,7 +459,7 @@ public class RouteFragment extends TopFragment {
                 });
                 lineLayout.setVisibility(View.VISIBLE);
 
-                TextView directionView = (TextView) view.findViewById(R.id.direction_view);
+                TextView directionView = view.findViewById(R.id.direction_view);
                 directionView.setText(Util.fromHtml(
                         String.format(getString(R.string.frag_route_direction),
                                 lStep.getDirection().getName())));
@@ -584,7 +584,7 @@ public class RouteFragment extends TopFragment {
                 if (drawableResourceId != 0 && !addedDrawables.contains(drawableResourceId)) {
                     addedDrawables.add(drawableResourceId);
                     View iconView = inflater.inflate(R.layout.station_include_icon, iconsLayout, false);
-                    ImageView iconImageView = (ImageView) iconView.findViewById(R.id.image_view);
+                    ImageView iconImageView = iconView.findViewById(R.id.image_view);
                     iconImageView.setImageResource(drawableResourceId);
                     separatorView.setVisibility(View.VISIBLE);
                     iconsLayout.addView(iconView);
@@ -592,7 +592,7 @@ public class RouteFragment extends TopFragment {
             }
         }
 
-        LinearLayout stationLayout = (LinearLayout) view.findViewById(R.id.station_layout);
+        LinearLayout stationLayout = view.findViewById(R.id.station_layout);
 
         if (setOnClickListener) {
             stationLayout.setOnClickListener(new View.OnClickListener() {

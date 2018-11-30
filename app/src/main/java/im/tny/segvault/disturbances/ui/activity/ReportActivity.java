@@ -153,7 +153,7 @@ public class ReportActivity extends TopActivity {
         linesLayout.removeAllViews();
         for (final Line line : lines) {
             View view = getLayoutInflater().inflate(R.layout.checkbox_report_line, linesLayout, false);
-            final CheckBox lineCheckbox = (CheckBox) view.findViewById(R.id.line_checkbox);
+            final CheckBox lineCheckbox = view.findViewById(R.id.line_checkbox);
             lineCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -165,7 +165,7 @@ public class ReportActivity extends TopActivity {
                     sendButton.setEnabled(checkedLines.size() > 0);
                 }
             });
-            TextView lineNameView = (TextView) view.findViewById(R.id.line_name_view);
+            TextView lineNameView = view.findViewById(R.id.line_name_view);
             String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
             String lineLine = String.format(getString(R.string.act_report_line_name), lineName);
             S2LS s2ls = Coordinator.get(this).getS2LS(line.getNetwork().getId());
@@ -188,7 +188,7 @@ public class ReportActivity extends TopActivity {
                 }
             };
 
-            TextView lineClosedView = (TextView) view.findViewById(R.id.line_closed_view);
+            TextView lineClosedView = view.findViewById(R.id.line_closed_view);
             if (!line.isOpen()) {
                 lineClosedView.setVisibility(View.VISIBLE);
                 lineCheckbox.setEnabled(false);

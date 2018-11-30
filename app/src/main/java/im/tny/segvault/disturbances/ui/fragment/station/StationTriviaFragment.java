@@ -84,7 +84,7 @@ public class StationTriviaFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        triviaView = (HtmlTextView) view.findViewById(R.id.trivia_view);
+        triviaView = view.findViewById(R.id.trivia_view);
 
         triviaView.setHtml(getString(R.string.status_loading));
         update();

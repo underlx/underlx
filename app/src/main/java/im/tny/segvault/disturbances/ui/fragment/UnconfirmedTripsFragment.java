@@ -77,7 +77,7 @@ public class UnconfirmedTripsFragment extends Fragment {
 
         // Set the adapter
         Context context = view.getContext();
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {

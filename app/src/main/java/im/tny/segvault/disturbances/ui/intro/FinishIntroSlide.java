@@ -59,10 +59,10 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_intro_finish, container, false);
 
-        title = (TextView) view.findViewById(R.id.title);
-        image = (ImageView) view.findViewById(R.id.image);
-        description = (TextView) view.findViewById(R.id.description);
-        button = (Button) view.findViewById(R.id.button);
+        title = view.findViewById(R.id.title);
+        image = view.findViewById(R.id.image);
+        description = view.findViewById(R.id.description);
+        button = view.findViewById(R.id.button);
 
         refresh();
 

@@ -124,10 +124,10 @@ public class StationPOIFragment extends Fragment
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
-        poisLayout = (LinearLayout) view.findViewById(R.id.pois_layout);
-        poiScrollView = (NestedScrollView) view.findViewById(R.id.poi_scroll_view);
+        poisLayout = view.findViewById(R.id.pois_layout);
+        poiScrollView = view.findViewById(R.id.poi_scroll_view);
 
-        mapView = (ScrollFixMapView) view.findViewById(R.id.map_view);
+        mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
 
         mapView.onResume(); // needed to get the map to display immediately

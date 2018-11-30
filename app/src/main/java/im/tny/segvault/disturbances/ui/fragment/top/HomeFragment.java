@@ -199,7 +199,7 @@ public class HomeFragment extends TopFragment {
             }
         });
 
-        disturbancesButton = (Button) view.findViewById(R.id.disturbances_button);
+        disturbancesButton = view.findViewById(R.id.disturbances_button);
         disturbancesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -218,7 +218,7 @@ public class HomeFragment extends TopFragment {
             }
         });
 
-        tripHistoryButton = (Button) view.findViewById(R.id.trip_history_button);
+        tripHistoryButton = view.findViewById(R.id.trip_history_button);
         tripHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

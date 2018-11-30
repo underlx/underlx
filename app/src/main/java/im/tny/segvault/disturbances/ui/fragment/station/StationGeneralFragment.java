@@ -131,22 +131,22 @@ public class StationGeneralFragment extends Fragment {
             return;
 
         if (station.isAlwaysClosed()) {
-            LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);
+            LinearLayout closedLayout = view.findViewById(R.id.closed_info_layout);
             closedLayout.setVisibility(View.VISIBLE);
         } else if (station.isExceptionallyClosed(net, new Date())) {
-            TextView closedView = (TextView) view.findViewById(R.id.closed_info_view);
+            TextView closedView = view.findViewById(R.id.closed_info_view);
             Formatter f = new Formatter();
             DateUtils.formatDateRange(getContext(), f, station.getNextOpenTime(net), station.getNextOpenTime(net), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
             closedView.setText(String.format(getString(R.string.frag_station_closed_schedule), f.toString()));
 
-            LinearLayout closedLayout = (LinearLayout) view.findViewById(R.id.closed_info_layout);
+            LinearLayout closedLayout = view.findViewById(R.id.closed_info_layout);
             closedLayout.setVisibility(View.VISIBLE);
         }
 
         // Titles
-        TextView connectionsTitleView = (TextView) view.findViewById(R.id.connections_title_view);
-        TextView accessibilityTitleView = (TextView) view.findViewById(R.id.accessibility_title_view);
-        TextView servicesTitleView = (TextView) view.findViewById(R.id.services_title_view);
+        TextView connectionsTitleView = view.findViewById(R.id.connections_title_view);
+        TextView accessibilityTitleView = view.findViewById(R.id.accessibility_title_view);
+        TextView servicesTitleView = view.findViewById(R.id.services_title_view);
 
         // feature indication
         final Map<String, View> tagToView = new HashMap<>();
@@ -205,7 +205,7 @@ public class StationGeneralFragment extends Fragment {
         }
 
         // buttons
-        Button busButton = (Button) view.findViewById(R.id.connections_bus_button);
+        Button busButton = view.findViewById(R.id.connections_bus_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BUS)) {
             busButton.setVisibility(View.VISIBLE);
             busButton.setOnClickListener(new View.OnClickListener() {
@@ -217,7 +217,7 @@ public class StationGeneralFragment extends Fragment {
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
-        Button boatButton = (Button) view.findViewById(R.id.connections_boat_button);
+        Button boatButton = view.findViewById(R.id.connections_boat_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BOAT)) {
             boatButton.setVisibility(View.VISIBLE);
             boatButton.setOnClickListener(new View.OnClickListener() {
@@ -229,7 +229,7 @@ public class StationGeneralFragment extends Fragment {
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
-        Button trainButton = (Button) view.findViewById(R.id.connections_train_button);
+        Button trainButton = view.findViewById(R.id.connections_train_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_TRAIN)) {
             trainButton.setVisibility(View.VISIBLE);
             trainButton.setOnClickListener(new View.OnClickListener() {
@@ -241,7 +241,7 @@ public class StationGeneralFragment extends Fragment {
             connectionsTitleView.setVisibility(View.VISIBLE);
         }
 
-        Button parkButton = (Button) view.findViewById(R.id.connections_park_button);
+        Button parkButton = view.findViewById(R.id.connections_park_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_PARK)) {
             parkButton.setVisibility(View.VISIBLE);
             parkButton.setOnClickListener(new View.OnClickListener() {
@@ -253,7 +253,7 @@ public class StationGeneralFragment extends Fragment {
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 
-        Button bikeButton = (Button) view.findViewById(R.id.connections_bike_button);
+        Button bikeButton = view.findViewById(R.id.connections_bike_button);
         if (station.hasConnectionUrl(Station.CONNECTION_TYPE_BIKE)) {
             bikeButton.setVisibility(View.VISIBLE);
             bikeButton.setOnClickListener(new View.OnClickListener() {
@@ -267,19 +267,19 @@ public class StationGeneralFragment extends Fragment {
 
         // Statistics
         Realm realm = Application.getDefaultRealmInstance(getContext());
-        TextView statsEntryCountView = (TextView) view.findViewById(R.id.station_entry_count_view);
+        TextView statsEntryCountView = view.findViewById(R.id.station_entry_count_view);
         long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
         statsEntryCountView.setText(String.format(getString(R.string.frag_station_stats_entry), entryCount));
 
-        TextView statsExitCountView = (TextView) view.findViewById(R.id.station_exit_count_view);
+        TextView statsExitCountView = view.findViewById(R.id.station_exit_count_view);
         long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
         statsExitCountView.setText(String.format(getString(R.string.frag_station_stats_exit), exitCount));
 
-        TextView statsGoneThroughCountView = (TextView) view.findViewById(R.id.station_gone_through_count_view);
+        TextView statsGoneThroughCountView = view.findViewById(R.id.station_gone_through_count_view);
         long goneThroughCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.GONE_THROUGH.name()).count();
         statsGoneThroughCountView.setText(String.format(getString(R.string.frag_station_stats_gone_through), goneThroughCount));
 
-        TextView statsTransferCountView = (TextView) view.findViewById(R.id.station_transfer_count_view);
+        TextView statsTransferCountView = view.findViewById(R.id.station_transfer_count_view);
         if (station.getLines().size() > 1) {
             long transferCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
             statsTransferCountView.setText(String.format(getString(R.string.frag_station_stats_transfer), transferCount));
