@@ -3,16 +3,22 @@ package im.tny.segvault.disturbances.ui.fragment;
 import android.app.Dialog;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.text.Spanned;
+import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 
 /**
  * Created by gabriel on 7/12/17.
@@ -34,20 +40,24 @@ public class HtmlDialogFragment extends DialogFragment {
         return newInstance(content, true);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String content = "";
         boolean isHtml = false;
         if (getArguments() != null) {
             content = getArguments().getString(ARG_CONTENT);
+            content = content == null ? "" : content;
             isHtml = getArguments().getBoolean(ARG_HTML);
         }
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View view = inflater.inflate(R.layout.dialog_html, null);
 
-        HtmlTextView htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
+        HtmlTextView htmltv = view.findViewById(R.id.html_view);
         if (isHtml) {
+            htmltv.setHtml(content, new HtmlHttpImageGetter(htmltv, null, true));
+            htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext())));
             htmltv.setHtml(content);
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

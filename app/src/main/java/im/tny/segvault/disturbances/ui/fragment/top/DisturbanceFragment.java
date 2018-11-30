@@ -115,12 +115,12 @@ public class DisturbanceFragment extends TopFragment {
         } else {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
-        listContainer = (LinearLayout) view.findViewById(R.id.list_container);
+        listContainer = view.findViewById(R.id.list_container);
 
         // fix scroll fling. less than ideal, but apparently there's still no other solution
         recyclerView.setNestedScrollingEnabled(false);
 
-        HtmlTextView htmltv = (HtmlTextView) view.findViewById(R.id.html_view);
+        HtmlTextView htmltv = view.findViewById(R.id.html_view);
         htmltv.setHtml(getString(R.string.frag_disturbances_bottom));
 
         getSwipeRefreshLayout().setRefreshing(true);
@@ -133,12 +133,7 @@ public class DisturbanceFragment extends TopFragment {
 
         new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        getSwipeRefreshLayout().setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new DisturbanceFragment.UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        });
+        getSwipeRefreshLayout().setOnRefreshListener(() -> new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
         return view;
     }
 
@@ -209,12 +204,7 @@ public class DisturbanceFragment extends TopFragment {
             } catch (APIException e) {
                 return false;
             }
-            Collections.sort(items, Collections.<DisturbanceRecyclerViewAdapter.DisturbanceItem>reverseOrder(new Comparator<DisturbanceRecyclerViewAdapter.DisturbanceItem>() {
-                @Override
-                public int compare(DisturbanceRecyclerViewAdapter.DisturbanceItem disturbanceItem, DisturbanceRecyclerViewAdapter.DisturbanceItem t1) {
-                    return Long.valueOf(disturbanceItem.startTime.getTime()).compareTo(Long.valueOf(t1.startTime.getTime()));
-                }
-            }));
+            Collections.sort(items, Collections.<DisturbanceRecyclerViewAdapter.DisturbanceItem>reverseOrder((disturbanceItem, t1) -> Long.compare(disturbanceItem.startTime.getTime(), t1.startTime.getTime())));
             return true;
         }
 
@@ -274,7 +264,7 @@ public class DisturbanceFragment extends TopFragment {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (getActivity() == null) {
+            if (getActivity() == null || intent.getAction() == null) {
                 return;
             }
             switch (intent.getAction()) {
