@@ -51,13 +51,13 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation project(':s2ls')
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.2'
-    implementation 'org.msgpack:jackson-dataformat-msgpack:0.8.13'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.8.16'
     implementation 'com.evernote:android-job:1.2.6'
     implementation 'info.debatty:java-string-similarity:1.1.0'
     implementation 'org.sufficientlysecure:html-textview:3.6'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
-    implementation 'uk.co.samuelwall:material-tap-target-prompt:2.9.0'
+    implementation 'uk.co.samuelwall:material-tap-target-prompt:2.14.0'
     ext.supportLibsVersion = "27.1.1"
     implementation "com.android.support:appcompat-v7:$supportLibsVersion"
     implementation "com.android.support:design:$supportLibsVersion"
@@ -74,7 +74,7 @@ dependencies {
     implementation "com.android.support:preference-v7:$supportLibsVersion"
     implementation 'net.opacapp:multiline-collapsingtoolbar:27.1.1'
     implementation 'org.jgrapht:jgrapht-core:0.9.2'
-    implementation 'com.jaredrummler:android-device-names:1.1.7'
+    implementation 'com.jaredrummler:android-device-names:1.1.8'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.support:multidex:1.0.3'
     testImplementation 'junit:junit:4.12'
