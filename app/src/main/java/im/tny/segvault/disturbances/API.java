@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -371,12 +372,7 @@ public class API {
 
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
-            h.setRequestProperty("Accept", "application/msgpack");
-            h.setRequestProperty("Accept-Encoding", "gzip");
-            if (authenticate && pairManager != null) {
-                String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
-                h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
-            }
+            setCommonRequestProperties(h, authenticate);
             h.setRequestMethod("GET");
             h.setDoInput(true);
 
@@ -423,12 +419,7 @@ public class API {
 
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
-            h.setRequestProperty("Accept", "application/msgpack");
-            h.setRequestProperty("Accept-Encoding", "gzip");
-            if (authenticate && pairManager != null) {
-                String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
-                h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
-            }
+            setCommonRequestProperties(h, authenticate);
             h.setRequestMethod("HEAD");
             h.setDoInput(true);
 
@@ -463,13 +454,8 @@ public class API {
 
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
-            h.setRequestProperty("Accept", "application/msgpack");
-            h.setRequestProperty("Accept-Encoding", "gzip");
             h.setRequestProperty("Content-Type", "application/msgpack");
-            if (authenticate && pairManager != null) {
-                String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
-                h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
-            }
+            setCommonRequestProperties(h, authenticate);
 
             h.setRequestMethod(method);
             h.setDoInput(true);
@@ -523,6 +509,20 @@ public class API {
 
     private InputStream putRequest(URI uri, byte[] content, boolean authenticate) throws APIException {
         return doInputRequest(uri, content, authenticate, "PUT");
+    }
+
+    private void setCommonRequestProperties(HttpURLConnection h, boolean authenticate) throws UnsupportedEncodingException {
+        h.setRequestProperty("Accept", "application/msgpack");
+        h.setRequestProperty("Accept-Encoding", "gzip");
+        if (authenticate && pairManager != null) {
+            String toEncode = pairManager.getPairKey() + ":" + pairManager.getPairSecret();
+            h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
+        }
+        h.setRequestProperty("User-Agent",
+                String.format("UnderLX/%s#%d %s",
+                        BuildConfig.VERSION_NAME,
+                        BuildConfig.VERSION_CODE,
+                        System.getProperty("http.agent")));
     }
 
     private Meta getMetaOnline() throws APIException {
