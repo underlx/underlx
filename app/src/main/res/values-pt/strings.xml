@@ -366,6 +366,12 @@
     <string name="frag_map_filters_applied">Filtros aplicados</string>
     <string name="frag_map_clear_filters">Desligar filtros</string>
     <string name="frag_disturbance_close">Fechar</string>
+    <string name="frag_trip_history_posplay_all_time">desde sempre</string>
+    <string name="frag_trip_history_posplay_this_week">esta semana</string>
+    <string name="frag_trip_history_posplay_username">%s no %s</string>
+    <string name="frag_trip_history_posplay_level">Nível %d</string>
+    <string name="frag_trip_history_posplay_no_participation">Sem\nparticipação</string>
+    <string name="frag_trip_history_posplay_xp_place">%d XP\n%dº lugar</string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>

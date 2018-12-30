@@ -491,6 +491,18 @@ public class Util {
         return getCurrentLocale(context).getLanguage();
     }
 
+    public static String getOrdinalSuffix(final int n) {
+        if (n >= 11 && n <= 13) {
+            return "th";
+        }
+        switch (n % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
+    }
+
     public static String[] getLineNames(Context context, Line line) {
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
         boolean preferMainNames = sharedPref.getBoolean(PreferenceNames.PreferMainNames, true);

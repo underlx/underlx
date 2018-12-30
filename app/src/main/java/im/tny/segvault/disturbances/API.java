@@ -352,6 +352,14 @@ public class API {
         public String serviceName;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class PairConnection {
+        public String service;
+        public String serviceName;
+        public long[] creationTime;
+        public Object extra;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -365,6 +373,10 @@ public class API {
     }
 
     private ObjectMapper mapper = new ObjectMapper(new MessagePackFactory());
+
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
 
     private InputStream getRequest(URI uri, boolean authenticate) throws APIException {
         try {
@@ -1002,6 +1014,20 @@ public class API {
             byte[] content = mapper.writeValueAsBytes(request);
             InputStream is = postRequest(endpoint.resolve("pair/connections"), content, true);
             return mapper.readValue(is, PairConnectionResponse.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<PairConnection> getPairConnections() throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("pair/connections"), true), new TypeReference<List<PairConnection>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

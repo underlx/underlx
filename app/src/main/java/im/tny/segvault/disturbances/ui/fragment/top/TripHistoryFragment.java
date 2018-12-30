@@ -4,20 +4,35 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,11 +40,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.CacheManager;
+import im.tny.segvault.disturbances.Connectivity;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
 import im.tny.segvault.disturbances.ui.activity.StatsActivity;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
@@ -57,6 +77,17 @@ public class TripHistoryFragment extends TopFragment {
     private TextView tripTotalLengthView;
     private TextView tripTotalTimeView;
     private TextView tripAverageSpeedView;
+
+    private TableRow posPlayLoadingRow;
+    private TableRow posPlayRow1;
+    private TableRow posPlayRow2;
+    private ImageView posPlayAvatarView;
+    private TextView posPlayUserView;
+    private TextView posPlayLevelView;
+    private ProgressBar posPlayLevelProgress;
+    private TextView posPlayNextLevelView;
+    private TextView posPlayOverallView;
+    private TextView posPlayWeekView;
 
     private boolean showVisits = false;
     private Menu menu;
@@ -119,6 +150,18 @@ public class TripHistoryFragment extends TopFragment {
         tripTotalLengthView = view.findViewById(R.id.trip_total_length_view);
         tripTotalTimeView = view.findViewById(R.id.trip_total_time_view);
         tripAverageSpeedView = view.findViewById(R.id.trip_average_speed_view);
+
+        posPlayLoadingRow = view.findViewById(R.id.posplay_loading_row);
+        posPlayRow1 = view.findViewById(R.id.posplay_row1);
+        posPlayRow2 = view.findViewById(R.id.posplay_row2);
+        posPlayAvatarView = view.findViewById(R.id.posplay_avatar_view);
+        posPlayUserView = view.findViewById(R.id.posplay_user_view);
+        posPlayLevelView = view.findViewById(R.id.posplay_level_view);
+        posPlayLevelProgress = view.findViewById(R.id.posplay_level_progress);
+        posPlayNextLevelView = view.findViewById(R.id.posplay_next_level_view);
+        posPlayOverallView = view.findViewById(R.id.posplay_overall_view);
+        posPlayWeekView = view.findViewById(R.id.posplay_week_view);
+
         recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -149,7 +192,7 @@ public class TripHistoryFragment extends TopFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.trip_history, menu);
-        if(showVisits) {
+        if (showVisits) {
             menu.findItem(R.id.menu_show_visits).setVisible(false);
         } else {
             menu.findItem(R.id.menu_hide_visits).setVisible(false);
@@ -220,7 +263,7 @@ public class TripHistoryFragment extends TopFragment {
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : realm.where(Trip.class).findAll()) {
                 TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
-                if(!item.isVisit) {
+                if (!item.isVisit) {
                     tripCount++;
                     tripTotalLength += item.length;
                     tripTotalTimeableLength += item.timeableLength;
@@ -248,8 +291,8 @@ public class TripHistoryFragment extends TopFragment {
                 // prevent onPostExecute from doing anything if no longer attached to an activity
                 return;
             }
-            tripCountView.setText(Integer.toString(tripCount));
-            tripTotalLengthView.setText(String.format(getString(R.string.frag_trip_history_length_value), (double)tripTotalLength / 1000f));
+            tripCountView.setText(String.format("%d", tripCount));
+            tripTotalLengthView.setText(String.format(getString(R.string.frag_trip_history_length_value), (double) tripTotalLength / 1000f));
 
             long days = tripTotalTime / TimeUnit.DAYS.toMillis(1);
             long hours = (tripTotalTime % TimeUnit.DAYS.toMillis(1)) / TimeUnit.HOURS.toMillis(1);
@@ -260,7 +303,7 @@ public class TripHistoryFragment extends TopFragment {
                 tripTotalTimeView.setText(String.format(getString(R.string.frag_trip_history_duration_with_days), days, hours, minutes));
             }
             tripAverageSpeedView.setText("--");
-            if(recyclerView != null && mListener != null) {
+            if (recyclerView != null && mListener != null) {
                 recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
                 if (result) {
@@ -276,7 +319,115 @@ public class TripHistoryFragment extends TopFragment {
             } else {
                 emptyView.setVisibility(View.VISIBLE);
             }
+            new UpdatePosPlayTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             getSwipeRefreshLayout().setRefreshing(false);
+        }
+    }
+
+    private final static String POSPLAY_CACHE_KEY = "PosPlayStatus";
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class PosPlayStatus implements Serializable {
+        public String serviceName;
+
+        public long discordID;
+        public String username;
+        public String avatarURL;
+        public int level;
+        public float levelProgress;
+        public int xp;
+        public int xpThisWeek;
+        public int rank;
+        public int rankThisWeek;
+    }
+
+    private class UpdatePosPlayTask extends AsyncTask<Void, Void, Boolean> {
+        private PosPlayStatus status;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            posPlayLoadingRow.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            CacheManager cm = Coordinator.get(getContext()).getCacheManager();
+
+            status = cm.fetchOrGet(POSPLAY_CACHE_KEY, (key, storeDate) -> false, key -> {
+                try {
+                    List<API.PairConnection> connections = API.getInstance().getPairConnections();
+                    for (API.PairConnection connection : connections) {
+                        if (connection.service.equals("posplay")) {
+                            PosPlayStatus status = API.getInstance().getMapper().convertValue(connection.extra, PosPlayStatus.class);
+                            if (status != null) {
+                                status.serviceName = connection.serviceName;
+                            }
+                            return status;
+                        }
+                    }
+                    // if we got here, there's no PosPlay connection (device may have been unpaired)
+                    // so delete key to ensure we don't show PosPlay info anymore
+                    cm.remove(POSPLAY_CACHE_KEY);
+                } catch (IllegalArgumentException e) { // convertValue throws
+                    return null;
+                } catch (APIException e) {
+                    return null;
+                }
+                return null;
+            }, PosPlayStatus.class);
+            return status != null;
+        }
+
+        protected void onPostExecute(Boolean result) {
+            posPlayLoadingRow.setVisibility(View.GONE);
+            if (result) {
+                posPlayRow1.setVisibility(View.VISIBLE);
+                posPlayRow2.setVisibility(View.VISIBLE);
+
+                String userLine = String.format(getString(R.string.frag_trip_history_posplay_username), status.username, status.serviceName);
+                int nStart = userLine.indexOf(status.username);
+                int nEnd = nStart + status.username.length();
+                SpannableString userSpannable = new SpannableString(userLine);
+                userSpannable.setSpan(new StyleSpan(Typeface.BOLD), nStart, nEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                posPlayUserView.setText(userSpannable);
+
+                String levelAlone = String.format("%d", status.level);
+                String levelLine = String.format(getString(R.string.frag_trip_history_posplay_level), status.level);
+                int lStart = levelLine.indexOf(levelAlone);
+                int lEnd = lStart + levelAlone.length();
+                SpannableString levelSpannable = new SpannableString(levelLine);
+                levelSpannable.setSpan(new StyleSpan(Typeface.BOLD), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                posPlayLevelView.setText(levelSpannable);
+
+                posPlayLevelProgress.setProgress(Math.round(status.levelProgress));
+                posPlayNextLevelView.setText(String.format("%d", status.level + 1));
+                if (status.rank == 0) {
+                    posPlayOverallView.setText(R.string.frag_trip_history_posplay_no_participation);
+                } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
+                    posPlayOverallView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
+                            status.xp, status.rank, Util.getOrdinalSuffix(status.rank)));
+                } else {
+                    posPlayOverallView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xp, status.rank));
+                }
+                if (status.rankThisWeek == 0) {
+                    posPlayWeekView.setText(R.string.frag_trip_history_posplay_no_participation);
+                } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
+                    posPlayWeekView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
+                            status.xpThisWeek, status.rankThisWeek, Util.getOrdinalSuffix(status.rankThisWeek)));
+                } else {
+                    posPlayWeekView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xpThisWeek, status.rankThisWeek));
+                }
+
+                RequestCreator rc = Picasso.get().load(status.avatarURL);
+                if (!Connectivity.isConnectedWifi(getContext())) {
+                    rc.networkPolicy(NetworkPolicy.OFFLINE);
+                }
+                rc.into(posPlayAvatarView);
+            } else {
+                posPlayRow1.setVisibility(View.GONE);
+                posPlayRow2.setVisibility(View.GONE);
+            }
         }
     }
 
