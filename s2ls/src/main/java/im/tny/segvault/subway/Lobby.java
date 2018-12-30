@@ -17,11 +17,18 @@ import java.util.TimeZone;
  */
 
 public class Lobby implements IIDable, Comparable<Lobby>, Serializable {
-    public Lobby(String id, String name) {
+    public Lobby(Station station, String id, String name) {
         setId(id);
         setName(name);
+        this.station = station;
         this.exits = new HashMap<>();
         this.schedules = new HashMap<>();
+    }
+
+    private Station station;
+
+    public Station getStation() {
+        return station;
     }
 
     private Map<Integer, Exit> exits = null;

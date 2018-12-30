@@ -145,17 +145,17 @@ public class LobbyView extends LinearLayout {
             }
         }
         Collections.sort(exceptions, (schedule, t1) -> Integer.compare(schedule.day, t1.day));
-        Calendar networkCal = Calendar.getInstance(TimeZone.getDefault());
-        int currentDay = networkCal.get(Calendar.DAY_OF_YEAR); // TODO timezone must be that of the network
+        Calendar networkCal = Calendar.getInstance(lobby.getStation().getNetwork().getTimezone());
+        int currentDay = networkCal.get(Calendar.DAY_OF_YEAR);
         for (Schedule exception : exceptions) {
-            int exceptionDay = exception.day;
-            if (exceptionDay < currentDay - 1) {
+            int exceptionDay = (exception.day + 1)%365; // this allows seeing the special schedules for the previous day, which may still affect today
+            if (exceptionDay < currentDay) {
                 exceptionDay += 365;
             }
             // show exceptions at most one month in advance
-            if (exceptionDay - currentDay < 30) { // minus one, because schedules from previous days may extend past midnight
+            if (exceptionDay - currentDay < 30) {
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                if (exceptionDay < currentDay - 1) {
+                if (exceptionDay < currentDay) {
                     cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
                 }
                 cal.set(Calendar.DAY_OF_YEAR, exception.day);
