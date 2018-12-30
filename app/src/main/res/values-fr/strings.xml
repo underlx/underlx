@@ -370,8 +370,8 @@
     <string name="frag_trip_history_posplay_this_week">cette semaine</string>
     <string name="frag_trip_history_posplay_username">%s au %s</string>
     <string name="frag_trip_history_posplay_level">Niveau %d</string>
-    <string name="frag_trip_history_posplay_no_participation">Sans\nparticipation</string>
-    <string name="frag_trip_history_posplay_xp_place">%d XP\n%dº position</string>
+    <string name="frag_trip_history_posplay_no_participation">Aucune\nparticipation</string>
+    <string name="frag_trip_history_posplay_xp_place">%d XP\n%s position</string>
     <string name="lobby_schedule_range_hours">&#160;(%d heures)</string>
 
     <string name="disturbance_status_report_begin">Les utilisateurs ont rapporté des problèmes en la circulation</string>

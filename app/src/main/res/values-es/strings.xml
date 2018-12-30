@@ -371,7 +371,7 @@
     <string name="frag_trip_history_posplay_username">%s en %s</string>
     <string name="frag_trip_history_posplay_level">Nivel %d</string>
     <string name="frag_trip_history_posplay_no_participation">Sin\nparticipación</string>
-    <string name="frag_trip_history_posplay_xp_place">%d XP\n%dª posición</string>
+    <string name="frag_trip_history_posplay_xp_place">%d XP\n%s posición</string>
     <string name="lobby_schedule_range_hours">&#160;(%d horas)</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>

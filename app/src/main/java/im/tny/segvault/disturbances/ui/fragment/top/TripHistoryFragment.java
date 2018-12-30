@@ -423,13 +423,17 @@ public class TripHistoryFragment extends TopFragment {
 
                 // all-time info
                 String placeLine;
+                boolean placeWordIsFemale = false;
+                switch(Util.getCurrentLanguage(getContext())) {
+                    case "es":
+                    case "fr":
+                        placeWordIsFemale = true;
+                        break;
+                }
                 if (status.rank == 0) {
                     placeLine = getString(R.string.frag_trip_history_posplay_no_participation);
-                } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
-                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
-                            status.xp, status.rank, Util.getOrdinalSuffix(status.rank));
                 } else {
-                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xp, status.rank);
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xp, Util.getOrdinal(getContext(), status.rank, placeWordIsFemale));
                 }
                 Spannable placeSpannable = new SpannableString(placeLine);
                 if (status.rank == 1) {
@@ -440,11 +444,8 @@ public class TripHistoryFragment extends TopFragment {
                 // week info
                 if (status.rankThisWeek == 0) {
                     placeLine = getString(R.string.frag_trip_history_posplay_no_participation);
-                } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
-                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
-                            status.xpThisWeek, status.rankThisWeek, Util.getOrdinalSuffix(status.rankThisWeek));
                 } else {
-                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xpThisWeek, status.rankThisWeek);
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xpThisWeek, Util.getOrdinal(getContext(), status.rankThisWeek, placeWordIsFemale));
                 }
                 placeSpannable = new SpannableString(placeLine);
                 if (status.rankThisWeek == 1) {

@@ -491,15 +491,42 @@ public class Util {
         return getCurrentLocale(context).getLanguage();
     }
 
-    public static String getOrdinalSuffix(final int n) {
-        if (n >= 11 && n <= 13) {
-            return "th";
-        }
-        switch (n % 10) {
-            case 1:  return "st";
-            case 2:  return "nd";
-            case 3:  return "rd";
-            default: return "th";
+    public static String getOrdinal(final Context context, final int n, final boolean female) {
+        switch (getCurrentLocale(context).getLanguage()) {
+            case "en": {
+                switch (n % 100) {
+                    case 11:
+                    case 12:
+                    case 13:
+                        return String.format("%dth", n);
+                }
+                switch (n % 10) {
+                    case 1:
+                        return String.format("%dst", n);
+                    case 2:
+                        return String.format("%dnd", n);
+                    case 3:
+                        return String.format("%drd", n);
+                    default:
+                        return String.format("%dth", n);
+                }
+            }
+            case "fr":
+                if (n == 1) {
+                    if (female) {
+                        return String.format("%dère", n);
+                    } else {
+                        return String.format("%der", n);
+                    }
+                }
+                return String.format("%dème", n);
+            case "de":
+                return String.format("%d.", n);
+            default:
+                if (female) {
+                    return String.format("%dª", n);
+                }
+                return String.format("%dº", n);
         }
     }
 
