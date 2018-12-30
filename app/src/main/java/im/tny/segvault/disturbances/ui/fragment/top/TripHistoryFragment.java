@@ -344,23 +344,8 @@ public class TripHistoryFragment extends TopFragment {
 
     private final static String POSPLAY_CACHE_KEY = "PosPlayStatus";
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class PosPlayStatus implements Serializable {
-        public String serviceName;
-
-        public long discordID;
-        public String username;
-        public String avatarURL;
-        public int level;
-        public float levelProgress;
-        public int xp;
-        public int xpThisWeek;
-        public int rank;
-        public int rankThisWeek;
-    }
-
     private class UpdatePosPlayTask extends AsyncTask<Void, Void, Boolean> {
-        private PosPlayStatus status;
+        private API.PosPlayStatus status;
 
         @Override
         protected void onPreExecute() {
@@ -377,7 +362,7 @@ public class TripHistoryFragment extends TopFragment {
                     List<API.PairConnection> connections = API.getInstance().getPairConnections();
                     for (API.PairConnection connection : connections) {
                         if (connection.service.equals("posplay")) {
-                            PosPlayStatus status = API.getInstance().getMapper().convertValue(connection.extra, PosPlayStatus.class);
+                            API.PosPlayStatus status = API.getInstance().getMapper().convertValue(connection.extra, API.PosPlayStatus.class);
                             if (status != null) {
                                 status.serviceName = connection.serviceName;
                             }
@@ -393,7 +378,7 @@ public class TripHistoryFragment extends TopFragment {
                     return null;
                 }
                 return null;
-            }, PosPlayStatus.class);
+            }, API.PosPlayStatus.class);
             return status != null;
         }
 

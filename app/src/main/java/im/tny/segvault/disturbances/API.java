@@ -360,6 +360,21 @@ public class API {
         public Object extra;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class PosPlayStatus implements Serializable {
+        public String serviceName;
+
+        public long discordID;
+        public String username;
+        public String avatarURL;
+        public int level;
+        public float levelProgress;
+        public int xp;
+        public int xpThisWeek;
+        public int rank;
+        public int rankThisWeek;
+    }
+
     private int timeoutMs;
     private URI endpoint;
 
