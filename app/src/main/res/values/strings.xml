@@ -163,6 +163,7 @@
     <string name="lobby_schedule_closed">closed</string>
     <string name="lobby_schedule_all_days">Every day: %s</string>
     <string name="lobby_schedule_range_separator">&#160;-&#160;</string>
+    <string name="lobby_schedule_range_hours">&#160;(%d hours)</string>
     <string name="lobby_exit_view_map">View map</string>
     <string name="poi_view_map">View external map</string>
     <string name="poi_view_on_map">View on map</string>

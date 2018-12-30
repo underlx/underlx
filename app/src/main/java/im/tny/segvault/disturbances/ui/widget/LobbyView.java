@@ -25,8 +25,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -133,6 +138,38 @@ public class LobbyView extends LinearLayout {
             }
         }
 
+        List<Schedule> exceptions = new ArrayList<>();
+        for (Schedule s : lobby.getSchedules()) {
+            if (s.holiday && s.day > 0) {
+                exceptions.add(s);
+            }
+        }
+        Collections.sort(exceptions, (schedule, t1) -> Integer.compare(schedule.day, t1.day));
+        Calendar networkCal = Calendar.getInstance(TimeZone.getDefault());
+        int currentDay = networkCal.get(Calendar.DAY_OF_YEAR); // TODO timezone must be that of the network
+        for (Schedule exception : exceptions) {
+            int exceptionDay = exception.day;
+            if (exceptionDay < currentDay - 1) {
+                exceptionDay += 365;
+            }
+            // show exceptions at most one month in advance
+            if (exceptionDay - currentDay < 30) { // minus one, because schedules from previous days may extend past midnight
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                if (exceptionDay < currentDay - 1) {
+                    cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
+                }
+                cal.set(Calendar.DAY_OF_YEAR, exception.day);
+
+                String date = DateUtils.formatDateTime(getContext(),
+                        cal.getTimeInMillis(),
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR);
+
+                TextView tv = new TextView(context);
+                tv.setText(String.format(getContext().getString(R.string.lobby_schedule_day), date, scheduleToString(exception)));
+                scheduleLayout.addView(tv);
+            }
+        }
+
         // Exits
         exitsLayout = findViewById(R.id.lobby_exits_layout);
         for (final Lobby.Exit exit : lobby.getExits()) {
@@ -177,7 +214,7 @@ public class LobbyView extends LinearLayout {
             exitLayout.addView(iv);
             exitLayout.addView(tv);
             exitLayout.addView(b);
-            int[] attrs = new int[] { R.attr.selectableItemBackground /* index 0 */};
+            int[] attrs = new int[]{R.attr.selectableItemBackground /* index 0 */};
             TypedArray ta = getContext().obtainStyledAttributes(attrs);
             ViewCompat.setBackground(exitLayout, ta.getDrawable(0));
             ta.recycle();
@@ -198,6 +235,10 @@ public class LobbyView extends LinearLayout {
         DateUtils.formatDateRange(getContext(), f, s.openTime, s.openTime, DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
         f.format(getContext().getString(R.string.lobby_schedule_range_separator));
         DateUtils.formatDateRange(getContext(), f, s.openTime + s.duration, s.openTime + s.duration, DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+
+        if (s.duration / (1000 * 60 * 60) >= 24) {
+            f.format(getContext().getString(R.string.lobby_schedule_range_hours), s.duration / (1000 * 60 * 60));
+        }
         return f.toString();
     }
 
