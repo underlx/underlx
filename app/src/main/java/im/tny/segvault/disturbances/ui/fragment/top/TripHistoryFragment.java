@@ -20,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
@@ -419,22 +420,37 @@ public class TripHistoryFragment extends TopFragment {
 
                 posPlayLevelProgress.setProgress(Math.round(status.levelProgress));
                 posPlayNextLevelView.setText(String.format("%d", status.level + 1));
+
+                // all-time info
+                String placeLine;
                 if (status.rank == 0) {
-                    posPlayOverallView.setText(R.string.frag_trip_history_posplay_no_participation);
+                    placeLine = getString(R.string.frag_trip_history_posplay_no_participation);
                 } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
-                    posPlayOverallView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
-                            status.xp, status.rank, Util.getOrdinalSuffix(status.rank)));
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
+                            status.xp, status.rank, Util.getOrdinalSuffix(status.rank));
                 } else {
-                    posPlayOverallView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xp, status.rank));
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xp, status.rank);
                 }
+                Spannable placeSpannable = new SpannableString(placeLine);
+                if (status.rank == 1) {
+                    placeSpannable.setSpan(new ForegroundColorSpan(Color.parseColor("#DAA520")), placeLine.indexOf("\n"), placeLine.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                posPlayOverallView.setText(placeSpannable);
+
+                // week info
                 if (status.rankThisWeek == 0) {
-                    posPlayWeekView.setText(R.string.frag_trip_history_posplay_no_participation);
+                    placeLine = getString(R.string.frag_trip_history_posplay_no_participation);
                 } else if (Util.getCurrentLanguage(getContext()).equals("en")) {
-                    posPlayWeekView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
-                            status.xpThisWeek, status.rankThisWeek, Util.getOrdinalSuffix(status.rankThisWeek)));
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place_english),
+                            status.xpThisWeek, status.rankThisWeek, Util.getOrdinalSuffix(status.rankThisWeek));
                 } else {
-                    posPlayWeekView.setText(String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xpThisWeek, status.rankThisWeek));
+                    placeLine = String.format(getString(R.string.frag_trip_history_posplay_xp_place), status.xpThisWeek, status.rankThisWeek);
                 }
+                placeSpannable = new SpannableString(placeLine);
+                if (status.rankThisWeek == 1) {
+                    placeSpannable.setSpan(new ForegroundColorSpan(Color.parseColor("#DAA520")), placeLine.indexOf("\n"), placeLine.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                posPlayWeekView.setText(placeSpannable);
 
                 RequestCreator rc = Picasso.get().load(status.avatarURL);
                 if (!Connectivity.isConnectedWifi(getContext())) {
