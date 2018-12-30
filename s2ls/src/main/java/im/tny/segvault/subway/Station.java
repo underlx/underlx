@@ -1,5 +1,6 @@
 package im.tny.segvault.subway;
 
+import android.location.Location;
 import android.text.TextUtils;
 
 import org.jgrapht.alg.BellmanFordShortestPath;
@@ -161,16 +162,30 @@ public class Station extends Zone implements IIDable, Comparable<Station> {
     }
 
     public List<Station> getAlternatives(IAlternativeQualifier qualifier, int maxAmount) {
+        Location thisLocation = new Location("");
+        float[] worldCoords = getWorldCoordinates();
+        thisLocation.setLatitude(worldCoords[0]);
+        thisLocation.setLongitude(worldCoords[1]);
+
         final HashMap<Station, Double> stationCost = new HashMap<>();
-        for (Stop source : getStops()) {
-            BellmanFordShortestPath<Stop, Connection> bf = new BellmanFordShortestPath<Stop, Connection>(getNetwork(), source);
-            for (Stop sink : getNetwork().vertexSet()) {
-                if (sink != source && qualifier.acceptable(sink.getStation()) &&
-                        bf.getCost(sink) < (stationCost.get(sink.getStation()) == null ? Double.MAX_VALUE : stationCost.get(sink.getStation()))) {
-                    stationCost.put(sink.getStation(), bf.getCost(sink));
+        for (Station station : getNetwork().getStations()) {
+            if(!qualifier.acceptable(station)) {
+                continue;
+            }
+            double minDistance = Double.MAX_VALUE;
+            for (Lobby lobby : station.getLobbies()) {
+                for (Lobby.Exit exit : lobby.getExits()) {
+                    Location exitLocation = new Location("");
+                    exitLocation.setLatitude(exit.worldCoord[0]);
+                    exitLocation.setLongitude(exit.worldCoord[1]);
+
+                    double distance = thisLocation.distanceTo(exitLocation);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                    }
                 }
             }
-
+            stationCost.put(station, minDistance);
         }
         List<Station> alternatives = new ArrayList<>(stationCost.keySet());
         Collections.sort(alternatives, new Comparator<Station>() {
