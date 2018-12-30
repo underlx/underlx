@@ -76,6 +76,7 @@
     <string name="frag_route_destination_station">Destination station</string>
     <string name="frag_route_instructions">Pick a starting point and a destination to see the recommended route.</string>
     <string name="developer_website" translatable="false">https://segvault.tny.im</string>
+    <string name="posplay_website" translatable="false">https://perturbacoes.pt/posplay</string>
     <string name="notif_disturbance_title">%s line</string>
     <string name="frag_route_short_cars_warning">In this line, trains are shorter. Look for the CCTV screens at one edge of the platform and stay in that half of the platform.</string>
     <string name="frag_route_disturbances_warning">Ongoing disturbances. The waiting time may be longer than usual.</string>
