@@ -252,7 +252,7 @@ public class StationActivity extends TopActivity
             case R.id.menu_share_webprofile:
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.link_format_station), stationId));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(Locale.US, getString(R.string.link_format_station), stationId));
                 try {
                     startActivity(shareIntent);
                 } catch (ActivityNotFoundException e) {

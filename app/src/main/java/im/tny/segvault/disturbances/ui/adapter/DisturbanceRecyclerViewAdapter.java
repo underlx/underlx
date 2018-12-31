@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.InternalLinkHandler;
@@ -132,7 +133,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.setType("text/plain");
-            sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(context.getString(R.string.link_format_disturbance), holder.mItem.id));
+            sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(Locale.US, context.getString(R.string.link_format_disturbance), holder.mItem.id));
             context.startActivity(Intent.createChooser(sendIntent, null));
         });
         holder.webButton.setOnClickListener(view -> {

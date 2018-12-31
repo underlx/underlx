@@ -546,7 +546,7 @@ public class API {
             h.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(toEncode.getBytes("UTF-8"), Base64.NO_WRAP));
         }
         h.setRequestProperty("User-Agent",
-                String.format("UnderLX/%s#%d %s",
+                String.format(Locale.US, "UnderLX/%s#%d %s",
                         BuildConfig.VERSION_NAME,
                         BuildConfig.VERSION_CODE,
                         System.getProperty("http.agent")));

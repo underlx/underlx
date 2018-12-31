@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -228,7 +229,7 @@ public class HomeStatsFragment extends Fragment {
     private static final String STATS_CACHE_KEY = "Stats-%s";
 
     private String buildCacheKey(String networkId) {
-        return String.format(STATS_CACHE_KEY, networkId);
+        return String.format(Locale.US, STATS_CACHE_KEY, networkId);
     }
 
     private Network networkFromKey(String key) {

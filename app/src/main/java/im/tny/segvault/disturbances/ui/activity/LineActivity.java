@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -168,7 +169,7 @@ public class LineActivity extends TopActivity {
             case R.id.menu_share_webprofile:
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(getString(R.string.link_format_line), lineId));
+                shareIntent.putExtra(Intent.EXTRA_TEXT, String.format(Locale.US, getString(R.string.link_format_line), lineId));
                 try {
                     startActivity(shareIntent);
                 } catch (ActivityNotFoundException e) {
