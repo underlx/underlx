@@ -292,7 +292,7 @@
     <string name="facebook_project_url" translatable="false">https://facebook.com/underlx</string>
     <string name="twitter_project_url" translatable="false">https://twitter.com/underlx</string>
     <string name="github_project_url" translatable="false">https://github.com/underlx</string>
-    <string name="discord_server_url" translatable="false">https://discord.gg/hhuC7fc</string>
+    <string name="discord_server_url" translatable="false">https://perturbacoes.pt/discord</string>
     <string name="frag_map_switch_type">Switch map type</string>
     <string name="frag_map_switch_type_taptarget_title">Switch map types</string>
     <string name="frag_map_switch_type_taptarget_subtitle">Tap to switch between different network maps and diagrams.</string>
