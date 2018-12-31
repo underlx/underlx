@@ -9,7 +9,7 @@
     <string name="update_topology_success">Plan du réseau mis à jour</string>
     <string name="dataset_info_authors">Développeurs</string>
     <string name="dataset_info_update">Mettre à jour</string>
-    <string name="frag_about_copyright">Copyright © 2017–2018 L\'équipe UnderLX\nEn partenariat avec le groupe Segvault</string>
+    <string name="frag_about_copyright">Copyright © 2017–2019 L\'équipe UnderLX\nEn partenariat avec le groupe Segvault</string>
     <string name="frag_about_datasets">Plans du réseau</string>
     <string name="frag_about_disclaimer">Cette application et le service associé n\'ont pas de connexion à Metropolitano de Lisboa, E.P.E.\nCe n\'est pas possible de garantir la correction de l\'information fournie.</string>
     <string name="frag_about_thanks">Communauté portugaise du SkyscraperCity\nkidrauhl - traduction de l\'interface\nJaime Silva - image du volet de navigation</string>
