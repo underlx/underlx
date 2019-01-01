@@ -383,6 +383,10 @@ public class TripHistoryFragment extends TopFragment {
         }
 
         protected void onPostExecute(Boolean result) {
+            if (!isAdded()) {
+                // prevent onPostExecute from doing anything if no longer attached to an activity
+                return;
+            }
             posPlayLoadingRow.setVisibility(View.GONE);
             if (result) {
                 posPlayRow1.setVisibility(View.VISIBLE);
