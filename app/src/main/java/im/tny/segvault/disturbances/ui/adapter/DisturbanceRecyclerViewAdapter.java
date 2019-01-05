@@ -223,9 +223,10 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             this.networkId = netId;
             statuses = new ArrayList<>();
             for (API.Status s : disturbance.statuses) {
-                Spannable text = Util.enrichLineStatus(context, s.translateStatus(context), s.msgType, new InternalLinkHandler(context));
-
-                statuses.add(new Status(new Date(s.time[0] * 1000), text, s.downtime, s.isOfficial()));
+                Date stime = new Date(s.time[0] * 1000);
+                Spannable text = Util.enrichLineStatus(context, lineId, s.status, s.msgType, stime,
+                        new InternalLinkHandler(context));
+                statuses.add(new Status(stime, text, s.downtime, s.isOfficial()));
             }
             Collections.sort(statuses, (o1, o2) -> o1.date.compareTo(o2.date));
         }

@@ -98,7 +98,13 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        String status = Util.translateLineStatus(getApplicationContext(), data.get("status"), data.get("msgType"));
+        String status = Util.enrichLineStatus(
+                getApplicationContext(),
+                data.get("line"),
+                data.get("status"),
+                data.get("msgType"),
+                new Date(remoteMessage.getSentTime()),
+                null).toString();
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

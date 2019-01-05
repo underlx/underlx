@@ -13,6 +13,7 @@ public class PreferenceNames {
     public static final String AutoOpenVisitCorrection = "pref_auto_open_visit_correction";
     public static final String Locale = "pref_locale";
     public static final String PreferMainNames = "pref_prefer_main_names";
+    public static final String TranslateAllStatus = "pref_translate_all_status";
     public static final String MapType = "pref_map_type";
     public static final String PermanentForeground = "pref_permanent_foreground";
     public static final String DeveloperMode = "pref_developer_mode";

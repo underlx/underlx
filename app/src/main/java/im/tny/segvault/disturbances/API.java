@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Spannable;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -203,8 +204,8 @@ public class API {
         public String msgType;
 
         @JsonIgnore
-        public String translateStatus(Context context) {
-            return Util.translateLineStatus(context, status, msgType);
+        public Spannable enrichStatus(Context context, String lineID) {
+            return Util.enrichLineStatus(context, lineID, status, msgType, new Date(time[0] * 1000), null);
         }
 
         @JsonIgnore

@@ -43,6 +43,11 @@
             android:key="pref_prefer_main_names"
             android:summary="@string/frag_settings_prefer_main_names_summary"
             android:title="@string/frag_settings_prefer_main_names" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_translate_all_status"
+            android:summary="@string/frag_settings_translate_all_status_summary"
+            android:title="@string/frag_settings_translate_all_status" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/frag_settings_other_title">
         <CheckBoxPreference

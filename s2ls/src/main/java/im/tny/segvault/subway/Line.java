@@ -39,6 +39,10 @@ public class Line extends Zone implements IColorable, IIDable, Comparable<Line> 
     private Map<String, String> names;
     private List<Station> stationsInOrder = new ArrayList<>();
 
+    public String getMainLocale() {
+        return mainLocale;
+    }
+
     public String[] getNames(String locale) {
         if (locale.equals(mainLocale)) {
             return new String[]{names.get(locale)};

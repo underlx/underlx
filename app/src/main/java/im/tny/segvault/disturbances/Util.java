@@ -11,9 +11,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.icu.util.TimeZone;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +24,8 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.text.style.ClickableSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -32,9 +36,12 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -550,66 +557,220 @@ public class Util {
         return names;
     }
 
-    public static String translateLineStatus(Context context, String status, String msgType) {
-        if (context != null) {
-            switch (msgType) {
-                case "REPORT_BEGIN":
-                    return context.getString(R.string.disturbance_status_report_begin);
-                case "REPORT_CONFIRM":
-                    return context.getString(R.string.disturbance_status_report_confirm);
-                case "REPORT_RECONFIRM":
-                    return context.getString(R.string.disturbance_status_report_reconfirm);
-                case "REPORT_SOLVED":
-                    return context.getString(R.string.disturbance_status_report_solved);
-            }
-        }
-        return status;
-    }
-
     public interface OnLineStatusSpanClickListener {
         void onClick(String url);
     }
 
     @JsonIgnore
-    public static Spannable enrichLineStatus(Context context, String status, String msgType, final OnLineStatusSpanClickListener listener) {
+    public static Spannable enrichLineStatus(Context context, String lineID, String status, String msgType, Date statusTime, @Nullable final OnLineStatusSpanClickListener listener) {
         Spannable sb = new SpannableString(status);
         if (context == null || msgType == null) {
             return sb;
         }
-        if (!msgType.startsWith("ML_") || !msgType.contains("_BETWEEN_")) {
+
+        switch (msgType) {
+            case "REPORT_BEGIN":
+                return new SpannableString(context.getString(R.string.disturbance_status_report_begin));
+            case "REPORT_CONFIRM":
+                return new SpannableString(context.getString(R.string.disturbance_status_report_confirm));
+            case "REPORT_RECONFIRM":
+                return new SpannableString(context.getString(R.string.disturbance_status_report_reconfirm));
+            case "REPORT_SOLVED":
+                return new SpannableString(context.getString(R.string.disturbance_status_report_solved));
+        }
+
+
+        MapManager mm = Coordinator.get(context).getMapManager();
+        Network network = mm.getNetwork("pt-ml");
+        Line line = network.getLine(lineID);
+
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        // do not translate if the locale is the same (will only break stuff)
+        final boolean translateAll = sharedPref.getBoolean(PreferenceNames.TranslateAllStatus, true) && (line == null || !line.getMainLocale().equals(getCurrentLanguage(context)));
+
+        Station firstStation = null, secondStation = null;
+        if (msgType.startsWith("ML_") && msgType.contains("_BETWEEN_")) {
+            int firstStationStartIdx = status.indexOf("entre as estações ") + "entre as estações ".length();
+            int firstStationEndIdx = firstStationStartIdx + status.substring(firstStationStartIdx).indexOf(" e ");
+            int secondStationStartIdx = firstStationEndIdx + " e ".length();
+            int secondStationEndIdx = secondStationStartIdx + 3 + status.substring(secondStationStartIdx + 3).indexOf(".");
+            String firstStationName = status.substring(firstStationStartIdx, firstStationEndIdx).trim().replace("S.", "São");
+            String secondStationName = status.substring(secondStationStartIdx, secondStationEndIdx).trim().replace("S.", "São");
+            firstStation = network.getStationByName(firstStationName);
+            secondStation = network.getStationByName(secondStationName);
+
+            final Station fs = firstStation, ss = secondStation;
+            if (!translateAll && listener != null) {
+                // their messages sometimes have a extra space before the name of the first station...
+                while (status.charAt(firstStationStartIdx) == ' ' && firstStationStartIdx < firstStationEndIdx) {
+                    firstStationStartIdx++;
+                }
+
+                if (firstStation != null) {
+                    sb.setSpan(new ClickableSpan() {
+                        @Override
+                        public void onClick(@NonNull View view) {
+                            listener.onClick("station:" + fs.getId());
+                        }
+                    }, firstStationStartIdx, firstStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                if (secondStation != null) {
+                    sb.setSpan(new ClickableSpan() {
+                        @Override
+                        public void onClick(@NonNull View view) {
+                            listener.onClick("station:" + ss.getId());
+                        }
+                    }, secondStationStartIdx, secondStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                return sb;
+            }
+        }
+
+        if (!translateAll || !msgType.startsWith("ML_")) {
             return sb;
         }
-        int firstStationStartIdx = status.indexOf("entre as estações ") + "entre as estações ".length();
-        int firstStationEndIdx = firstStationStartIdx + status.substring(firstStationStartIdx).indexOf(" e ");
-        int secondStationStartIdx = firstStationEndIdx + " e ".length();
-        int secondStationEndIdx = secondStationStartIdx + 3 + status.substring(secondStationStartIdx + 3).indexOf(".");
-        String firstStationName = status.substring(firstStationStartIdx, firstStationEndIdx).trim().replace("S.", "São");
-        String secondStationName = status.substring(secondStationStartIdx, secondStationEndIdx).trim().replace("S.", "São");
-        Network network = Coordinator.get(context).getMapManager().getNetwork("pt-ml");
-        final Station firstStation = network.getStationByName(firstStationName);
-        final Station secondStation = network.getStationByName(secondStationName);
 
-        // their messages sometimes have a extra space before the name of the first station...
-        while (status.charAt(firstStationStartIdx) == ' ' && firstStationStartIdx < firstStationEndIdx) {
-            firstStationStartIdx++;
+        // see the different message types at https://github.com/underlx/disturbancesmlx/blob/master/dataobjects/status.go
+
+        String[] parts = msgType.split("_");
+        // parts[0] is "ML"
+
+        if (parts.length < 2) {
+            return sb;
         }
 
-        if (firstStation != null) {
+        switch (parts[1]) {
+            case "GENERIC":
+                return new SpannableString(context.getString(R.string.disturbance_status_pt_ml_generic));
+            case "SOLVED":
+                return new SpannableString(context.getString(R.string.disturbance_status_pt_ml_solved));
+            case "CLOSED":
+                return new SpannableString(context.getString(R.string.disturbance_status_pt_ml_closed));
+            case "SPECIAL":
+                return new SpannableString(context.getString(R.string.disturbance_status_pt_ml_special));
+        }
+
+        if (parts.length < 4) {
+            return sb;
+        }
+
+        String tripartMsgFormat = context.getString(R.string.disturbance_status_pt_ml_tripart_format);
+        String partOne, partTwo = "", partThree = "";
+        switch (parts[1]) {
+            case "SIGNAL":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_signal);
+                break;
+            case "TRAIN":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_train);
+                break;
+            case "POWER":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_power);
+                break;
+            case "3RDPARTY":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_3rdparty);
+                break;
+            case "PASSENGER":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_passenger);
+                break;
+            case "STATION":
+                partOne = context.getString(R.string.disturbance_status_pt_ml_part_station);
+                break;
+            default:
+                // abort if we don't have a translation for one of the parts
+                return sb;
+        }
+
+        switch (parts[2]) {
+            case "SINCE": {
+                int timeStartIdx = status.indexOf("desde as ") + "desde as ".length();
+                int timeEndIdx = timeStartIdx + status.substring(timeStartIdx).indexOf(".");
+                java.util.TimeZone tz = network == null ? java.util.TimeZone.getDefault() : network.getTimezone();
+                Date time;
+                SimpleDateFormat disturbanceTimeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                try {
+                    time = disturbanceTimeFormat.parse(status.substring(timeStartIdx, timeEndIdx));
+                } catch (ParseException e) {
+                    return sb;
+                }
+                Calendar statusCal = Calendar.getInstance();
+                statusCal.setTime(statusTime);
+                statusCal.setTimeZone(tz);
+                Calendar parsedCal = Calendar.getInstance();
+                parsedCal.setTime(time);
+                parsedCal.setTimeZone(tz);
+                parsedCal.set(Calendar.YEAR, statusCal.get(Calendar.YEAR));
+                parsedCal.set(Calendar.MONTH, statusCal.get(Calendar.MONTH));
+                parsedCal.set(Calendar.DAY_OF_MONTH, statusCal.get(Calendar.DAY_OF_MONTH));
+                Formatter f = new Formatter();
+                DateUtils.formatDateRange(context, f, parsedCal.getTimeInMillis(), parsedCal.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+                partTwo = String.format(context.getString(R.string.disturbance_status_pt_ml_part_since), f.toString());
+                break;
+            }
+            case "HALTED":
+                partTwo = context.getString(R.string.disturbance_status_pt_ml_part_halted);
+                break;
+            case "BETWEEN":
+                if (firstStation == null || secondStation == null) {
+                    return sb;
+                }
+
+                partTwo = String.format(context.getString(R.string.disturbance_status_pt_ml_part_between), firstStation.getName(), secondStation.getName());
+                break;
+            case "DELAYED":
+                partTwo = context.getString(R.string.disturbance_status_pt_ml_part_delayed);
+                break;
+            default:
+                // abort if we don't have a translation for one of the parts
+                return sb;
+        }
+
+        switch (parts[3]) {
+            case "LONGHALT":
+                partThree = context.getString(R.string.disturbance_status_pt_ml_part_longhalt);
+                break;
+            case "LONGWAIT":
+                partThree = context.getString(R.string.disturbance_status_pt_ml_part_longwait);
+                break;
+            case "SOON":
+                partThree = context.getString(R.string.disturbance_status_pt_ml_part_soon);
+                break;
+            case "UNDER15":
+                partThree = context.getString(R.string.disturbance_status_pt_ml_part_under15);
+                break;
+            case "OVER15":
+                partThree = context.getString(R.string.disturbance_status_pt_ml_part_over15);
+                break;
+            default:
+                // abort if we don't have a translation for one of the parts
+                return sb;
+        }
+
+        String tripartMsg = String.format(tripartMsgFormat, partOne, partTwo, partThree);
+        sb = new SpannableString(tripartMsg);
+
+        if (firstStation != null && listener != null) {
+            int startIdx = tripartMsg.indexOf(firstStation.getName());
+            int endIdx = startIdx + firstStation.getName().length();
+            final Station fs = firstStation;
             sb.setSpan(new ClickableSpan() {
                 @Override
                 public void onClick(@NonNull View view) {
-                    listener.onClick("station:" + firstStation.getId());
+                    listener.onClick("station:" + fs.getId());
                 }
-            }, firstStationStartIdx, firstStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }, startIdx, endIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        if (secondStation != null) {
+        if (secondStation != null && listener != null) {
+            int startIdx = tripartMsg.indexOf(secondStation.getName());
+            int endIdx = startIdx + secondStation.getName().length();
+            final Station ss = secondStation;
             sb.setSpan(new ClickableSpan() {
                 @Override
                 public void onClick(@NonNull View view) {
-                    listener.onClick("station:" + secondStation.getId());
+                    listener.onClick("station:" + ss.getId());
                 }
-            }, secondStationStartIdx, secondStationEndIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }, startIdx, endIdx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+
         return sb;
     }
 

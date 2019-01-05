@@ -73,6 +73,7 @@ public class LineStatusCache {
 
     private static class StatusCache implements Serializable {
         private HashMap<String, Status> info;
+
         StatusCache(HashMap<String, Status> info) {
             this.info = info;
         }
@@ -205,14 +206,15 @@ public class LineStatusCache {
                             Collections.sort(d.statuses, (o1, o2) -> {
                                 long lhs = o1.time[0];
                                 long rhs = o2.time[0];
-                                return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
+                                return Long.compare(lhs, rhs);
                             });
 
-                            if (d.statuses.get(d.statuses.size() - 1).status.contains("interrompida")) {
-                                status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000), true);
-                            } else {
-                                status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000));
+                            boolean stopped = false;
+                            if (d.statuses.size() > 0) {
+                                API.Status lastStatus = d.statuses.get(d.statuses.size() - 1);
+                                stopped = lastStatus.msgType.contains("_SINCE_") || lastStatus.msgType.contains("_HALTED_") || lastStatus.msgType.contains("_BETWEEN_");
                             }
+                            status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000), stopped);
                             statuses.put(l.getId(), status);
                             break;
                         }
