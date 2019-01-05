@@ -373,11 +373,37 @@
     <string name="frag_trip_history_posplay_no_participation">Aucune\nparticipation</string>
     <string name="frag_trip_history_posplay_xp_place">%d XP\n%s position</string>
     <string name="lobby_schedule_range_hours">&#160;(%d heures)</string>
+    <string name="frag_settings_translate_all_status">Traduire tous les états de ligne</string>
+    <string name="frag_settings_translate_all_status_summary">Essayez de traduire tous les états de perturbation fournis par le Métro</string>
 
     <string name="disturbance_status_report_begin">Les utilisateurs ont rapporté des problèmes en la circulation</string>
     <string name="disturbance_status_report_confirm">Plusieurs utilisateurs ont confirmé des problèmes en la circulation</string>
     <string name="disturbance_status_report_reconfirm">Plusieurs utilisateurs ont confirmé de plus problèmes en la circulation</string>
     <string name="disturbance_status_report_solved">N\'existent plus rapports des problèmes en la circulation</string>
+
+    <string name="disturbance_status_pt_ml_generic">il y a des perturbations actuellement en cours. Le temps d\'attente peut être plus long qu\'à l\'habitude. Nous nous excusons pour toute gêne occasionnéee</string>
+    <string name="disturbance_status_pt_ml_solved">Trafic normal</string>
+    <string name="disturbance_status_pt_ml_closed">Service fermé</string>
+    <string name="disturbance_status_pt_ml_special">Service spécial</string>
+    <string name="disturbance_status_pt_ml_tripart_format">En raison %1$s%2$s %3$s</string>
+
+    <string name="disturbance_status_pt_ml_part_signal">de signalisation en panne</string>
+    <string name="disturbance_status_pt_ml_part_train">d\'un train en panne</string>
+    <string name="disturbance_status_pt_ml_part_power">d\'une panne de courant</string>
+    <string name="disturbance_status_pt_ml_part_3rdparty">d\'une cause externe au Métro</string>
+    <string name="disturbance_status_pt_ml_part_passenger">d\'un incident avec un passager</string>
+    <string name="disturbance_status_pt_ml_part_station">d\'une anomalie à la station</string>
+
+    <string name="disturbance_status_pt_ml_part_since">, le trafic est interrompu depuis %s.</string>
+    <string name="disturbance_status_pt_ml_part_halted">\u0020la trafic est interrompu.</string>
+    <string name="disturbance_status_pt_ml_part_between">\u0020la trafic sur la ligne est interrompu entre les stations %1$s et %2$s.</string>
+    <string name="disturbance_status_pt_ml_part_delayed">, il y a des perturbations actuellement en cours.</string>
+
+    <string name="disturbance_status_pt_ml_part_longhalt">Ce n\'est pas possible de prévoir la durée de l\'interruption, quit peut être prolongée. Nous nous excusons pour toute gêne occasionnée</string>
+    <string name="disturbance_status_pt_ml_part_longwait">Le temps d\'attente peut être plus long qu\'à l\'habitude. Nous nous excusons pour toute gêne occasionnée</string>
+    <string name="disturbance_status_pt_ml_part_soon">La circulation devrait reprendre bientôt</string>
+    <string name="disturbance_status_pt_ml_part_under15">La circulation devrait reprendre en moins de 15 minutes. Nous nous excusons pour toute gêne occasionnée</string>
+    <string name="disturbance_status_pt_ml_part_over15">La circulation devrait reprendre en plus de 15 minutes. Nous nous excusons pour toute gêne occasionnée</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>

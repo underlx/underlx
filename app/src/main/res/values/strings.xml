@@ -398,6 +398,7 @@
     <string name="disturbance_status_report_confirm">Several users confirmed service disruptions</string>
     <string name="disturbance_status_report_reconfirm">Several users confirmed more service disruptions</string>
     <string name="disturbance_status_report_solved">There are no more reports of service disruptions</string>
+
     <string name="disturbance_status_pt_ml_generic">the service is currently experiencing disruptions. The waiting time may be longer than usual. We apologize for the inconvenience</string>
     <string name="disturbance_status_pt_ml_solved">Regular service</string>
     <string name="disturbance_status_pt_ml_closed">Service closed</string>

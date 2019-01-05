@@ -380,6 +380,7 @@
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>
     <string name="disturbance_status_report_reconfirm">Vários utilizadores confirmaram mais problemas na circulação</string>
     <string name="disturbance_status_report_solved">Já não existem relatos de problemas na circulação</string>
+
     <string name="disturbance_status_pt_ml_generic">existem perturbações na circulação. O tempo de espera pode ser superior ao normal. Pedimos desculpa pelo incómodo causado</string>
     <string name="disturbance_status_pt_ml_solved">Circulação normal</string>
     <string name="disturbance_status_pt_ml_closed">Serviço encerrado</string>
