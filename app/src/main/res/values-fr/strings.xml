@@ -395,8 +395,8 @@
     <string name="disturbance_status_pt_ml_part_station">d\'une anomalie à la station</string>
 
     <string name="disturbance_status_pt_ml_part_since">, le trafic est interrompu depuis %s.</string>
-    <string name="disturbance_status_pt_ml_part_halted">\u0020la trafic est interrompu.</string>
-    <string name="disturbance_status_pt_ml_part_between">\u0020la trafic sur la ligne est interrompu entre les stations %1$s et %2$s.</string>
+    <string name="disturbance_status_pt_ml_part_halted">\u0020le trafic est interrompu.</string>
+    <string name="disturbance_status_pt_ml_part_between">\u0020le trafic sur la ligne est interrompu entre les stations %1$s et %2$s.</string>
     <string name="disturbance_status_pt_ml_part_delayed">, il y a des perturbations actuellement en cours.</string>
 
     <string name="disturbance_status_pt_ml_part_longhalt">Ce n\'est pas possible de prévoir la durée de l\'interruption, quit peut être prolongée. Nous nous excusons pour toute gêne occasionnée</string>
