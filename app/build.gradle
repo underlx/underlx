@@ -19,8 +19,8 @@ android {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 84
-        versionName '0.38'
+        versionCode 85
+        versionName '0.39'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
