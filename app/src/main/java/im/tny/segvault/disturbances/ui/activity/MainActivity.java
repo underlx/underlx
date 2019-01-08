@@ -546,6 +546,9 @@ public class MainActivity extends TopActivity
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null) {
+                return;
+            }
             switch (intent.getAction()) {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS:
                     final int progress = intent.getIntExtra(MapManager.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
