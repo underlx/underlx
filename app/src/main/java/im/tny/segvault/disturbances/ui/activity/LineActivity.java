@@ -1,19 +1,14 @@
 package im.tny.segvault.disturbances.ui.activity;
 
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,26 +24,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
-import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -61,7 +49,8 @@ public class LineActivity extends TopActivity {
     private String lineId;
 
     private LinearLayout lineIconsLayout;
-    private LinearLayout disturbancesWarningLayout;
+    private LinearLayout warningLayout;
+    private TextView warningView;
     private LinearLayout lineLayout;
 
     @Override
@@ -84,7 +73,8 @@ public class LineActivity extends TopActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         lineIconsLayout = findViewById(R.id.line_icons_layout);
-        disturbancesWarningLayout = findViewById(R.id.disturbances_warning_layout);
+        warningLayout = findViewById(R.id.warning_layout);
+        warningView = findViewById(R.id.warning_view);
         lineLayout = findViewById(R.id.line_layout);
 
         Network net = Coordinator.get(this).getMapManager().getNetwork(networkId);
@@ -130,24 +120,27 @@ public class LineActivity extends TopActivity {
         });
 
         Map<String, LineStatusCache.Status> statuses = Coordinator.get(this).getLineStatusCache().getLineStatus();
-        if (statuses.get(line.getId()) != null &&
-                statuses.get(line.getId()).down) {
-            disturbancesWarningLayout.setVisibility(View.VISIBLE);
+        LineStatusCache.Status lineStatus = statuses.get(line.getId());
+        if (lineStatus != null && new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5) && lineStatus.down) {
+            warningView.setText(R.string.act_line_disturbances_warning);
+            warningLayout.setVisibility(View.VISIBLE);
         } else {
-            disturbancesWarningLayout.setVisibility(View.GONE);
+            warningLayout.setVisibility(View.GONE);
         }
 
-        LinearLayout closedLayout = findViewById(R.id.closed_info_layout);
+        LinearLayout infoLayout = findViewById(R.id.info_layout);
+        TextView infoView = findViewById(R.id.info_view);
         if (line.isExceptionallyClosed(new Date())) {
-            TextView closedView = findViewById(R.id.closed_info_view);
             Formatter f = new Formatter();
             DateUtils.formatDateRange(LineActivity.this, f, line.getNextOpenTime(), line.getNextOpenTime(), DateUtils.FORMAT_SHOW_TIME, net.getTimezone().getID());
-            closedView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
-
-
-            closedLayout.setVisibility(View.VISIBLE);
+            infoView.setText(String.format(getString(R.string.act_line_closed_schedule), f.toString()));
+            infoLayout.setVisibility(View.VISIBLE);
+        } else if (lineStatus != null && lineStatus.condition.trainCars < line.getUsualCarCount() && lineStatus.condition.trainCars > 0) {
+            infoView.setText(String.format(getString(R.string.act_line_short_cars_now_warning),
+                    lineStatus.condition.trainCars, line.getUsualCarCount()));
+            infoLayout.setVisibility(View.VISIBLE);
         } else {
-            closedLayout.setVisibility(View.GONE);
+            infoLayout.setVisibility(View.GONE);
         }
 
         populateLineView(LineActivity.this, getLayoutInflater(), line, lineLayout);
@@ -273,7 +266,7 @@ public class LineActivity extends TopActivity {
             }
 
             // fill gap left by rounded corners of top/bottom
-            if((leftColor != 0 || rightColor != 0) && (i == 0 || i == stations.size() - 1)) {
+            if ((leftColor != 0 || rightColor != 0) && (i == 0 || i == stations.size() - 1)) {
                 GradientDrawable gd = new GradientDrawable(
                         GradientDrawable.Orientation.LEFT_RIGHT,
                         new int[]{leftColor, rightColor});

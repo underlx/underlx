@@ -366,17 +366,7 @@ public class RouteFragment extends TopFragment {
                         String.format(getString(R.string.frag_route_direction),
                                 ((EnterStep) step).getDirection().getName())));
 
-                if (line.getUsualCarCount() < network.getUsualCarCount()) {
-                    LinearLayout carsWarningLayout = view.findViewById(R.id.cars_warning_layout);
-                    carsWarningLayout.setVisibility(View.VISIBLE);
-                }
-
-                Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
-                if (statuses.get(line.getId()) != null &&
-                        statuses.get(line.getId()).down) {
-                    LinearLayout disturbancesWarningLayout = view.findViewById(R.id.disturbances_warning_layout);
-                    disturbancesWarningLayout.setVisibility(View.VISIBLE);
-                }
+                populateWarnings(getContext(), view, line);
             } else if (step instanceof ChangeLineStep) {
                 final ChangeLineStep lStep = (ChangeLineStep) step;
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_change_line, layoutRoute, false);
@@ -436,12 +426,7 @@ public class RouteFragment extends TopFragment {
                     carsWarningLayout.setVisibility(View.VISIBLE);
                 }
 
-                Map<String, LineStatusCache.Status> statuses = Coordinator.get(getContext()).getLineStatusCache().getLineStatus();
-                if (statuses.get(lStep.getTarget().getId()) != null &&
-                        statuses.get(lStep.getTarget().getId()).down) {
-                    LinearLayout disturbancesWarningLayout = view.findViewById(R.id.disturbances_warning_layout);
-                    disturbancesWarningLayout.setVisibility(View.VISIBLE);
-                }
+                populateWarnings(getContext(), view, lStep.getTarget());
             } else if (step instanceof ExitStep) {
                 view = getActivity().getLayoutInflater().inflate(R.layout.step_exit_network, layoutRoute, false);
 
@@ -521,6 +506,32 @@ public class RouteFragment extends TopFragment {
         boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
         if (locationEnabled) {
             layoutBottomSheet.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private static void populateWarnings(final Context context, final View view, final Line line) {
+        Map<String, LineStatusCache.Status> statuses = Coordinator.get(context).getLineStatusCache().getLineStatus();
+        LineStatusCache.Status lineStatus = statuses.get(line.getId());
+        boolean hasCarsWarning = false;
+        if (lineStatus != null && new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
+            if (lineStatus.condition.trainCars < line.getUsualCarCount() && lineStatus.condition.trainCars > 0) {
+                TextView carsWarningView = view.findViewById(R.id.cars_warning_view);
+                carsWarningView.setText(String.format(context.getString(R.string.frag_route_short_cars_now_warning),
+                        lineStatus.condition.trainCars, line.getUsualCarCount()));
+                LinearLayout carsWarningLayout = view.findViewById(R.id.cars_warning_layout);
+                carsWarningLayout.setVisibility(View.VISIBLE);
+                hasCarsWarning = true;
+            }
+
+            if (lineStatus.down) {
+                LinearLayout disturbancesWarningLayout = view.findViewById(R.id.disturbances_warning_layout);
+                disturbancesWarningLayout.setVisibility(View.VISIBLE);
+            }
+        }
+
+        if (!hasCarsWarning && line.getUsualCarCount() < line.getNetwork().getUsualCarCount()) {
+            LinearLayout carsWarningLayout = view.findViewById(R.id.cars_warning_layout);
+            carsWarningLayout.setVisibility(View.VISIBLE);
         }
     }
 

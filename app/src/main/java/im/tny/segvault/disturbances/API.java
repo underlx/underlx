@@ -294,6 +294,16 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class LineCondition {
+        public String id;
+        public long[] time;
+        public int trainCars;
+        public int trainFrequency;
+        public String line;
+        public String source;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     static public class Feedback {
         public String id;
         public long[] timestamp;
@@ -890,6 +900,20 @@ public class API {
             String url = String.format("stats/%s?start=%s&end=%s",
                     networkID, URLEncoder.encode(Util.encodeRFC3339(since), "utf-8"), URLEncoder.encode(Util.encodeRFC3339(until), "utf-8"));
             return mapper.readValue(getRequest(endpoint.resolve(url), false), Stats.class);
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<LineCondition> getLatestLineConditions() throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("lines/conditions?filter=latest"), false), new TypeReference<List<LineCondition>>() {
+            });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

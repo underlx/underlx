@@ -43,16 +43,16 @@
             android:id="@+id/middle_line_stripe_layout"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginTop="15dp"
-            android:layout_alignTop="@id/prev_line_stripe_layout" />
+            android:layout_alignTop="@id/prev_line_stripe_layout"
+            android:layout_marginTop="15dp" />
 
         <FrameLayout
             android:id="@+id/next_line_stripe_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignTop="@id/middle_line_stripe_layout"
-            android:layout_marginTop="40dp"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="40dp" />
 
         <ImageView
             android:layout_width="15dp"
@@ -115,8 +115,8 @@
                 android:layout_height="20dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginRight="5dp"
-                app:srcCompat="@drawable/ic_error_black_24dp"
-                android:tint="@color/colorError" />
+                android:tint="@color/colorError"
+                app:srcCompat="@drawable/ic_error_black_24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -138,15 +138,16 @@
                 android:layout_height="20dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginRight="5dp"
-                app:srcCompat="@drawable/ic_warning_black_24dp"
-                android:tint="@color/colorWarning" />
+                android:tint="@color/colorInfo"
+                app:srcCompat="@drawable/ic_info_black_24dp" />
 
             <TextView
+                android:id="@+id/cars_warning_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/frag_route_short_cars_warning"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/colorWarning" />
+                android:textColor="@color/colorInfo" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

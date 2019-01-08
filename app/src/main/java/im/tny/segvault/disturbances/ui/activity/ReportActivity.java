@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,12 +29,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
@@ -178,6 +182,15 @@ public class ReportActivity extends TopActivity {
                 lineNameView.setOnClickListener(cbOnClick);
                 lineClosedView.setOnClickListener(cbOnClick);
                 view.setOnClickListener(cbOnClick);
+            }
+
+            Map<String, LineStatusCache.Status> statuses = Coordinator.get(this).getLineStatusCache().getLineStatus();
+            LineStatusCache.Status lineStatus = statuses.get(line.getId());
+            TextView setFrequencyView = view.findViewById(R.id.line_set_frequency_view);
+            if (lineStatus != null && new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5) &&
+                    lineStatus.condition.trainFrequency > 0) {
+                setFrequencyView.setText(String.format(getString(R.string.act_report_line_train_frequency), DateUtils.formatElapsedTime(lineStatus.condition.trainFrequency / 1000)));
+                setFrequencyView.setVisibility(View.VISIBLE);
             }
 
             linesLayout.addView(view);

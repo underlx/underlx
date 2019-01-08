@@ -41,33 +41,53 @@ public class LineStatusCache {
         public final boolean stopped;
         public final Date downSince;
         public final Date updated;
+        public final Condition condition;
         public transient Line line;
 
-        public Status(Line line) {
+        Status(Line line, Condition condition) {
             this.id = line.getId();
             this.line = line;
             this.down = false;
             this.stopped = false;
             this.downSince = new Date();
             this.updated = new Date();
+            this.condition = (condition != null ? condition : new Condition());
         }
 
-        public Status(Line line, Date downSince) {
+        Status(Line line, Condition condition, Date downSince) {
             this.id = line.getId();
             this.line = line;
             this.down = true;
             this.stopped = false;
             this.downSince = downSince;
             this.updated = new Date();
+            this.condition = (condition != null ? condition : new Condition());
         }
 
-        public Status(Line line, Date downSince, boolean stopped) {
+        Status(Line line, Condition condition, Date downSince, boolean stopped) {
             this.id = line.getId();
             this.line = line;
             this.down = true;
             this.stopped = stopped;
             this.downSince = downSince;
             this.updated = new Date();
+            this.condition = (condition != null ? condition : new Condition());
+        }
+    }
+
+    public static class Condition implements Serializable {
+        public final int trainCars;
+        public final long trainFrequency;
+
+        Condition() {
+            // this constructor should be used when data is not available
+            trainCars = 0;
+            trainFrequency = 0;
+        }
+
+        Condition(int trainCars, long trainFrequency) {
+            this.trainCars = trainCars;
+            this.trainFrequency = trainFrequency;
         }
     }
 
@@ -156,7 +176,12 @@ public class LineStatusCache {
             // ensure line statuses are loaded, otherwise our map will only contain this line
             getLineStatus();
 
-            lineStatuses.put(line.getId(), new Status(line, since));
+            Condition prevCondition = new Condition();
+            if(lineStatuses.containsKey(line.getId())) {
+                prevCondition = lineStatuses.get(line.getId()).condition;
+            }
+
+            lineStatuses.put(line.getId(), new Status(line, prevCondition, since));
             cacheLineStatus(lineStatuses);
         }
         Intent intent = new Intent(ACTION_LINE_STATUS_UPDATE_SUCCESS);
@@ -169,7 +194,12 @@ public class LineStatusCache {
             // ensure line statuses are loaded, otherwise our map will only contain this line
             getLineStatus();
 
-            lineStatuses.put(line.getId(), new Status(line));
+            Condition prevCondition = new Condition();
+            if(lineStatuses.containsKey(line.getId())) {
+                prevCondition = lineStatuses.get(line.getId()).condition;
+            }
+
+            lineStatuses.put(line.getId(), new Status(line, prevCondition));
             cacheLineStatus(lineStatuses);
         }
         Intent intent = new Intent(ACTION_LINE_STATUS_UPDATE_SUCCESS);
@@ -197,6 +227,11 @@ public class LineStatusCache {
             }
             try {
                 List<API.Disturbance> disturbances = API.getInstance().getOngoingDisturbances();
+                List<API.LineCondition> conditions = API.getInstance().getLatestLineConditions();
+                Map<String, Condition> conditionsPerLine = new HashMap<>();
+                for (API.LineCondition condition : conditions) {
+                    conditionsPerLine.put(condition.line, new Condition(condition.trainCars, condition.trainFrequency * 1000));
+                }
                 for (Line l : lines) {
                     boolean foundDisturbance = false;
                     for (API.Disturbance d : disturbances) {
@@ -214,13 +249,13 @@ public class LineStatusCache {
                                 API.Status lastStatus = d.statuses.get(d.statuses.size() - 1);
                                 stopped = lastStatus.msgType.contains("_SINCE_") || lastStatus.msgType.contains("_HALTED_") || lastStatus.msgType.contains("_BETWEEN_");
                             }
-                            status = new LineStatusCache.Status(l, new Date(d.startTime[0] * 1000), stopped);
+                            status = new LineStatusCache.Status(l, conditionsPerLine.get(l.getId()), new Date(d.startTime[0] * 1000), stopped);
                             statuses.put(l.getId(), status);
                             break;
                         }
                     }
                     if (!foundDisturbance) {
-                        statuses.put(l.getId(), new LineStatusCache.Status(l));
+                        statuses.put(l.getId(), new LineStatusCache.Status(l, conditionsPerLine.get(l.getId())));
                     }
                 }
             } catch (APIException e) {

@@ -30,5 +30,12 @@
             android:text="@string/act_report_line_closed"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/line_set_frequency_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
