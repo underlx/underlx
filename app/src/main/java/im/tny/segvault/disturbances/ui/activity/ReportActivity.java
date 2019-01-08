@@ -1,8 +1,10 @@
 package im.tny.segvault.disturbances.ui.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -72,11 +74,17 @@ public class ReportActivity extends TopActivity {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
         }
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS);
+        filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        bm.registerReceiver(mBroadcastReceiver, filter);
+
         linesLayout = findViewById(R.id.lines_layout);
         sendButton = findViewById(R.id.send_button);
         sendButton.setOnClickListener(view -> new SubmitReportTask().execute());
 
-        populateLineList();
+        populateLineList(false);
     }
 
     private class SubmitReportTask extends AsyncTask<Void, Void, Boolean> {
@@ -91,7 +99,7 @@ public class ReportActivity extends TopActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             boolean anySuccess = false;
-            for(Line line : checkedLines) {
+            for (Line line : checkedLines) {
                 API.DisturbanceReport report = new API.DisturbanceReport();
                 report.category = "generic";
                 report.line = line.getId();
@@ -99,7 +107,7 @@ public class ReportActivity extends TopActivity {
                 try {
                     API.getInstance().postDisturbanceReport(report);
                     anySuccess = true;
-                } catch(APIException ex) {
+                } catch (APIException ex) {
                     // oh well
                 }
             }
@@ -109,7 +117,7 @@ public class ReportActivity extends TopActivity {
         @Override
         protected void onPostExecute(Boolean success) {
             String toastText = getString(R.string.act_report_success);
-            if(!success) {
+            if (!success) {
                 toastText = getString(R.string.act_report_error);
             }
 
@@ -126,7 +134,7 @@ public class ReportActivity extends TopActivity {
                 bm.sendBroadcast(intent);
             }
 
-            if(success) {
+            if (success) {
                 finish();
             } else {
                 Util.setViewAndChildrenEnabled(linesLayout, true);
@@ -135,7 +143,7 @@ public class ReportActivity extends TopActivity {
         }
     }
 
-    private void populateLineList() {
+    private void populateLineList(boolean fromUpdate) {
         List<Line> lines = new ArrayList<>();
         for (Network network : Coordinator.get(this).getMapManager().getNetworks()) {
             List<Line> nLines = new ArrayList<>(network.getLines());
@@ -144,9 +152,11 @@ public class ReportActivity extends TopActivity {
         }
 
         linesLayout.removeAllViews();
+        boolean needsStatusUpdate = false;
         for (final Line line : lines) {
             View view = getLayoutInflater().inflate(R.layout.checkbox_report_line, linesLayout, false);
             final CheckBox lineCheckbox = view.findViewById(R.id.line_checkbox);
+            lineCheckbox.setChecked(checkedLines.contains(line));
             lineCheckbox.setOnCheckedChangeListener((compoundButton, b) -> {
                 if (b) {
                     checkedLines.add(line);
@@ -156,7 +166,7 @@ public class ReportActivity extends TopActivity {
                 sendButton.setEnabled(checkedLines.size() > 0);
             });
             TextView lineNameView = view.findViewById(R.id.line_name_view);
-            String lineName =  Util.getLineNames(ReportActivity.this, line)[0];
+            String lineName = Util.getLineNames(ReportActivity.this, line)[0];
             String lineLine = String.format(getString(R.string.act_report_line_name), lineName);
             S2LS s2ls = Coordinator.get(this).getS2LS(line.getNetwork().getId());
             if (s2ls != null && s2ls.getCurrentTrip() != null) {
@@ -187,15 +197,21 @@ public class ReportActivity extends TopActivity {
             Map<String, LineStatusCache.Status> statuses = Coordinator.get(this).getLineStatusCache().getLineStatus();
             LineStatusCache.Status lineStatus = statuses.get(line.getId());
             TextView setFrequencyView = view.findViewById(R.id.line_set_frequency_view);
-            if (lineStatus != null && new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5) &&
-                    lineStatus.condition.trainFrequency > 0) {
-                setFrequencyView.setText(String.format(getString(R.string.act_report_line_train_frequency), DateUtils.formatElapsedTime(lineStatus.condition.trainFrequency / 1000)));
-                setFrequencyView.setVisibility(View.VISIBLE);
+            if (lineStatus != null && new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5)) {
+                if (lineStatus.condition.trainFrequency > 0) {
+                    setFrequencyView.setText(String.format(getString(R.string.act_report_line_train_frequency), DateUtils.formatElapsedTime(lineStatus.condition.trainFrequency / 1000)));
+                    setFrequencyView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                needsStatusUpdate = true;
             }
-
             linesLayout.addView(view);
         }
         sendButton.setEnabled(checkedLines.size() > 0);
+
+        if (needsStatusUpdate && !fromUpdate) {
+            Coordinator.get(this).getLineStatusCache().updateLineStatus();
+        }
     }
 
     @Override
@@ -207,6 +223,21 @@ public class ReportActivity extends TopActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() == null) {
+                return;
+            }
+            switch (intent.getAction()) {
+                case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
+                case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    populateLineList(true);
+                    break;
+            }
+        }
+    };
 
     public static final String STATE_IS_STANDALONE = "standalone";
 
