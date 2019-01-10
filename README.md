@@ -1,4 +1,4 @@
-# underlx [![Discord](https://img.shields.io/discord/334423823552217090.svg)](https://discord.gg/hhuC7fc) [![license](https://img.shields.io/github/license/underlx/underlx.svg)](https://github.com/underlx/underlx/blob/master/LICENSE)
+# underlx [![Discord](https://img.shields.io/discord/334423823552217090.svg)](https://perturbacoes.pt/discord?utm_source=gh-underlx) [![license](https://img.shields.io/github/license/underlx/underlx.svg)](https://github.com/underlx/underlx/blob/master/LICENSE)
 This is an app for Android devices that shows information about the [Lisbon Metro](http://www.metrolisboa.pt/), as collected by our other project, [disturbancesmlx](https://github.com/underlx/disturbancesmlx).
 
 The long-term goal is to become **the only Lisbon Metro app users will ever need**, and perhaps most importantly, **the one they'll want to have**.
