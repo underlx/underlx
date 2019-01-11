@@ -594,8 +594,8 @@ public class Util {
             int firstStationEndIdx = firstStationStartIdx + status.substring(firstStationStartIdx).indexOf(" e ");
             int secondStationStartIdx = firstStationEndIdx + " e ".length();
             int secondStationEndIdx = secondStationStartIdx + 3 + status.substring(secondStationStartIdx + 3).indexOf(".");
-            String firstStationName = status.substring(firstStationStartIdx, firstStationEndIdx).trim().replace("S.", "São");
-            String secondStationName = status.substring(secondStationStartIdx, secondStationEndIdx).trim().replace("S.", "São");
+            String firstStationName = sanitizeStationName(status.substring(firstStationStartIdx, firstStationEndIdx).trim());
+            String secondStationName = sanitizeStationName(status.substring(secondStationStartIdx, secondStationEndIdx).trim());
             firstStation = network.getStationByName(firstStationName);
             secondStation = network.getStationByName(secondStationName);
 
@@ -772,6 +772,16 @@ public class Util {
         }
 
         return sb;
+    }
+
+    private static String sanitizeStationName(String original) {
+        switch(original) {
+            case "S. Sebastião":
+                return "São Sebastião";
+            case "Colégio Militar":
+                return "Colégio Militar/Luz";
+        }
+        return original;
     }
 
     public static String encodeRFC3339(Date date) {
