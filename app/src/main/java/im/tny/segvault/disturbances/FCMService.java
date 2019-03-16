@@ -368,6 +368,9 @@ public class FCMService extends FirebaseMessagingService {
             case "clear-cache":
                 Util.deleteCache(this);
                 break;
+            case "download-extras":
+                Coordinator.get(this).cacheAllExtras(MapManager.PRIMARY_NETWORK_ID);
+                break;
         }
     }
 }
