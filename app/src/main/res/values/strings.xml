@@ -392,10 +392,10 @@
     <string name="frag_disturbance_close">Close</string>
     <string name="frag_trip_history_posplay_all_time">all-time</string>
     <string name="frag_trip_history_posplay_this_week">this week</string>
-    <string name="frag_trip_history_posplay_username">%s on %s</string>
+    <string name="frag_trip_history_posplay_username">%1$s on %2$s</string>
     <string name="frag_trip_history_posplay_level">Level %d</string>
     <string name="frag_trip_history_posplay_no_participation">No\nparticipation</string>
-    <string name="frag_trip_history_posplay_xp_place">%d XP\n%s place</string>
+    <string name="frag_trip_history_posplay_xp_place">%1$d XP\n%2$s place</string>
 
     <string name="disturbance_status_report_begin">Users reported service disruptions</string>
     <string name="disturbance_status_report_confirm">Several users confirmed service disruptions</string>

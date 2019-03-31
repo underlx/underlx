@@ -368,10 +368,10 @@
     <string name="frag_disturbance_close">Fermer</string>
     <string name="frag_trip_history_posplay_all_time">depuis toujours</string>
     <string name="frag_trip_history_posplay_this_week">cette semaine</string>
-    <string name="frag_trip_history_posplay_username">%s au %s</string>
+    <string name="frag_trip_history_posplay_username">%1$s au %2$s</string>
     <string name="frag_trip_history_posplay_level">Niveau %d</string>
     <string name="frag_trip_history_posplay_no_participation">Aucune\nparticipation</string>
-    <string name="frag_trip_history_posplay_xp_place">%d XP\n%s position</string>
+    <string name="frag_trip_history_posplay_xp_place">%1$d XP\n%2$s position</string>
     <string name="lobby_schedule_range_hours">&#160;(%d heures)</string>
     <string name="frag_settings_translate_all_status">Traduire tous les états de ligne</string>
     <string name="frag_settings_translate_all_status_summary">Essayez de traduire tous les états de perturbation fournis par le Métro</string>
