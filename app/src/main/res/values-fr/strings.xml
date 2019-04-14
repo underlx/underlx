@@ -378,6 +378,8 @@
     <string name="frag_route_short_cars_now_warning">Les trains sur cette ligne sont actuellement plus courts que d\'habitude (%1$d wagons au lieu de %2$d). Cherchez les écrans de vidéosurveillance sur un des côtés du quai et prenez le train dans cette moitié.</string>
     <string name="act_line_short_cars_now_warning">Les trains sur cette ligne sont actuellement plus courts que d\'habitude (%1$d wagons au lieu de %2$d).</string>
     <string name="act_report_line_train_frequency">Intervalle entre les trains établi par le Métro pour l\'heure actuelle: %s</string>
+    <string name="frag_notif_show_community_reported">Notifier sur rapports de la communauté</string>
+    <string name="frag_notif_show_community_reported_summary">Montrer notifications de problèmes en la circulation rapporté par autres utilisateurs</string>
 
     <string name="disturbance_status_report_begin">Les utilisateurs ont rapporté des problèmes en la circulation</string>
     <string name="disturbance_status_report_confirm">Plusieurs utilisateurs ont confirmé des problèmes en la circulation</string>

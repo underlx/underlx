@@ -378,6 +378,8 @@
     <string name="frag_route_short_cars_now_warning">En este momento, los trenes de esta línea son más cortos de lo habitual (%1$d vagones en vez de %2$d). Busca las pantallas de videovigilancia en una de las puntas de la plataforma y mantente en esa mitad.</string>
     <string name="act_line_short_cars_now_warning">En este momento, los trenes de esta línea son más cortos de lo habitual (%1$d vagones en vez de %2$d).</string>
     <string name="act_report_line_train_frequency">Intervalo entre trenes establecido por el Metro para la hora actual: %s</string>
+    <string name="frag_notif_show_community_reported">Notificar sobre informes de la comunidade</string>
+    <string name="frag_notif_show_community_reported_summary">Mostrar notificaciones de problemas en la circulación reportados por otros usuarios</string>
 
     <string name="disturbance_status_report_begin">Los usuarios reportaron problemas en la circulación</string>
     <string name="disturbance_status_report_confirm">Varios usuarios confirmaron problemas en la circulación</string>

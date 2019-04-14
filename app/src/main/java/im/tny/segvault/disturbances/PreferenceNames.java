@@ -21,6 +21,7 @@ public class PreferenceNames {
     // notifsettings
     public static final String NotifsLines = "pref_notifs_lines";
     public static final String NotifsServiceResumed = "pref_notifs_service_resumed";
+    public static final String NotifsCommunity = "pref_notifs_community";
     public static final String NotifsRingtone = "pref_notifs_ringtone";
     public static final String NotifsVibrate = "pref_notifs_vibrate";
     public static final String NotifsRegularizationRingtone = "pref_notifs_regularization_ringtone";

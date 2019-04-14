@@ -51,6 +51,12 @@
             android:key="pref_notifs_regularization_vibrate"
             android:title="@string/frag_notif_regularization_vibrate" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_notifs_community"
+            android:summary="@string/frag_notif_show_community_reported_summary"
+            android:title="@string/frag_notif_show_community_reported" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/frag_notif_announcement_title">

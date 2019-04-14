@@ -115,6 +115,13 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
+        if (data.containsKey("official") &&
+                data.get("official").equals("false") &&
+                !sharedPref.getBoolean(PreferenceNames.NotifsCommunity, true)) {
+            // notifications for community-reported disturbances disabled
+            return;
+        }
+
         Realm realm = Application.getDefaultRealmInstance(this);
         for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
             if (rule.isEnabled() && rule.applies(new Date(remoteMessage.getSentTime()))) {

@@ -58,7 +58,9 @@
     <string name="frag_notif_summary_lines">Showing notifications for lines: %s</string>
     <string name="frag_notif_summary_no_lines">Disturbance notifications disabled</string>
     <string name="frag_notif_show_regularization">Show regularization notifications</string>
-    <string name="frag_notif_show_regularization_summary">\"Circulação normal\" notifications</string>
+    <string name="frag_notif_show_regularization_summary">\"Regular service\" / \"Circulação normal\" notifications</string>
+    <string name="frag_notif_show_community_reported">Notify about community reports</string>
+    <string name="frag_notif_show_community_reported_summary">Show notifications for service disruptions reported by other users</string>
     <string name="frag_notif_announcement_title">Announcement notifications</string>
     <string name="frag_notif_sources">Sources</string>
     <string name="frag_notif_summary_sources">Showing notifications for announcements from: %s</string>
