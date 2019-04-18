@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
@@ -55,6 +56,8 @@ public class FCMService extends FirebaseMessagingService {
                     handleAnnouncementMessage(remoteMessage);
                 } else if (BuildConfig.DEBUG && from.startsWith("/topics/announcements-debug-")) {
                     handleAnnouncementMessage(remoteMessage);
+                } else if (from.startsWith("/topics/pair-")) {
+                    handlePersonalMessage(remoteMessage);
                 }
                 break;
         }
@@ -223,6 +226,47 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
         notificationManager.notify(data.get("url").hashCode(), notificationBuilder.build());
+    }
+
+    private void handlePersonalMessage(RemoteMessage remoteMessage) {
+        Map<String, String> data = remoteMessage.getData();
+        if (!data.containsKey("type")) {
+            return;
+        }
+
+        if(!data.get("type").equals("posplay-notification")) {
+            return;
+        }
+
+        String title = data.get("title");
+        String body = data.get("body");
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(title);
+        bigTextStyle.bigText(body);
+
+        Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
+        notificationIntent.setData(Uri.parse(data.get("url")));
+        PendingIntent contentIntent = PendingIntent.getActivity(this, Math.abs(Coordinator.get(this).getRandom().nextInt()), notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ANNOUNCEMENTS_ID)
+                .setStyle(bigTextStyle)
+                .setSmallIcon(R.drawable.ic_posplay_blue_24dp)
+                .setColor(Color.parseColor("#0078E7"))
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setWhen(remoteMessage.getSentTime())
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(contentIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (notificationManager == null) {
+            return;
+        }
+        notificationManager.notify(remoteMessage.getMessageId().hashCode(), notificationBuilder.build());
     }
 
     private void handleBroadcastMessage(RemoteMessage remoteMessage) {

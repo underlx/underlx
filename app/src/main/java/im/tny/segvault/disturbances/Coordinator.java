@@ -8,41 +8,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.os.Build;
-import android.os.Looper;
-import android.support.constraint.solver.Cache;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
-import im.tny.segvault.disturbances.model.Trip;
-import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
-import im.tny.segvault.s2ls.InNetworkState;
-import im.tny.segvault.s2ls.NearNetworkState;
-import im.tny.segvault.s2ls.OffNetworkState;
-import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
-import im.tny.segvault.s2ls.State;
-import im.tny.segvault.s2ls.routing.ChangeLineStep;
-import im.tny.segvault.s2ls.routing.EnterStep;
-import im.tny.segvault.s2ls.routing.ExitStep;
-import im.tny.segvault.s2ls.routing.Route;
-import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
@@ -261,6 +238,14 @@ public class Coordinator implements MapManager.OnLoadListener {
             } else {
                 fcm.unsubscribeFromTopic("announcements-" + possibleSource.id);
                 fcm.unsubscribeFromTopic("announcements-debug-" + possibleSource.id);
+            }
+        }
+
+        if (pairManager.isPaired()) {
+            String topicName = String.format("pair-%s", pairManager.getPairKey());
+            fcm.subscribeToTopic(topicName);
+            if (BuildConfig.DEBUG) {
+                fcm.subscribeToTopic(topicName + "-debug");
             }
         }
     }
