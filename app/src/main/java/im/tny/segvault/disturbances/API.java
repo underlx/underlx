@@ -7,6 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.util.Base64;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,6 +34,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,6 +84,25 @@ public class API {
         public boolean supported;
         public boolean up;
         public int minAndroidClient;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class Gateway {
+        public String protocol;
+
+        // Capture all other fields that Jackson do not match other members
+        @JsonIgnore
+        private Map<String, Object> specificFields = new HashMap<String, Object>();
+
+        @JsonAnyGetter
+        public Map<String, Object> getSpecificFields() {
+            return specificFields;
+        }
+
+        @JsonAnySetter
+        public void setSpecificField(String name, Object value) {
+            specificFields.put(name, value);
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -583,6 +605,7 @@ public class API {
                     Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
+                getMQTTConnectionInfo();
             }
             return this.endpointMetaInfo;
         }
@@ -617,6 +640,58 @@ public class API {
                 throw new APIException(new Exception("Endpoint reports it is not supported"));
             }
         }
+    }
+
+    public List<Gateway> getGateways() throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("gateways"), false), new TypeReference<List<Gateway>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public class MQTTConnectionInfo {
+        public String host;
+        public int port;
+        public boolean isTLS;
+    }
+
+    private MQTTConnectionInfo mqttConnInfo = null;
+
+    public MQTTConnectionInfo getMQTTConnectionInfo() {
+        if (mqttConnInfo != null) {
+            return mqttConnInfo;
+        }
+        try {
+            List<API.Gateway> gateways = getGateways();
+
+            for (API.Gateway gateway : gateways) {
+                if (!gateway.protocol.equals("mqtt")) {
+                    continue;
+                }
+                if (!"3.1.1".equals(gateway.getSpecificFields().get("pVer"))) {
+                    continue;
+                }
+                if (gateway.getSpecificFields().containsKey("host") && gateway.getSpecificFields().get("host") instanceof String &&
+                        gateway.getSpecificFields().containsKey("port") && gateway.getSpecificFields().get("port") instanceof Integer) {
+                    MQTTConnectionInfo info = new MQTTConnectionInfo();
+                    info.host = (String)gateway.getSpecificFields().get("host");
+                    info.port = (Integer) gateway.getSpecificFields().get("port");
+                    info.isTLS = gateway.getSpecificFields().containsKey("tls") && gateway.getSpecificFields().get("tls").equals(true);
+                    mqttConnInfo = info;
+                    return info;
+                }
+            }
+        } catch (APIException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<Network> getNetworks() throws APIException {

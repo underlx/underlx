@@ -36,9 +36,16 @@ android {
         }
     }
     packagingOptions {
-        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
         exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
     }
     productFlavors {
     }
@@ -77,6 +84,7 @@ dependencies {
     implementation 'com.jaredrummler:android-device-names:1.1.8'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.hivemq:hivemq-mqtt-client:1.0.1'
     testImplementation 'junit:junit:4.12'
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
     debugImplementation 'com.uphyca:stetho_realm:2.2.1'

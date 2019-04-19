@@ -119,6 +119,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
             }
         });
         new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
+        connectMQTT();
         updateRouteNotification(s2ls);
     }
 
@@ -133,6 +134,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.sendBroadcast(intent);
 
+        disconnectMQTT();
         if (!checkStopForeground(s2ls)) {
             updateRouteNotification(s2ls);
         }
@@ -226,6 +228,22 @@ public class S2LSChangeListener implements S2LS.EventListener {
     private void updateRouteNotification(S2LS s2ls, boolean b) {
         if (mainService != null) {
             mainService.updateRouteNotification(s2ls, b);
+        } else {
+            requestStartMainService();
+        }
+    }
+
+    private void connectMQTT() {
+        if (mainService != null) {
+            mainService.connectMQTT();
+        } else {
+            requestStartMainService();
+        }
+    }
+
+    private void disconnectMQTT() {
+        if (mainService != null) {
+            mainService.disconnectMQTT();
         } else {
             requestStartMainService();
         }

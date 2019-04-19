@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -85,6 +86,10 @@ public class Coordinator implements MapManager.OnLoadListener {
         reloadFCMsubscriptions();
 
         OurJobCreator.scheduleAllJobs();
+    }
+
+    public PairManager getPairManager() {
+        return pairManager;
     }
 
     public Synchronizer getSynchronizer() {

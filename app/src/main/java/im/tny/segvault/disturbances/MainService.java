@@ -22,7 +22,15 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
+import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
+import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3Connect;
+import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3ConnectBuilder;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,8 +68,6 @@ import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_HI
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_ID;
 
 public class MainService extends Service {
-    private API api;
-
     private Date creationDate = null;
 
     // Binder given to clients
@@ -89,7 +95,6 @@ public class MainService extends Service {
         creationDate = new Date();
         API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);
-        api = API.getInstance();
 
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(generalPrefsListener);
@@ -362,11 +367,11 @@ public class MainService extends Service {
         }
 
 
-        if(highPriorityNotification) {
+        if (highPriorityNotification) {
             lastRouteNotificationData = data;
             proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
             Log.d("MainService", "Updated route notification (high priority)");
-        } else if(shouldUpdateRouteNotification(data)) {
+        } else if (shouldUpdateRouteNotification(data)) {
             proxyStartForeground(ROUTE_NOTIFICATION_ID, notificationBuilder.build());
             Log.d("MainService", "Updated route notification");
         }
@@ -440,6 +445,73 @@ public class MainService extends Service {
             }
         }, 10000);
     }
+
+    //region MQTT connection
+
+    private Mqtt3BlockingClient mqttClient = null;
+    private final Object mqttLock = new Object();
+    private class MQTTConnectTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (!Coordinator.get(MainService.this).getPairManager().isPaired()) {
+                return null;
+            }
+            synchronized (mqttLock) {
+                API.MQTTConnectionInfo info = API.getInstance().getMQTTConnectionInfo();
+
+                if(info == null) {
+                    return null;
+                }
+
+                Mqtt3ClientBuilder builder = Mqtt3Client.builder()
+                        .identifier(Coordinator.get(MainService.this).getPairManager().getPairKey())
+                        .serverHost(info.host)
+                        .serverPort(info.port);
+                if (info.isTLS) {
+                    builder = builder.useSslWithDefaultConfig();
+                }
+                mqttClient = builder.buildBlocking();
+
+                Mqtt3SimpleAuth simpleAuth;
+                try {
+                    simpleAuth = Mqtt3SimpleAuth.builder()
+                            .username(Coordinator.get(MainService.this).getPairManager().getPairKey())
+                            .password(Coordinator.get(MainService.this).getPairManager().getPairSecret().getBytes("UTF-8"))
+                            .build();
+                } catch (UnsupportedEncodingException e) {
+                    // this just doesn't happen
+                    return null;
+                }
+                Mqtt3Connect connect = Mqtt3Connect.builder().simpleAuth(simpleAuth).build();
+
+                mqttClient.connect(connect);
+                return null;
+            }
+        }
+    }
+
+    private class MQTTDisconnectTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            synchronized (mqttLock) {
+                if (mqttClient == null) {
+                    return null;
+                }
+
+                mqttClient.disconnect();
+                return null;
+            }
+        }
+    }
+
+    void connectMQTT() {
+        new MQTTConnectTask().execute();
+    }
+
+    void disconnectMQTT() {
+        new MQTTDisconnectTask().execute();
+    }
+    //endregion
 
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = (prefs, key) -> {
         switch (key) {
