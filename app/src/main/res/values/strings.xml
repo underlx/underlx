@@ -108,6 +108,7 @@
     <string name="notif_route_waiting">Waiting for train…</string>
     <string name="notif_route_end_navigation">Exit navigation</string>
     <string name="notif_route_report">Service disruptions?</string>
+    <string name="notif_route_vehicle_etas_title">Next trains:</string>
     <string name="frag_disturbance_menu_refresh">Refresh</string>
     <string name="frag_disturbance_updated">Disturbance list updated</string>
     <string name="frag_home_menu_refresh">Refresh</string>
@@ -462,6 +463,18 @@
     <string name="poi_type_post_office">Post office</string>
     <string name="poi_type_cemetery">Cemetery</string>
     <string name="poi_type_hotel">Accommodation</string>
+
+    <string name="vehicle_eta_interval_seconds">in %1$d to %2$d seconds</string>
+    <string name="vehicle_eta_interval_minutes">in %1$d to %2$d minutes</string>
+    <string name="vehicle_eta_exact_formatted">in %s</string>
+    <string name="vehicle_eta_exact_seconds">in %d seconds</string>
+    <string name="vehicle_eta_exact_minutes">in %d minutes</string>
+    <string name="vehicle_eta_lessthan_seconds">in less than %d seconds</string>
+    <string name="vehicle_eta_lessthan_minutes">in less than %d minutes</string>
+    <string name="vehicle_eta_morethan_seconds">in more than %d seconds</string>
+    <string name="vehicle_eta_morethan_minutes">in more than %d minutes</string>
+    <string name="vehicle_eta_timestamp">at %s</string>
+    <string name="vehicle_eta_unavailable">information unavailable</string>
 
     <string-array name="frag_settings_languages">
         <item>System default</item>

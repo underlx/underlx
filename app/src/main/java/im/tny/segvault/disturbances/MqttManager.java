@@ -380,9 +380,9 @@ public class MqttManager {
         }
     }
 
-    // returns a map where the key is the direction
-    public Map<Station, API.MQTTvehicleETA> getVehicleETAsForStation(Station station) {
-        Map<Station, API.MQTTvehicleETA> result = new HashMap<>();
+    // returns a map where the key is the direction ID
+    public Map<String, API.MQTTvehicleETA> getVehicleETAsForStation(Station station) {
+        Map<String, API.MQTTvehicleETA> result = new HashMap<>();
         synchronized (vehicleETAsLock) {
             for (String key : vehicleETAs.keySet()) {
                 String[] parts = key.split("#");
@@ -392,7 +392,7 @@ public class MqttManager {
                         // do not include expired ones
                         continue;
                     }
-                    result.put(station.getNetwork().getStation(parts[2]), value.eta);
+                    result.put(parts[2], value.eta);
                 }
             }
         }

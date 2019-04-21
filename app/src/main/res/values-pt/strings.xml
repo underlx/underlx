@@ -380,6 +380,7 @@
     <string name="act_report_line_train_frequency">Intervalo entre comboios estabelecido pelo Metro para a hora atual: %s</string>
     <string name="frag_notif_show_community_reported">Notificar sobre relatos da comunidade</string>
     <string name="frag_notif_show_community_reported_summary">Mostrar notificações de problemas na circulação comunicados por outros utilizadores</string>
+    <string name="notif_route_vehicle_etas_title">Próximos comboios:</string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>
@@ -444,6 +445,18 @@
     <string name="poi_type_post_office">Correios</string>
     <string name="poi_type_cemetery">Cemitério</string>
     <string name="poi_type_hotel">Alojamento</string>
+
+    <string name="vehicle_eta_interval_seconds">em %1$d a %2$d segundos</string>
+    <string name="vehicle_eta_interval_minutes">em %1$d a %2$d minutos</string>
+    <string name="vehicle_eta_exact_formatted">em %s</string>
+    <string name="vehicle_eta_exact_seconds">daqui a %d segundos</string>
+    <string name="vehicle_eta_exact_minutes">daqui a %d minutos</string>
+    <string name="vehicle_eta_lessthan_seconds">em menos de %d segundos</string>
+    <string name="vehicle_eta_lessthan_minutes">em menos de %d minutos</string>
+    <string name="vehicle_eta_morethan_seconds">em mais de %d segundos</string>
+    <string name="vehicle_eta_morethan_minutes">em mais de %d minutos</string>
+    <string name="vehicle_eta_timestamp">às %s</string>
+    <string name="vehicle_eta_unavailable">informação não disponível</string>
 
     <string-array name="frag_settings_languages">
         <item>Padrão do sistema</item>
