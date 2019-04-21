@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -56,6 +55,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     private WiFiChecker wiFiChecker;
     private LineStatusCache lineStatusCache;
     private CacheManager cacheManager;
+    private MqttManager mqttManager;
     private Random random = new Random();
 
     private Coordinator(Context context) {
@@ -78,6 +78,7 @@ public class Coordinator implements MapManager.OnLoadListener {
 
         lineStatusCache = new LineStatusCache(this.context);
         cacheManager = new CacheManager(this.context);
+        mqttManager = new MqttManager(this.context);
 
         wiFiChecker = new WiFiChecker(this.context);
         wiFiChecker.setScanInterval(10000);
@@ -106,6 +107,10 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public CacheManager getCacheManager() {
         return cacheManager;
+    }
+
+    public MqttManager getMqttManager() {
+        return mqttManager;
     }
 
     public S2LS getS2LS(String networkId) {

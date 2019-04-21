@@ -12,8 +12,6 @@ import android.util.Log;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
@@ -109,6 +107,9 @@ public class S2LSChangeListener implements S2LS.EventListener {
 
             @Override
             public void onNewStationEnteredNow(Path path) {
+                Coordinator.get(context).getMqttManager().replaceSubscriptionsWithPrefix(
+                        MqttManager.getVehicleETAsTopicPrefix(),
+                        MqttManager.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
                 if (path.getDirection() == null) {
                     new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
                 } else {
@@ -119,7 +120,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
             }
         });
         new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
-        connectMQTT();
+        Coordinator.get(context).getMqttManager().connect(MqttManager.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
         updateRouteNotification(s2ls);
     }
 
@@ -134,7 +135,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.sendBroadcast(intent);
 
-        disconnectMQTT();
+        Coordinator.get(context).getMqttManager().disconnect();
         if (!checkStopForeground(s2ls)) {
             updateRouteNotification(s2ls);
         }
@@ -228,22 +229,6 @@ public class S2LSChangeListener implements S2LS.EventListener {
     private void updateRouteNotification(S2LS s2ls, boolean b) {
         if (mainService != null) {
             mainService.updateRouteNotification(s2ls, b);
-        } else {
-            requestStartMainService();
-        }
-    }
-
-    private void connectMQTT() {
-        if (mainService != null) {
-            mainService.connectMQTT();
-        } else {
-            requestStartMainService();
-        }
-    }
-
-    private void disconnectMQTT() {
-        if (mainService != null) {
-            mainService.disconnectMQTT();
         } else {
             requestStartMainService();
         }

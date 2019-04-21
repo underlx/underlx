@@ -12,10 +12,21 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DatabindContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.type.SimpleType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.util.Converter;
+import com.fasterxml.jackson.databind.util.StdConverter;
 
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 
@@ -90,7 +101,7 @@ public class API {
     static public class Gateway {
         public String protocol;
 
-        // Capture all other fields that Jackson do not match other members
+        // Capture all other fields that do not match other members
         @JsonIgnore
         private Map<String, Object> specificFields = new HashMap<String, Object>();
 
@@ -408,6 +419,41 @@ public class API {
         public int rankThisWeek;
     }
 
+    //region MQTT payloads
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = MQTTvehicleETAnoValue.class, name = "n"),
+            @JsonSubTypes.Type(value = MQTTvehicleETAsingleValue.class, name = "e"),
+            @JsonSubTypes.Type(value = MQTTvehicleETAinterval.class, name = "i"),
+            @JsonSubTypes.Type(value = MQTTvehicleETAsingleValue.class, name = "l"),
+            @JsonSubTypes.Type(value = MQTTvehicleETAsingleValue.class, name = "m"),
+            @JsonSubTypes.Type(value = MQTTvehicleETAsingleValue.class, name = "t")}
+    )
+    static public abstract class MQTTvehicleETA {
+        public String direction;
+        public long made;
+        public int validFor;
+        public String type;
+        public String units;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class MQTTvehicleETAnoValue extends MQTTvehicleETA {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class MQTTvehicleETAsingleValue extends MQTTvehicleETA {
+        public long value;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class MQTTvehicleETAinterval extends MQTTvehicleETA {
+        public int lower;
+        public int upper;
+    }
+    //endregion
+
     private int timeoutMs;
     private URI endpoint;
 
@@ -681,7 +727,7 @@ public class API {
                 if (gateway.getSpecificFields().containsKey("host") && gateway.getSpecificFields().get("host") instanceof String &&
                         gateway.getSpecificFields().containsKey("port") && gateway.getSpecificFields().get("port") instanceof Integer) {
                     MQTTConnectionInfo info = new MQTTConnectionInfo();
-                    info.host = (String)gateway.getSpecificFields().get("host");
+                    info.host = (String) gateway.getSpecificFields().get("host");
                     info.port = (Integer) gateway.getSpecificFields().get("port");
                     info.isTLS = gateway.getSpecificFields().containsKey("tls") && gateway.getSpecificFields().get("tls").equals(true);
                     mqttConnInfo = info;

@@ -5,36 +5,19 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
-import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
-import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3Connect;
-import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3ConnectBuilder;
-
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
@@ -43,21 +26,12 @@ import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
-import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.s2ls.InNetworkState;
-import im.tny.segvault.s2ls.NearNetworkState;
-import im.tny.segvault.s2ls.OffNetworkState;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
-import im.tny.segvault.s2ls.State;
-import im.tny.segvault.s2ls.routing.ChangeLineStep;
-import im.tny.segvault.s2ls.routing.EnterStep;
-import im.tny.segvault.s2ls.routing.ExitStep;
 import im.tny.segvault.s2ls.routing.Route;
-import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -445,73 +419,6 @@ public class MainService extends Service {
             }
         }, 10000);
     }
-
-    //region MQTT connection
-
-    private Mqtt3BlockingClient mqttClient = null;
-    private final Object mqttLock = new Object();
-    private class MQTTConnectTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (!Coordinator.get(MainService.this).getPairManager().isPaired()) {
-                return null;
-            }
-            synchronized (mqttLock) {
-                API.MQTTConnectionInfo info = API.getInstance().getMQTTConnectionInfo();
-
-                if(info == null) {
-                    return null;
-                }
-
-                Mqtt3ClientBuilder builder = Mqtt3Client.builder()
-                        .identifier(Coordinator.get(MainService.this).getPairManager().getPairKey())
-                        .serverHost(info.host)
-                        .serverPort(info.port);
-                if (info.isTLS) {
-                    builder = builder.useSslWithDefaultConfig();
-                }
-                mqttClient = builder.buildBlocking();
-
-                Mqtt3SimpleAuth simpleAuth;
-                try {
-                    simpleAuth = Mqtt3SimpleAuth.builder()
-                            .username(Coordinator.get(MainService.this).getPairManager().getPairKey())
-                            .password(Coordinator.get(MainService.this).getPairManager().getPairSecret().getBytes("UTF-8"))
-                            .build();
-                } catch (UnsupportedEncodingException e) {
-                    // this just doesn't happen
-                    return null;
-                }
-                Mqtt3Connect connect = Mqtt3Connect.builder().simpleAuth(simpleAuth).build();
-
-                mqttClient.connect(connect);
-                return null;
-            }
-        }
-    }
-
-    private class MQTTDisconnectTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            synchronized (mqttLock) {
-                if (mqttClient == null) {
-                    return null;
-                }
-
-                mqttClient.disconnect();
-                return null;
-            }
-        }
-    }
-
-    void connectMQTT() {
-        new MQTTConnectTask().execute();
-    }
-
-    void disconnectMQTT() {
-        new MQTTDisconnectTask().execute();
-    }
-    //endregion
 
     private SharedPreferences.OnSharedPreferenceChangeListener generalPrefsListener = (prefs, key) -> {
         switch (key) {
