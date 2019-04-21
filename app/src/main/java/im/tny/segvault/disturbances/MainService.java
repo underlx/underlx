@@ -3,7 +3,10 @@ package im.tny.segvault.disturbances;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Build;
@@ -89,10 +92,15 @@ public class MainService extends Service {
 
         Coordinator.get(this).registerMainService(this);
         Coordinator.get(this).reloadFCMsubscriptions();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MqttManager.ACTION_VEHICLE_ETAS_UPDATED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         Coordinator.get(this).unregisterMainService();
         Coordinator.get(this).getWiFiChecker().stopScanning();
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
@@ -459,6 +467,20 @@ public class MainService extends Service {
         Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
         bm.sendBroadcast(intent);
+    };
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null) {
+                return;
+            }
+            switch (intent.getAction()) {
+                case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
+                    updateRouteNotification(Coordinator.get(MainService.this).getS2LS(intent.getStringExtra(MqttManager.EXTRA_VEHICLE_ETAS_NETWORK)));
+                    break;
+            }
+        }
     };
 
 }

@@ -706,6 +706,7 @@ public class API {
         public String host;
         public int port;
         public boolean isTLS;
+        public String protocolVersion;
     }
 
     private MQTTConnectionInfo mqttConnInfo = null;
@@ -730,6 +731,7 @@ public class API {
                     info.host = (String) gateway.getSpecificFields().get("host");
                     info.port = (Integer) gateway.getSpecificFields().get("port");
                     info.isTLS = gateway.getSpecificFields().containsKey("tls") && gateway.getSpecificFields().get("tls").equals(true);
+                    info.protocolVersion = (String) gateway.getSpecificFields().get("pVer");
                     mqttConnInfo = info;
                     return info;
                 }

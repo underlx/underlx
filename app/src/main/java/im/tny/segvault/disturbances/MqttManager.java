@@ -1,38 +1,30 @@
 package im.tny.segvault.disturbances;
 
-import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
-import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.exceptions.MqttClientStateException;
-import com.hivemq.client.mqtt.exceptions.MqttSessionExpiredException;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
-import com.hivemq.client.mqtt.mqtt3.message.Mqtt3ReturnCode;
-import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscribe;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3SubscribeBuilder;
-import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
-import com.hivemq.client.mqtt.mqtt3.message.unsubscribe.Mqtt3Unsubscribe;
-import com.hivemq.client.mqtt.mqtt3.message.unsubscribe.Mqtt3UnsubscribeBuilder;
+
+import org.fusesource.mqtt.client.BlockingConnection;
+import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.Message;
+import org.fusesource.mqtt.client.QoS;
+import org.fusesource.mqtt.client.Topic;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -42,15 +34,13 @@ import im.tny.segvault.subway.Station;
 public class MqttManager {
     private Context context;
     private final Object mqttLock = new Object();
-    private Mqtt3BlockingClient mqttClient = null;
-    private boolean mqttConnected = false;
+    private BlockingConnection mqttConnection;
     private Set<String> mqttSubscriptions = new HashSet<>();
 
     public MqttManager(Context context) {
         this.context = context;
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private static class MQTTConnectTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
         private String[] initialTopics;
@@ -76,35 +66,30 @@ public class MqttManager {
                     return null;
                 }
 
-                Mqtt3ClientBuilder builder = Mqtt3Client.builder()
-                        .identifier(Coordinator.get(parent.context).getPairManager().getPairKey())
-                        .serverHost(info.host)
-                        .serverPort(info.port);
-                if (info.isTLS) {
-                    builder = builder.useSslWithDefaultConfig();
-                }
-                parent.mqttClient = builder.buildBlocking();
-
-                String user = Coordinator.get(parent.context).getPairManager().getPairKey();
-                byte[] pass;
+                MQTT mqttClient = new MQTT();
                 try {
-                    pass = Coordinator.get(parent.context).getPairManager().getPairSecret().getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    // this just doesn't happen
+                    if (info.isTLS) {
+                        mqttClient.setHost(String.format("tls://%s:%d", info.host, info.port));
+                    } else {
+                        mqttClient.setHost(String.format("tcp://%s:%d", info.host, info.port));
+                    }
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
                     return null;
                 }
+                mqttClient.setClientId(Coordinator.get(parent.context).getPairManager().getPairKey());
+                mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
+                mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
+                mqttClient.setVersion(info.protocolVersion);
+                mqttClient.setReconnectDelay(1000);
 
-                Mqtt3ReturnCode connectCode = parent.mqttClient.connectWith()
-                        .simpleAuth()
-                        .username(user)
-                        .password(pass)
-                        .applySimpleAuth()
-                        .send().getReturnCode();
-
-                if (connectCode.isError()) {
+                parent.mqttConnection = mqttClient.blockingConnection();
+                try {
+                    parent.mqttConnection.connect();
+                } catch (Exception e) {
+                    // oh well
                     return null;
                 }
-                parent.mqttConnected = true;
                 new Thread(new ConsumeRunnable(parent)).start();
 
                 return null;
@@ -122,7 +107,6 @@ public class MqttManager {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private static class MQTTDisconnectTask extends AsyncTask<Void, Void, Void> {
         private WeakReference<MqttManager> parentRef;
 
@@ -137,21 +121,21 @@ public class MqttManager {
                 return null;
             }
             synchronized (parent.mqttLock) {
-                if (parent.mqttClient == null || !parent.mqttConnected) {
+                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
 
                 try {
-                    parent.mqttClient.disconnect();
-                } catch (MqttClientStateException ex) {
-                    // probably we were not connected anymore
+                    parent.mqttConnection.disconnect();
+                } catch (Exception e) {
+                    // oh well
+                    e.printStackTrace();
                 }
                 return null;
             }
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private static class MQTTSubscribeTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
         private String unsubscribeFromPrefix = "";
@@ -172,7 +156,7 @@ public class MqttManager {
                 return null;
             }
             synchronized (parent.mqttLock) {
-                if (parent.mqttClient == null || !parent.mqttConnected) {
+                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
 
@@ -184,48 +168,35 @@ public class MqttManager {
                         }
                     }
 
-                    Mqtt3UnsubscribeBuilder builder = Mqtt3Unsubscribe.builder();
-                    Mqtt3UnsubscribeBuilder.Complete completeBuilder = null;
-                    for (String topic : subs) {
-                        parent.mqttSubscriptions.remove(topic);
-                        if (completeBuilder == null) {
-                            completeBuilder = builder.addTopicFilter(topic);
-                        } else {
-                            completeBuilder = completeBuilder.addTopicFilter(topic);
+                    if (subs.size() > 0) {
+                        String arr[] = new String[subs.size()];
+                        try {
+                            parent.mqttConnection.unsubscribe(subs.toArray(arr));
+                            parent.mqttSubscriptions.removeAll(subs);
+                        } catch (Exception e) {
+                            // oh well
+                            e.printStackTrace();
                         }
                     }
-                    try {
-                        parent.mqttClient.unsubscribe(completeBuilder.build());
-                    } catch (MqttClientStateException ex) {
-                        // TODO handle disconnects by reconnecting
-                        // probably we were not connected anymore
-                    }
                 }
 
-                Mqtt3SubscribeBuilder builder = Mqtt3Subscribe.builder();
-                Mqtt3SubscribeBuilder.Complete completeBuilder = null;
+                List<Topic> mqttTopics = new ArrayList<>();
                 for (String topic : topics) {
-                    Mqtt3Subscription sub = Mqtt3Subscription.builder().topicFilter(topic).qos(MqttQos.AT_MOST_ONCE).build();
-                    if (completeBuilder == null) {
-                        completeBuilder = builder.addSubscription(sub);
-                    } else {
-                        completeBuilder = completeBuilder.addSubscription(sub);
-                    }
-                    parent.mqttSubscriptions.add(topic);
+                    mqttTopics.add(new Topic(topic, QoS.AT_MOST_ONCE));
                 }
+                Topic arr[] = new Topic[mqttTopics.size()];
                 try {
-                    parent.mqttClient.subscribe(completeBuilder.build());
-                } catch (MqttClientStateException ex) {
-                    // TODO handle disconnects by reconnecting
-                    // probably we were not connected anymore
+                    parent.mqttConnection.subscribe(mqttTopics.toArray(arr));
+                    parent.mqttSubscriptions.addAll(Arrays.asList(topics));
+                } catch (Exception e) {
+                    // oh well
+                    e.printStackTrace();
                 }
-
                 return null;
             }
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private static class MQTTUnsubscribeTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
 
@@ -240,25 +211,16 @@ public class MqttManager {
                 return null;
             }
             synchronized (parent.mqttLock) {
-                if (parent.mqttClient == null || !parent.mqttConnected) {
+                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
 
-                Mqtt3UnsubscribeBuilder builder = Mqtt3Unsubscribe.builder();
-                Mqtt3UnsubscribeBuilder.Complete completeBuilder = null;
-                for (String topic : topics) {
-                    parent.mqttSubscriptions.remove(topic);
-                    if (completeBuilder == null) {
-                        completeBuilder = builder.addTopicFilter(topic);
-                    } else {
-                        completeBuilder = completeBuilder.addTopicFilter(topic);
-                    }
-                }
                 try {
-                    parent.mqttClient.unsubscribe(completeBuilder.build());
-                } catch (MqttClientStateException ex) {
-                    // TODO handle disconnects by reconnecting
-                    // probably we were not connected anymore
+                    parent.mqttConnection.unsubscribe(topics);
+                    parent.mqttSubscriptions.removeAll(Arrays.asList(topics));
+                } catch (Exception e) {
+                    // oh well
+                    e.printStackTrace();
                 }
 
                 return null;
@@ -266,7 +228,6 @@ public class MqttManager {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private static class ConsumeRunnable implements Runnable {
         private WeakReference<MqttManager> parentRef;
 
@@ -281,22 +242,22 @@ public class MqttManager {
                     return;
                 }
 
-                Mqtt3BlockingClient client;
+                BlockingConnection connection;
                 synchronized (parent.mqttLock) {
-                    client = parent.mqttClient;
-                    if (!parent.mqttConnected) {
-                        return;
-                    }
+                    connection = parent.mqttConnection;
+                }
+                if(!connection.isConnected()) {
+                    return;
                 }
                 MapManager mapManager = Coordinator.get(parent.context).getMapManager();
 
-                try (Mqtt3BlockingClient.Mqtt3Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
-                    Optional<Mqtt3Publish> publishMessage = publishes.receive(10, TimeUnit.SECONDS);
-                    if (!publishMessage.isPresent()) {
+                try {
+                    Message message = connection.receive(10, TimeUnit.SECONDS);
+                    if(message == null) {
                         continue;
                     }
-                    Mqtt3Publish publish = publishMessage.get();
-                    String topicName = publish.getTopic().toString();
+                    message.ack();
+                    String topicName = message.getTopic();
                     Log.d("MQTT", "Received message on topic " + topicName);
 
                     if (topicName.startsWith("msgpack/vehicleeta/")) {
@@ -313,51 +274,40 @@ public class MqttManager {
                         if (station == null) {
                             continue;
                         }
-                        parent.processVehicleETAMessage(station, publish.getPayloadAsBytes());
+                        parent.processVehicleETAMessage(station, message.getPayload());
+                        Intent intent = new Intent(ACTION_VEHICLE_ETAS_UPDATED);
+                        intent.putExtra(EXTRA_VEHICLE_ETAS_NETWORK, network.getId());
+                        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(parent.context);
+                        bm.sendBroadcast(intent);
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                } catch (MqttSessionExpiredException e) {
-                    return;
                 }
             }
         }
     }
 
     void connect(String... initialTopics) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             new MQTTConnectTask(this).execute(initialTopics);
-        }
     }
 
     void disconnect() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             new MQTTDisconnectTask(this).execute();
-        }
     }
 
     void subscribe(String... topics) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             new MQTTSubscribeTask(this).execute(topics);
-        }
     }
 
     void replaceSubscriptionsWithPrefix(String prefix, String... newTopics) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             new MQTTSubscribeTask(this, prefix).execute(newTopics);
-        }
     }
 
     void unsubscribe(String... topics) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             new MQTTUnsubscribeTask(this).execute(topics);
-        }
     }
 
     void unsubscribeAll() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return;
-        }
         synchronized (mqttLock) {
             if (mqttSubscriptions.size() == 0) {
                 return;
@@ -368,9 +318,6 @@ public class MqttManager {
     }
 
     void unsubscribeWithPrefix(String prefix) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return;
-        }
         synchronized (mqttLock) {
             List<String> subs = new ArrayList<>();
             for (String sub : mqttSubscriptions) {
@@ -478,4 +425,6 @@ public class MqttManager {
         return "msgpack/vehicleeta/";
     }
 
+    public static final String ACTION_VEHICLE_ETAS_UPDATED = "im.tny.segvault.disturbances.action.vehicleeta.updated";
+    public static final String EXTRA_VEHICLE_ETAS_NETWORK = "im.tny.segvault.disturbances.extra.vehicleeta.network";
 }
