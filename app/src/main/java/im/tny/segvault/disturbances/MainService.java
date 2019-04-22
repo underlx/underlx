@@ -396,7 +396,7 @@ public class MainService extends Service {
         }
         List<Station> directions = new ArrayList<>();
         for (Stop s : directionsSet) {
-            if (!s.equals(curDirection)) {
+            if (!s.equals(curDirection) && !s.equals(curStop)) {
                 directions.add(s.getStation());
             }
         }

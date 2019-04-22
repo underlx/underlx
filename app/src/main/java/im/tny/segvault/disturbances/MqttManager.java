@@ -405,8 +405,6 @@ public class MqttManager {
     private void processVehicleETAMessage(Station station, byte[] payload) {
         ObjectMapper mapper = API.getInstance().getMapper();
 
-        Log.d("MQTT", "Station " + station.getId());
-
         try {
             List<API.MQTTvehicleETA> etas = mapper.readValue(payload, new TypeReference<List<API.MQTTvehicleETA>>() {
             });
