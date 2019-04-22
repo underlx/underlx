@@ -107,9 +107,10 @@ public class S2LSChangeListener implements S2LS.EventListener {
 
             @Override
             public void onNewStationEnteredNow(Path path) {
-                Coordinator.get(context).getMqttManager().replaceSubscriptionsWithPrefix(
-                        MqttManager.getVehicleETAsTopicPrefix(),
-                        MqttManager.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
+                MqttManager mqtt = Coordinator.get(context).getMqttManager();
+                mqtt.replaceSubscriptionsWithPrefix(
+                        mqtt.getVehicleETAsTopicPrefix(),
+                        mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
                 if (path.getDirection() == null) {
                     new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
                 } else {
@@ -120,7 +121,8 @@ public class S2LSChangeListener implements S2LS.EventListener {
             }
         });
         new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
-        Coordinator.get(context).getMqttManager().connect(MqttManager.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
+        MqttManager mqtt = Coordinator.get(context).getMqttManager();
+        mqtt.connect(mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
         updateRouteNotification(s2ls);
     }
 

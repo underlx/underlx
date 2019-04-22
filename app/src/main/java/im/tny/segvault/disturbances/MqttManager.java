@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -30,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MqttManager {
     private Context context;
@@ -77,7 +80,7 @@ public class MqttManager {
                     e.printStackTrace();
                     return null;
                 }
-                mqttClient.setClientId(Coordinator.get(parent.context).getPairManager().getPairKey());
+                mqttClient.setClientId(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()));
                 mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
                 mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
                 mqttClient.setVersion(info.protocolVersion);
@@ -260,7 +263,7 @@ public class MqttManager {
                     String topicName = message.getTopic();
                     Log.d("MQTT", "Received message on topic " + topicName);
 
-                    if (topicName.startsWith("msgpack/vehicleeta/")) {
+                    if (topicName.startsWith("msgpack/vehicleeta/") || topicName.startsWith("dev-msgpack/vehicleeta/")) {
                         // should be of the form msgpack/vehicleeta/pt-ml/pt-ml-av
                         String[] parts = topicName.split("/");
                         if (parts.length != 4) {
@@ -417,12 +420,19 @@ public class MqttManager {
         }
     }
 
-    public static String getVehicleETAsTopicForStation(Station station) {
+    public String getVehicleETAsTopicForStation(Station station) {
         return String.format("%s%s/%s", getVehicleETAsTopicPrefix(), station.getNetwork().getId(), station.getId());
     }
 
-    public static String getVehicleETAsTopicPrefix() {
-        return "msgpack/vehicleeta/";
+    public String getVehicleETAsTopicPrefix() {
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean devMode = sharedPref.getBoolean(PreferenceNames.DeveloperMode, false);
+
+        if(devMode) {
+            return "dev-msgpack/vehicleeta/";
+        } else {
+            return "msgpack/vehicleeta/";
+        }
     }
 
     public static final String ACTION_VEHICLE_ETAS_UPDATED = "im.tny.segvault.disturbances.action.vehicleeta.updated";

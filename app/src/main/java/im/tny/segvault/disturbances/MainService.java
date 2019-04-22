@@ -20,9 +20,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.text.style.TabStopSpan;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -48,6 +46,7 @@ import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
+import im.tny.segvault.subway.Transfer;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -288,7 +287,7 @@ public class MainService extends Service {
                 if (etas.size() == 0) {
                     statusLines.add(getString(R.string.notif_route_waiting));
                 } else {
-                    handleETAlines(etas, statusLines, curStop);
+                    addETAlines(this, etas, statusLines, curStop, null);
                 }
             } else {
                 Stop direction = currentPath.getDirection();
@@ -298,11 +297,14 @@ public class MainService extends Service {
                     if (currentRoute == null) {
                         statusLines.add(String.format(getString(R.string.notif_route_direction), direction.getStation().getName()));
                     }
+                    if (curStop.getStation().getLines().size() > 1 && etas.size() > 0) {
+                        addETAlines(this, etas, statusLines, curStop, direction);
+                    }
                 } else {
                     if (etas.size() == 0) {
                         statusLines.add(getString(R.string.notif_route_left_station));
                     } else {
-                        handleETAlines(etas, statusLines, curStop);
+                        addETAlines(this, etas, statusLines, curStop, null);
                     }
                 }
             }
@@ -382,22 +384,26 @@ public class MainService extends Service {
         }
     }
 
-    private void handleETAlines(Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop) {
-        statusLines.add(getString(R.string.notif_route_vehicle_etas_title));
+    public static void addETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop, Stop curDirection) {
+        statusLines.add(context.getString(R.string.notif_route_vehicle_etas_title));
         Set<Stop> directionsSet = new HashSet<>();
         for (Stop s : curStop.getStation().getStops()) {
             for (Connection c : curStop.getStation().getNetwork().outgoingEdgesOf(s)) {
-                directionsSet.add(curStop.getStation().getDirectionForConnection(c));
+                if (!(c instanceof Transfer)) {
+                    directionsSet.add(curStop.getStation().getDirectionForConnection(c));
+                }
             }
         }
         List<Station> directions = new ArrayList<>();
         for (Stop s : directionsSet) {
-            directions.add(s.getStation());
+            if (!s.equals(curDirection)) {
+                directions.add(s.getStation());
+            }
         }
         Collections.sort(directions, (station, t1) -> station.getName().compareTo(t1.getName()));
         for (Station direction : directions) {
             String line = String.format("%s %s", direction.getName(),
-                    vehicleETAtoString(this, etas.get(direction.getId())));
+                    vehicleETAtoString(context, etas.get(direction.getId())));
             int lStart = line.indexOf(direction.getName());
             int lEnd = lStart + direction.getName().length();
             SpannableString lineSpannable = new SpannableString(line);
@@ -427,7 +433,7 @@ public class MainService extends Service {
                         case "s":
                             if (((API.MQTTvehicleETAsingleValue) eta).value > 60) {
                                 return String.format(context.getString(R.string.vehicle_eta_exact_formatted),
-                                        DateUtils.formatElapsedTime(((API.MQTTvehicleETAsingleValue) eta).value / 1000));
+                                        DateUtils.formatElapsedTime(((API.MQTTvehicleETAsingleValue) eta).value));
                             }
                             return String.format(context.getString(R.string.vehicle_eta_exact_seconds), ((API.MQTTvehicleETAsingleValue) eta).value);
                         case "m":

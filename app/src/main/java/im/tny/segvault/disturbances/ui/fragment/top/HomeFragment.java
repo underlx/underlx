@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.text.Layout;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.TypedValue;
@@ -38,12 +39,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.MapManager;
+import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
@@ -92,6 +95,7 @@ public class HomeFragment extends TopFragment {
     private TextView curStationNameView;
     private TextView directionView;
     private TextView nextStationView;
+    private TextView nextTrainsView;
     private Button curTripIncorrectLocationButton;
     private Button curTripEndButton;
     private Button navEndButton;
@@ -164,6 +168,7 @@ public class HomeFragment extends TopFragment {
         curStationNameView = view.findViewById(R.id.cur_station_name_view);
         directionView = view.findViewById(R.id.direction_view);
         nextStationView = view.findViewById(R.id.next_station_view);
+        nextTrainsView = view.findViewById(R.id.next_trains_view);
         curTripEndButton = view.findViewById(R.id.cur_trip_end);
         curTripIncorrectLocationButton = view.findViewById(R.id.cur_trip_incorrect_location);
 
@@ -217,6 +222,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(S2LSChangeListener.ACTION_NAVIGATION_ENDED);
         filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
         filter.addAction(MainService.ACTION_FAVORITE_STATIONS_UPDATED);
+        filter.addAction(MqttManager.ACTION_VEHICLE_ETAS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -399,8 +405,11 @@ public class HomeFragment extends TopFragment {
             final Station station = currentPath.getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
 
+            Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
+
             Stop direction = currentPath.getDirection();
             Stop next = currentPath.getNextStop();
+            boolean showETAs = station.getLines().size() > 0 && etas.size() > 0;
             if (direction != null && next != null) {
                 directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
                 nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
@@ -421,6 +430,7 @@ public class HomeFragment extends TopFragment {
             } else {
                 directionView.setVisibility(View.GONE);
                 nextStationView.setVisibility(View.GONE);
+                showETAs = etas.size() > 0;
             }
             redrawCurrentStationLineIcons(station);
             curStationLayout.setVisibility(View.VISIBLE);
@@ -430,6 +440,22 @@ public class HomeFragment extends TopFragment {
                 intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MapManager.PRIMARY_NETWORK_ID);
                 startActivity(intent);
             });
+
+            if(showETAs) {
+                List<CharSequence> etaLines = new ArrayList<>();
+
+                MainService.addETAlines(getContext(), etas, etaLines, currentPath.getCurrentStop(), direction);
+                nextTrainsView.setText("");
+                for(int i = 0; i < etaLines.size(); i++) {
+                    nextTrainsView.append(etaLines.get(i));
+                    if(i < etaLines.size() - 1) {
+                        nextTrainsView.append("\n");
+                    }
+                }
+                nextTrainsView.setVisibility(View.VISIBLE);
+            } else {
+                nextTrainsView.setVisibility(View.GONE);
+            }
 
             curTripIncorrectLocationButton.setOnClickListener(view -> new FeedbackUtil.IncorrectLocation(getContext(), station).showReportWizard());
 
@@ -536,6 +562,7 @@ public class HomeFragment extends TopFragment {
                 case S2LSChangeListener.ACTION_CURRENT_TRIP_ENDED:
                 case S2LSChangeListener.ACTION_S2LS_STATUS_CHANGED:
                 case S2LSChangeListener.ACTION_NAVIGATION_ENDED:
+                case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
                     refreshCurrentTrip();
                     break;
             }
