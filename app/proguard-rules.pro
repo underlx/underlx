@@ -63,3 +63,6 @@
 # OkHttp platform used only on JVM and when Conscrypt dependency is available.
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 # end of okhttp rules
+
+# The MQTT client seems to work fine despite the warnings...
+-dontwarn org.fusesource.hawtdispatch.**
