@@ -153,7 +153,7 @@ public class MainActivity extends TopActivity
         if (savedInstanceState == null) {
             // show initial fragment
             if (newFragment == null) {
-                newFragment = new HomeFragment();
+                newFragment = HomeFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
             }
             replaceFragment(newFragment, false, false);
         }
@@ -320,7 +320,7 @@ public class MainActivity extends TopActivity
         try {
             switch (id) {
                 case R.id.nav_home:
-                    return HomeFragment.newInstance();
+                    return HomeFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
                 case R.id.nav_plan_route:
                     return RouteFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
                 case R.id.nav_trip_history:
@@ -328,7 +328,7 @@ public class MainActivity extends TopActivity
                 case R.id.nav_map:
                     return MapFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
                 case R.id.nav_announcements:
-                    return AnnouncementFragment.newInstance(MapManager.PRIMARY_NETWORK_ID, 1);
+                    return AnnouncementFragment.newInstance(1);
                 case R.id.nav_disturbances:
                     return DisturbanceFragment.newInstance(1);
                 case R.id.nav_notif:

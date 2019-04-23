@@ -111,6 +111,10 @@ public class HomeFragment extends TopFragment {
 
     private HomeStatsFragment statsFragment;
 
+    private static final String ARG_NETWORK_ID = "networkId";
+
+    private String networkId;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -136,9 +140,10 @@ public class HomeFragment extends TopFragment {
      *
      * @return A new instance of fragment HomeFragment.
      */
-    public static HomeFragment newInstance() {
+    public static HomeFragment newInstance(String networkId) {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_NETWORK_ID, networkId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -146,6 +151,9 @@ public class HomeFragment extends TopFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            networkId = getArguments().getString(ARG_NETWORK_ID);
+        }
     }
 
     @Override
@@ -184,7 +192,7 @@ public class HomeFragment extends TopFragment {
         curTripEndButton.setOnClickListener(v -> {
             Intent stopIntent = new Intent(getContext(), MainService.class);
             stopIntent.setAction(MainService.ACTION_END_TRIP);
-            stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, MapManager.PRIMARY_NETWORK_ID);
+            stopIntent.putExtra(MainService.EXTRA_TRIP_NETWORK, networkId);
             getContext().startService(stopIntent);
         });
 
@@ -231,7 +239,7 @@ public class HomeFragment extends TopFragment {
         Fragment newFragment = HomeLinesFragment.newInstance(1);
         transaction.replace(R.id.line_status_card, newFragment);
 
-        statsFragment = HomeStatsFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
+        statsFragment = HomeStatsFragment.newInstance(networkId);
         transaction.replace(R.id.stats_card, statsFragment);
 
         newFragment = HomeBackersFragment.newInstance();
@@ -364,7 +372,7 @@ public class HomeFragment extends TopFragment {
             statsFragment.onlineUpdate();
         }
 
-        Network net = mapm.getNetwork(MapManager.PRIMARY_NETWORK_ID);
+        Network net = mapm.getNetwork(networkId);
         if (net == null) {
             networkClosedCard.setVisibility(View.GONE);
             unconfirmedTripsCard.setVisibility(View.GONE);
@@ -386,11 +394,10 @@ public class HomeFragment extends TopFragment {
         if (mListener == null)
             return;
 
-        final MainService m = mListener.getMainService();
-        if (m == null)
+        if (!isAdded())
             return;
 
-        final S2LS loc = Coordinator.get(getContext()).getS2LS(MapManager.PRIMARY_NETWORK_ID);
+        final S2LS loc = Coordinator.get(getContext()).getS2LS(networkId);
 
         if (loc == null) {
             ongoingTripCard.setVisibility(View.GONE);
@@ -437,18 +444,18 @@ public class HomeFragment extends TopFragment {
             curStationLayout.setOnClickListener(view -> {
                 Intent intent = new Intent(getContext(), StationActivity.class);
                 intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, MapManager.PRIMARY_NETWORK_ID);
+                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
                 startActivity(intent);
             });
 
-            if(showETAs) {
+            if (showETAs) {
                 List<CharSequence> etaLines = new ArrayList<>();
 
                 MainService.addETAlines(getContext(), etas, etaLines, currentPath.getCurrentStop(), direction);
                 nextTrainsView.setText("");
-                for(int i = 0; i < etaLines.size(); i++) {
+                for (int i = 0; i < etaLines.size(); i++) {
                     nextTrainsView.append(etaLines.get(i));
-                    if(i < etaLines.size() - 1) {
+                    if (i < etaLines.size() - 1) {
                         nextTrainsView.append("\n");
                     }
                 }

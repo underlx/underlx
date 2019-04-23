@@ -238,21 +238,21 @@ public class HomeStatsFragment extends Fragment {
 
     private void redraw() {
         CacheManager cm = Coordinator.get(getContext()).getCacheManager();
-        Stats stats = cm.get(buildCacheKey(MapManager.PRIMARY_NETWORK_ID), Stats.class);
-        Date updated = cm.getStoreDate(buildCacheKey(MapManager.PRIMARY_NETWORK_ID));
+        Stats stats = cm.get(buildCacheKey(networkId), Stats.class);
+        Date updated = cm.getStoreDate(buildCacheKey(networkId));
         List<Stats> lstats = new ArrayList<>();
         lstats.add(stats);
         List<Date> lupdated = new ArrayList<>();
         lupdated.add(updated);
         redraw(lstats, lupdated);
-        new RetrieveStatsTask(this).execute(MapManager.PRIMARY_NETWORK_ID);
+        new RetrieveStatsTask(this).execute(networkId);
     }
 
     public void onlineUpdate() {
         if(!isAdded()) {
             return;
         }
-        new RetrieveStatsTask(this).execute(MapManager.PRIMARY_NETWORK_ID);
+        new RetrieveStatsTask(this).execute(networkId);
     }
 
     private void redraw(List<Stats> listStats, List<Date> listUpdated) {

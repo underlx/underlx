@@ -52,6 +52,7 @@ import io.realm.Realm;
 
 public class MapManager {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
+    private static final String[] supportedNetworkIDs = new String[]{PRIMARY_NETWORK_ID};
 
     private Context context;
     private final Object lock = new Object();
@@ -342,7 +343,9 @@ public class MapManager {
     private void loadNetworks() {
         synchronized (lock) {
             try {
-                loadNetwork(PRIMARY_NETWORK_ID);
+                for(String id : supportedNetworkIDs) {
+                    loadNetwork(id);
+                }
             } catch (CacheException e) {
                 // cache invalid, attempt to reload topology
                 updateTopology();
@@ -355,7 +358,7 @@ public class MapManager {
             if (!isTopologyUpdateInProgress()) {
                 cancelTopologyUpdate();
                 currentUpdateTopologyTask = new UpdateTopologyTask(this);
-                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, MapManager.PRIMARY_NETWORK_ID);
+                currentUpdateTopologyTask.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, supportedNetworkIDs);
             }
         }
     }

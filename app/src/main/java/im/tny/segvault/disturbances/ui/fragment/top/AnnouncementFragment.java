@@ -41,9 +41,6 @@ public class AnnouncementFragment extends TopFragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
 
-    private static final String ARG_NETWORK_ID = "networkId";
-    private String networkId;
-
     private OnListFragmentInteractionListener mListener;
 
     private RecyclerView recyclerView = null;
@@ -72,11 +69,10 @@ public class AnnouncementFragment extends TopFragment {
     }
 
     @SuppressWarnings("unused")
-    public static AnnouncementFragment newInstance(String networkId, int columnCount) {
+    public static AnnouncementFragment newInstance(int columnCount) {
         AnnouncementFragment fragment = new AnnouncementFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
-        args.putString(ARG_NETWORK_ID, networkId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -87,7 +83,6 @@ public class AnnouncementFragment extends TopFragment {
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-            networkId = getArguments().getString(ARG_NETWORK_ID);
         }
     }
 

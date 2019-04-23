@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -419,9 +420,16 @@ public class FCMService extends FirebaseMessagingService {
             case "clear-cache":
                 Util.deleteCache(this);
                 break;
-            case "download-extras":
-                Coordinator.get(this).cacheAllExtras(MapManager.PRIMARY_NETWORK_ID);
+            case "download-extras": {
+                Collection<Network> networks = Coordinator.get(this).getMapManager().getNetworks();
+                String[] arr = new String[networks.size()];
+                int i = 0;
+                for(Network n : networks) {
+                    arr[i++] = n.getId();
+                }
+                Coordinator.get(this).cacheAllExtras(arr);
                 break;
+            }
         }
     }
 }
