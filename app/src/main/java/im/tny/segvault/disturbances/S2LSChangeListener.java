@@ -10,6 +10,9 @@ import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.exception.APIException;
@@ -113,21 +116,18 @@ public class S2LSChangeListener implements S2LS.EventListener {
             @Override
             public void onNewStationEnteredNow(Path path) {
                 MqttManager mqtt = Coordinator.get(context).getMqttManager();
-                if(prevSubscribedTopic != null) {
+                if (prevSubscribedTopic != null) {
                     mqtt.unsubscribe(mqttPartyID, prevSubscribedTopic);
                 }
                 prevSubscribedTopic = mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation());
                 mqtt.subscribe(mqttPartyID, prevSubscribedTopic);
-                if (path.getDirection() == null) {
-                    new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
-                } else {
-                    new SubmitRealtimeLocationTask().execute(
-                            path.getCurrentStop().getStation().getId(),
-                            path.getDirection().getStation().getId());
-                }
+                new SubmitRealtimeLocationTask(S2LSChangeListener.this,
+                        path.getCurrentStop().getStation(),
+                        path.getDirection() == null ? null : path.getDirection().getStation())
+                        .execute();
             }
         });
-        new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
+        new SubmitRealtimeLocationTask(S2LSChangeListener.this, path.getCurrentStop().getStation(), null).execute();
         mqttPartyID = mqtt.connect(origTopic);
         updateRouteNotification(s2ls);
     }
@@ -251,14 +251,25 @@ public class S2LSChangeListener implements S2LS.EventListener {
         }
     }
 
-    private static class SubmitRealtimeLocationTask extends AsyncTask<String, Void, Void> {
+    private static class SubmitRealtimeLocationTask extends AsyncTask<Void, Void, Void> {
+        private WeakReference<S2LSChangeListener> parentRef;
+        private Station station;
+        private Station direction;
+
+        SubmitRealtimeLocationTask(S2LSChangeListener parent, Station station, Station direction) {
+            parentRef = new WeakReference<>(parent);
+            this.station = station;
+            this.direction = direction;
+        }
+
+        private API.RealtimeLocationRequest r;
 
         @Override
-        protected Void doInBackground(String... strings) {
-            API.RealtimeLocationRequest r = new API.RealtimeLocationRequest();
-            r.s = strings[0];
-            if (strings.length > 1) {
-                r.d = strings[1];
+        protected Void doInBackground(Void... nothing) {
+            r = new API.RealtimeLocationRequest();
+            r.s = station.getId();
+            if (direction != null) {
+                r.d = direction.getId();
             }
             try {
                 API.getInstance().postRealtimeLocation(r);
@@ -266,6 +277,24 @@ public class S2LSChangeListener implements S2LS.EventListener {
                 // oh well...
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            S2LSChangeListener parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+
+            try {
+                byte[] payload = API.getInstance().getMapper().writeValueAsBytes(r);
+                MqttManager mqttManager = Coordinator.get(parent.context).getMqttManager();
+                mqttManager.publish(parent.mqttPartyID, mqttManager.getLocationPublishTopicForNetwork(station.getNetwork()), payload);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 

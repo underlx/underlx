@@ -254,7 +254,7 @@ public class MqttManager {
                 }
             }
 
-            if(actualTopics.size() == 0) {
+            if (actualTopics.size() == 0) {
                 return null;
             }
 
@@ -281,6 +281,43 @@ public class MqttManager {
                 }
             }
 
+            return null;
+        }
+    }
+
+    private static class MQTTPublishTask extends AsyncTask<Void, Void, Void> {
+        private WeakReference<MqttManager> parentRef;
+        private String topic;
+        private byte[] payload;
+
+        MQTTPublishTask(MqttManager parent, String topic, byte[] payload) {
+            parentRef = new WeakReference<>(parent);
+            this.topic = topic;
+            this.payload = payload;
+        }
+
+        @Override
+        protected Void doInBackground(Void... nothing) {
+            MqttManager parent = parentRef.get();
+            if (parent == null) {
+                return null;
+            }
+
+            BlockingConnection connection;
+            synchronized (parent.mqttLock) {
+                connection = parent.mqttConnection;
+
+                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
+                    return null;
+                }
+            }
+
+            try {
+                connection.publish(topic, payload, QoS.AT_MOST_ONCE, false);
+            } catch (Exception e) {
+                // oh well
+                e.printStackTrace();
+            }
             return null;
         }
     }
@@ -403,6 +440,10 @@ public class MqttManager {
         }
     }
 
+    public void publish(int partyID, String topic, byte[] payload) {
+        new MQTTPublishTask(this, topic, payload).execute();
+    }
+
     private final Map<String, VehicleETAValue> vehicleETAs = new HashMap<>();
     private final Object vehicleETAsLock = new Object();
 
@@ -499,6 +540,18 @@ public class MqttManager {
             return "msgpack/vehicleeta/";
         }
     }
+
+    public String getLocationPublishTopicForNetwork(Network network) {
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean devMode = sharedPref.getBoolean(PreferenceNames.DeveloperMode, false);
+
+        if (devMode) {
+            return String.format("dev-msgpack/rtloc/%s", network.getId());
+        } else {
+            return String.format("msgpack/rtloc/%s", network.getId());
+        }
+    }
+
 
     public static final String ACTION_VEHICLE_ETAS_UPDATED = "im.tny.segvault.disturbances.action.vehicleeta.updated";
     public static final String EXTRA_VEHICLE_ETAS_NETWORK = "im.tny.segvault.disturbances.extra.vehicleeta.network";
