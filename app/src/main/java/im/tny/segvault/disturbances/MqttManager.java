@@ -134,6 +134,8 @@ public class MqttManager {
                     // oh well
                     e.printStackTrace();
                 }
+                // setting this to null tells the message consumption thread to stop
+                parent.mqttConnection = null;
                 return null;
             }
         }
@@ -249,14 +251,18 @@ public class MqttManager {
                 synchronized (parent.mqttLock) {
                     connection = parent.mqttConnection;
                 }
-                if(!connection.isConnected()) {
+                if (connection == null) {
                     return;
                 }
-                MapManager mapManager = Coordinator.get(parent.context).getMapManager();
-
                 try {
+                    if (!connection.isConnected()) {
+                        Thread.sleep(2000);
+                        continue;
+                    }
+                    MapManager mapManager = Coordinator.get(parent.context).getMapManager();
+
                     Message message = connection.receive(10, TimeUnit.SECONDS);
-                    if(message == null) {
+                    if (message == null) {
                         continue;
                     }
                     message.ack();
@@ -291,23 +297,23 @@ public class MqttManager {
     }
 
     void connect(String... initialTopics) {
-            new MQTTConnectTask(this).execute(initialTopics);
+        new MQTTConnectTask(this).execute(initialTopics);
     }
 
     void disconnect() {
-            new MQTTDisconnectTask(this).execute();
+        new MQTTDisconnectTask(this).execute();
     }
 
     void subscribe(String... topics) {
-            new MQTTSubscribeTask(this).execute(topics);
+        new MQTTSubscribeTask(this).execute(topics);
     }
 
     void replaceSubscriptionsWithPrefix(String prefix, String... newTopics) {
-            new MQTTSubscribeTask(this, prefix).execute(newTopics);
+        new MQTTSubscribeTask(this, prefix).execute(newTopics);
     }
 
     void unsubscribe(String... topics) {
-            new MQTTUnsubscribeTask(this).execute(topics);
+        new MQTTUnsubscribeTask(this).execute(topics);
     }
 
     void unsubscribeAll() {
@@ -426,7 +432,7 @@ public class MqttManager {
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
         boolean devMode = sharedPref.getBoolean(PreferenceNames.DeveloperMode, false);
 
-        if(devMode) {
+        if (devMode) {
             return "dev-msgpack/vehicleeta/";
         } else {
             return "msgpack/vehicleeta/";
