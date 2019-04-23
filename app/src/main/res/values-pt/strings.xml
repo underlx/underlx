@@ -381,6 +381,7 @@
     <string name="frag_notif_show_community_reported">Notificar sobre relatos da comunidade</string>
     <string name="frag_notif_show_community_reported_summary">Mostrar notificações de problemas na circulação comunicados por outros utilizadores</string>
     <string name="notif_route_vehicle_etas_title">Próximos comboios:</string>
+    <string name="frag_station_vehicle_etas">Próximos comboios</string>
 
     <string name="disturbance_status_report_begin">Os utilizadores comunicaram problemas na circulação</string>
     <string name="disturbance_status_report_confirm">Vários utilizadores confirmaram problemas na circulação</string>

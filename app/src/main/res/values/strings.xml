@@ -119,6 +119,7 @@
     <string name="frag_trip_history_title">Trip history</string>
     <string name="frag_trip_history_empty">No trips yet</string>
     <string name="frag_station_connections">Connections</string>
+    <string name="frag_station_vehicle_etas">Next trains</string>
     <string name="frag_station_bus">Bus terminal</string>
     <string name="frag_station_boat">Ferry</string>
     <string name="frag_station_train">Train</string>

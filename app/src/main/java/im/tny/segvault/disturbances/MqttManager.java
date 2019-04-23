@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +37,8 @@ public class MqttManager {
     private Context context;
     private final Object mqttLock = new Object();
     private BlockingConnection mqttConnection;
-    private Set<String> mqttSubscriptions = new HashSet<>();
+    private Map<Integer, HashSet<String>> mqttSubscriptionsByParty = new HashMap<>();
+    private Map<String, HashSet<Integer>> mqttSubscriptionsByTopic = new HashMap<>();
 
     public MqttManager(Context context) {
         this.context = context;
@@ -47,9 +47,11 @@ public class MqttManager {
     private static class MQTTConnectTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
         private String[] initialTopics;
+        private int clientID;
 
-        MQTTConnectTask(MqttManager parent) {
+        MQTTConnectTask(MqttManager parent, int clientID) {
             parentRef = new WeakReference<>(parent);
+            this.clientID = clientID;
         }
 
         @Override
@@ -93,6 +95,7 @@ public class MqttManager {
                     // oh well
                     return null;
                 }
+                Log.d("MQTT", "connected");
                 new Thread(new ConsumeRunnable(parent)).start();
 
                 return null;
@@ -106,7 +109,7 @@ public class MqttManager {
             if (parent == null) {
                 return;
             }
-            new MQTTSubscribeTask(parent).execute(initialTopics);
+            new MQTTSubscribeTask(parent, clientID).execute(initialTopics);
         }
     }
 
@@ -130,6 +133,9 @@ public class MqttManager {
 
                 try {
                     parent.mqttConnection.disconnect();
+                    parent.mqttSubscriptionsByTopic.clear();
+                    parent.mqttSubscriptionsByParty.clear();
+                    Log.d("MQTT", "disconnected");
                 } catch (Exception e) {
                     // oh well
                     e.printStackTrace();
@@ -143,15 +149,11 @@ public class MqttManager {
 
     private static class MQTTSubscribeTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
-        private String unsubscribeFromPrefix = "";
+        private int partyID;
 
-        MQTTSubscribeTask(MqttManager parent) {
+        MQTTSubscribeTask(MqttManager parent, int partyID) {
             parentRef = new WeakReference<>(parent);
-        }
-
-        MQTTSubscribeTask(MqttManager parent, String unsubscribeFromPrefix) {
-            parentRef = new WeakReference<>(parent);
-            this.unsubscribeFromPrefix = unsubscribeFromPrefix;
+            this.partyID = partyID;
         }
 
         @Override
@@ -165,26 +167,6 @@ public class MqttManager {
                     return null;
                 }
 
-                if (!unsubscribeFromPrefix.isEmpty()) {
-                    List<String> subs = new ArrayList<>();
-                    for (String sub : parent.mqttSubscriptions) {
-                        if (sub.startsWith(unsubscribeFromPrefix)) {
-                            subs.add(sub);
-                        }
-                    }
-
-                    if (subs.size() > 0) {
-                        String arr[] = new String[subs.size()];
-                        try {
-                            parent.mqttConnection.unsubscribe(subs.toArray(arr));
-                            parent.mqttSubscriptions.removeAll(subs);
-                        } catch (Exception e) {
-                            // oh well
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
                 List<Topic> mqttTopics = new ArrayList<>();
                 for (String topic : topics) {
                     mqttTopics.add(new Topic(topic, QoS.AT_MOST_ONCE));
@@ -192,7 +174,22 @@ public class MqttManager {
                 Topic arr[] = new Topic[mqttTopics.size()];
                 try {
                     parent.mqttConnection.subscribe(mqttTopics.toArray(arr));
-                    parent.mqttSubscriptions.addAll(Arrays.asList(topics));
+
+                    HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
+                    if(byParty == null) {
+                        byParty = new HashSet<>();
+                        parent.mqttSubscriptionsByParty.put(partyID, byParty);
+                    }
+                    for(String topic : topics) {
+                        byParty.add(topic);
+                        HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                        if(byTopic == null) {
+                            byTopic = new HashSet<>();
+                            parent.mqttSubscriptionsByTopic.put(topic, byTopic);
+                        }
+                        byTopic.add(partyID);
+                        Log.d("MQTT", "Party " + partyID + " subscribed to topic " + topic);
+                    }
                 } catch (Exception e) {
                     // oh well
                     e.printStackTrace();
@@ -204,9 +201,11 @@ public class MqttManager {
 
     private static class MQTTUnsubscribeTask extends AsyncTask<String, Void, Void> {
         private WeakReference<MqttManager> parentRef;
+        private int partyID;
 
-        MQTTUnsubscribeTask(MqttManager parent) {
+        MQTTUnsubscribeTask(MqttManager parent, int partyID) {
             parentRef = new WeakReference<>(parent);
+            this.partyID = partyID;
         }
 
         @Override
@@ -220,9 +219,34 @@ public class MqttManager {
                     return null;
                 }
 
+                HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
+                if(byParty == null) {
+                    byParty = new HashSet<>();
+                }
+                List<String> actualTopics = new ArrayList<>();
+                for(String topic : topics) {
+                    HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                    if(byTopic == null || byTopic.size() == 1) {
+                        // this is the only party interested in this topic, actually unsubscribe
+                        actualTopics.add(topic);
+                    } else {
+                        // some parties are still interested in this topic, don't actually unsubscribe but register the lack of interest of this party
+                        byTopic.remove(partyID);
+                        byParty.remove(topic);
+                    }
+                }
+
+                String arr[] = new String[actualTopics.size()];
                 try {
-                    parent.mqttConnection.unsubscribe(topics);
-                    parent.mqttSubscriptions.removeAll(Arrays.asList(topics));
+                    parent.mqttConnection.unsubscribe(actualTopics.toArray(arr));
+
+                    for(String topic : actualTopics) {
+                        Log.d("MQTT", "Party " + partyID + " unsubscribed from topic " + topic);
+                        HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                        if(byTopic != null) {
+                            byTopic.remove(partyID);
+                        }
+                    }
                 } catch (Exception e) {
                     // oh well
                     e.printStackTrace();
@@ -296,49 +320,52 @@ public class MqttManager {
         }
     }
 
-    void connect(String... initialTopics) {
-        new MQTTConnectTask(this).execute(initialTopics);
-    }
+    private int partyCount = 0;
 
-    void disconnect() {
-        new MQTTDisconnectTask(this).execute();
-    }
-
-    void subscribe(String... topics) {
-        new MQTTSubscribeTask(this).execute(topics);
-    }
-
-    void replaceSubscriptionsWithPrefix(String prefix, String... newTopics) {
-        new MQTTSubscribeTask(this, prefix).execute(newTopics);
-    }
-
-    void unsubscribe(String... topics) {
-        new MQTTUnsubscribeTask(this).execute(topics);
-    }
-
-    void unsubscribeAll() {
+    public int connect(String... initialTopics) {
         synchronized (mqttLock) {
-            if (mqttSubscriptions.size() == 0) {
-                return;
+            if (partyCount == 0) {
+                new MQTTConnectTask(this, partyCount).execute(initialTopics);
+            } else {
+                subscribe(partyCount, initialTopics);
             }
-            String arr[] = new String[mqttSubscriptions.size()];
-            new MQTTUnsubscribeTask(this).execute(mqttSubscriptions.toArray(arr));
+            return partyCount++;
         }
     }
 
-    void unsubscribeWithPrefix(String prefix) {
+    public void disconnect(int partyID) {
         synchronized (mqttLock) {
-            List<String> subs = new ArrayList<>();
-            for (String sub : mqttSubscriptions) {
-                if (sub.startsWith(prefix)) {
-                    subs.add(sub);
+            if (partyCount <= 1) {
+                new MQTTDisconnectTask(this).execute();
+            } else {
+                HashSet<String> byParty = mqttSubscriptionsByParty.get(partyID);
+                if(byParty != null) {
+                    byParty.clear();
+                }
+                for(HashSet<Integer> ofTopic : mqttSubscriptionsByTopic.values()) {
+                    ofTopic.remove(partyID);
                 }
             }
+            partyCount--;
+        }
+    }
+
+    public void subscribe(int partyID, String... topics) {
+        new MQTTSubscribeTask(this, partyID).execute(topics);
+    }
+
+    public void unsubscribe(int partyID, String... topics) {
+        new MQTTUnsubscribeTask(this, partyID).execute(topics);
+    }
+
+    public void unsubscribeAll(int partyID) {
+        synchronized (mqttLock) {
+            Set<String> subs = mqttSubscriptionsByParty.get(partyID);
             if (subs.size() == 0) {
                 return;
             }
             String arr[] = new String[subs.size()];
-            new MQTTUnsubscribeTask(this).execute(subs.toArray(arr));
+            new MQTTUnsubscribeTask(this, partyID).execute(subs.toArray(arr));
         }
     }
 

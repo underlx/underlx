@@ -386,17 +386,22 @@ public class MainService extends Service {
 
     public static void addETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop, Stop curDirection) {
         statusLines.add(context.getString(R.string.notif_route_vehicle_etas_title));
+        statusLines.addAll(getETAlines(context, etas, curStop.getStation(), curDirection));
+    }
+
+    public static List<CharSequence> getETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, Stop curDirection) {
+        List<CharSequence> statusLines = new ArrayList<>();
         Set<Stop> directionsSet = new HashSet<>();
-        for (Stop s : curStop.getStation().getStops()) {
-            for (Connection c : curStop.getStation().getNetwork().outgoingEdgesOf(s)) {
+        for (Stop s : curStation.getStops()) {
+            for (Connection c : curStation.getNetwork().outgoingEdgesOf(s)) {
                 if (!(c instanceof Transfer)) {
-                    directionsSet.add(curStop.getStation().getDirectionForConnection(c));
+                    directionsSet.add(curStation.getDirectionForConnection(c));
                 }
             }
         }
         List<Station> directions = new ArrayList<>();
         for (Stop s : directionsSet) {
-            if (!s.equals(curDirection) && !s.equals(curStop)) {
+            if (!s.equals(curDirection) && !s.getStation().equals(curStation)) {
                 directions.add(s.getStation());
             }
         }
@@ -411,7 +416,9 @@ public class MainService extends Service {
             //lineSpannable.setSpan(new TabStopSpan.Standard(600), 0, lineSpannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             statusLines.add(lineSpannable);
         }
+        return statusLines;
     }
+
 
     private static String vehicleETAtoString(Context context, API.MQTTvehicleETA eta) {
         if (eta == null) {

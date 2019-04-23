@@ -30,6 +30,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class S2LSChangeListener implements S2LS.EventListener {
     private Context context;
     private MainService mainService;
+    private int mqttPartyID;
 
     public S2LSChangeListener(Context context) {
         this.context = context.getApplicationContext();
@@ -86,6 +87,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
         Path path = s2ls.getCurrentTrip();
         path.addPathChangedListener(new Path.OnPathChangedListener() {
             private Station prevEndStation = null;
+            private String prevSubscribedTopic = null;
 
             @Override
             public void onPathChanged(Path path) {
@@ -108,9 +110,11 @@ public class S2LSChangeListener implements S2LS.EventListener {
             @Override
             public void onNewStationEnteredNow(Path path) {
                 MqttManager mqtt = Coordinator.get(context).getMqttManager();
-                mqtt.replaceSubscriptionsWithPrefix(
-                        mqtt.getVehicleETAsTopicPrefix(),
-                        mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
+                if(prevSubscribedTopic != null) {
+                    mqtt.unsubscribe(mqttPartyID, prevSubscribedTopic);
+                }
+                prevSubscribedTopic = mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation());
+                mqtt.subscribe(mqttPartyID, prevSubscribedTopic);
                 if (path.getDirection() == null) {
                     new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
                 } else {
@@ -122,7 +126,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
         });
         new SubmitRealtimeLocationTask().execute(path.getCurrentStop().getStation().getId());
         MqttManager mqtt = Coordinator.get(context).getMqttManager();
-        mqtt.connect(mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
+        mqttPartyID = mqtt.connect(mqtt.getVehicleETAsTopicForStation(path.getCurrentStop().getStation()));
         updateRouteNotification(s2ls);
     }
 
@@ -137,7 +141,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.sendBroadcast(intent);
 
-        Coordinator.get(context).getMqttManager().disconnect();
+        Coordinator.get(context).getMqttManager().disconnect(mqttPartyID);
         if (!checkStopForeground(s2ls)) {
             updateRouteNotification(s2ls);
         }

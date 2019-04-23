@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -18,15 +19,19 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ExtraContentCache;
+import im.tny.segvault.disturbances.MqttManager;
+import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
@@ -35,6 +40,8 @@ import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -53,6 +60,7 @@ public class StationGeneralFragment extends Fragment {
     private String networkId;
 
     private OnFragmentInteractionListener mListener;
+    private int mqttPartyID = -1;
 
     private View view;
 
@@ -94,6 +102,7 @@ public class StationGeneralFragment extends Fragment {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(StationActivity.ACTION_MAIN_SERVICE_BOUND);
+        filter.addAction(MqttManager.ACTION_VEHICLE_ETAS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -111,12 +120,31 @@ public class StationGeneralFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+
+        final MqttManager mqttManager = Coordinator.get(context).getMqttManager();
+        final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
+        if (net == null) {
+            return;
+        }
+        final Station station = net.getStation(stationId);
+        if (station == null) {
+            return;
+        }
+
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
+            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (mqttPartyID >= 0) {
+            final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
+            mqttManager.disconnect(mqttPartyID);
+        }
     }
 
     private void update() {
@@ -141,6 +169,25 @@ public class StationGeneralFragment extends Fragment {
 
             LinearLayout closedLayout = view.findViewById(R.id.closed_info_layout);
             closedLayout.setVisibility(View.VISIBLE);
+        }
+
+        Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
+
+        LinearLayout vehicleETAsLayout = view.findViewById(R.id.vehicle_etas_layout);
+        if(etas.size() > 0) {
+            TextView vehicleETAsView = view.findViewById(R.id.vehicle_etas_view);
+
+            List<CharSequence> etaLines = MainService.getETAlines(getContext(), etas, station, null);
+            vehicleETAsView.setText("");
+            for(int i = 0; i < etaLines.size(); i++) {
+                vehicleETAsView.append(etaLines.get(i));
+                if(i < etaLines.size() - 1) {
+                    vehicleETAsView.append("\n");
+                }
+            }
+            vehicleETAsLayout.setVisibility(View.VISIBLE);
+        } else {
+            vehicleETAsLayout.setVisibility(View.GONE);
         }
 
         // Titles
@@ -195,10 +242,10 @@ public class StationGeneralFragment extends Fragment {
         tagToTitle.put("s_urgent_pass", servicesTitleView);
 
         List<String> stationTags = station.getAllTags();
-        for(String tag : stationTags) {
+        for (String tag : stationTags) {
             View view = tagToView.get(tag);
             View titleView = tagToTitle.get(tag);
-            if(view != null && titleView != null) {
+            if (view != null && titleView != null) {
                 view.setVisibility(View.VISIBLE);
                 titleView.setVisibility(View.VISIBLE);
             }
@@ -314,6 +361,7 @@ public class StationGeneralFragment extends Fragment {
             }
             switch (intent.getAction()) {
                 case StationActivity.ACTION_MAIN_SERVICE_BOUND:
+                case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
                     if (mListener != null) {
                         update();
                     }
