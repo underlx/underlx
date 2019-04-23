@@ -328,7 +328,7 @@
     <string name="frag_settings_all_trips_delete_confirmation_desc">L\'information sur tous les trajets sera effacée et tous les statistiques seront remisé à zéro.</string>
     <string name="frag_settings_all_trips_delete_confirmation_delete">Effacer tous les trajets</string>
     <string name="frag_station_taxi">Station de taxis</string>
-    <string name="frag_station_reduced_mobility">Mobilité Réduite</string>
+    <string name="frag_station_reduced_mobility">Mobilité réduite</string>
     <string name="frag_station_lift_surface">Ascenseur hall-surface</string>
     <string name="frag_station_lift_platform">Ascenseur hall-quai</string>
     <string name="frag_station_escalator_surface">Escalier roulant hall-surface</string>
@@ -447,17 +447,17 @@
     <string name="poi_type_cemetery">Cimetière</string>
     <string name="poi_type_hotel">Hébergement</string>
 
-    <string name="vehicle_eta_interval_seconds">en %1$d à %2$d secondes</string>
-    <string name="vehicle_eta_interval_minutes">en %1$d à %2$d minutes</string>
-    <string name="vehicle_eta_exact_formatted">en %s</string>
-    <string name="vehicle_eta_exact_seconds">en %d secondes</string>
-    <string name="vehicle_eta_exact_minutes">en %d minutes</string>
+    <string name="vehicle_eta_interval_seconds">dans %1$d à %2$d secondes</string>
+    <string name="vehicle_eta_interval_minutes">dans %1$d à %2$d minutes</string>
+    <string name="vehicle_eta_exact_formatted">dans %s</string>
+    <string name="vehicle_eta_exact_seconds">dans %d secondes</string>
+    <string name="vehicle_eta_exact_minutes">dans %d minutes</string>
     <string name="vehicle_eta_lessthan_seconds">en moins de %d secondes</string>
     <string name="vehicle_eta_lessthan_minutes">en moins de %d minutes</string>
     <string name="vehicle_eta_morethan_seconds">en plus de %d secondes</string>
     <string name="vehicle_eta_morethan_minutes">en plus de %d minutes</string>
     <string name="vehicle_eta_timestamp">à %s</string>
-    <string name="vehicle_eta_unavailable">information non disponible</string>
+    <string name="vehicle_eta_unavailable">pas d\'information disponible</string>
 
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>

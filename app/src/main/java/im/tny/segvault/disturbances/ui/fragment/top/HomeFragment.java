@@ -409,7 +409,7 @@ public class HomeFragment extends TopFragment {
 
             Stop direction = currentPath.getDirection();
             Stop next = currentPath.getNextStop();
-            boolean showETAs = station.getLines().size() > 0 && etas.size() > 0;
+            boolean showETAs = (direction == null || station.getLines().size() > 0) && etas.size() > 0;
             if (direction != null && next != null) {
                 directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
                 nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));

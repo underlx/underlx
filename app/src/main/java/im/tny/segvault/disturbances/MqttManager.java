@@ -64,37 +64,40 @@ public class MqttManager {
                 return null;
             }
             this.initialTopics = initialTopics;
+
+            API.MQTTConnectionInfo info = API.getInstance().getMQTTConnectionInfo();
+
+            if (info == null) {
+                return null;
+            }
+
+            MQTT mqttClient = new MQTT();
+            try {
+                if (info.isTLS) {
+                    mqttClient.setHost(String.format("tls://%s:%d", info.host, info.port));
+                } else {
+                    mqttClient.setHost(String.format("tcp://%s:%d", info.host, info.port));
+                }
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                return null;
+            }
+            mqttClient.setClientId(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()));
+            mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
+            mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
+            mqttClient.setVersion(info.protocolVersion);
+            mqttClient.setReconnectDelay(1000);
+
+            BlockingConnection connection = mqttClient.blockingConnection();
+            try {
+                connection.connect();
+            } catch (Exception e) {
+                // oh well
+                return null;
+            }
+
             synchronized (parent.mqttLock) {
-                API.MQTTConnectionInfo info = API.getInstance().getMQTTConnectionInfo();
-
-                if (info == null) {
-                    return null;
-                }
-
-                MQTT mqttClient = new MQTT();
-                try {
-                    if (info.isTLS) {
-                        mqttClient.setHost(String.format("tls://%s:%d", info.host, info.port));
-                    } else {
-                        mqttClient.setHost(String.format("tcp://%s:%d", info.host, info.port));
-                    }
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-                mqttClient.setClientId(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()));
-                mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
-                mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
-                mqttClient.setVersion(info.protocolVersion);
-                mqttClient.setReconnectDelay(1000);
-
-                parent.mqttConnection = mqttClient.blockingConnection();
-                try {
-                    parent.mqttConnection.connect();
-                } catch (Exception e) {
-                    // oh well
-                    return null;
-                }
+                parent.mqttConnection = connection;
                 Log.d("MQTT", "connected");
                 new Thread(new ConsumeRunnable(parent)).start();
 
@@ -126,24 +129,29 @@ public class MqttManager {
             if (parent == null) {
                 return null;
             }
+            BlockingConnection connection;
             synchronized (parent.mqttLock) {
                 if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
+                connection = parent.mqttConnection;
 
-                try {
-                    parent.mqttConnection.disconnect();
-                    parent.mqttSubscriptionsByTopic.clear();
-                    parent.mqttSubscriptionsByParty.clear();
-                    Log.d("MQTT", "disconnected");
-                } catch (Exception e) {
-                    // oh well
-                    e.printStackTrace();
-                }
+                parent.mqttSubscriptionsByTopic.clear();
+                parent.mqttSubscriptionsByParty.clear();
+
                 // setting this to null tells the message consumption thread to stop
                 parent.mqttConnection = null;
-                return null;
+
             }
+
+            try {
+                connection.disconnect();
+            } catch (Exception e) {
+                // oh well
+                e.printStackTrace();
+            }
+            Log.d("MQTT", "disconnected");
+            return null;
         }
     }
 
@@ -162,40 +170,46 @@ public class MqttManager {
             if (parent == null || topics.length == 0) {
                 return null;
             }
+            BlockingConnection connection;
             synchronized (parent.mqttLock) {
                 if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
+                connection = parent.mqttConnection;
+            }
 
-                List<Topic> mqttTopics = new ArrayList<>();
-                for (String topic : topics) {
-                    mqttTopics.add(new Topic(topic, QoS.AT_MOST_ONCE));
-                }
-                Topic arr[] = new Topic[mqttTopics.size()];
-                try {
-                    parent.mqttConnection.subscribe(mqttTopics.toArray(arr));
-
-                    HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
-                    if(byParty == null) {
-                        byParty = new HashSet<>();
-                        parent.mqttSubscriptionsByParty.put(partyID, byParty);
-                    }
-                    for(String topic : topics) {
-                        byParty.add(topic);
-                        HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
-                        if(byTopic == null) {
-                            byTopic = new HashSet<>();
-                            parent.mqttSubscriptionsByTopic.put(topic, byTopic);
-                        }
-                        byTopic.add(partyID);
-                        Log.d("MQTT", "Party " + partyID + " subscribed to topic " + topic);
-                    }
-                } catch (Exception e) {
-                    // oh well
-                    e.printStackTrace();
-                }
+            List<Topic> mqttTopics = new ArrayList<>();
+            for (String topic : topics) {
+                mqttTopics.add(new Topic(topic, QoS.AT_MOST_ONCE));
+            }
+            Topic arr[] = new Topic[mqttTopics.size()];
+            try {
+                connection.subscribe(mqttTopics.toArray(arr));
+            } catch (Exception e) {
+                // oh well
+                e.printStackTrace();
                 return null;
             }
+
+            synchronized (parent.mqttLock) {
+                HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
+                if (byParty == null) {
+                    byParty = new HashSet<>();
+                    parent.mqttSubscriptionsByParty.put(partyID, byParty);
+                }
+                for (String topic : topics) {
+                    byParty.add(topic);
+                    HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                    if (byTopic == null) {
+                        byTopic = new HashSet<>();
+                        parent.mqttSubscriptionsByTopic.put(topic, byTopic);
+                    }
+                    byTopic.add(partyID);
+                    Log.d("MQTT", "Party " + partyID + " subscribed to topic " + topic);
+                }
+            }
+            return null;
+
         }
     }
 
@@ -214,19 +228,22 @@ public class MqttManager {
             if (parent == null || topics.length == 0) {
                 return null;
             }
+            List<String> actualTopics = new ArrayList<>();
+            BlockingConnection connection;
             synchronized (parent.mqttLock) {
+                connection = parent.mqttConnection;
+
                 if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
                 }
 
                 HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
-                if(byParty == null) {
+                if (byParty == null) {
                     byParty = new HashSet<>();
                 }
-                List<String> actualTopics = new ArrayList<>();
-                for(String topic : topics) {
+                for (String topic : topics) {
                     HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
-                    if(byTopic == null || byTopic.size() == 1) {
+                    if (byTopic == null || byTopic.size() <= 1) {
                         // this is the only party interested in this topic, actually unsubscribe
                         actualTopics.add(topic);
                     } else {
@@ -235,25 +252,36 @@ public class MqttManager {
                         byParty.remove(topic);
                     }
                 }
+            }
 
-                String arr[] = new String[actualTopics.size()];
-                try {
-                    parent.mqttConnection.unsubscribe(actualTopics.toArray(arr));
-
-                    for(String topic : actualTopics) {
-                        Log.d("MQTT", "Party " + partyID + " unsubscribed from topic " + topic);
-                        HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
-                        if(byTopic != null) {
-                            byTopic.remove(partyID);
-                        }
-                    }
-                } catch (Exception e) {
-                    // oh well
-                    e.printStackTrace();
-                }
-
+            if(actualTopics.size() == 0) {
                 return null;
             }
+
+            String arr[] = new String[actualTopics.size()];
+            try {
+                connection.unsubscribe(actualTopics.toArray(arr));
+            } catch (Exception e) {
+                // oh well
+                e.printStackTrace();
+                return null;
+            }
+            synchronized (parent.mqttLock) {
+                HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
+                if (byParty == null) {
+                    byParty = new HashSet<>();
+                }
+                for (String topic : actualTopics) {
+                    Log.d("MQTT", "Party " + partyID + " unsubscribed from topic " + topic);
+                    HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                    if (byTopic != null) {
+                        byTopic.remove(partyID);
+                    }
+                    byParty.remove(topic);
+                }
+            }
+
+            return null;
         }
     }
 
@@ -315,21 +343,29 @@ public class MqttManager {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
         }
     }
 
     private int partyCount = 0;
+    private int currPartyID = 0;
 
     public int connect(String... initialTopics) {
         synchronized (mqttLock) {
+            int id = currPartyID++;
             if (partyCount == 0) {
-                new MQTTConnectTask(this, partyCount).execute(initialTopics);
+                new MQTTConnectTask(this, currPartyID).execute(initialTopics);
             } else {
-                subscribe(partyCount, initialTopics);
+                subscribe(currPartyID, initialTopics);
             }
-            return partyCount++;
+            partyCount++;
+            return id;
         }
     }
 
@@ -339,11 +375,9 @@ public class MqttManager {
                 new MQTTDisconnectTask(this).execute();
             } else {
                 HashSet<String> byParty = mqttSubscriptionsByParty.get(partyID);
-                if(byParty != null) {
-                    byParty.clear();
-                }
-                for(HashSet<Integer> ofTopic : mqttSubscriptionsByTopic.values()) {
-                    ofTopic.remove(partyID);
+                if (byParty != null && byParty.size() > 0) {
+                    String arr[] = new String[byParty.size()];
+                    new MQTTUnsubscribeTask(this, partyID).execute(byParty.toArray(arr));
                 }
             }
             partyCount--;

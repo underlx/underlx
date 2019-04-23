@@ -92,6 +92,21 @@ public class StationGeneralFragment extends Fragment {
             stationId = getArguments().getString(ARG_STATION_ID);
             networkId = getArguments().getString(ARG_NETWORK_ID);
         }
+
+        final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
+        final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
+        if (net == null) {
+            return;
+        }
+        final Station station = net.getStation(stationId);
+        if (station == null) {
+            return;
+        }
+
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
+            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
+        }
     }
 
     @Override
@@ -119,21 +134,6 @@ public class StationGeneralFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
-        }
-
-        final MqttManager mqttManager = Coordinator.get(context).getMqttManager();
-        final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
-        if (net == null) {
-            return;
-        }
-        final Station station = net.getStation(stationId);
-        if (station == null) {
-            return;
-        }
-
-        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
-        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
         }
     }
 
@@ -174,7 +174,7 @@ public class StationGeneralFragment extends Fragment {
         Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
 
         LinearLayout vehicleETAsLayout = view.findViewById(R.id.vehicle_etas_layout);
-        if(etas.size() > 0) {
+        if(etas.size() > 0 && !station.isAlwaysClosed()) {
             TextView vehicleETAsView = view.findViewById(R.id.vehicle_etas_view);
 
             List<CharSequence> etaLines = MainService.getETAlines(getContext(), etas, station, null);
