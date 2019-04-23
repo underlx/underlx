@@ -127,12 +127,15 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         boolean permanentForeground = sharedPref.getBoolean(PreferenceNames.PermanentForeground, false);
 
-        if (!shouldBeInForeground(Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID))) {
+        S2LS s2ls = Coordinator.get(MainService.this).getS2LS(MapManager.PRIMARY_NETWORK_ID);
+        if (!shouldBeInForeground(s2ls)) {
             if (permanentForeground) {
                 startPermanentForeground();
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startTemporaryForeground();
             }
+        } else {
+            updateRouteNotification(s2ls);
         }
 
         if (intent != null && intent.getAction() != null) {
@@ -254,7 +257,7 @@ public class MainService extends Service {
         Route currentRoute = loc.getCurrentTargetRoute();
 
         if (currentPath == null && currentRoute == null) {
-            Log.e("MainService", "Attempt to create notification when there's no path or planned route");
+            Log.d("MainService", "Attempt to create notification when there's no path or planned route");
             return;
         }
 
