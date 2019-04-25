@@ -92,21 +92,6 @@ public class StationGeneralFragment extends Fragment {
             stationId = getArguments().getString(ARG_STATION_ID);
             networkId = getArguments().getString(ARG_NETWORK_ID);
         }
-
-        final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
-        final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
-        if (net == null) {
-            return;
-        }
-        final Station station = net.getStation(stationId);
-        if (station == null) {
-            return;
-        }
-
-        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
-        }
     }
 
     @Override
@@ -122,6 +107,21 @@ public class StationGeneralFragment extends Fragment {
         bm.registerReceiver(mBroadcastReceiver, filter);
 
         update();
+
+        final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
+        final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
+        if (net == null) {
+            return view;
+        }
+        final Station station = net.getStation(stationId);
+        if (station == null) {
+            return view;
+        }
+
+        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
+            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
+        }
 
         return view;
     }
