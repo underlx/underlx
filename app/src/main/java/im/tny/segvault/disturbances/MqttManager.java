@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,6 +16,7 @@ import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.Message;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
+import org.fusesource.mqtt.client.Tracer;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -36,9 +38,11 @@ import static android.content.Context.MODE_PRIVATE;
 public class MqttManager {
     private Context context;
     private final Object mqttLock = new Object();
-    private BlockingConnection mqttConnection;
+    private BlockingConnectionWithTimeouts mqttConnection;
     private Map<Integer, HashSet<String>> mqttSubscriptionsByParty = new HashMap<>();
     private Map<String, HashSet<Integer>> mqttSubscriptionsByTopic = new HashMap<>();
+    private static long timeout = 10;
+    private static TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
     public MqttManager(Context context) {
         this.context = context;
@@ -94,10 +98,16 @@ public class MqttManager {
             mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
             mqttClient.setVersion(info.protocolVersion);
             mqttClient.setReconnectDelay(1000);
+            mqttClient.setTracer(new Tracer() {
+                @Override
+                public void debug(String message, Object... args) {
+                    Log.d("MQTT-tracer", message + TextUtils.join(", ", args));
+                }
+            });
 
-            BlockingConnection connection = mqttClient.blockingConnection();
+            BlockingConnectionWithTimeouts connection = new BlockingConnectionWithTimeouts(mqttClient.futureConnection());
             try {
-                connection.connect();
+                connection.connect(timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
                 return null;
@@ -136,7 +146,7 @@ public class MqttManager {
             if (parent == null) {
                 return null;
             }
-            BlockingConnection connection;
+            BlockingConnectionWithTimeouts connection;
             synchronized (parent.mqttLock) {
                 if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
@@ -152,7 +162,7 @@ public class MqttManager {
             }
 
             try {
-                connection.disconnect();
+                connection.disconnect(timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -177,7 +187,7 @@ public class MqttManager {
             if (parent == null || topics.length == 0) {
                 return null;
             }
-            BlockingConnection connection;
+            BlockingConnectionWithTimeouts connection;
             synchronized (parent.mqttLock) {
                 if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
                     return null;
@@ -191,7 +201,7 @@ public class MqttManager {
             }
             Topic arr[] = new Topic[mqttTopics.size()];
             try {
-                connection.subscribe(mqttTopics.toArray(arr));
+                connection.subscribe(mqttTopics.toArray(arr), timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -236,7 +246,7 @@ public class MqttManager {
                 return null;
             }
             List<String> actualTopics = new ArrayList<>();
-            BlockingConnection connection;
+            BlockingConnectionWithTimeouts connection;
             synchronized (parent.mqttLock) {
                 connection = parent.mqttConnection;
 
@@ -267,7 +277,7 @@ public class MqttManager {
 
             String arr[] = new String[actualTopics.size()];
             try {
-                connection.unsubscribe(actualTopics.toArray(arr));
+                connection.unsubscribe(actualTopics.toArray(arr), timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -283,13 +293,13 @@ public class MqttManager {
                     HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
                     if (byTopic != null) {
                         byTopic.remove(partyID);
-                        if(byTopic.size() == 0) {
+                        if (byTopic.size() == 0) {
                             parent.mqttSubscriptionsByTopic.remove(topic);
                         }
                     }
                     byParty.remove(topic);
                 }
-                if(byParty.size() == 0) {
+                if (byParty.size() == 0) {
                     parent.mqttSubscriptionsByParty.remove(partyID);
                 }
             }
@@ -316,7 +326,7 @@ public class MqttManager {
                 return null;
             }
 
-            BlockingConnection connection;
+            BlockingConnectionWithTimeouts connection;
             synchronized (parent.mqttLock) {
                 connection = parent.mqttConnection;
 
@@ -326,7 +336,7 @@ public class MqttManager {
             }
 
             try {
-                connection.publish(topic, payload, QoS.AT_MOST_ONCE, false);
+                connection.publish(topic, payload, QoS.AT_MOST_ONCE, false, timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -349,7 +359,7 @@ public class MqttManager {
                     return;
                 }
 
-                BlockingConnection connection;
+                BlockingConnectionWithTimeouts connection;
                 synchronized (parent.mqttLock) {
                     connection = parent.mqttConnection;
                 }

@@ -127,7 +127,8 @@ public class S2LSChangeListener implements S2LS.EventListener {
                         .executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
             }
         });
-        new SubmitRealtimeLocationTask(S2LSChangeListener.this, path.getCurrentStop().getStation(), null).execute();
+        new SubmitRealtimeLocationTask(S2LSChangeListener.this, path.getCurrentStop().getStation(), null)
+                .executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         mqttPartyID = mqtt.connect(origTopic);
         updateRouteNotification(s2ls);
     }
