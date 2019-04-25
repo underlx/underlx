@@ -124,7 +124,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
                 new SubmitRealtimeLocationTask(S2LSChangeListener.this,
                         path.getCurrentStop().getStation(),
                         path.getDirection() == null ? null : path.getDirection().getStation())
-                        .execute();
+                        .executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
             }
         });
         new SubmitRealtimeLocationTask(S2LSChangeListener.this, path.getCurrentStop().getStation(), null).execute();

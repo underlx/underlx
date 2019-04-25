@@ -60,7 +60,8 @@ public class MqttManager {
             if (parent == null) {
                 return null;
             }
-            if (!Coordinator.get(parent.context).getPairManager().isPaired()) {
+            if (!Coordinator.get(parent.context).getPairManager().isPaired() ||
+                    !Coordinator.get(parent.context).getPairManager().isActivated()) {
                 return null;
             }
             this.initialTopics = initialTopics;
@@ -69,6 +70,12 @@ public class MqttManager {
 
             if (info == null) {
                 return null;
+            }
+
+            synchronized (parent.mqttLock) {
+                if (parent.mqttConnection != null && parent.mqttConnection.isConnected()) {
+                    return null;
+                }
             }
 
             MQTT mqttClient = new MQTT();
@@ -112,7 +119,7 @@ public class MqttManager {
             if (parent == null) {
                 return;
             }
-            new MQTTSubscribeTask(parent, clientID).execute(initialTopics);
+            new MQTTSubscribeTask(parent, clientID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, initialTopics);
         }
     }
 
@@ -276,8 +283,14 @@ public class MqttManager {
                     HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
                     if (byTopic != null) {
                         byTopic.remove(partyID);
+                        if(byTopic.size() == 0) {
+                            parent.mqttSubscriptionsByTopic.remove(topic);
+                        }
                     }
                     byParty.remove(topic);
+                }
+                if(byParty.size() == 0) {
+                    parent.mqttSubscriptionsByParty.remove(partyID);
                 }
             }
 
@@ -397,9 +410,9 @@ public class MqttManager {
         synchronized (mqttLock) {
             int id = currPartyID++;
             if (partyCount == 0) {
-                new MQTTConnectTask(this, currPartyID).execute(initialTopics);
+                new MQTTConnectTask(this, id).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, initialTopics);
             } else {
-                subscribe(currPartyID, initialTopics);
+                subscribe(id, initialTopics);
             }
             partyCount++;
             return id;
@@ -409,12 +422,12 @@ public class MqttManager {
     public void disconnect(int partyID) {
         synchronized (mqttLock) {
             if (partyCount <= 1) {
-                new MQTTDisconnectTask(this).execute();
+                new MQTTDisconnectTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
             } else {
                 HashSet<String> byParty = mqttSubscriptionsByParty.get(partyID);
                 if (byParty != null && byParty.size() > 0) {
                     String arr[] = new String[byParty.size()];
-                    new MQTTUnsubscribeTask(this, partyID).execute(byParty.toArray(arr));
+                    new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, byParty.toArray(arr));
                 }
             }
             partyCount--;
@@ -422,11 +435,11 @@ public class MqttManager {
     }
 
     public void subscribe(int partyID, String... topics) {
-        new MQTTSubscribeTask(this, partyID).execute(topics);
+        new MQTTSubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, topics);
     }
 
     public void unsubscribe(int partyID, String... topics) {
-        new MQTTUnsubscribeTask(this, partyID).execute(topics);
+        new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, topics);
     }
 
     public void unsubscribeAll(int partyID) {
@@ -436,12 +449,12 @@ public class MqttManager {
                 return;
             }
             String arr[] = new String[subs.size()];
-            new MQTTUnsubscribeTask(this, partyID).execute(subs.toArray(arr));
+            new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, subs.toArray(arr));
         }
     }
 
     public void publish(int partyID, String topic, byte[] payload) {
-        new MQTTPublishTask(this, topic, payload).execute();
+        new MQTTPublishTask(this, topic, payload).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     private final Map<String, VehicleETAValue> vehicleETAs = new HashMap<>();

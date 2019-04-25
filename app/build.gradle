@@ -58,7 +58,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation project(':s2ls')
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     implementation 'org.msgpack:jackson-dataformat-msgpack:0.8.16'
     implementation 'com.evernote:android-job:1.2.6'
     implementation 'info.debatty:java-string-similarity:1.1.0'
@@ -84,7 +84,7 @@ dependencies {
     implementation 'com.jaredrummler:android-device-names:1.1.8'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'org.fusesource.mqtt-client:mqtt-client:1.12'
+    implementation 'com.github.gbl08ma.mqtt-client:mqtt-client:0d143a7458'
     testImplementation 'junit:junit:4.12'
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
     debugImplementation 'com.uphyca:stetho_realm:2.2.1'
