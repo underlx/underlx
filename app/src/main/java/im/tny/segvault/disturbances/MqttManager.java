@@ -48,7 +48,7 @@ public class MqttManager {
         this.context = context;
     }
 
-    private static class MQTTConnectTask extends AsyncTask<String, Void, Void> {
+    private static class MQTTConnectTask extends AsyncTask<String, Void, Boolean> {
         private WeakReference<MqttManager> parentRef;
         private String[] initialTopics;
         private int clientID;
@@ -59,26 +59,26 @@ public class MqttManager {
         }
 
         @Override
-        protected Void doInBackground(String... initialTopics) {
+        protected Boolean doInBackground(String... initialTopics) {
             MqttManager parent = parentRef.get();
             if (parent == null) {
-                return null;
-            }
-            if (!Coordinator.get(parent.context).getPairManager().isPaired() ||
-                    !Coordinator.get(parent.context).getPairManager().isActivated()) {
-                return null;
+                return false;
             }
             this.initialTopics = initialTopics;
+            if (!Coordinator.get(parent.context).getPairManager().isPaired() ||
+                    !Coordinator.get(parent.context).getPairManager().isActivated()) {
+                return false;
+            }
 
             API.MQTTConnectionInfo info = API.getInstance().getMQTTConnectionInfo();
 
             if (info == null) {
-                return null;
+                return false;
             }
 
             synchronized (parent.mqttLock) {
                 if (parent.mqttConnection != null && parent.mqttConnection.isConnected()) {
-                    return null;
+                    return false;
                 }
             }
 
@@ -91,7 +91,7 @@ public class MqttManager {
                 }
             } catch (URISyntaxException e) {
                 e.printStackTrace();
-                return null;
+                return false;
             }
             mqttClient.setClientId(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()));
             mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
@@ -110,23 +110,22 @@ public class MqttManager {
                 connection.connect(timeout, timeoutUnit);
             } catch (Exception e) {
                 // oh well
-                return null;
+                return false;
             }
 
             synchronized (parent.mqttLock) {
                 parent.mqttConnection = connection;
-                Log.d("MQTT", "connected");
-                new Thread(new ConsumeRunnable(parent)).start();
-
-                return null;
             }
+            Log.d("MQTT", "connected");
+            new Thread(new ConsumeRunnable(parent)).start();
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
             MqttManager parent = parentRef.get();
-            if (parent == null) {
+            if (parent == null || !success) {
                 return;
             }
             new MQTTSubscribeTask(parent, clientID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, initialTopics);
@@ -184,7 +183,7 @@ public class MqttManager {
         @Override
         protected Void doInBackground(String... topics) {
             MqttManager parent = parentRef.get();
-            if (parent == null || topics.length == 0) {
+            if (parent == null || topics == null || topics.length == 0) {
                 return null;
             }
             BlockingConnectionWithTimeouts connection;
@@ -242,7 +241,7 @@ public class MqttManager {
         @Override
         protected Void doInBackground(String... topics) {
             MqttManager parent = parentRef.get();
-            if (parent == null || topics.length == 0) {
+            if (parent == null || topics == null || topics.length == 0) {
                 return null;
             }
             List<String> actualTopics = new ArrayList<>();
