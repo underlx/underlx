@@ -189,6 +189,12 @@ public class AboutFragment extends TopFragment {
         picasso.put("url", "https://square.github.io/picasso/");
         data.add(picasso);
 
+        Map<String, String> mqttclient = new HashMap<>(3);
+        mqttclient.put("name", "mqtt-client");
+        mqttclient.put("license", "© FuseSource Corp., gbl08ma - Apache License 2.0");
+        mqttclient.put("url", "https://github.com/gbl08ma/mqtt-client/");
+        data.add(mqttclient);
+
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
         licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
