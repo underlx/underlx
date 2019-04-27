@@ -266,23 +266,14 @@ public class S2LSChangeListener implements S2LS.EventListener {
         private API.RealtimeLocationRequest r;
 
         @Override
-        protected Void doInBackground(Void... nothing) {
+        protected void onPreExecute() {
+            super.onPreExecute();
+
             r = new API.RealtimeLocationRequest();
             r.s = station.getId();
             if (direction != null) {
                 r.d = direction.getId();
             }
-            try {
-                API.getInstance().postRealtimeLocation(r);
-            } catch (APIException e) {
-                // oh well...
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
 
             S2LSChangeListener parent = parentRef.get();
             if (parent == null) {
@@ -296,6 +287,16 @@ public class S2LSChangeListener implements S2LS.EventListener {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        protected Void doInBackground(Void... nothing) {
+            try {
+                API.getInstance().postRealtimeLocation(r);
+            } catch (APIException e) {
+                // oh well...
+            }
+            return null;
         }
     }
 
