@@ -157,7 +157,7 @@ public class MqttManager {
 
                 // setting this to null tells the message consumption thread to stop
                 parent.mqttConnection = null;
-
+                parent.partyCount = 0;
             }
 
             try {
@@ -358,6 +358,8 @@ public class MqttManager {
                     return;
                 }
 
+                parent.cleanup();
+
                 BlockingConnectionWithTimeouts connection;
                 synchronized (parent.mqttLock) {
                     connection = parent.mqttConnection;
@@ -440,6 +442,26 @@ public class MqttManager {
                 }
             }
             partyCount--;
+        }
+    }
+
+    public void disconnectAll() {
+        new MQTTDisconnectTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+    }
+
+    private int withoutSubsCount = 0;
+    public void cleanup() {
+        synchronized (mqttLock) {
+            if(mqttSubscriptionsByTopic.size() == 0) {
+                withoutSubsCount++;
+            } else {
+                withoutSubsCount = 0;
+            }
+            if ((partyCount == 0 || withoutSubsCount >= 5) && mqttConnection != null) {
+                // what are we even doing connected?
+                Log.d("MQTT", "Cleanup detected useless connection, disconnecting");
+                disconnectAll();
+            }
         }
     }
 
