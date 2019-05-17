@@ -150,7 +150,7 @@ public class ErrorFragment extends TopFragment {
     }
 
     private void exitErrorScreen() {
-        if (mListener != null) {
+        if (mListener != null && isAdded()) {
             mListener.switchToPage(originalFragmentIdString, false);
         }
     }
