@@ -24,14 +24,20 @@ public class DisturbanceAwareWeighter extends NeutralWeighter {
     @Override
     public double getEdgeWeight(Network network, Connection connection) {
         double weight = super.getEdgeWeight(network, connection);
-        // make transferring to lines with disturbances much "heavier"
+
         LineStatusCache.Status s = Coordinator.get(context).getLineStatusCache().getLineStatus(connection.getTarget().getLine().getId());
         if (connection instanceof Transfer || isSource(connection.getSource())) {
-            if (!isTarget(connection.getTarget()) && s != null &&
-                    (s.down || connection.getTarget().getLine().isExceptionallyClosed(new Date()))) {
+            if (!isTarget(connection.getTarget()) && s != null
+                    // make transferring to closed lines or lines with disturbances much "heavier"
+                    && (s.down ||
+                    connection.getTarget().getLine().isExceptionallyClosed(new Date()) ||
+                    // make transferring through closed stations much "heavier"
+                    connection.getTarget().getStation().isAlwaysClosed() ||
+                    connection.getTarget().getStation().isExceptionallyClosed(network, new Date()))
+            ) {
                 // TODO adjust this according to disturbance severity, if possible
                 weight += 100000;
-                if(connection.getTarget().getLine().isExceptionallyClosed(new Date())) {
+                if (connection.getTarget().getLine().isExceptionallyClosed(new Date())) {
                     weight += 100000;
                 }
             }
