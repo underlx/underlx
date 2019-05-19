@@ -56,7 +56,7 @@ public class Schedule implements Serializable {
         c.setTime(curDate);
         Schedule todaySchedule = getScheduleForDay(network, schedule, c);
         if(todaySchedule == null) {
-            return 0;
+            return Long.MAX_VALUE;
         }
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
@@ -66,8 +66,8 @@ public class Schedule implements Serializable {
             // network already closed for today, we want tomorrow's opening time
             c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) + 1);
             Schedule tomorrowSchedule = getScheduleForDay(network, schedule, c);
-            if(tomorrowSchedule == null) {
-                return 0;
+            if(tomorrowSchedule == null || !tomorrowSchedule.open) {
+                return Long.MAX_VALUE;
             }
             return c.getTimeInMillis() + tomorrowSchedule.openTime;
         }
