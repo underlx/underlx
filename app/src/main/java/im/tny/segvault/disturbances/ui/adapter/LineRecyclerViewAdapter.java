@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
+import java.util.TimeZone;
 
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment.OnListFragmentInteractionListener;
@@ -83,7 +84,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         } else if (holder.mItem.exceptionallyClosed) {
             setDownGradient(holder);
             Formatter f = new Formatter();
-            DateUtils.formatDateRange(context, f, holder.mItem.closedUntil, holder.mItem.closedUntil, DateUtils.FORMAT_SHOW_TIME, Time.TIMEZONE_UTC);
+            DateUtils.formatDateRange(context, f, holder.mItem.closedUntil, holder.mItem.closedUntil, DateUtils.FORMAT_SHOW_TIME, holder.mItem.timezone);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_until), f.toString()));
             holder.mStatusView.setImageResource(R.drawable.ic_close_white_24dp);
         } else if (holder.mItem.scheduleClosed) {
@@ -153,6 +154,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final boolean scheduleClosed;
         public final boolean isInterrupted;
         public final long closedUntil;
+        public final String timezone;
 
         public LineItem(Line line, Context context) {
             this.id = line.getId();
@@ -165,6 +167,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.scheduleClosed = !line.isOpen();
             this.isInterrupted = false;
             this.closedUntil = line.getNextOpenTime(new Date());
+            this.timezone = line.getNetwork().getTimezone().getID();
         }
 
         public LineItem(Line line, Date downSince, Context context) {
@@ -178,6 +181,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.scheduleClosed = !line.isOpen();
             this.isInterrupted = false;
             this.closedUntil = line.getNextOpenTime(new Date());
+            this.timezone = line.getNetwork().getTimezone().getID();
         }
 
         public LineItem(Line line, Date downSince, boolean isInterrupted, Context context) {
@@ -191,6 +195,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.scheduleClosed = !line.isOpen();
             this.isInterrupted = isInterrupted;
             this.closedUntil = line.getNextOpenTime(new Date());
+            this.timezone = line.getNetwork().getTimezone().getID();
         }
 
         @Override
