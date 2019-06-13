@@ -41,6 +41,7 @@
     <string name="frag_lines_error_updating">Failed to update line status</string>
     <string name="frag_lines_updated">Updated %s</string>
     <string name="frag_lines_duration">for %d minutes</string>
+    <string name="frag_lines_cars">%d cars</string>
     <string name="frag_lines_until">until %s</string>
     <string name="frag_lines_report_disruptions">Report disruptions</string>
     <string name="frag_map_title">Map</string>

@@ -147,11 +147,11 @@ public class HomeLinesFragment extends Fragment {
                 oneIsOpen = true;
             }
             if (s.stopped) {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.stopped, getContext()));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.condition.trainCars, s.stopped, getContext()));
             } else if (s.down) {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, getContext()));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.downSince, s.condition.trainCars, getContext()));
             } else {
-                items.add(new LineRecyclerViewAdapter.LineItem(s.line, getContext()));
+                items.add(new LineRecyclerViewAdapter.LineItem(s.line, s.condition.trainCars, getContext()));
             }
             if (s.updated.getTime() < mostRecentUpdate.getTime()) {
                 mostRecentUpdate = s.updated;

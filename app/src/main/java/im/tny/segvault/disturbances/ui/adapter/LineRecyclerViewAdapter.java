@@ -20,8 +20,11 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
+import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.R;
@@ -60,7 +63,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        if(holder.mItem.names.length == 1) {
+        if (holder.mItem.names.length == 1) {
             holder.mNameView.setText(holder.mItem.names[0]);
         } else {
             SpannableStringBuilder str = new SpannableStringBuilder(holder.mItem.names[0] + "\t\t\t" + holder.mItem.names[1]);
@@ -69,13 +72,14 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             str.setSpan(new android.text.style.StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.mNameView.setText(str);
         }
-        if(holder.mItem.isInterrupted) {
+        holder.mStatusSecondaryView.setVisibility(View.GONE);
+        if (holder.mItem.isInterrupted) {
             long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
             holder.mStatusView.setImageResource(R.drawable.ic_alert_octagon_white_24dp);
             setDownGradient(holder);
-        } else if(holder.mItem.down) {
+        } else if (holder.mItem.down) {
             long downMinutes = (((new Date()).getTime() / 60000) - (holder.mItem.downSince.getTime() / 60000));
             holder.mStatusDescView.setVisibility(View.VISIBLE);
             holder.mStatusDescView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_duration), downMinutes));
@@ -93,6 +97,10 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             holder.mStatusView.setImageResource(R.drawable.ic_sleep_white_24dp);
         } else {
             holder.mView.setBackgroundColor(holder.mItem.color);
+            if (holder.mItem.curCars > 0 && holder.mItem.curCars < holder.mItem.usualCars) {
+                holder.mStatusSecondaryView.setVisibility(View.VISIBLE);
+                holder.mStatusSecondaryView.setText(String.format(holder.mView.getContext().getString(R.string.frag_lines_cars), holder.mItem.curCars));
+            }
             holder.mStatusDescView.setVisibility(View.GONE);
             holder.mStatusView.setImageResource(R.drawable.ic_done_white);
         }
@@ -126,6 +134,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final View mView;
         public final TextView mNameView;
         public final TextView mStatusDescView;
+        public final TextView mStatusSecondaryView;
         public final ImageView mStatusView;
         public LineItem mItem;
 
@@ -134,6 +143,7 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             mView = view;
             mNameView = view.findViewById(R.id.line_name_view);
             mStatusDescView = view.findViewById(R.id.line_status_desc_view);
+            mStatusSecondaryView = view.findViewById(R.id.line_status_secondary_view);
             mStatusView = view.findViewById(R.id.line_status_view);
         }
 
@@ -155,8 +165,10 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         public final boolean isInterrupted;
         public final long closedUntil;
         public final String timezone;
+        public final int usualCars;
+        public final int curCars;
 
-        public LineItem(Line line, Context context) {
+        public LineItem(Line line, int curCars, Context context) {
             this.id = line.getId();
             this.names = Util.getLineNames(context, line);
             this.color = line.getColor();
@@ -168,23 +180,15 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.isInterrupted = false;
             this.closedUntil = line.getNextOpenTime(new Date());
             this.timezone = line.getNetwork().getTimezone().getID();
+            this.usualCars = line.getUsualCarCount();
+            this.curCars = curCars;
         }
 
-        public LineItem(Line line, Date downSince, Context context) {
-            this.id = line.getId();
-            this.names = Util.getLineNames(context, line);
-            this.color = line.getColor();
-            this.order = line.getOrder();
-            this.down = true;
-            this.downSince = downSince;
-            this.exceptionallyClosed = line.isExceptionallyClosed(new Date());
-            this.scheduleClosed = !line.isOpen();
-            this.isInterrupted = false;
-            this.closedUntil = line.getNextOpenTime(new Date());
-            this.timezone = line.getNetwork().getTimezone().getID();
+        public LineItem(Line line, Date downSince, int curCars, Context context) {
+            this(line, downSince, curCars, false, context);
         }
 
-        public LineItem(Line line, Date downSince, boolean isInterrupted, Context context) {
+        public LineItem(Line line, Date downSince, int curCars, boolean isInterrupted, Context context) {
             this.id = line.getId();
             this.names = Util.getLineNames(context, line);
             this.color = line.getColor();
@@ -196,6 +200,8 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
             this.isInterrupted = isInterrupted;
             this.closedUntil = line.getNextOpenTime(new Date());
             this.timezone = line.getNetwork().getTimezone().getID();
+            this.usualCars = line.getUsualCarCount();
+            this.curCars = curCars;
         }
 
         @Override
@@ -204,3 +210,4 @@ public class LineRecyclerViewAdapter extends RecyclerView.Adapter<LineRecyclerVi
         }
     }
 }
+

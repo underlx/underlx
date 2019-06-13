@@ -15,9 +15,10 @@
             android:id="@+id/line_name_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginStart="@dimen/text_margin"
             android:layout_marginLeft="@dimen/text_margin"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
             android:textColor="#ffffff" />
 
@@ -30,10 +31,24 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
+            <TextView
+                android:id="@+id/line_status_secondary_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="@dimen/text_margin"
+                android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="10dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+                android:textColor="#ffffff"
+                android:visibility="gone" />
+
             <ImageView
                 android:id="@+id/line_status_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/text_margin"
                 android:layout_marginRight="@dimen/text_margin" />
 
             <TextView
@@ -41,9 +56,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginBottom="10dp"
-                android:layout_marginRight="@dimen/text_margin"
                 android:layout_marginTop="10dp"
+                android:layout_marginRight="@dimen/text_margin"
+                android:layout_marginBottom="10dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
                 android:textColor="#ffffff" />
 
