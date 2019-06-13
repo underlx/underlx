@@ -5,8 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -18,9 +20,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.text.Layout;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.style.URLSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,10 +38,15 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
+import org.sufficientlysecure.htmltextview.HtmlTextView;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +54,14 @@ import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
+import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.MqttManager;
+import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
+import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
@@ -63,6 +75,7 @@ import im.tny.segvault.disturbances.ui.fragment.UnconfirmedTripsFragment;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.Route;
@@ -72,6 +85,8 @@ import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -110,6 +125,8 @@ public class HomeFragment extends TopFragment {
     private TextView routeSummaryView;
 
     private HomeStatsFragment statsFragment;
+
+    private Map<Integer, HtmlTextView> motdViews = new HashMap<>();
 
     private static final String ARG_NETWORK_ID = "networkId";
 
@@ -164,6 +181,14 @@ public class HomeFragment extends TopFragment {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        motdViews.put(0, view.findViewById(R.id.motd_priority0_view));
+        motdViews.put(1, view.findViewById(R.id.motd_priority1_view));
+        motdViews.put(2, view.findViewById(R.id.motd_priority2_view));
+        motdViews.put(3, view.findViewById(R.id.motd_priority3_view));
+        motdViews.put(4, view.findViewById(R.id.motd_priority4_view));
+        motdViews.put(5, view.findViewById(R.id.motd_priority5_view));
+        motdViews.put(6, view.findViewById(R.id.motd_priority6_view));
 
         networkClosedCard = view.findViewById(R.id.network_closed_card);
         networkClosedView = view.findViewById(R.id.network_closed_view);
@@ -388,6 +413,7 @@ public class HomeFragment extends TopFragment {
 
         clockUnadjustedCard.setVisibility(API.getInstance().isClockOutOfSync() ? View.VISIBLE : View.GONE);
         recomputeShortcutVisibility();
+        new RefreshMOTDTask(HomeFragment.this).execute(requestOnlineUpdate);
     }
 
     private void refreshCurrentTrip() {
@@ -535,6 +561,66 @@ public class HomeFragment extends TopFragment {
         }
     }
 
+    private String getMOTDtext(API.MOTD motd) {
+        final String locale = Util.getCurrentLanguage(getContext());
+        if (motd.html.get(locale) != null) {
+            return motd.html.get(locale);
+        }
+        // no translation available for this locale
+        return motd.html.get(motd.mainLocale);
+    }
+
+    private void refreshMOTD(API.MOTD motd) {
+        for (HtmlTextView view : motdViews.values()) {
+            view.setVisibility(View.GONE);
+        }
+        if (motd == null || motd.html == null || motd.html.size() == 0) {
+            return;
+        }
+        int priority = motd.priority;
+        if (priority < 100 && priority > 6) {
+            priority = 6;
+        }
+        if (priority >= 0 && priority <= 6) {
+            String html = getMOTDtext(motd);
+            motdViews.get(priority).setHtml(html, new HtmlHttpImageGetter(motdViews.get(priority), null, true));
+            motdViews.get(priority).setText(RichTextUtils.replaceAll((Spanned) motdViews.get(priority).getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext())));
+            motdViews.get(priority).setVisibility(View.VISIBLE);
+        }
+    }
+
+    private static class RefreshMOTDTask extends AsyncTask<Boolean, Void, Boolean> {
+        private WeakReference<HomeFragment> parentRef;
+        private API.MOTD motd;
+
+        RefreshMOTDTask(HomeFragment parent) {
+            parentRef = new WeakReference<>(parent);
+        }
+
+        @Override
+        protected Boolean doInBackground(Boolean... forceUpdate) {
+            try {
+                if(forceUpdate.length > 0 && forceUpdate[0]) {
+                    this.motd = API.getInstance().getMeta(true).motd;
+                } else {
+                    this.motd = API.getInstance().getMeta().motd;
+                }
+                return true;
+            } catch (APIException e) {
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            HomeFragment parent = parentRef.get();
+            if (parent == null || !result || !parent.isAdded()) {
+                return;
+            }
+            parent.refreshMOTD(motd);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -571,6 +657,8 @@ public class HomeFragment extends TopFragment {
                 case S2LSChangeListener.ACTION_NAVIGATION_ENDED:
                 case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
                     refreshCurrentTrip();
+                case API.ACTION_ENDPOINT_META_AVAILABLE:
+                    new RefreshMOTDTask(HomeFragment.this).execute();
                     break;
             }
         }

@@ -56,6 +56,10 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
 
         TextView timeView = holder.mView.findViewById(R.id.time_view);
         timeView.setVisibility(View.INVISIBLE);
+        ViewGroup.LayoutParams layoutParams = timeView.getLayoutParams();
+        final float scale = timeView.getContext().getResources().getDisplayMetrics().density;
+        layoutParams.width = (int)(30 * scale);
+        timeView.setLayoutParams(layoutParams);
 
         FrameLayout prevLineStripeLayout = holder.mView.findViewById(R.id.prev_line_stripe_layout);
         prevLineStripeLayout.setVisibility(View.GONE);

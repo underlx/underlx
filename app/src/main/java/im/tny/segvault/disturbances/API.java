@@ -86,6 +86,14 @@ public class API {
         public boolean supported;
         public boolean up;
         public int minAndroidClient;
+        public MOTD motd;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class MOTD {
+        public Map<String, String> html;
+        public String mainLocale;
+        public int priority;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -635,8 +643,12 @@ public class API {
     }
 
     public Meta getMeta() throws APIException {
+        return getMeta(false);
+    }
+
+    public Meta getMeta(boolean forceUpdate) throws APIException {
         synchronized (lock) {
-            if (this.endpointMetaInfo == null) {
+            if (this.endpointMetaInfo == null || forceUpdate) {
                 this.endpointMetaInfo = getMetaOnline();
                 if (context != null) {
                     Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);

@@ -58,7 +58,6 @@ public class HtmlDialogFragment extends DialogFragment {
         if (isHtml) {
             htmltv.setHtml(content, new HtmlHttpImageGetter(htmltv, null, true));
             htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext())));
-            htmltv.setHtml(content);
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 htmltv.setTextAppearance(R.style.TextAppearance_AppCompat_Small);
