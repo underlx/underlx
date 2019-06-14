@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -235,7 +236,7 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        if(!data.get("type").equals("posplay-notification")) {
+        if (!data.get("type").equals("posplay-notification")) {
             return;
         }
 
@@ -274,6 +275,19 @@ public class FCMService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         if (!data.containsKey("id") || !data.containsKey("type")) {
             return;
+        }
+
+        if (data.containsKey("shardID") && !data.get("shardID").isEmpty() &&
+                data.containsKey("shardMax") && !data.get("shardMax").isEmpty()) {
+            int shardID = Util.tryParseInteger(data.get("shardID"), 1);
+            int shardMax = Util.tryParseInteger(data.get("shardMax"), 1);
+
+            String androidID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            int thisShard = (Math.abs(androidID.hashCode()) % shardMax) + 1; // % gives values in range [0, shardMax[; by adding one we can use shards from e.g. 1/3 to 3/3 instead of 0/3 to 2/3, which is more human-friendly
+            if (thisShard != shardID) {
+                // we are not the chosen ones
+                return;
+            }
         }
 
         if (data.containsKey("versions") && !data.get("versions").isEmpty()) {
@@ -424,7 +438,7 @@ public class FCMService extends FirebaseMessagingService {
                 Collection<Network> networks = Coordinator.get(this).getMapManager().getNetworks();
                 String[] arr = new String[networks.size()];
                 int i = 0;
-                for(Network n : networks) {
+                for (Network n : networks) {
                     arr[i++] = n.getId();
                 }
                 Coordinator.get(this).cacheAllExtras(arr);
