@@ -459,6 +459,17 @@
     <string name="vehicle_eta_morethan_minutes">en plus de %d minutes</string>
     <string name="vehicle_eta_timestamp">à %s</string>
     <string name="vehicle_eta_unavailable">pas d\'information disponible</string>
+    <string name="vehicle_eta_interval_seconds_short">%1$d à %2$d s</string>
+    <string name="vehicle_eta_interval_minutes_short">%1$d à %2$d min</string>
+    <string name="vehicle_eta_exact_formatted_short">%s</string>
+    <string name="vehicle_eta_exact_seconds_short">%d s</string>
+    <string name="vehicle_eta_exact_minutes_short">%d min</string>
+    <string name="vehicle_eta_lessthan_seconds_short">&lt;%d s</string>
+    <string name="vehicle_eta_lessthan_minutes_short">&lt;%d min</string>
+    <string name="vehicle_eta_morethan_seconds_short">&gt;%d s</string>
+    <string name="vehicle_eta_morethan_minutes_short">&gt;%d min</string>
+    <string name="vehicle_eta_timestamp_short">à %s</string>
+    <string name="vehicle_eta_unavailable_short">pas d\'info</string>
 
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>

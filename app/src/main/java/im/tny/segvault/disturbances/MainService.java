@@ -14,12 +14,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
@@ -389,13 +391,20 @@ public class MainService extends Service {
         }
     }
 
-    public static void addETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop, Stop curDirection) {
+    public static void addETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop, @Nullable Stop curDirection) {
         statusLines.add(context.getString(R.string.notif_route_vehicle_etas_title));
         statusLines.addAll(getETAlines(context, etas, curStop.getStation(), curDirection));
     }
 
-    public static List<CharSequence> getETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, Stop curDirection) {
-        List<CharSequence> statusLines = new ArrayList<>();
+    public static class ETArow {
+        public Station direction;
+        public Stop directionStop;
+        public String eta;
+        public boolean available;
+    }
+
+    public static List<ETArow> getETArows(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, @Nullable Stop curDirection, boolean withUnavailable, boolean shortText) {
+        List<ETArow> statusRows = new ArrayList<>();
         Set<Stop> directionsSet = new HashSet<>();
         for (Stop s : curStation.getStops()) {
             for (Connection c : curStation.getNetwork().outgoingEdgesOf(s)) {
@@ -404,20 +413,48 @@ public class MainService extends Service {
                 }
             }
         }
-        List<Station> directions = new ArrayList<>();
+        List<Stop> directions = new ArrayList<>();
         for (Stop s : directionsSet) {
             if (!s.equals(curDirection) && !s.getStation().equals(curStation)) {
-                directions.add(s.getStation());
+                directions.add(s);
             }
         }
-        Collections.sort(directions, (station, t1) -> station.getName().compareTo(t1.getName()));
-        for (Station direction : directions) {
-            String line = String.format("%s %s", direction.getName(),
-                    vehicleETAtoString(context, etas.get(direction.getId())));
-            int lStart = line.indexOf(direction.getName());
-            int lEnd = lStart + direction.getName().length();
+        Collections.sort(directions, (stop, t1) -> {
+            int lineComp = Integer.compare(stop.getLine().getOrder(), t1.getLine().getOrder());
+            if (lineComp == 0) {
+                return stop.getStation().getName().compareTo(t1.getStation().getName());
+            }
+            return lineComp;
+        });
+        for (Stop direction : directions) {
+            ETArow r = new ETArow();
+            r.direction = direction.getStation();
+            r.directionStop = direction;
+            API.MQTTvehicleETA eta = etas.get(r.direction.getId());
+            r.available = eta != null;
+            if(shortText) {
+                r.eta = vehicleETAtoShortString(context, eta);
+            } else {
+                r.eta = vehicleETAtoString(context, eta);
+            }
+            if(r.available || withUnavailable) {
+                statusRows.add(r);
+            }
+        }
+        return statusRows;
+    }
+
+    public static List<CharSequence> getETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, @Nullable Stop curDirection) {
+        List<CharSequence> statusLines = new ArrayList<>();
+        List<ETArow> rows = getETArows(context, etas, curStation, curDirection, true, false);
+        for (ETArow r : rows) {
+            String line = String.format("%s %s", r.direction.getName(),
+                    vehicleETAtoString(context, etas.get(r.direction.getId())));
+            int lStart = line.indexOf(r.direction.getName());
+            int lEnd = lStart + r.direction.getName().length();
             SpannableString lineSpannable = new SpannableString(line);
             lineSpannable.setSpan(new StyleSpan(Typeface.BOLD), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            lineSpannable.setSpan(new ForegroundColorSpan(r.directionStop.getLine().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             //lineSpannable.setSpan(new TabStopSpan.Standard(600), 0, lineSpannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             statusLines.add(lineSpannable);
         }
@@ -477,6 +514,60 @@ public class MainService extends Service {
             }
         }
         return context.getString(R.string.vehicle_eta_unavailable);
+    }
+
+    private static String vehicleETAtoShortString(Context context, API.MQTTvehicleETA eta) {
+        if (eta == null) {
+            return context.getString(R.string.vehicle_eta_unavailable_short);
+        }
+        if (eta instanceof API.MQTTvehicleETAinterval) {
+            if (eta.type.equals("i")) {
+                switch (eta.units) {
+                    case "s":
+                        return String.format(context.getString(R.string.vehicle_eta_interval_seconds_short), ((API.MQTTvehicleETAinterval) eta).lower, ((API.MQTTvehicleETAinterval) eta).upper);
+                    case "m":
+                        return String.format(context.getString(R.string.vehicle_eta_interval_minutes_short), ((API.MQTTvehicleETAinterval) eta).lower, ((API.MQTTvehicleETAinterval) eta).upper);
+                }
+            }
+        } else if (eta instanceof API.MQTTvehicleETAsingleValue) {
+            switch (eta.type) {
+                case "e":
+                    switch (eta.units) {
+                        case "s":
+                            if (((API.MQTTvehicleETAsingleValue) eta).value > 60) {
+                                return String.format(context.getString(R.string.vehicle_eta_exact_formatted_short),
+                                        DateUtils.formatElapsedTime(((API.MQTTvehicleETAsingleValue) eta).value));
+                            }
+                            return String.format(context.getString(R.string.vehicle_eta_exact_seconds_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                        case "m":
+                            return String.format(context.getString(R.string.vehicle_eta_exact_minutes_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                    }
+                    break;
+                case "l":
+                    switch (eta.units) {
+                        case "s":
+                            return String.format(context.getString(R.string.vehicle_eta_lessthan_seconds_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                        case "m":
+                            return String.format(context.getString(R.string.vehicle_eta_lessthan_minutes_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                    }
+                    break;
+                case "m":
+                    switch (eta.units) {
+                        case "s":
+                            return String.format(context.getString(R.string.vehicle_eta_morethan_seconds_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                        case "m":
+                            return String.format(context.getString(R.string.vehicle_eta_morethan_minutes_short), ((API.MQTTvehicleETAsingleValue) eta).value);
+                    }
+                    break;
+                case "t":
+                    // when it's a timestamp, it's always in seconds
+                    String time = DateUtils.formatDateTime(context,
+                            ((API.MQTTvehicleETAsingleValue) eta).value * 1000,
+                            DateUtils.FORMAT_SHOW_TIME);
+                    return String.format(context.getString(R.string.vehicle_eta_timestamp_short), time);
+            }
+        }
+        return context.getString(R.string.vehicle_eta_unavailable_short);
     }
 
     private boolean shouldBeInForeground(S2LS loc) {

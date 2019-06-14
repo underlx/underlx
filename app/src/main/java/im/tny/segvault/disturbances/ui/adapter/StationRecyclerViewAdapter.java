@@ -1,21 +1,28 @@
 package im.tny.segvault.disturbances.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
+import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
@@ -42,7 +49,7 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.path_station, parent, false);
+                .inflate(R.layout.adapter_row_station, parent, false);
         context = parent.getContext();
         mapManager = Coordinator.get(context).getMapManager();
         return new ViewHolder(view);
@@ -52,13 +59,16 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
 
+        // remove background from path_station since adapter_row_station already sets selectableItemBackground
+        holder.mView.findViewById(R.id.path_station_root_layout).setBackgroundColor(Color.TRANSPARENT);
+
         final Station station = mapManager.getNetwork(holder.mItem.networkId).getStation(holder.mItem.id);
 
         TextView timeView = holder.mView.findViewById(R.id.time_view);
         timeView.setVisibility(View.INVISIBLE);
         ViewGroup.LayoutParams layoutParams = timeView.getLayoutParams();
         final float scale = timeView.getContext().getResources().getDisplayMetrics().density;
-        layoutParams.width = (int)(30 * scale);
+        layoutParams.width = (int) (30 * scale);
         timeView.setLayoutParams(layoutParams);
 
         FrameLayout prevLineStripeLayout = holder.mView.findViewById(R.id.prev_line_stripe_layout);
@@ -107,6 +117,35 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
         }
 
         RouteFragment.populateStationView(context, station, holder.mView, true, false);
+
+        TableLayout etasLayout = holder.mView.findViewById(R.id.etas_layout);
+
+        Map<String, API.MQTTvehicleETA> etas = Coordinator.get(context).getMqttManager().getVehicleETAsForStation(station);
+        if (etas.size() > 0 && !station.isAlwaysClosed()) {
+            List<MainService.ETArow> rows = MainService.getETArows(context, etas, station, null, false, true);
+            for (int i = 0; i < rows.size(); i += 2) {
+                boolean isSingle = i == rows.size() - 1;
+                TableRow row;
+                if (isSingle) {
+                    row = (TableRow) LayoutInflater.from(context).inflate(R.layout.adapter_row_station_row_single, etasLayout, false);
+                } else {
+                    row = (TableRow) LayoutInflater.from(context).inflate(R.layout.adapter_row_station_row_double, etasLayout, false);
+                }
+                TextView destinationView = row.findViewById(R.id.destination1_view);
+                destinationView.setText(rows.get(i).direction.getName(isSingle ? 25 : 9));
+                destinationView.setTextColor(rows.get(i).directionStop.getLine().getColor());
+                TextView etaView = row.findViewById(R.id.eta1_view);
+                etaView.setText(rows.get(i).eta);
+                if (!isSingle) {
+                    destinationView = row.findViewById(R.id.destination2_view);
+                    destinationView.setText(rows.get(i + 1).direction.getName(9));
+                    destinationView.setTextColor(rows.get(i + 1).directionStop.getLine().getColor());
+                    etaView = row.findViewById(R.id.eta2_view);
+                    etaView.setText(rows.get(i + 1).eta);
+                }
+                etasLayout.addView(row);
+            }
+        }
 
         holder.mView.setOnClickListener(v -> {
             if (null != mListener) {

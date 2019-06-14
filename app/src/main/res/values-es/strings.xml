@@ -459,6 +459,17 @@
     <string name="vehicle_eta_morethan_minutes">en más de %d minutos</string>
     <string name="vehicle_eta_timestamp">a las %s</string>
     <string name="vehicle_eta_unavailable">información no disponible</string>
+    <string name="vehicle_eta_interval_seconds_short">%1$d a %2$d s</string>
+    <string name="vehicle_eta_interval_minutes_short">%1$d a %2$d min</string>
+    <string name="vehicle_eta_exact_formatted_short">%s</string>
+    <string name="vehicle_eta_exact_seconds_short">%d s</string>
+    <string name="vehicle_eta_exact_minutes_short">%d min</string>
+    <string name="vehicle_eta_lessthan_seconds_short">&lt;%d s</string>
+    <string name="vehicle_eta_lessthan_minutes_short">&lt;%d min</string>
+    <string name="vehicle_eta_morethan_seconds_short">&gt;%d s</string>
+    <string name="vehicle_eta_morethan_minutes_short">&gt;%d min</string>
+    <string name="vehicle_eta_timestamp_short">a las %s</string>
+    <string name="vehicle_eta_unavailable_short">sin info</string>
 
     <string-array name="frag_settings_languages">
         <item>Defecto del sistema</item>

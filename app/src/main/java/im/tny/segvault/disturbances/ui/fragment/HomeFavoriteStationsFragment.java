@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +27,8 @@ import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
+import im.tny.segvault.disturbances.MqttManager;
+import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
@@ -34,6 +38,8 @@ import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A fragment representing a list of Items.
@@ -47,6 +53,8 @@ public class HomeFavoriteStationsFragment extends Fragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private RecyclerView recyclerView = null;
+    private int mqttPartyID = -1;
+    private String[] prevTopics = null;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -93,6 +101,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
         filter.addAction(MainService.ACTION_FAVORITE_STATIONS_UPDATED);
+        filter.addAction(MqttManager.ACTION_VEHICLE_ETAS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -109,7 +118,21 @@ public class HomeFavoriteStationsFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-        new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new UpdateDataTask(false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mqttPartyID >= 0) {
+            final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
+            mqttManager.disconnect(mqttPartyID);
+        }
     }
 
     @Override
@@ -118,8 +141,12 @@ public class HomeFavoriteStationsFragment extends Fragment {
         mListener = null;
     }
 
+    private List<StationRecyclerViewAdapter.StationItem> items = new ArrayList<>();
     private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
-        private List<StationRecyclerViewAdapter.StationItem> items = new ArrayList<>();
+        private boolean etasOnly;
+        public UpdateDataTask(boolean etasOnly) {
+            this.etasOnly = etasOnly;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -130,6 +157,11 @@ public class HomeFavoriteStationsFragment extends Fragment {
             if (mListener == null) {
                 return false;
             }
+
+            if(etasOnly) {
+                return true;
+            }
+            items = new ArrayList<>();
 
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (RStation s : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
@@ -160,6 +192,37 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 recyclerView.setAdapter(new StationRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
             }
+
+            final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
+            SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
+            if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
+                String[] topics = new String[items.size()];
+                for(int i = 0; i < items.size(); i++) {
+                    topics[i] = mqttManager.getVehicleETAsTopicForStation(items.get(i).networkId, items.get(i).id);
+                }
+                if(mqttPartyID >= 0) {
+                    if(prevTopics != null) {
+                        if(prevTopics.length == topics.length) {
+                            boolean containsAll = true;
+                            List<String> pt = Arrays.asList(prevTopics);
+                            for(String topic : topics) {
+                                if(!pt.contains(topic)) {
+                                    containsAll = false;
+                                    break;
+                                }
+                            }
+                            if(containsAll) {
+                                // no changes since last subscription
+                                return;
+                            }
+                        }
+                    }
+                    mqttManager.subscribe(mqttPartyID, topics);
+                } else {
+                    mqttPartyID = mqttManager.connect(topics);
+                }
+                prevTopics = topics;
+            }
         }
     }
 
@@ -187,7 +250,10 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_FAVORITE_STATIONS_UPDATED:
-                    new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new UpdateDataTask(false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    break;
+                case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
+                    new UpdateDataTask(true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }
         }

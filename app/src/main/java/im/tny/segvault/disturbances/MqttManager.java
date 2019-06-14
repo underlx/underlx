@@ -264,6 +264,7 @@ public class MqttManager {
                         actualTopics.add(topic);
                     } else {
                         // some parties are still interested in this topic, don't actually unsubscribe but register the lack of interest of this party
+                        Log.d("MQTT", "Party " + partyID + " unsubscribed from topic " + topic);
                         byTopic.remove(partyID);
                         byParty.remove(topic);
                     }
@@ -571,7 +572,11 @@ public class MqttManager {
     }
 
     public String getVehicleETAsTopicForStation(Station station) {
-        return String.format("%s%s/%s", getVehicleETAsTopicPrefix(), station.getNetwork().getId(), station.getId());
+        return getVehicleETAsTopicForStation(station.getNetwork().getId(), station.getId());
+    }
+
+    public String getVehicleETAsTopicForStation(String networkId, String stationId) {
+        return String.format("%s%s/%s", getVehicleETAsTopicPrefix(), networkId, stationId);
     }
 
     public String getVehicleETAsTopicPrefix() {

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/destination1_view"
+        android:layout_width="0dp"
+        android:layout_weight="20"
+        android:gravity="end"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/eta1_view"
+        android:layout_width="0dp"
+        android:layout_weight="15"
+        android:gravity="start"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <TextView
+        android:id="@+id/destination2_view"
+        android:layout_width="0dp"
+        android:layout_weight="20"
+        android:gravity="end"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/eta2_view"
+        android:layout_width="0dp"
+        android:layout_weight="15"
+        android:gravity="start"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+</TableRow>

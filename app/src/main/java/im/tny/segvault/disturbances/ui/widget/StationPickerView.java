@@ -29,7 +29,6 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.FrameLayout;
@@ -44,7 +43,6 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -445,7 +443,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
 
             // Inflate your custom row layout as usual.
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.row_station, parent, false);
+            convertView = inflater.inflate(R.layout.dropdown_row_station, parent, false);
 
             TextView name = convertView.findViewById(R.id.text_name);
             name.setText(station.getName());
