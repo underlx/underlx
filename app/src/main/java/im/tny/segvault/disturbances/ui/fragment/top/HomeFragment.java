@@ -584,7 +584,7 @@ public class HomeFragment extends TopFragment {
         if (priority >= 0 && priority <= 6) {
             String html = getMOTDtext(motd);
             motdViews.get(priority).setHtml(html, new HtmlHttpImageGetter(motdViews.get(priority), null, true));
-            motdViews.get(priority).setText(RichTextUtils.replaceAll((Spanned) motdViews.get(priority).getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext())));
+            motdViews.get(priority).setText(RichTextUtils.replaceAll((Spanned) motdViews.get(priority).getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
             motdViews.get(priority).setVisibility(View.VISIBLE);
         }
     }
@@ -631,7 +631,7 @@ public class HomeFragment extends TopFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
+    public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener, InternalLinkHandler.FallbackLinkHandler {
 
     }
 

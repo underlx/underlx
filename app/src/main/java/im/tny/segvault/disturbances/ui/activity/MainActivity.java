@@ -477,6 +477,8 @@ public class MainActivity extends TopActivity
             transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(url.substring(5)));
             transaction.addToBackStack(null);
             transaction.commitAllowingStateLoss();
+        } else if (url.startsWith("page:")) {
+            switchToPage(url.substring(5), true);
         } else {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             if (browserIntent.resolveActivity(getPackageManager()) != null) {
