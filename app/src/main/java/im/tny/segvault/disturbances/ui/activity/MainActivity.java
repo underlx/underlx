@@ -371,7 +371,7 @@ public class MainActivity extends TopActivity
             case "nav_about":
                 return R.id.nav_about;
             default:
-                return R.id.nav_home;
+                return 0;
         }
     }
 

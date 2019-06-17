@@ -25,24 +25,23 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.InternalLinkHandler;
+import im.tny.segvault.disturbances.OurHtmlHttpImageGetter;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
+import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment.OnListFragmentInteractionListener;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -102,7 +101,7 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
         }
 
         if (!holder.mItem.notes.isEmpty()) {
-            holder.notesView.setHtml(holder.mItem.notes, new HtmlHttpImageGetter(holder.notesView, null, true));
+            holder.notesView.setHtml(holder.mItem.notes, new OurHtmlHttpImageGetter(holder.notesView, null, OurHtmlHttpImageGetter.ParentFitType.FIT_PARENT_WIDTH));
             holder.notesView.setText(RichTextUtils.replaceAll((Spanned) holder.notesView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(context)));
             holder.notesLayout.setVisibility(View.VISIBLE);
         }

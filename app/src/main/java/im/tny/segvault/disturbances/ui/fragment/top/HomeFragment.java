@@ -1,11 +1,9 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -17,13 +15,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.text.Layout;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.text.style.URLSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -38,13 +33,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -55,38 +48,36 @@ import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.InternalLinkHandler;
+import im.tny.segvault.disturbances.LineStatusCache;
+import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.MqttManager;
-import im.tny.segvault.disturbances.PreferenceNames;
+import im.tny.segvault.disturbances.OurHtmlHttpImageGetter;
+import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.exception.APIException;
+import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.ui.activity.MainActivity;
+import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
-import im.tny.segvault.disturbances.LineStatusCache;
-import im.tny.segvault.disturbances.ui.activity.MainActivity;
-import im.tny.segvault.disturbances.MainService;
-import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.activity.StationActivity;
-import im.tny.segvault.disturbances.ui.fragment.UnconfirmedTripsFragment;
-import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.fragment.UnconfirmedTripsFragment;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -583,8 +574,12 @@ public class HomeFragment extends TopFragment {
         }
         if (priority >= 0 && priority <= 6) {
             String html = getMOTDtext(motd);
-            motdViews.get(priority).setHtml(html, new HtmlHttpImageGetter(motdViews.get(priority), null, true));
-            motdViews.get(priority).setText(RichTextUtils.replaceAll((Spanned) motdViews.get(priority).getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
+            motdViews.get(priority).setHtml(html, new OurHtmlHttpImageGetter(motdViews.get(priority), null, OurHtmlHttpImageGetter.ParentFitType.FIT_PARENT_WIDTH));
+            motdViews.get(priority).setText(RichTextUtils.replaceAll(
+                    (Spanned) motdViews.get(priority).getText(),
+                    URLSpan.class,
+                    new RichTextUtils.URLSpanConverter(),
+                    new InternalLinkHandler(getContext(), mListener)));
             motdViews.get(priority).setVisibility(View.VISIBLE);
         }
     }

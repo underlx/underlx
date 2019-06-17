@@ -13,10 +13,10 @@ import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import im.tny.segvault.disturbances.InternalLinkHandler;
+import im.tny.segvault.disturbances.OurHtmlHttpImageGetter;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
 
@@ -56,7 +56,7 @@ public class HtmlDialogFragment extends DialogFragment {
 
         HtmlTextView htmltv = view.findViewById(R.id.html_view);
         if (isHtml) {
-            htmltv.setHtml(content, new HtmlHttpImageGetter(htmltv, null, true));
+            htmltv.setHtml(content, new OurHtmlHttpImageGetter(htmltv, null, OurHtmlHttpImageGetter.ParentFitType.FIT_PARENT_WIDTH));
             htmltv.setText(RichTextUtils.replaceAll((Spanned) htmltv.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext())));
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

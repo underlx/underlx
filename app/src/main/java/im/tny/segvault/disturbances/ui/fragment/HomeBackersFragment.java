@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.Serializable;
@@ -22,6 +21,7 @@ import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.CacheManager;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.InternalLinkHandler;
+import im.tny.segvault.disturbances.OurHtmlHttpImageGetter;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
@@ -63,7 +63,7 @@ public class HomeBackersFragment extends Fragment {
     }
 
     private void setContent(String html) {
-        contentView.setHtml(html, new HtmlHttpImageGetter(contentView, null, true));
+        contentView.setHtml(html, new OurHtmlHttpImageGetter(contentView, null, OurHtmlHttpImageGetter.ParentFitType.FIT_PARENT_WIDTH));
         contentView.setText(RichTextUtils.replaceAll((Spanned) contentView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
     }
 
