@@ -3,6 +3,7 @@ package im.tny.segvault.disturbances;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.util.Base64;
@@ -647,15 +648,29 @@ public class API {
     }
 
     public Meta getMeta(boolean forceUpdate) throws APIException {
+        boolean needsUpdate;
         synchronized (lock) {
-            if (this.endpointMetaInfo == null || forceUpdate) {
-                this.endpointMetaInfo = getMetaOnline();
-                if (context != null) {
-                    Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                }
-                getMQTTConnectionInfo();
+            needsUpdate = this.endpointMetaInfo == null || forceUpdate;
+        }
+        if (needsUpdate) {
+            Meta info = getMetaOnline();
+            synchronized (lock) {
+                this.endpointMetaInfo = info;
             }
+            if (context != null) {
+                Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            }
+            getMQTTConnectionInfo();
+        }
+        synchronized (lock) {
+            return this.endpointMetaInfo;
+        }
+    }
+
+    @Nullable
+    public Meta getMetaOffline() {
+        synchronized (lock) {
             return this.endpointMetaInfo;
         }
     }
@@ -715,8 +730,10 @@ public class API {
     private MQTTConnectionInfo mqttConnInfo = null;
 
     public MQTTConnectionInfo getMQTTConnectionInfo() {
-        if (mqttConnInfo != null) {
-            return mqttConnInfo;
+        synchronized (lock) {
+            if (mqttConnInfo != null) {
+                return mqttConnInfo;
+            }
         }
         try {
             List<API.Gateway> gateways = getGateways();

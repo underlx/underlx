@@ -240,6 +240,11 @@ public class RouteFragment extends TopFragment {
         destinationPicker.setOnSelectionLostListener(() -> hideRoute());
 
         if (mListener != null) {
+            String origId = mListener.getRouteOrigin();
+            if (origId != null) {
+                originPicker.setSelectionById(origId);
+            }
+
             String destId = mListener.getRouteDestination();
             if (destId != null) {
                 destinationPicker.setSelectionById(destId);
@@ -649,6 +654,7 @@ public class RouteFragment extends TopFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener extends TopFragment.OnInteractionListener {
+        String getRouteOrigin();
         String getRouteDestination();
     }
 

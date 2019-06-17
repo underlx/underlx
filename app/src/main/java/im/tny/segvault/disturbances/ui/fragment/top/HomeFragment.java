@@ -593,6 +593,19 @@ public class HomeFragment extends TopFragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            HomeFragment parent = parentRef.get();
+            if (parent == null || !parent.isAdded()) {
+                return;
+            }
+            API.Meta meta = API.getInstance().getMetaOffline();
+            if (meta != null) {
+                parent.refreshMOTD(meta.motd);
+            }
+        }
+
+        @Override
         protected Boolean doInBackground(Boolean... forceUpdate) {
             try {
                 if(forceUpdate.length > 0 && forceUpdate[0]) {

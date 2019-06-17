@@ -35,6 +35,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -479,6 +481,21 @@ public class MainActivity extends TopActivity
             transaction.commitAllowingStateLoss();
         } else if (url.startsWith("page:")) {
             switchToPage(url.substring(5), true);
+        } else if (url.startsWith("planroute:")) {
+            try {
+                Uri uri = Uri.parse(url);
+                String from = uri.getQueryParameter("from"), to = uri.getQueryParameter("to");
+                if (from != null && !from.isEmpty()) {
+                    planRouteFrom = from;
+                }
+                if (to != null && !to.isEmpty()) {
+                    planRouteTo = to;
+                }
+                switchToPage("nav_plan_route", true);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                return;
+            }
         } else {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             if (browserIntent.resolveActivity(getPackageManager()) != null) {
@@ -678,7 +695,15 @@ public class MainActivity extends TopActivity
         }
     }
 
+    private String planRouteFrom = null;
     private String planRouteTo = null;
+
+    @Override
+    public String getRouteOrigin() {
+        String s = planRouteFrom;
+        planRouteFrom = null;
+        return s;
+    }
 
     @Override
     public String getRouteDestination() {
