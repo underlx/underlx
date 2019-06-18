@@ -19,7 +19,7 @@ android {
         applicationId "im.tny.segvault.disturbances"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 94
+        versionCode 95
         versionName '0.41'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
