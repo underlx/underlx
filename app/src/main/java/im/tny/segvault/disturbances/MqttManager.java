@@ -11,7 +11,6 @@ import android.util.Log;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.Message;
 import org.fusesource.mqtt.client.QoS;
@@ -41,6 +40,7 @@ public class MqttManager {
     private BlockingConnectionWithTimeouts mqttConnection;
     private Map<Integer, HashSet<String>> mqttSubscriptionsByParty = new HashMap<>();
     private Map<String, HashSet<Integer>> mqttSubscriptionsByTopic = new HashMap<>();
+    private Set<Integer> parties = new HashSet<>();
     private static long timeout = 10;
     private static TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
@@ -128,7 +128,7 @@ public class MqttManager {
             if (parent == null || !success) {
                 return;
             }
-            new MQTTSubscribeTask(parent, clientID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, initialTopics);
+            new MQTTSubscribeTask(parent, clientID).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, initialTopics);
         }
     }
 
@@ -157,7 +157,6 @@ public class MqttManager {
 
                 // setting this to null tells the message consumption thread to stop
                 parent.mqttConnection = null;
-                parent.partyCount = 0;
             }
 
             try {
@@ -271,18 +270,16 @@ public class MqttManager {
                 }
             }
 
-            if (actualTopics.size() == 0) {
-                return null;
+            if (actualTopics.size() > 0) {
+                String arr[] = new String[actualTopics.size()];
+                try {
+                    connection.unsubscribe(actualTopics.toArray(arr), timeout, timeoutUnit);
+                } catch (Exception e) {
+                    // oh well
+                    e.printStackTrace();
+                }
             }
 
-            String arr[] = new String[actualTopics.size()];
-            try {
-                connection.unsubscribe(actualTopics.toArray(arr), timeout, timeoutUnit);
-            } catch (Exception e) {
-                // oh well
-                e.printStackTrace();
-                return null;
-            }
             synchronized (parent.mqttLock) {
                 HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
                 if (byParty == null) {
@@ -305,6 +302,21 @@ public class MqttManager {
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            MqttManager parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+            synchronized (parent.mqttLock) {
+                if (parent.parties.size() == 0) {
+                    new MQTTDisconnectTask(parent).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+            }
         }
     }
 
@@ -358,8 +370,6 @@ public class MqttManager {
                 if (parent == null) {
                     return;
                 }
-
-                parent.cleanup();
 
                 BlockingConnectionWithTimeouts connection;
                 synchronized (parent.mqttLock) {
@@ -415,63 +425,51 @@ public class MqttManager {
         }
     }
 
-    private int partyCount = 0;
     private int currPartyID = 0;
 
     public int connect(String... initialTopics) {
         synchronized (mqttLock) {
             int id = currPartyID++;
-            if (partyCount == 0) {
-                new MQTTConnectTask(this, id).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, initialTopics);
+            if (parties.size() == 0) {
+                new MQTTConnectTask(this, id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, initialTopics);
             } else {
+                Log.d("MQTT", "will subscribe");
                 subscribe(id, initialTopics);
             }
-            partyCount++;
+            parties.add(id);
             return id;
         }
     }
 
     public void disconnect(int partyID) {
         synchronized (mqttLock) {
-            if (partyCount <= 1) {
-                new MQTTDisconnectTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+            if (parties.size() == 0 || (parties.size() == 1 && parties.contains(partyID))) {
+                Log.d("MQTT", "will disconnect");
+                new MQTTDisconnectTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
                 HashSet<String> byParty = mqttSubscriptionsByParty.get(partyID);
                 if (byParty != null && byParty.size() > 0) {
                     String arr[] = new String[byParty.size()];
-                    new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, byParty.toArray(arr));
+                    new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, byParty.toArray(arr));
                 }
             }
-            partyCount--;
+            parties.remove(partyID);
         }
     }
 
     public void disconnectAll() {
-        new MQTTDisconnectTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
-    }
-
-    private int withoutSubsCount = 0;
-    public void cleanup() {
         synchronized (mqttLock) {
-            if(mqttSubscriptionsByTopic.size() == 0) {
-                withoutSubsCount++;
-            } else {
-                withoutSubsCount = 0;
-            }
-            if ((partyCount == 0 || withoutSubsCount >= 5) && mqttConnection != null) {
-                // what are we even doing connected?
-                Log.d("MQTT", "Cleanup detected useless connection, disconnecting");
-                disconnectAll();
-            }
+            new MQTTDisconnectTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            parties.clear();
         }
     }
 
     public void subscribe(int partyID, String... topics) {
-        new MQTTSubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, topics);
+        new MQTTSubscribeTask(this, partyID).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topics);
     }
 
     public void unsubscribe(int partyID, String... topics) {
-        new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, topics);
+        new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topics);
     }
 
     public void unsubscribeAll(int partyID) {
@@ -481,12 +479,12 @@ public class MqttManager {
                 return;
             }
             String arr[] = new String[subs.size()];
-            new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR, subs.toArray(arr));
+            new MQTTUnsubscribeTask(this, partyID).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, subs.toArray(arr));
         }
     }
 
     public void publish(int partyID, String topic, byte[] payload) {
-        new MQTTPublishTask(this, topic, payload).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+        new MQTTPublishTask(this, topic, payload).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private final Map<String, VehicleETAValue> vehicleETAs = new HashMap<>();

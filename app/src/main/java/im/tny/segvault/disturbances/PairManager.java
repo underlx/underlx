@@ -42,7 +42,7 @@ public class PairManager {
     }
 
     public boolean isActivated() {
-        return sharedPref.getLong(PREF_API_ACTIVATION, Long.MAX_VALUE) < new Date().getTime();
+        return true;//sharedPref.getLong(PREF_API_ACTIVATION, Long.MAX_VALUE) < new Date().getTime();
     }
 
     public void pair() {

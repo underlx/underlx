@@ -120,18 +120,24 @@ public class HomeFavoriteStationsFragment extends Fragment {
         }
     }
 
+    private boolean fragmentPaused;
+
     @Override
     public void onResume() {
         super.onResume();
+        fragmentPaused = false;
         new UpdateDataTask(false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        fragmentPaused = true;
         if (mqttPartyID >= 0) {
             final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
             mqttManager.disconnect(mqttPartyID);
+            mqttPartyID = -1;
+            prevTopics = null;
         }
     }
 
@@ -218,7 +224,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
                         }
                     }
                     mqttManager.subscribe(mqttPartyID, topics);
-                } else {
+                } else if(!fragmentPaused) { // since this AsyncTask started, the fragment may have paused
                     mqttPartyID = mqttManager.connect(topics);
                 }
                 prevTopics = topics;

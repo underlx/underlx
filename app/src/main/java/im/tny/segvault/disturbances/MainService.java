@@ -140,8 +140,6 @@ public class MainService extends Service {
             updateRouteNotification(s2ls);
         }
 
-        Coordinator.get(MainService.this).getMqttManager().cleanup();
-
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case ACTION_END_TRIP: {
