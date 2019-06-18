@@ -65,6 +65,7 @@ public class API {
 
     private PairManager pairManager;
     private Meta endpointMetaInfo;
+    private Date endpointMetaLastUpdated;
     private final Object lock = new Object();
     private Context context;
     private long timeSkew;
@@ -648,31 +649,28 @@ public class API {
     }
 
     public Meta getMeta(boolean forceUpdate) throws APIException {
-        boolean needsUpdate;
         synchronized (lock) {
-            needsUpdate = this.endpointMetaInfo == null || forceUpdate;
-        }
-        if (needsUpdate) {
-            Meta info = getMetaOnline();
-            synchronized (lock) {
-                this.endpointMetaInfo = info;
+            if (this.endpointMetaInfo == null || forceUpdate) {
+                this.endpointMetaInfo = getMetaOnline();
+                this.endpointMetaLastUpdated = new Date();
+                if (context != null) {
+                    Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                }
+                getMQTTConnectionInfo();
             }
-            if (context != null) {
-                Intent intent = new Intent(ACTION_ENDPOINT_META_AVAILABLE);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
-            getMQTTConnectionInfo();
-        }
-        synchronized (lock) {
             return this.endpointMetaInfo;
         }
     }
 
     @Nullable
     public Meta getMetaOffline() {
-        synchronized (lock) {
-            return this.endpointMetaInfo;
-        }
+        return this.endpointMetaInfo;
+    }
+
+    @Nullable
+    public Date getMetaLastUpdated() {
+        return this.endpointMetaLastUpdated;
     }
 
     public boolean meetsEndpointRequirements(boolean goOnline) {

@@ -38,10 +38,12 @@ import org.sufficientlysecure.htmltextview.HtmlTextView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
@@ -122,6 +124,8 @@ public class HomeFragment extends TopFragment {
     private static final String ARG_NETWORK_ID = "networkId";
 
     private String networkId;
+
+    private boolean refreshedOnlineSinceOpening = false;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -234,7 +238,7 @@ public class HomeFragment extends TopFragment {
 
         view.findViewById(R.id.clock_unadjusted_button).setOnClickListener(view1 -> startActivity(new Intent(Settings.ACTION_DATE_SETTINGS)));
 
-        getSwipeRefreshLayout().setOnRefreshListener(() -> refresh(true));
+        getSwipeRefreshLayout().setOnRefreshListener(() -> refresh(true, true));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
@@ -262,7 +266,7 @@ public class HomeFragment extends TopFragment {
         transaction.replace(R.id.footer_layout, newFragment);
 
         transaction.commitAllowingStateLoss();
-        refresh(true);
+        refresh(true, false);
         refreshCurrentTrip();
         return view;
     }
@@ -283,7 +287,7 @@ public class HomeFragment extends TopFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                refresh(true);
+                refresh(true, true);
                 return true;
             case R.id.menu_report_incorrect_location:
                 new FeedbackUtil.IncorrectLocation(getContext()).showReportWizard();
@@ -349,7 +353,10 @@ public class HomeFragment extends TopFragment {
         }
     }
 
-    private void refresh(boolean requestOnlineUpdate) {
+    private void refresh(boolean requestOnlineUpdate, boolean manualRefresh) {
+        if (mListener == null)
+            return;
+
         Realm realm = Application.getDefaultRealmInstance(getContext());
         boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
         boolean hasFavoriteStations = realm.where(RStation.class).equalTo("favorite", true).count() > 0;
@@ -379,9 +386,6 @@ public class HomeFragment extends TopFragment {
             favoriteStationsCard.setVisibility(View.GONE);
         }
 
-        if (mListener == null)
-            return;
-
         MapManager mapm = Coordinator.get(getContext()).getMapManager();
         if (requestOnlineUpdate) {
             Coordinator.get(getContext()).getLineStatusCache().updateLineStatus();
@@ -404,7 +408,13 @@ public class HomeFragment extends TopFragment {
 
         clockUnadjustedCard.setVisibility(API.getInstance().isClockOutOfSync() ? View.VISIBLE : View.GONE);
         recomputeShortcutVisibility();
-        new RefreshMOTDTask(HomeFragment.this).execute(requestOnlineUpdate);
+        Date metaUpdated = API.getInstance().getMetaLastUpdated();
+        boolean metaOld = metaUpdated != null && new Date().getTime() - metaUpdated.getTime() > TimeUnit.MINUTES.toMillis(2);
+        new RefreshMOTDTask(HomeFragment.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestOnlineUpdate && (manualRefresh || metaOld));
+
+        if (requestOnlineUpdate) {
+            refreshedOnlineSinceOpening = true;
+        }
     }
 
     private void refreshCurrentTrip() {
@@ -608,7 +618,7 @@ public class HomeFragment extends TopFragment {
         @Override
         protected Boolean doInBackground(Boolean... forceUpdate) {
             try {
-                if(forceUpdate.length > 0 && forceUpdate[0]) {
+                if (forceUpdate.length > 0 && forceUpdate[0]) {
                     this.motd = API.getInstance().getMeta(true).motd;
                 } else {
                     this.motd = API.getInstance().getMeta().motd;
@@ -653,11 +663,14 @@ public class HomeFragment extends TopFragment {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
                 case MainService.ACTION_TRIP_REALM_UPDATED:
                 case MainService.ACTION_FAVORITE_STATIONS_UPDATED:
-                    refresh(false);
+                    refresh(false, false);
                     break;
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
+                    refresh(!refreshedOnlineSinceOpening, false);
+                    refreshCurrentTrip();
+                    break;
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    refresh(true);
+                    refresh(true, false);
                     // fallthrough
                 case S2LSChangeListener.ACTION_CURRENT_TRIP_UPDATED:
                 case S2LSChangeListener.ACTION_CURRENT_TRIP_ENDED:
@@ -665,8 +678,9 @@ public class HomeFragment extends TopFragment {
                 case S2LSChangeListener.ACTION_NAVIGATION_ENDED:
                 case MqttManager.ACTION_VEHICLE_ETAS_UPDATED:
                     refreshCurrentTrip();
+                    break;
                 case API.ACTION_ENDPOINT_META_AVAILABLE:
-                    new RefreshMOTDTask(HomeFragment.this).execute();
+                    new RefreshMOTDTask(HomeFragment.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }
         }

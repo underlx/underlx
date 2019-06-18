@@ -66,6 +66,7 @@ public class HomeStatsFragment extends Fragment {
     private static final String ARG_NETWORK_ID = "networkId";
 
     private String networkId;
+    private boolean onlineUpdateQueued = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -245,14 +246,18 @@ public class HomeStatsFragment extends Fragment {
         List<Date> lupdated = new ArrayList<>();
         lupdated.add(updated);
         redraw(lstats, lupdated);
-        new RetrieveStatsTask(this).execute(networkId);
+        if (onlineUpdateQueued) {
+            onlineUpdateQueued = false;
+            onlineUpdate();
+        }
     }
 
     public void onlineUpdate() {
-        if(!isAdded()) {
+        if (!isAdded()) {
+            onlineUpdateQueued = true;
             return;
         }
-        new RetrieveStatsTask(this).execute(networkId);
+        new RetrieveStatsTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, networkId);
     }
 
     private void redraw(List<Stats> listStats, List<Date> listUpdated) {
@@ -264,7 +269,7 @@ public class HomeStatsFragment extends Fragment {
 
         Stats stats = listStats.get(0);
         Date updated = listUpdated.get(0);
-        if(stats == null || updated == null) {
+        if (stats == null || updated == null) {
             return;
         }
 
@@ -374,9 +379,8 @@ public class HomeStatsFragment extends Fragment {
             }
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
-                    redraw();
-                    break;
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
+                    redraw();
                     break;
             }
         }
