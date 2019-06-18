@@ -406,6 +406,25 @@ public class API {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = WorldMap.class, name = "world-map"),
+            @JsonSubTypes.Type(value = HTMLMap.class, name = "html")}
+    )
+    static public class Diagram implements Serializable {
+        public String type;
+    }
+
+    static public class WorldMap extends Diagram {
+    }
+
+    static public class HTMLMap extends Diagram {
+        public String url;
+        public boolean cache;
+        public boolean wideViewport;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     static public class PosPlayStatus implements Serializable {
         public String serviceName;
 
@@ -1208,6 +1227,20 @@ public class API {
         throwIfRequirementsNotMet();
         try {
             return mapper.readValue(getRequest(endpoint.resolve("pair/connections"), true), new TypeReference<List<PairConnection>>() {
+            });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public List<Diagram> getDiagrams() throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("maps"), false), new TypeReference<List<Diagram>>() {
             });
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");

@@ -258,10 +258,10 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return Schedule.getNextCloseTime(this, schedules, curDate);
     }
 
-    public abstract class Plan {
+    public static abstract class Plan {
     }
 
-    public class HtmlDiagram extends Plan {
+    public static class HtmlDiagram extends Plan {
         private String url;
         private boolean wideViewport;
 
@@ -280,15 +280,16 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
 
     }
 
-    public class WorldMap extends Plan {
+    public static class WorldMap extends Plan {
     }
 
+    private List<Plan> maps = new ArrayList<>();
+
     public List<Plan> getMaps() {
-        // TODO retrieve maps from server
-        List<Plan> maps = new ArrayList<>(3);
-        maps.add(new WorldMap());
-        maps.add(new HtmlDiagram("file:///android_asset/map-pt-ml.html", true));
-        maps.add(new HtmlDiagram("file:///android_asset/map-pt-ml-portrait.html", false));
         return maps;
+    }
+
+    public void addMap(Plan map) {
+        maps.add(map);
     }
 }

@@ -5,20 +5,27 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.support.constraint.solver.Cache;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,11 +36,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
 import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -47,7 +54,6 @@ import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import im.tny.segvault.subway.WorldPath;
-import im.tny.segvault.subway.Zone;
 import io.realm.Realm;
 
 public class MapManager {
@@ -186,7 +192,7 @@ public class MapManager {
                         }
                     }
 
-                    publishProgress(40);
+                    publishProgress(30);
                     if (isCancelled()) break;
 
                     int line_count = n.lines.size();
@@ -196,7 +202,7 @@ public class MapManager {
                         API.Line l = api.getLine(lineid);
                         apiLines.put(lineid, l);
                         cur_line++;
-                        publishProgress(40 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
+                        publishProgress(30 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
                         if (cur_line < line_count) {
                             cur_line++;
                         }
@@ -206,22 +212,38 @@ public class MapManager {
 
                     List<API.Connection> connections = api.getConnections();
 
-                    publishProgress(80);
+                    publishProgress(70);
                     if (isCancelled()) break;
 
                     List<API.Transfer> transfers = api.getTransfers();
 
-                    publishProgress(90);
+                    publishProgress(80);
                     if (isCancelled()) break;
 
                     List<API.POI> pois = api.getPOIs();
 
+                    publishProgress(90);
+                    if (isCancelled()) break;
+
+                    List<API.Diagram> maps = api.getDiagrams();
+
+                    publishProgress(95);
+                    if (isCancelled()) break;
+
+                    clearAllCachedDiagrams(mapManager.context);
+                    for (API.Diagram map : maps) {
+                        if (map instanceof API.HTMLMap && ((API.HTMLMap) map).cache) {
+                            downloadDiagram(mapManager.context, (API.HTMLMap) map);
+                        }
+                    }
+
                     publishProgress(100);
+                    if (isCancelled()) break;
 
                     API.DatasetInfo info = api.getDatasetInfo(n.id);
 
 
-                    Network network = mapManager.saveNetwork(n, apiStations, apiLobbies, apiLines, connections, transfers, pois, info);
+                    Network network = mapManager.saveNetwork(n, apiStations, apiLobbies, apiLines, connections, transfers, pois, maps, info);
                     Coordinator.get(mapManager.context).getLineStatusCache().clear();
 
                     if (mapManager.updateListener != null) {
@@ -307,11 +329,11 @@ public class MapManager {
                 return Result.RESCHEDULE;
             }
 
-            if(!outOfDateNetworks.isEmpty()) {
-                if(updateDependingOnConnectivity) {
+            if (!outOfDateNetworks.isEmpty()) {
+                if (updateDependingOnConnectivity) {
                     autoUpdate = Connectivity.isConnectedWifi(getContext());
                 }
-                if(autoUpdate) {
+                if (autoUpdate) {
                     String[] networksArray = new String[outOfDateNetworks.size()];
                     outOfDateNetworks.toArray(networksArray);
                     Coordinator.get(getContext()).getMapManager().updateTopologySync(networksArray);
@@ -343,7 +365,7 @@ public class MapManager {
     private void loadNetworks() {
         synchronized (lock) {
             try {
-                for(String id : supportedNetworkIDs) {
+                for (String id : supportedNetworkIDs) {
                     loadNetwork(id);
                 }
             } catch (CacheException e) {
@@ -422,7 +444,7 @@ public class MapManager {
             if (!isTopologyUpdateInProgress() && lastTopologyUpdatesCheckLongAgo()) {
                 lastTopologyUpdatesCheck = new Date();
                 String tag = CheckUpdatesJob.NO_UPDATE_TAG;
-                if(autoUpdate) {
+                if (autoUpdate) {
                     tag = CheckUpdatesJob.AUTO_UPDATE_TAG;
                 }
                 new JobRequest.Builder(tag)
@@ -448,6 +470,7 @@ public class MapManager {
         public List<API.Connection> connections;
         public List<API.Transfer> transfers;
         public List<API.POI> pois;
+        public List<API.Diagram> maps;
         public API.DatasetInfo info;
     }
 
@@ -458,6 +481,7 @@ public class MapManager {
                                 List<API.Connection> connections,
                                 List<API.Transfer> transfers,
                                 List<API.POI> pois,
+                                List<API.Diagram> maps,
                                 API.DatasetInfo info) throws CacheException {
         Topology t = new Topology();
         t.network = network;
@@ -467,6 +491,7 @@ public class MapManager {
         t.connections = connections;
         t.transfers = transfers;
         t.pois = pois;
+        t.maps = maps;
         t.info = info;
 
         String filename = "net-" + network.id;
@@ -637,6 +662,21 @@ public class MapManager {
             net.addSchedule(sched);
         }
 
+        for (API.Diagram map : t.maps) {
+            if (map instanceof API.WorldMap) {
+                net.addMap(new Network.WorldMap());
+            } else if (map instanceof API.HTMLMap) {
+                String url = ((API.HTMLMap) map).url;
+                if (((API.HTMLMap) map).cache) {
+                    url = buildCachedDiagramFilename((API.HTMLMap) map);
+                    url = "file://" + context.getFilesDir().getAbsolutePath() + "/" + url;
+                } else {
+                    url = API.getInstance().getEndpoint().resolve(url).normalize().toString();
+                }
+                net.addMap(new Network.HtmlDiagram(url, ((API.HTMLMap) map).wideViewport));
+            }
+        }
+
         net.setDatasetAuthors(t.info.authors);
         net.setDatasetVersion(t.info.version);
         net.setEdgeWeighter(cweighter);
@@ -667,6 +707,67 @@ public class MapManager {
         }
 
         return net;
+    }
+
+    public static String buildCachedDiagramFilename(API.HTMLMap map) {
+        return "map-" + Integer.toString(map.url.hashCode()) + ".html";
+    }
+
+    public static void clearAllCachedDiagrams(Context context) {
+        File cacheDir = context.getFilesDir();
+        File[] files = cacheDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().startsWith("map-")) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    public static void downloadDiagram(Context context, API.HTMLMap map) {
+        try {
+            String url = map.url;
+                url = API.getInstance().getEndpoint().resolve(url).normalize().toString();
+            HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+            h.setRequestProperty("Accept-Encoding", "gzip");
+            h.setRequestMethod("GET");
+            h.setDoInput(true);
+
+            InputStream is;
+            int code;
+            try {
+                // Will throw IOException if server responds with 401.
+                code = h.getResponseCode();
+            } catch (IOException e) {
+                // Will return 401, because now connection has the correct internal state.
+                code = h.getResponseCode();
+            }
+            if (code == 200) {
+                is = h.getInputStream();
+            } else {
+                return;
+            }
+
+            if ("gzip".equals(h.getContentEncoding())) {
+                is = new GZIPInputStream(is);
+            }
+
+            File cacheDir = context.getFilesDir();
+            File file = new File(cacheDir, buildCachedDiagramFilename(map));
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is), 8);
+
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file));
+            String line;
+            while ((line = reader.readLine()) != null)
+                outputStreamWriter.write(line + "\n");
+
+            outputStreamWriter.close();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public interface OnLoadListener {
