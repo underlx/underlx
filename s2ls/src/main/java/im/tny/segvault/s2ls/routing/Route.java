@@ -116,19 +116,16 @@ public class Route extends ArrayList<Step> {
             }
             for (Stop pSource : possibleSources) {
                 for (Stop pTarget : possibleTargets) {
-                    // hackish "annotations" for the connection weighter
-                    pSource.putMeta("is_route_source", true);
-                    pTarget.putMeta("is_route_target", true);
+                    network.getEdgeWeighter().setRouteSource(pSource);
+                    network.getEdgeWeighter().setRouteTarget(pTarget);
 
                     try {
                         paths.add(as.getShortestPath(pSource, pTarget, heuristic));
-                    } catch(IllegalArgumentException ex) {
+                    } catch (IllegalArgumentException ex) {
                         // pSource or pTarget are somehow not part of the network
                         // (a topology update took place?)
                         // try to carry on anyway
                     }
-                    pSource.putMeta("is_route_source", null);
-                    pTarget.putMeta("is_route_target", null);
                 }
             }
             network.setEdgeWeighter(prevWeighter);
@@ -200,19 +197,37 @@ public class Route extends ArrayList<Step> {
         return false;
     }
 
+    @Nullable
     public Station getSource() {
-        return getSourceStop().getStation();
+        Stop stop = getSourceStop();
+        if (stop == null) {
+            return null;
+        }
+        return stop.getStation();
     }
 
+    @Nullable
     public Stop getSourceStop() {
+        if (getPath().getEdgeList().size() == 0) {
+            return null;
+        }
         return getPath().getEdgeList().get(0).getSource();
     }
 
+    @Nullable
     public Station getTarget() {
-        return getTargetStop().getStation();
+        Stop stop = getTargetStop();
+        if (stop == null) {
+            return null;
+        }
+        return stop.getStation();
     }
 
+    @Nullable
     public Stop getTargetStop() {
+        if (getPath().getEdgeList().size() == 0) {
+            return null;
+        }
         return getPath().getEdgeList().get(getPath().getEdgeList().size() - 1).getTarget();
     }
 

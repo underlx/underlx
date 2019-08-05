@@ -68,7 +68,7 @@ public class MapManager {
 
     public MapManager(Context applicationContext) {
         this.context = applicationContext;
-        cweighter = new DisturbanceAwareWeighter(applicationContext);
+        cweighter = new ETAWeighter(applicationContext);
     }
 
     private OnLoadListener loadListener;

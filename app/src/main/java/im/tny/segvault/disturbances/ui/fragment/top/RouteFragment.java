@@ -16,14 +16,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -40,17 +38,17 @@ import java.util.Map;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.ETAWeighter;
 import im.tny.segvault.disturbances.LineStatusCache;
-import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
 import im.tny.segvault.s2ls.routing.EnterStep;
@@ -60,6 +58,7 @@ import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.IEdgeWeighter;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -479,31 +478,37 @@ public class RouteFragment extends TopFragment {
         layoutInstructions.setVisibility(View.GONE);
         layoutRoute.setVisibility(View.VISIBLE);
         swapButton.setVisibility(View.VISIBLE);
+        boolean useRealtimeConditions = useRealtimeCheckbox.isChecked();
         if (realtimeEqualsNeutral) {
+            useRealtimeConditions = true; // when the checkbox is gone, always use real-time conditions
             useRealtimeCheckbox.setVisibility(View.GONE);
         } else {
             useRealtimeCheckbox.setVisibility(View.VISIBLE);
         }
 
         int length = 0;
-        double realWeight = 0;
-        // TODO: switch to using route.getPath().getWeight() directly once DisturbanceAwareWeighter
-        // can actually provide proper weights for lines with disturbances, and not just some
-        // extremely large number
-        NeutralWeighter weighter = new NeutralWeighter();
+        double etaWeight = 0;
+        IEdgeWeighter weighter;
+        if (useRealtimeConditions) {
+            weighter = new ETAWeighter(getContext());
+        } else {
+            weighter = new NeutralWeighter();
+        }
+        weighter.setRouteSource(route.getSourceStop());
+        weighter.setRouteTarget(route.getTargetStop());
         for (Connection c : route.getPath().getEdgeList()) {
             length += c.getWorldLength();
-            realWeight += weighter.getEdgeWeight(network, c);
+            etaWeight += weighter.getEdgeWeight(network, c);
         }
         if (length < 1000) {
             routeEtaView.setText(
                     String.format("%s (%d m)",
-                            DateUtils.formatElapsedTime((int) realWeight),
+                            DateUtils.formatElapsedTime((int) etaWeight),
                             length));
         } else {
             routeEtaView.setText(
                     String.format("%s (%.01f km)",
-                            DateUtils.formatElapsedTime((int) realWeight),
+                            DateUtils.formatElapsedTime((int) etaWeight),
                             length / 1000.0));
         }
 

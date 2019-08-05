@@ -13,11 +13,12 @@ import im.tny.segvault.subway.Transfer;
  * Created by gabriel on 4/27/17.
  */
 
-public class DisturbanceAwareWeighter extends NeutralWeighter {
+public class DisturbanceAwareWeighter extends ETAWeighter {
     private Context context;
 
 
     public DisturbanceAwareWeighter(Context context) {
+        super(context);
         this.context = context;
     }
 

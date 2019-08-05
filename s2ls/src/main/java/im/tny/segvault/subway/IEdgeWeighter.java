@@ -5,5 +5,7 @@ package im.tny.segvault.subway;
  */
 
 public interface IEdgeWeighter {
-    public double getEdgeWeight(Network network, Connection connection);
+    double getEdgeWeight(Network network, Connection connection);
+    void setRouteSource(Stop routeSource);
+    void setRouteTarget(Stop routeTarget);
 }

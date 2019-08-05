@@ -14,11 +14,24 @@ public abstract class ConnectionWeighter implements IEdgeWeighter {
     @Override
     public abstract double getEdgeWeight(Network network, Connection connection);
 
+    private Stop routeSource;
+    private Stop routeTarget;
+
+    @Override
+    public void setRouteSource(Stop routeSource) {
+        this.routeSource = routeSource;
+    }
+
+    @Override
+    public void setRouteTarget(Stop routeTarget) {
+        this.routeTarget = routeTarget;
+    }
+
     protected boolean isSource(Stop stop) {
-        return stop.getMeta("is_route_source") != null;
+        return stop.equals(routeSource);
     }
 
     protected boolean isTarget(Stop stop) {
-        return stop.getMeta("is_route_target") != null;
+        return stop.equals(routeTarget);
     }
 }
