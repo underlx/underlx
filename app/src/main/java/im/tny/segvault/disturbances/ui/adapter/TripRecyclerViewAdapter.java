@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.InvalidObjectException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -220,7 +221,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final int timeableLength;
         public final long movementMilliseconds;
 
-        public TripItem(Trip trip, Collection<Network> networks) {
+        public TripItem(Trip trip, Collection<Network> networks) throws InvalidObjectException {
             this.id = trip.getId();
 
             Network network = null;
@@ -261,6 +262,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
             this.lineColors = new ArrayList<>();
             Path path = trip.toConnectionPath(network);
+            if(path == null) {
+                throw new InvalidObjectException("Corrupt trip in DB");
+            }
             List<Connection> edges = path.getEdgeList();
             if (edges.size() > 0) {
                 lineColors.add(edges.get(0).getSource().getLine().getColor());

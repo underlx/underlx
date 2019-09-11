@@ -156,6 +156,9 @@ public class TripFragment extends BottomSheetDialogFragment {
         }
 
         Path path = trip.toConnectionPath(network);
+        if(path == null) {
+            return;
+        }
 
         Station origin = path.getStartVertex().getStation();
         Station dest = path.getEndVertex().getStation();

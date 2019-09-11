@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -132,8 +133,12 @@ public class UnconfirmedTripsFragment extends Fragment {
             Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : Trip.getMissingConfirmTrips(realm)) {
-                TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
-                items.add(item);
+                try {
+                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
+                    items.add(item);
+                } catch (InvalidObjectException e) {
+                    e.printStackTrace();
+                }
             }
             realm.close();
             if (items.size() == 0) {

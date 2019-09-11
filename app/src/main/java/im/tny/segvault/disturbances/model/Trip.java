@@ -165,7 +165,17 @@ public class Trip extends RealmObject {
             }
         }
         if (startVertex == null) {
-            startVertex = edges.get(0).getSource();
+            if (edges.size() > 0) {
+                startVertex = edges.get(0).getSource();
+            } else if (path.size() > 0) {
+                // handling a situation that should not occur
+                // this DB entry is definitely corrupt
+                startVertex = network.getStation(path.get(0).getStation().getId()).getStops().iterator().next();
+            } else {
+                // handling a situation that should not occur
+                // this DB entry is definitely corrupt
+                return null;
+            }
         }
         return new Path(network, startVertex, edges, times, manualEntry, 0);
     }
@@ -273,7 +283,7 @@ public class Trip extends RealmObject {
             // our A is the station use in the DB we want to check
             // our B is this whole trip
             Date startB = uses.get(0).getEntryDate();
-            Date endB = uses.get(uses.size()-1).getLeaveDate();
+            Date endB = uses.get(uses.size() - 1).getLeaveDate();
             boolean hasOverlap = realm.where(Trip.class).lessThanOrEqualTo("path.entryDate", endB).greaterThanOrEqualTo("path.leaveDate", startB).count() > 0;
             if (hasOverlap) {
                 // this trip overlaps with a previous trip. this should never happen, but if it does, we'll prevent shenanigans here
@@ -295,7 +305,7 @@ public class Trip extends RealmObject {
         Realm realm = Realm.getDefaultInstance();
         realm.executeTransaction(realm1 -> {
             Trip trip = realm1.where(Trip.class).equalTo("id", id).findFirst();
-            if(trip == null) {
+            if (trip == null) {
                 return;
             }
             trip.setUserConfirmed(true);

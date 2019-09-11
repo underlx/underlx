@@ -236,6 +236,9 @@ public class StatsActivity extends TopActivity {
                     }
                 }
                 Path path = trip.toConnectionPath(network);
+                if (path == null) {
+                    return;
+                }
                 List<Connection> edges = path.getEdgeList();
                 if (edges.size() == 0) {
                     value++;
@@ -274,6 +277,9 @@ public class StatsActivity extends TopActivity {
                     }
                 }
                 Path path = trip.toConnectionPath(network);
+                if (path == null) {
+                    continue;
+                }
                 List<Connection> edges = path.getEdgeList();
                 if (edges.size() > 0) {
                     value += path.getPhysicalLength();
@@ -311,7 +317,9 @@ public class StatsActivity extends TopActivity {
                     }
                 }
                 Path path = trip.toConnectionPath(network);
-                value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
+                if (path != null) {
+                    value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
+                }
             }
         }
 
@@ -381,8 +389,10 @@ public class StatsActivity extends TopActivity {
                     }
                 }
                 Path path = trip.toConnectionPath(network);
-                timeableLength += path.getTimeablePhysicalLength();
-                movementMilliseconds += path.getMovementMilliseconds();
+                if (path != null) {
+                    timeableLength += path.getTimeablePhysicalLength();
+                    movementMilliseconds += path.getMovementMilliseconds();
+                }
             }
         }
 

@@ -131,7 +131,7 @@ public class TripCorrectionActivity extends TopActivity {
 
         originalPath = trip.toConnectionPath(network);
 
-        if (!trip.canBeCorrected()) {
+        if (originalPath == null || !trip.canBeCorrected()) {
             finish();
             return;
         }

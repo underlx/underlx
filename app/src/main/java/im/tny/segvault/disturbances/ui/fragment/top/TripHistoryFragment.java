@@ -41,6 +41,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Transformation;
 
+import java.io.InvalidObjectException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -280,16 +281,20 @@ public class TripHistoryFragment extends TopFragment {
             Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
             Realm realm = Application.getDefaultRealmInstance(getContext());
             for (Trip t : realm.where(Trip.class).findAll()) {
-                TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
-                if (!item.isVisit) {
-                    tripCount++;
-                    tripTotalLength += item.length;
-                    tripTotalTimeableLength += item.timeableLength;
-                    tripTotalTime += item.destTime.getTime() - item.originTime.getTime();
-                    tripTotalMovementTime += item.movementMilliseconds;
-                }
-                if (showVisits || !item.isVisit) {
-                    items.add(item);
+                try {
+                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
+                    if (!item.isVisit) {
+                        tripCount++;
+                        tripTotalLength += item.length;
+                        tripTotalTimeableLength += item.timeableLength;
+                        tripTotalTime += item.destTime.getTime() - item.originTime.getTime();
+                        tripTotalMovementTime += item.movementMilliseconds;
+                    }
+                    if (showVisits || !item.isVisit) {
+                        items.add(item);
+                    }
+                } catch (InvalidObjectException e) {
+                    e.printStackTrace();
                 }
             }
             realm.close();
@@ -413,7 +418,7 @@ public class TripHistoryFragment extends TopFragment {
                 // all-time info
                 String placeLine;
                 boolean placeWordIsFemale = false;
-                switch(Util.getCurrentLanguage(getContext())) {
+                switch (Util.getCurrentLanguage(getContext())) {
                     case "es":
                     case "fr":
                         placeWordIsFemale = true;
