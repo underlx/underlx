@@ -1,5 +1,6 @@
 package im.tny.segvault.disturbances;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,12 +12,14 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -37,9 +40,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -48,9 +55,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
+import io.realm.Realm;
+import io.realm.RealmQuery;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -771,7 +782,7 @@ public class Util {
     }
 
     private static String sanitizeStationName(String original) {
-        switch(original) {
+        switch (original) {
             case "S. Sebastião":
                 return "São Sebastião";
             case "Colégio Militar":
@@ -846,6 +857,68 @@ public class Util {
             return dir.delete();
         } else
             return dir != null && dir.isFile() && dir.delete();
+    }
+
+    @SuppressLint("NewApi") // retrofix takes care of removeIf
+    public static List<Station> getMostUsedStations(Context context, int limit) {
+        Realm realm = Application.getDefaultRealmInstance(context);
+
+
+        Map<String, Long> totalsPerStation = new HashMap<>();
+        Map<String, Long> mostRecentUse = new HashMap<>();
+        for (RStation s : realm.where(RStation.class).findAll()) {
+            RealmQuery<StationUse> q = realm.where(StationUse.class).
+                    equalTo("station.id", s.getId()).
+                    beginGroup().
+                    equalTo("type", "NETWORK_ENTRY").
+                    or().
+                    equalTo("type", "NETWORK_EXIT").
+                    or().
+                    equalTo("type", "INTERCHANGE").
+                    endGroup();
+            totalsPerStation.put(s.getId(), q.count());
+
+            Date m = q.maximumDate("leaveDate");
+            mostRecentUse.put(s.getId(), m == null ? Long.MIN_VALUE : m.getTime());
+        }
+
+        realm.close();
+        List<Station> stations = new ArrayList<>(Coordinator.get(context).getMapManager().getAllStations());
+        Collections.sort(stations, (s1, s2) -> {
+            Long s1total = totalsPerStation.get(s1.getId());
+            if (s1total == null) {
+                s1total = 0L;
+            }
+            Long s2total = totalsPerStation.get(s2.getId());
+            if (s2total == null) {
+                s2total = 0L;
+            }
+            // sort by descending
+            int c = Long.compare(s2total, s1total);
+            if (c != 0) {
+                return c;
+            }
+            // resolve ties by putting most recently used first
+
+            Long s1lastUse = mostRecentUse.get(s1.getId());
+            if (s1lastUse == null) {
+                s1lastUse = 0L;
+            }
+            Long s2lastUse = mostRecentUse.get(s2.getId());
+            if (s2lastUse == null) {
+                s2lastUse = 0L;
+            }
+
+            return Long.compare(s2lastUse, s1lastUse);
+        });
+        stations.removeIf(s -> {
+            Long total = totalsPerStation.get(s.getId());
+            return total == null || total == 0;
+        });
+        if (limit > 0) {
+            stations = stations.subList(0, Integer.min(stations.size(), limit));
+        }
+        return stations;
     }
 
     // large stack thread pool executor

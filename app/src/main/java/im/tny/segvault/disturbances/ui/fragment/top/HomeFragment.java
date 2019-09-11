@@ -126,6 +126,7 @@ public class HomeFragment extends TopFragment {
     private String networkId;
 
     private boolean refreshedOnlineSinceOpening = false;
+    private boolean favoritesInMostUsedMode = false;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -375,12 +376,22 @@ public class HomeFragment extends TopFragment {
         }
 
         if (hasFavoriteStations) {
-            if (favoriteStationsCard.getVisibility() == View.GONE) {
+            if (favoriteStationsCard.getVisibility() == View.GONE || favoritesInMostUsedMode) {
                 FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1);
+                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, false);
                 transaction.replace(R.id.favorite_stations_card, newFragment);
                 transaction.commitAllowingStateLoss();
                 favoriteStationsCard.setVisibility(View.VISIBLE);
+                favoritesInMostUsedMode = false;
+            }
+        } else if (Util.getMostUsedStations(getContext(), 1).size() > 0) {
+            if (favoriteStationsCard.getVisibility() == View.GONE || !favoritesInMostUsedMode) {
+                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, true);
+                transaction.replace(R.id.favorite_stations_card, newFragment);
+                transaction.commitAllowingStateLoss();
+                favoriteStationsCard.setVisibility(View.VISIBLE);
+                favoritesInMostUsedMode = true;
             }
         } else {
             favoriteStationsCard.setVisibility(View.GONE);

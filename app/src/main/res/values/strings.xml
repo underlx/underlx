@@ -394,6 +394,7 @@
     <string name="service_connect_error">An error occurred. Make sure you entered the correct code and try again.</string>
     <string name="service_connect_success">This &appname; install is now connected with: %s.</string>
     <string name="frag_favorite_stations_title">Favorite stations</string>
+    <string name="frag_favorite_stations_most_used_title">Most used stations</string>
     <string name="frag_disturbance_close">Close</string>
     <string name="frag_trip_history_posplay_all_time">all-time</string>
     <string name="frag_trip_history_posplay_this_week">this week</string>

@@ -7,14 +7,17 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +31,7 @@ import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.adapter.StationRecyclerViewAdapter;
@@ -46,8 +50,11 @@ import static android.content.Context.MODE_PRIVATE;
 public class HomeFavoriteStationsFragment extends Fragment {
 
     private static final String ARG_COLUMN_COUNT = "column-count";
+    private static final String ARG_IS_MOST_USED = "is-most-used";
     private int mColumnCount = 1;
+    private boolean isMostUsed = false;
     private OnListFragmentInteractionListener mListener;
+    private TextView titleView;
     private RecyclerView recyclerView = null;
     private int mqttPartyID = -1;
     private String[] prevTopics = null;
@@ -59,10 +66,11 @@ public class HomeFavoriteStationsFragment extends Fragment {
     public HomeFavoriteStationsFragment() {
     }
 
-    public static HomeFavoriteStationsFragment newInstance(int columnCount) {
+    public static HomeFavoriteStationsFragment newInstance(int columnCount, boolean isMostUsed) {
         HomeFavoriteStationsFragment fragment = new HomeFavoriteStationsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
+        args.putBoolean(ARG_IS_MOST_USED, isMostUsed);
         fragment.setArguments(args);
         return fragment;
     }
@@ -73,6 +81,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            isMostUsed = getArguments().getBoolean(ARG_IS_MOST_USED);
         }
     }
 
@@ -83,6 +92,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
 
         // Set the adapter
         Context context = view.getContext();
+        titleView = view.findViewById(R.id.favorite_stations_title_view);
         recyclerView = view.findViewById(R.id.list);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -144,8 +154,10 @@ public class HomeFavoriteStationsFragment extends Fragment {
     }
 
     private List<StationRecyclerViewAdapter.StationItem> items = new ArrayList<>();
+
     private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
         private boolean etasOnly;
+
         public UpdateDataTask(boolean etasOnly) {
             this.etasOnly = etasOnly;
         }
@@ -160,16 +172,26 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 return false;
             }
 
-            if(etasOnly) {
+            if (etasOnly) {
                 return true;
             }
             items = new ArrayList<>();
 
-            Realm realm = Application.getDefaultRealmInstance(getContext());
-            for (RStation s : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
-                items.add(new StationRecyclerViewAdapter.StationItem(s.getId(), s.getNetwork(), getContext()));
+
+            if (isMostUsed) {
+                for (Station s : Util.getMostUsedStations(getContext(), 4)) {
+                    items.add(new StationRecyclerViewAdapter.StationItem(s.getId(), s.getNetwork().getId(), getContext()));
+                }
+            } else {
+                // show true favorites
+                Realm realm = Application.getDefaultRealmInstance(getContext());
+                for (RStation s : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
+                    items.add(new StationRecyclerViewAdapter.StationItem(s.getId(), s.getNetwork(), getContext()));
+                }
+                realm.close();
             }
-            realm.close();
+
+
             if (items.size() == 0) {
                 return true;
             }
@@ -194,33 +216,38 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 recyclerView.setAdapter(new StationRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
             }
+            if(isMostUsed) {
+                titleView.setText(R.string.frag_favorite_stations_most_used_title);
+            } else {
+                titleView.setText(R.string.frag_favorite_stations_title);
+            }
 
             final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
             SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
             if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
                 String[] topics = new String[items.size()];
-                for(int i = 0; i < items.size(); i++) {
+                for (int i = 0; i < items.size(); i++) {
                     topics[i] = mqttManager.getVehicleETAsTopicForStation(items.get(i).networkId, items.get(i).id);
                 }
-                if(mqttPartyID >= 0) {
-                    if(prevTopics != null) {
-                        if(prevTopics.length == topics.length) {
+                if (mqttPartyID >= 0) {
+                    if (prevTopics != null) {
+                        if (prevTopics.length == topics.length) {
                             boolean containsAll = true;
                             List<String> pt = Arrays.asList(prevTopics);
-                            for(String topic : topics) {
-                                if(!pt.contains(topic)) {
+                            for (String topic : topics) {
+                                if (!pt.contains(topic)) {
                                     containsAll = false;
                                     break;
                                 }
                             }
-                            if(containsAll) {
+                            if (containsAll) {
                                 // no changes since last subscription
                                 return;
                             }
                         }
                     }
                     mqttManager.subscribe(mqttPartyID, topics);
-                } else if(!fragmentPaused) { // since this AsyncTask started, the fragment may have paused
+                } else if (!fragmentPaused) { // since this AsyncTask started, the fragment may have paused
                     mqttPartyID = mqttManager.connect(topics);
                 }
                 prevTopics = topics;

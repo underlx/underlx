@@ -383,6 +383,7 @@
     <string name="notif_route_vehicle_etas_title">Prochains trains:</string>
     <string name="frag_station_vehicle_etas">Prochains trains</string>
     <string name="frag_lines_cars">%d wagons</string>
+    <string name="frag_favorite_stations_most_used_title">Stations les plus utilisées</string>
 
     <string name="disturbance_status_report_begin">Les utilisateurs ont rapporté des problèmes en la circulation</string>
     <string name="disturbance_status_report_confirm">Plusieurs utilisateurs ont confirmé des problèmes en la circulation</string>
