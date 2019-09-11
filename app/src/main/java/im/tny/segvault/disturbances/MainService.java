@@ -81,7 +81,13 @@ public class MainService extends Service {
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleUtil.updateResources(base));
+    }
+
+    @Override
     public void onCreate() {
+        LocaleUtil.updateResources(this);
         creationDate = new Date();
         API.getInstance().setContext(getApplicationContext());
         PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.notif_settings, false);

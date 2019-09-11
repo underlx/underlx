@@ -629,8 +629,10 @@ public class RouteFragment extends TopFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("origin_focused", originPicker.isFocused());
-        outState.putBoolean("destination_focused", destinationPicker.isFocused());
+        if(originPicker != null && destinationPicker != null) {
+            outState.putBoolean("origin_focused", originPicker.isFocused());
+            outState.putBoolean("destination_focused", destinationPicker.isFocused());
+        }
         super.onSaveInstanceState(outState);
     }
 

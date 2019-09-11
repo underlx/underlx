@@ -57,7 +57,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements
     }
 
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
-        LocaleUtil.initializeLocale(getContext());
+        LocaleUtil.updateResources(getContext());
         getPreferenceManager().setSharedPreferencesName("settings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 

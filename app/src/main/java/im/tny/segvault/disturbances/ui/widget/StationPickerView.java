@@ -518,10 +518,16 @@ public class StationPickerView extends LinearLayout implements LocationListener 
 
     @Override
     public boolean isFocused() {
+        if(textView == null) {
+            return false;
+        }
         return textView.isFocused();
     }
 
     public boolean focusOnEntry() {
+        if(textView == null) {
+            return false;
+        }
         textView.setFocusableInTouchMode(true);
         return textView.requestFocus();
     }

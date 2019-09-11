@@ -37,9 +37,14 @@ public class IntroActivity extends AppIntro2 implements
     private boolean locBound = false;
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleUtil.updateResources(base));
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LocaleUtil.initializeLocale(this);
+        LocaleUtil.updateResources(this);
 
         Object conn = getLastCustomNonConfigurationInstance();
         if (conn != null) {

@@ -1,6 +1,11 @@
 package im.tny.segvault.disturbances.ui.activity;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -15,12 +20,15 @@ public abstract class TopActivity extends AppCompatActivity {
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        LocaleUtil.initializeLocale(this);
+        LocaleUtil.updateResources(this);
     }
 
-
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleUtil.updateResources(base));
+    }
 }

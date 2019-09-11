@@ -63,6 +63,9 @@ public class HomeBackersFragment extends Fragment {
     }
 
     private void setContent(String html) {
+        if(contentView == null) {
+            return;
+        }
         contentView.setHtml(html, new OurHtmlHttpImageGetter(contentView, null, OurHtmlHttpImageGetter.ParentFitType.FIT_PARENT_WIDTH));
         contentView.setText(RichTextUtils.replaceAll((Spanned) contentView.getText(), URLSpan.class, new RichTextUtils.URLSpanConverter(), new InternalLinkHandler(getContext(), mListener)));
     }

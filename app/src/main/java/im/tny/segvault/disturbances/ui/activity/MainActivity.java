@@ -31,15 +31,19 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.InternalLinkHandler;
+import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
@@ -124,6 +128,7 @@ public class MainActivity extends TopActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Log.d("Locale", "Initialized locale " + getString(R.string.frag_about_thanks_title));
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

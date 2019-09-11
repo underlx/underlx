@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
+import android.content.res.Configuration;
 
 import com.evernote.android.job.JobManager;
 
@@ -21,17 +22,26 @@ public class Application extends androidx.multidex.MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        LocaleUtil.initializeLocale(getApplicationContext());
+        LocaleUtil.updateResources(this);
         StethoUtils.install(this);
         initRealm(this);
         JobManager.create(this).addJobCreator(new OurJobCreator());
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleUtil.updateResources(base));
+    }
+
+    @Override
     public Context getApplicationContext() {
-        Context context = super.getApplicationContext();
-        LocaleUtil.initializeLocale(context);
-        return context;
+        return LocaleUtil.updateResources(super.getApplicationContext(), false);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        LocaleUtil.updateResources(this);
     }
 
     public static void initRealm(Context context) {

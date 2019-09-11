@@ -63,7 +63,7 @@ public class SearchContentProvider extends ContentProvider {
 
         final List<ResultRow> results = new ArrayList<>();
 
-        LocaleUtil.initializeLocale(getContext());
+        LocaleUtil.updateResources(getContext());
         final String locale = Util.getCurrentLanguage(getContext());
         final MapManager mapm = Coordinator.get(getContext()).getMapManager();
 

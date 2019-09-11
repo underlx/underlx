@@ -84,7 +84,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
 
     @Override
     public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
-        LocaleUtil.initializeLocale(getContext());
+        LocaleUtil.updateResources(getContext());
         getPreferenceManager().setSharedPreferencesName("notifsettings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 

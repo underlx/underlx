@@ -34,6 +34,17 @@ import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_DISTURBANCE
 
 public class FCMService extends FirebaseMessagingService {
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleUtil.updateResources(base));
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LocaleUtil.updateResources(this);
+    }
+
+    @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         String from = remoteMessage.getFrom();
         switch (from) {
@@ -332,7 +343,7 @@ public class FCMService extends FirebaseMessagingService {
         }
 
         if (data.containsKey("locales") && !data.get("locales").isEmpty()) {
-            LocaleUtil.initializeLocale(this);
+            LocaleUtil.updateResources(this);
             String currentLang = Util.getCurrentLanguage(this);
             String[] parts = data.get("locales").split(",");
             // negations are matched as a AND, non-negations as a OR

@@ -40,6 +40,7 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public static synchronized Coordinator get(Context context) {
         if (singleton == null) {
+            context = LocaleUtil.updateResources(context);
             singleton = new Coordinator(context.getApplicationContext());
 
             // force maps to load so onNetworkLoaded is called and the WiFiChecker, etc. is attached to the network
@@ -330,11 +331,11 @@ public class Coordinator implements MapManager.OnLoadListener {
             R.drawable.nav_6};
     private static final int[] navTextShadowColor = {
             -1,
-            -1,
+            -2,
             -1,
             Color.BLACK,
             Color.BLACK,
-            -1
+            -2
     };
     private static final String[] navImageCredits = {
             "Jaime Silva",
@@ -353,9 +354,14 @@ public class Coordinator implements MapManager.OnLoadListener {
     }
 
     public int getNavTextShadowColor() {
-        return navTextShadowColor[lastSelectedNavImageOffset] != -1 ?
-                navTextShadowColor[lastSelectedNavImageOffset] :
-                context.getResources().getColor(R.color.colorAccent);
+        switch (navTextShadowColor[lastSelectedNavImageOffset]) {
+            case -1:
+                return context.getResources().getColor(R.color.colorAccent);
+            case -2:
+                return context.getResources().getColor(R.color.colorPrimary);
+            default:
+                return navTextShadowColor[lastSelectedNavImageOffset];
+        }
     }
 
     public String getNavImageCredits() {
