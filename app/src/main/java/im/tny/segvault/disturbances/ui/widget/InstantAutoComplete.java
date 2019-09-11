@@ -7,7 +7,7 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class InstantAutoComplete extends android.support.v7.widget.AppCompatAutoCompleteTextView {
+public class InstantAutoComplete extends androidx.appcompat.widget.AppCompatAutoCompleteTextView {
     {
         addTextChangedListener(new TextWatcher() {
             @Override

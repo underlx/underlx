@@ -17,7 +17,7 @@ import io.realm.exceptions.RealmFileException;
  * Created by gabriel on 4/14/17.
  */
 
-public class Application extends android.support.multidex.MultiDexApplication {
+public class Application extends androidx.multidex.MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();

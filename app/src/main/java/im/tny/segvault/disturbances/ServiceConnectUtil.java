@@ -1,37 +1,21 @@
 package im.tny.segvault.disturbances;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.wifi.ScanResult;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
+
+import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaredrummler.android.device.DeviceName;
 
 import java.lang.ref.WeakReference;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.Feedback;
-import im.tny.segvault.disturbances.ui.widget.StationPickerView;
-import im.tny.segvault.subway.Station;
-import io.realm.Realm;
 
 public class ServiceConnectUtil {
     public static class Wizard {

@@ -9,14 +9,14 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.XpPreferenceFragment;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
+import androidx.preference.XpPreferenceFragment;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,16 +31,13 @@ import net.xpece.android.support.preference.SharedPreferencesCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import im.tny.segvault.disturbances.Announcement;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LocaleUtil;
-import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
@@ -49,7 +46,6 @@ import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.subway.Line;
-import im.tny.segvault.subway.Network;
 
 public class NotifPreferenceFragment extends XpPreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {

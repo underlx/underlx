@@ -1,14 +1,13 @@
 package im.tny.segvault.disturbances.ui.fragment;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
@@ -18,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -26,7 +24,6 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
-import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.Trip;

@@ -3,7 +3,7 @@ package im.tny.segvault.disturbances.ui.adapter;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,9 +56,9 @@ public class AnnouncementRecyclerViewAdapter extends RecyclerView.Adapter<Announ
         }
         holder.mDateView.setText(String.format(holder.mView.getContext().getString(R.string.frag_announcement_posted_on), DateUtils.formatDateTime(holder.mView.getContext(), holder.mItem.pubDate.getTime(), DateUtils.FORMAT_SHOW_DATE)));
         holder.mDescriptionView.setText(holder.mItem.description);
-        int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
+        int resId = R.style.TextAppearance_AppCompat_Small;
         if (holder.mItem.description.length() > 0 && holder.mItem.description.length() <= 140) {
-            resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
+            resId = R.style.TextAppearance_AppCompat_Medium;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -7,20 +7,18 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
@@ -34,8 +32,6 @@ import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.adapter.StationRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
-import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
-import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
 

@@ -1,10 +1,9 @@
 package im.tny.segvault.disturbances.ui.util;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.util.AttributeSet;
 
 import net.xpece.android.support.preference.DialogPreference;

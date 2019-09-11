@@ -3,7 +3,7 @@ package im.tny.segvault.disturbances.ui.util;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import im.tny.segvault.disturbances.R;

@@ -10,12 +10,12 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.CardView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.cardview.widget.CardView;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.format.DateUtils;
@@ -449,9 +449,9 @@ public class HomeFragment extends TopFragment {
                 nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
 
                 Stop likelyExit = RouteUtil.getLikelyNextExit(getContext(), currentPath.getEdgeList(), 1);
-                int resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Small;
+                int resId = R.style.TextAppearance_AppCompat_Small;
                 if (next == likelyExit && currentRoute == null) {
-                    resId = android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Medium;
+                    resId = R.style.TextAppearance_AppCompat_Medium;
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     nextStationView.setTextAppearance(resId);

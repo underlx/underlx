@@ -1,6 +1,6 @@
 package im.tny.segvault.s2ls.routing;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.AStarShortestPath;

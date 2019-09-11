@@ -13,7 +13,7 @@
         android:text="@string/frag_unconfirmed_trips_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:name="im.tny.segvault.disturbances.TripHistoryFragment"
         android:layout_width="match_parent"

@@ -2,7 +2,7 @@ package im.tny.segvault.disturbances;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
