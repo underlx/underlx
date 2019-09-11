@@ -108,7 +108,6 @@ public class StationGeneralFragment extends Fragment {
 
         update();
 
-        final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
         final Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null) {
             return view;
@@ -116,11 +115,6 @@ public class StationGeneralFragment extends Fragment {
         final Station station = net.getStation(stationId);
         if (station == null) {
             return view;
-        }
-
-        SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(station));
         }
 
         return view;
@@ -138,13 +132,38 @@ public class StationGeneralFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+
+        final MqttManager mqttManager = Coordinator.get(context).getMqttManager();
+
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
+            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(networkId, stationId));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+        if (mqttPartyID >= 0) {
+            final MqttManager mqttManager = Coordinator.get(context).getMqttManager();
+            mqttManager.disconnect(mqttPartyID);
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        if (mqttPartyID >= 0) {
-            final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
-            mqttManager.disconnect(mqttPartyID);
-        }
     }
 
     private void update() {
@@ -174,14 +193,14 @@ public class StationGeneralFragment extends Fragment {
         Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
 
         LinearLayout vehicleETAsLayout = view.findViewById(R.id.vehicle_etas_layout);
-        if(etas.size() > 0 && !station.isAlwaysClosed()) {
+        if (etas.size() > 0 && !station.isAlwaysClosed()) {
             TextView vehicleETAsView = view.findViewById(R.id.vehicle_etas_view);
 
             List<CharSequence> etaLines = MainService.getETAlines(getContext(), etas, station, null);
             vehicleETAsView.setText("");
-            for(int i = 0; i < etaLines.size(); i++) {
+            for (int i = 0; i < etaLines.size(); i++) {
                 vehicleETAsView.append(etaLines.get(i));
-                if(i < etaLines.size() - 1) {
+                if (i < etaLines.size() - 1) {
                     vehicleETAsView.append("\n");
                 }
             }

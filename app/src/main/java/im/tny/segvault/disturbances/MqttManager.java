@@ -48,6 +48,7 @@ public class MqttManager {
     private final static int SPECIAL_RECONNECT_PARTY_ID = -999;
     private final static int INITIAL_RECONNECT_DELAY_S = 5;
     private final static int MAX_RECONNECT_DELAY_S = 60;
+    private final static int KEEPALIVE_S = 29;
     private int reconnectAttempts = 0;
 
     public MqttManager(Context context) {
@@ -74,6 +75,25 @@ public class MqttManager {
                 return;
             }
 
+            new MQTTReconnectTask(parent).execute();
+        }
+    }
+
+    private static class MQTTReconnectTask extends AsyncTask<String, Void, Boolean> {
+        private WeakReference<MqttManager> parentRef;
+        private HashSet<String> topics;
+
+        MQTTReconnectTask(MqttManager parent) {
+            parentRef = new WeakReference<>(parent);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            MqttManager parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
             long sleepTime;
             synchronized (parent.mqttLock) {
                 sleepTime = ++parent.reconnectAttempts * INITIAL_RECONNECT_DELAY_S * 1000;
@@ -82,7 +102,7 @@ public class MqttManager {
                 }
 
                 if (parent.reconnectAttempts > 20) {
-                    return;
+                    return false;
                 }
             }
             try {
@@ -91,7 +111,7 @@ public class MqttManager {
                 e.printStackTrace();
             }
 
-            HashSet<String> topics = new HashSet<>();
+            topics = new HashSet<>();
             synchronized (parent.mqttLock) {
                 for (HashSet<String> s : parent.mqttSubscriptionsByParty.values()) {
                     topics.addAll(s);
@@ -100,12 +120,32 @@ public class MqttManager {
 
             if (topics.size() == 0) {
                 Log.d("MQTT", "No topics registered now, not reconnecting");
-                return;
+                return false;
             }
 
-            Log.d("MQTT", "Reconnecting");
-            String[] topicsArr = new String[topics.size()];
-            new MQTTConnectTask(parent, SPECIAL_RECONNECT_PARTY_ID).execute(topics.toArray(topicsArr));
+            MqttClient client;
+            synchronized (parent.mqttLock) {
+                client = parent.mqttClient;
+            }
+            if (client != null && client.getState().isConnected()) {
+                Log.d("MQTT", "Client already connected, not reconnecting");
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean != null && aBoolean) {
+                MqttManager parent = parentRef.get();
+                if (parent == null) {
+                    return;
+                }
+                Log.d("MQTT", "Reconnecting");
+                String[] topicsArr = new String[topics.size()];
+                new MQTTConnectTask(parent, SPECIAL_RECONNECT_PARTY_ID).execute(topics.toArray(topicsArr));
+            }
         }
     }
 
@@ -163,7 +203,8 @@ public class MqttManager {
 
             try {
                 client.connectWith()
-                        .keepAlive(5)
+                        .keepAlive(KEEPALIVE_S)
+                        .cleanSession(true) // we know how to re-subscribe to the topics we want
                         .simpleAuth()
                         .username(Coordinator.get(parent.context).getPairManager().getPairKey())
                         .password(Coordinator.get(parent.context).getPairManager().getPairSecret().getBytes("UTF-8"))
@@ -476,6 +517,10 @@ public class MqttManager {
                         bm.sendBroadcast(intent);
                     }
                 } catch (Exception e) {
+                    if (!client.getState().isConnected()) {
+                        Log.d("MQTT", "ConsumeRunnable stopping as client disconnected");
+                        return;
+                    }
                     e.printStackTrace();
                     try {
                         Thread.sleep(2000);
