@@ -6,18 +6,22 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.os.Build;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
@@ -315,4 +319,47 @@ public class Coordinator implements MapManager.OnLoadListener {
             wiFiChecker.updateBSSIDsDebug(bssids);
         }
     }
+
+    //region Navigation drawer images
+    private static final int[] navImages = {
+            R.drawable.nav_1,
+            R.drawable.nav_2,
+            R.drawable.nav_3,
+            R.drawable.nav_4,
+            R.drawable.nav_5,
+            R.drawable.nav_6};
+    private static final int[] navTextShadowColor = {
+            -1,
+            -1,
+            -1,
+            Color.BLACK,
+            Color.BLACK,
+            -1
+    };
+    private static final String[] navImageCredits = {
+            "Jaime Silva",
+            "Carlos Fonseca",
+            "arcticpenguin",
+            "Barry J Dillon",
+            "Roberta R.",
+            "Javier Gonzalez"
+    };
+
+    private int lastSelectedNavImageOffset = 0;
+
+    public int getNavImageResource() {
+        lastSelectedNavImageOffset = (int) ((new Date().getTime() / TimeUnit.HOURS.toMillis(10)) % navImages.length);
+        return navImages[lastSelectedNavImageOffset];
+    }
+
+    public int getNavTextShadowColor() {
+        return navTextShadowColor[lastSelectedNavImageOffset] != -1 ?
+                navTextShadowColor[lastSelectedNavImageOffset] :
+                context.getResources().getColor(R.color.colorAccent);
+    }
+
+    public String getNavImageCredits() {
+        return navImageCredits[lastSelectedNavImageOffset];
+    }
+    //endregion
 }

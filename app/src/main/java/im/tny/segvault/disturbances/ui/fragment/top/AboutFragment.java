@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -97,102 +99,105 @@ public class AboutFragment extends TopFragment {
         versionView.setText(String.format(getResources().getString(R.string.frag_about_version),
                 String.format("%s #%d", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)));
 
+        TextView thanksView = view.findViewById(R.id.special_thanks_view);
+        thanksView.setText(String.format(getString(R.string.frag_about_thanks), Coordinator.get(getContext()).getNavImageCredits()));
+
         ListView thirdPartyList = view.findViewById(R.id.about_thirdparty);
 
         List<Map<String, String>> data = new ArrayList<>();
         Map<String, String> jgrapht = new HashMap<>(3);
         jgrapht.put("name", "JGraphT");
-        jgrapht.put("license", "© Barak Naveh and Contributors - Eclipse Public License");
+        jgrapht.put("license", "© Barak Naveh and Contributors\nEclipse Public License");
         jgrapht.put("url", "http://jgrapht.org");
         data.add(jgrapht);
 
         Map<String, String> jackson = new HashMap<>(3);
         jackson.put("name", "Jackson JSON");
-        jackson.put("license", "© FasterXML LLC - Apache License 2.0");
+        jackson.put("license", "© FasterXML LLC\nApache License 2.0");
         jackson.put("url", "https://github.com/FasterXML/jackson-core");
         data.add(jackson);
 
         Map<String, String> mpack = new HashMap<>(3);
         mpack.put("name", "MessagePack for Java");
-        mpack.put("license", "© msgpack.org - Apache License 2.0");
+        mpack.put("license", "© msgpack.org\nApache License 2.0");
         mpack.put("url", "https://github.com/msgpack/msgpack-java/");
         data.add(mpack);
 
         Map<String, String> ajob = new HashMap<>(3);
         ajob.put("name", "Android-Job");
-        ajob.put("license", "© Evernote Corporation - Apache License 2.0");
+        ajob.put("license", "© Evernote Corporation\nApache License 2.0");
         ajob.put("url", "https://evernote.github.io/android-job/");
         data.add(ajob);
 
         Map<String, String> mpref = new HashMap<>(3);
         mpref.put("name", "Material Preference");
-        mpref.put("license", "© consp1racy - Apache License 2.0");
+        mpref.put("license", "© consp1racy\nApache License 2.0");
         mpref.put("url", "https://github.com/consp1racy/android-support-preference");
         data.add(mpref);
 
         Map<String, String> jss = new HashMap<>(3);
         jss.put("name", "java-string-similarity");
-        jss.put("license", "© Thibault Debatty - MIT License");
+        jss.put("license", "© Thibault Debatty\nMIT License");
         jss.put("url", "https://github.com/tdebatty/java-string-similarity");
         data.add(jss);
 
         Map<String, String> realm = new HashMap<>(3);
         realm.put("name", "Realm Java");
-        realm.put("license", "© Realm Inc - Apache License 2.0");
+        realm.put("license", "© Realm Inc\nApache License 2.0");
         realm.put("url", "https://realm.io/products/realm-mobile-database/");
         data.add(realm);
 
         Map<String, String> htmltv = new HashMap<>(3);
         htmltv.put("name", "HtmlTextView");
-        htmltv.put("license", "© Sufficiently Secure - Apache License 2.0");
+        htmltv.put("license", "© Sufficiently Secure\nApache License 2.0");
         htmltv.put("url", "https://github.com/SufficientlySecure/html-textview/");
         data.add(htmltv);
 
         Map<String, String> intro = new HashMap<>(3);
         intro.put("name", "AppIntro");
-        intro.put("license", "© Paolo Rotolo, Maximilian Narr - Apache License 2.0");
+        intro.put("license", "© Paolo Rotolo, Maximilian Narr\nApache License 2.0");
         intro.put("url", "https://github.com/apl-devs/AppIntro");
         data.add(intro);
 
         Map<String, String> mtp = new HashMap<>(3);
         mtp.put("name", "Material Tap Target Prompt");
-        mtp.put("license", "© Samuel Wall - Apache License 2.0");
+        mtp.put("license", "© Samuel Wall\nApache License 2.0");
         mtp.put("url", "https://github.com/sjwall/MaterialTapTargetPrompt");
         data.add(mtp);
 
         Map<String, String> pickers = new HashMap<>(3);
         pickers.put("name", "android-betterpickers");
-        pickers.put("license", "© Derek Brameyer, Code-Troopers - Apache License 2.0");
+        pickers.put("license", "© Derek Brameyer, Code-Troopers\nApache License 2.0");
         pickers.put("url", "https://github.com/code-troopers/android-betterpickers");
         data.add(pickers);
 
         Map<String, String> mlct = new HashMap<>(3);
         mlct.put("name", "multiline-collapsingtoolbar");
-        mlct.put("license", "© Johan von Forstner, Raphael Michel - Apache License 2.0");
+        mlct.put("license", "© Johan von Forstner, Raphael Michel\nApache License 2.0");
         mlct.put("url", "https://github.com/opacapp/multiline-collapsingtoolbar");
         data.add(mlct);
 
         Map<String, String> adn = new HashMap<>(3);
         adn.put("name", "Android Device Names");
-        adn.put("license", "© Jared Rummler - Apache License 2.0");
+        adn.put("license", "© Jared Rummler\nApache License 2.0");
         adn.put("url", "https://github.com/jaredrummler/AndroidDeviceNames");
         data.add(adn);
 
         Map<String, String> picasso = new HashMap<>(3);
         picasso.put("name", "Picasso");
-        picasso.put("license", "© Square, Inc. - Apache License 2.0");
+        picasso.put("license", "© Square, Inc.\nApache License 2.0");
         picasso.put("url", "https://square.github.io/picasso/");
         data.add(picasso);
 
         Map<String, String> mqttclient = new HashMap<>(3);
         mqttclient.put("name", "HiveMQ MQTT Client");
-        mqttclient.put("license", "© dc-square and the HiveMQ MQTT Client Project - Apache License 2.0");
+        mqttclient.put("license", "© dc-square and the HiveMQ MQTT Client Project\nApache License 2.0");
         mqttclient.put("url", "https://github.com/hivemq/hivemq-mqtt-client");
         data.add(mqttclient);
 
         Map<String, String> licon = new HashMap<>(3);
         licon.put("name", "Line icons");
-        licon.put("license", "Rdg Vito @ Wikipedia - CC-BY-SA 3.0");
+        licon.put("license", "Rdg Vito @ Wikipedia\nCC-BY-SA 3.0");
         licon.put("url", "https://commons.wikimedia.org/wiki/File:MetroLisboa-linha-amarela.svg");
         data.add(licon);
 
@@ -202,9 +207,9 @@ public class AboutFragment extends TopFragment {
         data.add(aosp);
 
         SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
-                android.R.layout.simple_list_item_2,
+                R.layout.included_components_list_item,
                 new String[]{"name", "license"},
-                new int[]{android.R.id.text1, android.R.id.text2});
+                new int[]{R.id.title_view, R.id.subtitle_view});
 
         thirdPartyList.setAdapter(adapter);
 

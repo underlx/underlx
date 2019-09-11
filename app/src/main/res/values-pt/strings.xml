@@ -12,7 +12,7 @@
     <string name="frag_about_copyright">Copyright © 2017–2019 A Equipa do UnderLX \nEm parceria com o grupo Segvault</string>
     <string name="frag_about_datasets">Mapas de rede</string>
     <string name="frag_about_disclaimer">Esta app e o serviço associado não têm qualquer ligação à Metropolitano de Lisboa, E.P.E.\nNão podemos garantir a correcção da informação fornecida.</string>
-    <string name="frag_about_thanks">Comunidade portuguesa do SkyscraperCity\nkidrauhl - tradução da interface\nJaime Silva - imagem do painel de navegação</string>
+    <string name="frag_about_thanks">Comunidade portuguesa do SkyscraperCity\nkidrauhl - tradução da interface\n%s - imagem do painel de navegação</string>
     <string name="frag_about_thanks_title">Agradecimentos</string>
     <string name="frag_about_thirdparty">Componentes incluídos</string>
     <string name="frag_about_title">Acerca</string>

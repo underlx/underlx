@@ -72,10 +72,10 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <TextView
+        android:id="@+id/special_thanks_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/frag_about_thanks"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <TextView

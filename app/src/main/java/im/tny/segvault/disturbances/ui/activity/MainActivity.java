@@ -33,6 +33,9 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
@@ -130,6 +133,11 @@ public class MainActivity extends TopActivity
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        LinearLayout headerLayout = navigationView.getHeaderView(0).findViewById(R.id.nav_header_layout);
+        headerLayout.setBackgroundResource(Coordinator.get(this).getNavImageResource());
+        TextView navTitle = navigationView.getHeaderView(0).findViewById(R.id.nav_title_view);
+        navTitle.setShadowLayer(7, 0, 0, Coordinator.get(this).getNavTextShadowColor());
 
         Fragment newFragment = null;
         if (getIntent() != null) {

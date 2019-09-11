@@ -130,4 +130,5 @@ public class Application extends androidx.multidex.MultiDexApplication {
             }
         }
     }
+
 }
