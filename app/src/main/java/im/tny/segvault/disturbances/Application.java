@@ -11,6 +11,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;
 import io.realm.RealmSchema;
+import io.realm.exceptions.RealmFileException;
 
 /**
  * Created by gabriel on 4/14/17.
@@ -48,6 +49,10 @@ public class Application extends android.support.multidex.MultiDexApplication {
         try {
             realm = Realm.getDefaultInstance();
         } catch (IllegalStateException e) {
+            Application.initRealm(context);
+            realm = Realm.getDefaultInstance();
+        } catch (RealmFileException e) {
+            // happens when the DB is corrupted
             Application.initRealm(context);
             realm = Realm.getDefaultInstance();
         }
