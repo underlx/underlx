@@ -1,31 +1,35 @@
 package im.tny.segvault.disturbances;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.fusesource.mqtt.client.MQTT;
-import org.fusesource.mqtt.client.Message;
-import org.fusesource.mqtt.client.QoS;
-import org.fusesource.mqtt.client.Topic;
-import org.fusesource.mqtt.client.Tracer;
+import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;
+import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedListener;
+import com.hivemq.client.mqtt.lifecycle.MqttDisconnectSource;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -37,15 +41,72 @@ import static android.content.Context.MODE_PRIVATE;
 public class MqttManager {
     private Context context;
     private final Object mqttLock = new Object();
-    private BlockingConnectionWithTimeouts mqttConnection;
+    private Mqtt3BlockingClient mqttClient;
     private Map<Integer, HashSet<String>> mqttSubscriptionsByParty = new HashMap<>();
     private Map<String, HashSet<Integer>> mqttSubscriptionsByTopic = new HashMap<>();
     private Set<Integer> parties = new HashSet<>();
-    private static long timeout = 10;
-    private static TimeUnit timeoutUnit = TimeUnit.SECONDS;
+    private final static int SPECIAL_RECONNECT_PARTY_ID = -999;
+    private final static int INITIAL_RECONNECT_DELAY_S = 5;
+    private final static int MAX_RECONNECT_DELAY_S = 60;
+    private int reconnectAttempts = 0;
 
     public MqttManager(Context context) {
         this.context = context;
+    }
+
+    private static class DisconnectedListener implements MqttClientDisconnectedListener {
+        private WeakReference<MqttManager> parentRef;
+
+        DisconnectedListener(MqttManager parent) {
+            parentRef = new WeakReference<>(parent);
+        }
+
+        @Override
+        public void onDisconnected(MqttClientDisconnectedContext context) {
+            Log.d("MQTT", "onDisconnected");
+            if (context.getSource() == MqttDisconnectSource.USER) {
+                Log.d("MQTT", "Disconnected on request, not reconnecting");
+                return;
+            }
+
+            MqttManager parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+
+            long sleepTime;
+            synchronized (parent.mqttLock) {
+                sleepTime = ++parent.reconnectAttempts * INITIAL_RECONNECT_DELAY_S * 1000;
+                if (sleepTime > MAX_RECONNECT_DELAY_S * 1000) {
+                    sleepTime = MAX_RECONNECT_DELAY_S * 1000;
+                }
+
+                if (parent.reconnectAttempts > 20) {
+                    return;
+                }
+            }
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            HashSet<String> topics = new HashSet<>();
+            synchronized (parent.mqttLock) {
+                for (HashSet<String> s : parent.mqttSubscriptionsByParty.values()) {
+                    topics.addAll(s);
+                }
+            }
+
+            if (topics.size() == 0) {
+                Log.d("MQTT", "No topics registered now, not reconnecting");
+                return;
+            }
+
+            Log.d("MQTT", "Reconnecting");
+            String[] topicsArr = new String[topics.size()];
+            new MQTTConnectTask(parent, SPECIAL_RECONNECT_PARTY_ID).execute(topics.toArray(topicsArr));
+        }
     }
 
     private static class MQTTConnectTask extends AsyncTask<String, Void, Boolean> {
@@ -64,6 +125,13 @@ public class MqttManager {
             if (parent == null) {
                 return false;
             }
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                // HiveMQ MQTT Client crashes on Android < 4.4 due to the use of StandardCharsets
+                // Could probably be fixed by forking/adding backports like android-retrofix, but it's not worth it
+                // (at the time of writing, the app has less than 10 users on versions below 4.4)
+                return false;
+            }
             this.initialTopics = initialTopics;
             if (!Coordinator.get(parent.context).getPairManager().isPaired() ||
                     !Coordinator.get(parent.context).getPairManager().isActivated()) {
@@ -77,44 +145,37 @@ public class MqttManager {
             }
 
             synchronized (parent.mqttLock) {
-                if (parent.mqttConnection != null && parent.mqttConnection.isConnected()) {
+                if (parent.mqttClient != null && clientID != SPECIAL_RECONNECT_PARTY_ID) {
                     return false;
                 }
             }
 
-            MQTT mqttClient = new MQTT();
-            try {
-                if (info.isTLS) {
-                    mqttClient.setHost(String.format("tls://%s:%d", info.host, info.port));
-                } else {
-                    mqttClient.setHost(String.format("tcp://%s:%d", info.host, info.port));
-                }
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                return false;
+            Mqtt3ClientBuilder clientBuilder = MqttClient.builder()
+                    .identifier(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()))
+                    .serverHost(info.host)
+                    .serverPort(info.port)
+                    .addDisconnectedListener(new DisconnectedListener(parent))
+                    .useMqttVersion3();
+            if (info.isTLS) {
+                clientBuilder = clientBuilder.sslWithDefaultConfig();
             }
-            mqttClient.setClientId(String.format("%s-%d", Coordinator.get(parent.context).getPairManager().getPairKey(), new Date().getTime()));
-            mqttClient.setUserName(Coordinator.get(parent.context).getPairManager().getPairKey());
-            mqttClient.setPassword(Coordinator.get(parent.context).getPairManager().getPairSecret());
-            mqttClient.setVersion(info.protocolVersion);
-            mqttClient.setReconnectDelay(1000);
-            mqttClient.setTracer(new Tracer() {
-                @Override
-                public void debug(String message, Object... args) {
-                    Log.d("MQTT-tracer", message + TextUtils.join(", ", args));
-                }
-            });
+            Mqtt3BlockingClient client = clientBuilder.build().toBlocking();
 
-            BlockingConnectionWithTimeouts connection = new BlockingConnectionWithTimeouts(mqttClient.futureConnection());
             try {
-                connection.connect(timeout, timeoutUnit);
+                client.connectWith()
+                        .keepAlive(5)
+                        .simpleAuth()
+                        .username(Coordinator.get(parent.context).getPairManager().getPairKey())
+                        .password(Coordinator.get(parent.context).getPairManager().getPairSecret().getBytes("UTF-8"))
+                        .applySimpleAuth().send();
             } catch (Exception e) {
                 // oh well
                 return false;
             }
 
             synchronized (parent.mqttLock) {
-                parent.mqttConnection = connection;
+                parent.mqttClient = client;
+                parent.reconnectAttempts = 0;
             }
             Log.d("MQTT", "connected");
             new Thread(new ConsumeRunnable(parent)).start();
@@ -145,22 +206,23 @@ public class MqttManager {
             if (parent == null) {
                 return null;
             }
-            BlockingConnectionWithTimeouts connection;
+
+            Mqtt3BlockingClient client;
             synchronized (parent.mqttLock) {
-                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
+                if (parent.mqttClient == null) {
                     return null;
                 }
-                connection = parent.mqttConnection;
+                client = parent.mqttClient;
 
                 parent.mqttSubscriptionsByTopic.clear();
                 parent.mqttSubscriptionsByParty.clear();
 
                 // setting this to null tells the message consumption thread to stop
-                parent.mqttConnection = null;
+                parent.mqttClient = null;
             }
 
             try {
-                connection.disconnect(timeout, timeoutUnit);
+                client.disconnect();
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -185,42 +247,45 @@ public class MqttManager {
             if (parent == null || topics == null || topics.length == 0) {
                 return null;
             }
-            BlockingConnectionWithTimeouts connection;
+            Mqtt3BlockingClient client;
             synchronized (parent.mqttLock) {
-                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
+                if (parent.mqttClient == null) {
                     return null;
                 }
-                connection = parent.mqttConnection;
+                client = parent.mqttClient;
             }
 
-            List<Topic> mqttTopics = new ArrayList<>();
-            for (String topic : topics) {
-                mqttTopics.add(new Topic(topic, QoS.AT_MOST_ONCE));
-            }
-            Topic arr[] = new Topic[mqttTopics.size()];
             try {
-                connection.subscribe(mqttTopics.toArray(arr), timeout, timeoutUnit);
+                for (String topic : topics) {
+                    client.subscribeWith().topicFilter(topic).qos(MqttQos.AT_MOST_ONCE).send();
+                }
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
                 return null;
             }
 
-            synchronized (parent.mqttLock) {
-                HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
-                if (byParty == null) {
-                    byParty = new HashSet<>();
-                    parent.mqttSubscriptionsByParty.put(partyID, byParty);
-                }
-                for (String topic : topics) {
-                    byParty.add(topic);
-                    HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
-                    if (byTopic == null) {
-                        byTopic = new HashSet<>();
-                        parent.mqttSubscriptionsByTopic.put(topic, byTopic);
+            if (partyID != SPECIAL_RECONNECT_PARTY_ID) {
+                synchronized (parent.mqttLock) {
+                    HashSet<String> byParty = parent.mqttSubscriptionsByParty.get(partyID);
+                    if (byParty == null) {
+                        byParty = new HashSet<>();
+                        parent.mqttSubscriptionsByParty.put(partyID, byParty);
                     }
-                    byTopic.add(partyID);
-                    Log.d("MQTT", "Party " + partyID + " subscribed to topic " + topic);
+                    for (String topic : topics) {
+                        byParty.add(topic);
+                        HashSet<Integer> byTopic = parent.mqttSubscriptionsByTopic.get(topic);
+                        if (byTopic == null) {
+                            byTopic = new HashSet<>();
+                            parent.mqttSubscriptionsByTopic.put(topic, byTopic);
+                        }
+                        byTopic.add(partyID);
+                        Log.d("MQTT", "Party " + partyID + " subscribed to topic " + topic);
+                    }
+                }
+            } else {
+                for (String topic : topics) {
+                    Log.d("MQTT", "Reconnect resubscribed to topic " + topic);
                 }
             }
             return null;
@@ -244,11 +309,10 @@ public class MqttManager {
                 return null;
             }
             List<String> actualTopics = new ArrayList<>();
-            BlockingConnectionWithTimeouts connection;
+            Mqtt3BlockingClient client;
             synchronized (parent.mqttLock) {
-                connection = parent.mqttConnection;
-
-                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
+                client = parent.mqttClient;
+                if (parent.mqttClient == null) {
                     return null;
                 }
 
@@ -271,9 +335,10 @@ public class MqttManager {
             }
 
             if (actualTopics.size() > 0) {
-                String arr[] = new String[actualTopics.size()];
                 try {
-                    connection.unsubscribe(actualTopics.toArray(arr), timeout, timeoutUnit);
+                    for (String topic : actualTopics) {
+                        client.unsubscribeWith().topicFilter(topic).send();
+                    }
                 } catch (Exception e) {
                     // oh well
                     e.printStackTrace();
@@ -338,17 +403,13 @@ public class MqttManager {
                 return null;
             }
 
-            BlockingConnectionWithTimeouts connection;
+            Mqtt3BlockingClient client;
             synchronized (parent.mqttLock) {
-                connection = parent.mqttConnection;
-
-                if (parent.mqttConnection == null || !parent.mqttConnection.isConnected()) {
-                    return null;
-                }
+                client = parent.mqttClient;
             }
 
             try {
-                connection.publish(topic, payload, QoS.AT_MOST_ONCE, false, timeout, timeoutUnit);
+                client.publishWith().topic(topic).payload(payload).qos(MqttQos.AT_MOST_ONCE).send();
             } catch (Exception e) {
                 // oh well
                 e.printStackTrace();
@@ -364,6 +425,7 @@ public class MqttManager {
             parentRef = new WeakReference<>(parent);
         }
 
+        @SuppressLint("NewAPI")
         public void run() {
             while (true) {
                 MqttManager parent = parentRef.get();
@@ -371,26 +433,26 @@ public class MqttManager {
                     return;
                 }
 
-                BlockingConnectionWithTimeouts connection;
+                Mqtt3BlockingClient client;
                 synchronized (parent.mqttLock) {
-                    connection = parent.mqttConnection;
+                    client = parent.mqttClient;
                 }
-                if (connection == null) {
+                if (client == null) {
                     return;
                 }
                 try {
-                    if (!connection.isConnected()) {
-                        Thread.sleep(2000);
-                        continue;
-                    }
                     MapManager mapManager = Coordinator.get(parent.context).getMapManager();
 
-                    Message message = connection.receive(10, TimeUnit.SECONDS);
-                    if (message == null) {
-                        continue;
+                    Mqtt3Publish publish;
+                    try (Mqtt3BlockingClient.Mqtt3Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
+                        Optional<Mqtt3Publish> publishMessage = publishes.receive(10, TimeUnit.SECONDS);
+
+                        if (!publishMessage.isPresent()) {
+                            continue;
+                        }
+                        publish = publishMessage.get();
                     }
-                    message.ack();
-                    String topicName = message.getTopic();
+                    String topicName = publish.getTopic().toString();
                     Log.d("MQTT", "Received message on topic " + topicName);
 
                     if (topicName.startsWith("msgpack/vehicleeta/") || topicName.startsWith("dev-msgpack/vehicleeta/")) {
@@ -407,7 +469,7 @@ public class MqttManager {
                         if (station == null) {
                             continue;
                         }
-                        parent.processVehicleETAMessage(station, message.getPayload());
+                        parent.processVehicleETAMessage(station, publish.getPayloadAsBytes());
                         Intent intent = new Intent(ACTION_VEHICLE_ETAS_UPDATED);
                         intent.putExtra(EXTRA_VEHICLE_ETAS_NETWORK, network.getId());
                         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(parent.context);
@@ -421,9 +483,11 @@ public class MqttManager {
                         e1.printStackTrace();
                     }
                 }
+
             }
         }
     }
+
 
     private int currPartyID = 0;
 

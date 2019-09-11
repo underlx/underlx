@@ -190,9 +190,9 @@ public class AboutFragment extends TopFragment {
         data.add(picasso);
 
         Map<String, String> mqttclient = new HashMap<>(3);
-        mqttclient.put("name", "mqtt-client");
-        mqttclient.put("license", "© FuseSource Corp., gbl08ma - Apache License 2.0");
-        mqttclient.put("url", "https://github.com/gbl08ma/mqtt-client/");
+        mqttclient.put("name", "HiveMQ MQTT Client");
+        mqttclient.put("license", "© dc-square and the HiveMQ MQTT Client Project - Apache License 2.0");
+        mqttclient.put("url", "https://github.com/hivemq/hivemq-mqtt-client");
         data.add(mqttclient);
 
         Map<String, String> licon = new HashMap<>(3);

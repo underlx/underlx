@@ -66,3 +66,6 @@
 
 # The MQTT client seems to work fine despite the warnings...
 -dontwarn org.fusesource.hawtdispatch.**
+
+-keepclassmembernames class io.netty.** { *; }
+-keepclassmembernames class org.jctools.** { *; }
