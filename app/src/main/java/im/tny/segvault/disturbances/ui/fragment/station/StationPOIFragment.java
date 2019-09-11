@@ -307,7 +307,13 @@ public class StationPOIFragment extends Fragment
 
         googleMap.setOnInfoWindowClickListener(this);
 
+        // make sure we don't zoom in too close (if the points are too close together/there's a single point)
         LatLngBounds bounds = builder.build();
+        LatLng center = bounds.getCenter();
+        builder.include(new LatLng(center.latitude-0.00025f,center.longitude-0.00025f));
+        builder.include(new LatLng(center.latitude+0.00025f,center.longitude+0.00025f));
+        bounds = builder.build();
+
         int padding = 64; // offset from edges of the map in pixels
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         googleMap.moveCamera(cu);
