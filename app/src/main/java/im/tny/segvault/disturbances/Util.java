@@ -569,7 +569,7 @@ public class Util {
     }
 
     @JsonIgnore
-    public static Spannable enrichLineStatus(Context context, String lineID, String status, String msgType, Date statusTime, @Nullable final OnLineStatusSpanClickListener listener) {
+    public static Spannable enrichLineStatus(Context context, String networkID, String lineID, String status, String msgType, Date statusTime, @Nullable final OnLineStatusSpanClickListener listener) {
         Spannable sb = new SpannableString(status);
         if (context == null || msgType == null) {
             return sb;
@@ -588,7 +588,10 @@ public class Util {
 
 
         MapManager mm = Coordinator.get(context).getMapManager();
-        Network network = mm.getNetwork("pt-ml");
+        Network network = mm.getNetwork(networkID);
+        if (network == null) {
+            return sb;
+        }
         Line line = network.getLine(lineID);
 
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);

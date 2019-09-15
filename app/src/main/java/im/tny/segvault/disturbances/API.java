@@ -238,8 +238,8 @@ public class API {
         public String msgType;
 
         @JsonIgnore
-        public Spannable enrichStatus(Context context, String lineID) {
-            return Util.enrichLineStatus(context, lineID, status, msgType, new Date(time[0] * 1000), null);
+        public Spannable enrichStatus(Context context, String networkID, String lineID) {
+            return Util.enrichLineStatus(context, networkID, lineID, status, msgType, new Date(time[0] * 1000), null);
         }
 
         @JsonIgnore

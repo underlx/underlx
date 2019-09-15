@@ -116,7 +116,8 @@ public class FCMService extends FirebaseMessagingService {
 
         String status = Util.enrichLineStatus(
                 getApplicationContext(),
-                data.get("line"),
+                snetwork.getId(),
+                sline.getId(),
                 data.get("status"),
                 data.get("msgType"),
                 new Date(remoteMessage.getSentTime()),

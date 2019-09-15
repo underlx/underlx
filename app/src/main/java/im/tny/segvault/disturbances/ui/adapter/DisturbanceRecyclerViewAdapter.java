@@ -7,9 +7,11 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Spannable;
 import android.text.Spanned;
 import android.text.format.DateUtils;
@@ -223,8 +225,8 @@ public class DisturbanceRecyclerViewAdapter extends RecyclerView.Adapter<Disturb
             statuses = new ArrayList<>();
             for (API.Status s : disturbance.statuses) {
                 Date stime = new Date(s.time[0] * 1000);
-                Spannable text = Util.enrichLineStatus(context, lineId, s.status, s.msgType, stime,
-                        new InternalLinkHandler(context));
+                Spannable text = Util.enrichLineStatus(context, netId, lineId, s.status, s.msgType,
+                        stime, new InternalLinkHandler(context));
                 statuses.add(new Status(stime, text, s.downtime, s.isOfficial()));
             }
             Collections.sort(statuses, (o1, o2) -> o1.date.compareTo(o2.date));
