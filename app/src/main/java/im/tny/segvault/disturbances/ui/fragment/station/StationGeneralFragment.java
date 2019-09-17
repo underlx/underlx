@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,7 +144,7 @@ public class StationGeneralFragment extends Fragment {
 
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
         if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-            mqttPartyID = mqttManager.connect(mqttManager.getVehicleETAsTopicForStation(networkId, stationId));
+            mqttPartyID = mqttManager.connect(mqttManager.getAllVehicleETAsTopicForStation(networkId, stationId));
         }
     }
 
@@ -188,7 +191,7 @@ public class StationGeneralFragment extends Fragment {
             closedLayout.setVisibility(View.VISIBLE);
         }
 
-        Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
+        Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station, 3);
 
         LinearLayout vehicleETAsLayout = view.findViewById(R.id.vehicle_etas_layout);
         if (etas.size() > 0 && !station.isAlwaysClosed()) {

@@ -471,6 +471,8 @@
     <string name="vehicle_eta_morethan_minutes_short">&gt;%d min</string>
     <string name="vehicle_eta_timestamp_short">à %s</string>
     <string name="vehicle_eta_unavailable_short">pas d\'info</string>
+    <string name="vehicle_eta_after_next">Les suivants:</string>
+
 
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>

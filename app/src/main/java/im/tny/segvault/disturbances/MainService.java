@@ -14,14 +14,17 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
@@ -45,6 +48,7 @@ import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.routing.Route;
 import im.tny.segvault.subway.Connection;
+import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
@@ -292,7 +296,7 @@ public class MainService extends Service {
                 title = curStop.getStation().getName();
             }
 
-            Map<String, API.MQTTvehicleETA> etas = Coordinator.get(this).getMqttManager().getVehicleETAsForStation(curStop.getStation());
+            Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(this).getMqttManager().getVehicleETAsForStation(curStop.getStation(), 1);
 
             if (currentPath.isWaitingFirstTrain()) {
                 if (etas.size() == 0) {
@@ -395,7 +399,7 @@ public class MainService extends Service {
         }
     }
 
-    public static void addETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, List<CharSequence> statusLines, Stop curStop, @Nullable Stop curDirection) {
+    public static void addETAlines(Context context, Map<String, List<API.MQTTvehicleETA>> etas, List<CharSequence> statusLines, Stop curStop, @Nullable Stop curDirection) {
         statusLines.add(context.getString(R.string.notif_route_vehicle_etas_title));
         statusLines.addAll(getETAlines(context, etas, curStop.getStation(), curDirection));
     }
@@ -407,16 +411,27 @@ public class MainService extends Service {
         public boolean available;
     }
 
-    public static List<ETArow> getETArows(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, @Nullable Stop curDirection, boolean withUnavailable, boolean shortText) {
+    public static List<ETArow> getETArows(Context context, Map<String, List<API.MQTTvehicleETA>> etas, Station curStation, @Nullable Stop curDirection, boolean withUnavailable, boolean shortText) {
         List<ETArow> statusRows = new ArrayList<>();
         Set<Stop> directionsSet = new HashSet<>();
-        for (Stop s : curStation.getStops()) {
-            for (Connection c : curStation.getNetwork().outgoingEdgesOf(s)) {
-                if (!(c instanceof Transfer)) {
-                    directionsSet.add(curStation.getDirectionForConnection(c));
+        for (List<API.MQTTvehicleETA> lETAs : etas.values()) {
+            for (API.MQTTvehicleETA eta : lETAs) {
+                Station station = curStation.getNetwork().getStation(eta.direction);
+                if (station == null) {
+                    continue;
+                }
+                // get stop for the line of the current station (so it has the right color, etc.)
+                for (Stop stop : station.getStops()) {
+                    for (Line l : curStation.getLines()) {
+                        if (l.equals(stop.getLine())) {
+                            directionsSet.add(stop);
+                            break;
+                        }
+                    }
                 }
             }
         }
+
         List<Stop> directions = new ArrayList<>();
         for (Stop s : directionsSet) {
             if (!s.equals(curDirection) && !s.getStation().equals(curStation)) {
@@ -434,37 +449,50 @@ public class MainService extends Service {
             ETArow r = new ETArow();
             r.direction = direction.getStation();
             r.directionStop = direction;
-            API.MQTTvehicleETA eta = etas.get(r.direction.getId());
-            r.available = eta != null;
-            if(shortText) {
-                r.eta = vehicleETAtoShortString(context, eta);
-            } else {
-                r.eta = vehicleETAtoString(context, eta);
+            List<API.MQTTvehicleETA> lETAs = etas.get(r.direction.getId());
+            r.available = lETAs != null;
+            r.eta = "";
+            int i = 0;
+            for (API.MQTTvehicleETA eta : lETAs) {
+                if (shortText || i != 0) {
+                    if (i == 1) {
+                        r.eta += String.format("\n\t\t%s ", context.getString(R.string.vehicle_eta_after_next));
+                    } else if (i > 1) {
+                        r.eta += ", ";
+                    }
+                    r.eta += vehicleETAtoShortString(context, eta);
+                } else {
+                    r.eta += vehicleETAtoString(context, eta);
+                }
+                i++;
             }
-            if(r.available || withUnavailable) {
+            if (r.available || withUnavailable) {
                 statusRows.add(r);
             }
         }
         return statusRows;
     }
 
-    public static List<CharSequence> getETAlines(Context context, Map<String, API.MQTTvehicleETA> etas, Station curStation, @Nullable Stop curDirection) {
+    public static List<CharSequence> getETAlines(Context context, Map<String, List<API.MQTTvehicleETA>> etas, Station curStation, @Nullable Stop curDirection) {
         List<CharSequence> statusLines = new ArrayList<>();
         List<ETArow> rows = getETArows(context, etas, curStation, curDirection, true, false);
         for (ETArow r : rows) {
-            String line = String.format("%s %s", r.direction.getName(),
-                    vehicleETAtoString(context, etas.get(r.direction.getId())));
+            String line = String.format("%s %s", r.direction.getName(), r.eta);
             int lStart = line.indexOf(r.direction.getName());
             int lEnd = lStart + r.direction.getName().length();
             SpannableString lineSpannable = new SpannableString(line);
             lineSpannable.setSpan(new StyleSpan(Typeface.BOLD), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             lineSpannable.setSpan(new ForegroundColorSpan(r.directionStop.getLine().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            int extraVehiclesStart = line.indexOf("\n");
+            if (extraVehiclesStart > -1) {
+                lineSpannable.setSpan(new RelativeSizeSpan(0.8f), extraVehiclesStart, line.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
             //lineSpannable.setSpan(new TabStopSpan.Standard(600), 0, lineSpannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             statusLines.add(lineSpannable);
         }
         return statusLines;
     }
-
 
     private static String vehicleETAtoString(Context context, API.MQTTvehicleETA eta) {
         if (eta == null) {

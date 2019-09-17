@@ -489,6 +489,7 @@
     <string name="vehicle_eta_morethan_minutes_short">&gt;%d min</string>
     <string name="vehicle_eta_timestamp_short">at %s</string>
     <string name="vehicle_eta_unavailable_short">no info</string>
+    <string name="vehicle_eta_after_next">After next:</string>
 
     <string-array name="frag_settings_languages">
         <item>System default</item>

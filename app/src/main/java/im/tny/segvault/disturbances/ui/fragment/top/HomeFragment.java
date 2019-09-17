@@ -450,7 +450,7 @@ public class HomeFragment extends TopFragment {
             final Station station = currentPath.getCurrentStop().getStation();
             curStationNameView.setText(station.getName());
 
-            Map<String, API.MQTTvehicleETA> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station);
+            Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station, 1);
 
             Stop direction = currentPath.getDirection();
             Stop next = currentPath.getNextStop();

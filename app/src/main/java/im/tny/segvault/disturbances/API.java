@@ -456,6 +456,7 @@ public class API {
         public int validFor;
         public String type;
         public String units;
+        public int order;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

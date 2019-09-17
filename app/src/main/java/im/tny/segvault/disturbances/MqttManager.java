@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -499,7 +501,7 @@ public class MqttManager {
                     if (topicName.startsWith("msgpack/vehicleeta/") || topicName.startsWith("dev-msgpack/vehicleeta/")) {
                         // should be of the form msgpack/vehicleeta/pt-ml/pt-ml-av
                         String[] parts = topicName.split("/");
-                        if (parts.length != 4) {
+                        if ((parts.length != 5 || !"all".equals(parts[4])) && parts.length != 4) {
                             continue;
                         }
                         Network network = mapManager.getNetwork(parts[2]);
@@ -599,8 +601,8 @@ public class MqttManager {
     private final Map<String, VehicleETAValue> vehicleETAs = new HashMap<>();
     private final Object vehicleETAsLock = new Object();
 
-    private String getVehicleETAMapKey(Network network, Station station, Station direction) {
-        return String.format("%s#%s#%s", network.getId(), station.getId(), direction.getId());
+    private String getVehicleETAMapKey(Network network, Station station, Station direction, int order) {
+        return String.format("%s#%s#%s#%d", network.getId(), station.getId(), direction.getId(), order);
     }
 
     private static class VehicleETAValue {
@@ -614,23 +616,17 @@ public class MqttManager {
             return;
         }
 
-        String key = getVehicleETAMapKey(station.getNetwork(), station, direction);
+        String key = getVehicleETAMapKey(station.getNetwork(), station, direction, eta.order);
         VehicleETAValue value = new VehicleETAValue();
         value.eta = eta;
         value.storedAt = new Date();
         synchronized (vehicleETAsLock) {
-            API.MQTTvehicleETA existingETA = getVehicleETA(station, direction);
-            // use the made field (unix timestamp coming from server, so it's not synced to the local clock) as kind of a lamport clock
-            // this rejects the ETA if we already have a more recent one (protection against out of order messages)
-            if (existingETA != null && existingETA.made > eta.made) {
-                return;
-            }
             vehicleETAs.put(key, value);
         }
     }
 
-    public API.MQTTvehicleETA getVehicleETA(Station station, Station direction) {
-        String key = getVehicleETAMapKey(station.getNetwork(), station, direction);
+    public API.MQTTvehicleETA getVehicleETA(Station station, Station direction, int order) {
+        String key = getVehicleETAMapKey(station.getNetwork(), station, direction, order);
         synchronized (vehicleETAsLock) {
             if (!vehicleETAs.containsKey(key)) {
                 return null;
@@ -644,8 +640,9 @@ public class MqttManager {
     }
 
     // returns a map where the key is the direction ID
-    public Map<String, API.MQTTvehicleETA> getVehicleETAsForStation(Station station) {
-        Map<String, API.MQTTvehicleETA> result = new HashMap<>();
+    @SuppressLint("NewApi") // retrofix takes care of sort
+    public Map<String, List<API.MQTTvehicleETA>> getVehicleETAsForStation(Station station, int numVehicles) {
+        Map<String, List<API.MQTTvehicleETA>> result = new HashMap<>();
         synchronized (vehicleETAsLock) {
             for (String key : vehicleETAs.keySet()) {
                 String[] parts = key.split("#");
@@ -655,9 +652,18 @@ public class MqttManager {
                         // do not include expired ones
                         continue;
                     }
-                    result.put(parts[2], value.eta);
+                    if (!result.containsKey(parts[2])) {
+                        result.put(parts[2], new ArrayList<>());
+                    }
+                    result.get(parts[2]).add(value.eta);
                 }
             }
+        }
+        for (String dir : result.keySet()) {
+            List<API.MQTTvehicleETA> etas = result.get(dir);
+            etas.sort((t0, t1) -> Integer.compare(t0.order, t1.order));
+            etas = etas.subList(0, Math.min(numVehicles, etas.size()));
+            result.put(dir, etas);
         }
         return result;
     }
@@ -684,6 +690,14 @@ public class MqttManager {
 
     public String getVehicleETAsTopicForStation(String networkId, String stationId) {
         return String.format("%s%s/%s", getVehicleETAsTopicPrefix(), networkId, stationId);
+    }
+
+    public String getAllVehicleETAsTopicForStation(Station station) {
+        return getAllVehicleETAsTopicForStation(station.getNetwork().getId(), station.getId());
+    }
+
+    public String getAllVehicleETAsTopicForStation(String networkId, String stationId) {
+        return String.format("%s%s/%s/all", getVehicleETAsTopicPrefix(), networkId, stationId);
     }
 
     public String getVehicleETAsTopicPrefix() {

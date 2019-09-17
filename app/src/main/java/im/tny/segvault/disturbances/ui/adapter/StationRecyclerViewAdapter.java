@@ -119,7 +119,7 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
 
         TableLayout etasLayout = holder.mView.findViewById(R.id.etas_layout);
 
-        Map<String, API.MQTTvehicleETA> etas = Coordinator.get(context).getMqttManager().getVehicleETAsForStation(station);
+        Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(context).getMqttManager().getVehicleETAsForStation(station, 1);
         if (etas.size() > 0 && !station.isAlwaysClosed()) {
             List<MainService.ETArow> rows = MainService.getETArows(context, etas, station, null, false, true);
             for (int i = 0; i < rows.size(); i += 2) {
