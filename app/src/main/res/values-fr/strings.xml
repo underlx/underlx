@@ -335,9 +335,13 @@
     <string name="frag_station_escalator_platform">Escalier roulant hall-quai</string>
     <string name="frag_station_wheelchair_platform">Plateforme pour des fauteuils roulants</string>
     <string name="frag_station_wc">Toilettes publiques</string>
+    <string name="frag_station_baby_care">Espace bébé</string>
     <string name="frag_station_stores">Magasin</string>
     <string name="frag_station_ticket_office">Point de vente / assistance</string>
     <string name="frag_station_urgent_ticket">Point Lisboa Viva urgent</string>
+    <string name="frag_station_navegante_space">Espace Navegante</string>
+    <string name="frag_station_client_space">Espace client</string>
+    <string name="frag_station_info_space">Espace information</string>
     <string name="frag_station_lostfound">Bureau des objets trouvés</string>
     <string name="act_report_title">Rapporter des problèmes</string>
     <string name="act_report_intro">Soyez les yeux d\'&appname; dans le réseau et aidez à obtenir de l\'information plus complète.</string>

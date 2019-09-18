@@ -222,6 +222,8 @@ public class StationGeneralFragment extends Fragment {
         tagToTitle.put("a_store", servicesTitleView);
         tagToView.put("a_wc", view.findViewById(R.id.service_wc_layout));
         tagToTitle.put("a_wc", servicesTitleView);
+        tagToView.put("a_baby", view.findViewById(R.id.service_baby_care_layout));
+        tagToTitle.put("a_baby", servicesTitleView);
         tagToView.put("a_wifi", view.findViewById(R.id.service_wifi_layout));
         tagToTitle.put("a_wifi", servicesTitleView);
         tagToView.put("c_airport", view.findViewById(R.id.feature_airport_layout));
@@ -250,8 +252,14 @@ public class StationGeneralFragment extends Fragment {
         tagToTitle.put("m_lift_surface", accessibilityTitleView);
         tagToView.put("m_platform", view.findViewById(R.id.feature_wheelchair_platform_layout));
         tagToTitle.put("m_platform", accessibilityTitleView);
+        tagToView.put("s_client", view.findViewById(R.id.service_client_space_layout));
+        tagToTitle.put("s_client", servicesTitleView);
+        tagToView.put("s_info", view.findViewById(R.id.service_info_space_layout));
+        tagToTitle.put("s_info", servicesTitleView);
         tagToView.put("s_lostfound", view.findViewById(R.id.service_lostfound_layout));
         tagToTitle.put("s_lostfound", servicesTitleView);
+        tagToView.put("s_navegante", view.findViewById(R.id.service_navegante_space_layout));
+        tagToTitle.put("s_navegante", servicesTitleView);
         tagToView.put("s_ticket1", view.findViewById(R.id.service_ticket_office_layout));
         tagToTitle.put("s_ticket1", servicesTitleView);
         tagToView.put("s_ticket2", view.findViewById(R.id.service_ticket_office_layout));

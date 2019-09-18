@@ -335,9 +335,13 @@
     <string name="frag_station_escalator_platform">Escalera mecánica atrio-muelle</string>
     <string name="frag_station_wheelchair_platform">Plataforma para sillas de ruedas</string>
     <string name="frag_station_wc">Baños públicos</string>
+    <string name="frag_station_baby_care">Espacio bebê</string>
     <string name="frag_station_stores">Tiendas</string>
     <string name="frag_station_ticket_office">Punto de venta / atención</string>
     <string name="frag_station_urgent_ticket">Punto Lisboa Viva urgente</string>
+    <string name="frag_station_navegante_space">Espacio Navegante</string>
+    <string name="frag_station_client_space">Espacio cliente</string>
+    <string name="frag_station_info_space">Espacio información</string>
     <string name="frag_station_lostfound">Oficina de objetos perdidos</string>
     <string name="act_report_title">Reportar problemas</string>
     <string name="act_report_intro">Sea los ojos de &appname; en la red y ayude a obtener una información más completa.</string>

@@ -332,6 +332,8 @@ public class Util {
 
     public static int getDrawableResourceIdForStationTag(String tag) {
         switch (tag) {
+            case "a_baby":
+                return R.drawable.ic_child_care_black_24dp;
             case "a_store":
                 return R.drawable.ic_gift_black_24dp;
             case "a_wc":
@@ -367,7 +369,11 @@ public class Util {
             case "s_ticket2":
             case "s_ticket3":
             case "s_urgent_pass":
+            case "s_navegante":
                 return R.drawable.ic_cards_black_24dp;
+            case "s_info":
+            case "s_client":
+                return R.drawable.ic_info_black_24dp;
             default:
                 return 0;
         }

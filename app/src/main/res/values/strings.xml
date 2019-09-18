@@ -134,9 +134,13 @@
     <string name="frag_station_escalator_platform">Lobby-platforms escalator</string>
     <string name="frag_station_wheelchair_platform">Wheelchair platform</string>
     <string name="frag_station_wc">WC</string>
+    <string name="frag_station_baby_care">Baby care</string>
     <string name="frag_station_stores">Stores</string>
     <string name="frag_station_ticket_office">Ticket office</string>
     <string name="frag_station_urgent_ticket">Urgent Lisboa Viva pass office</string>
+    <string name="frag_station_navegante_space">Navegante space</string>
+    <string name="frag_station_client_space">Client space</string>
+    <string name="frag_station_info_space">Information space</string>
     <string name="frag_station_lostfound">Lost and found</string>
     <string name="frag_station_statistics">Statistics</string>
     <string name="frag_station_stats_intro">In this station, you…</string>

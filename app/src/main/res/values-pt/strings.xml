@@ -333,9 +333,13 @@
     <string name="frag_station_escalator_platform">Escadas rolantes átrio-cais</string>
     <string name="frag_station_wheelchair_platform">Plataforma para cadeiras de rodas</string>
     <string name="frag_station_wc">Casas de banho</string>
+    <string name="frag_station_baby_care">Espaço bebé</string>
     <string name="frag_station_stores">Lojas</string>
     <string name="frag_station_ticket_office">Posto de venda / atendimento</string>
     <string name="frag_station_urgent_ticket">Posto Lisboa Viva urgente</string>
+    <string name="frag_station_navegante_space">Espaço Navegante</string>
+    <string name="frag_station_client_space">Espaço cliente</string>
+    <string name="frag_station_info_space">Espaço informação</string>
     <string name="frag_station_lostfound">Perdidos e achados</string>
     <string name="act_report_title">Comunicar problemas</string>
     <string name="act_report_intro">Seja os olhos do &appname; na rede e ajude a obter uma informação mais completa.</string>
