@@ -4,20 +4,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +27,6 @@ import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.MqttManager;
-import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.RStation;
@@ -38,8 +35,6 @@ import im.tny.segvault.disturbances.ui.adapter.StationRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A fragment representing a list of Items.
@@ -216,42 +211,39 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 recyclerView.setAdapter(new StationRecyclerViewAdapter(items, mListener));
                 recyclerView.invalidate();
             }
-            if(isMostUsed) {
+            if (isMostUsed) {
                 titleView.setText(R.string.frag_favorite_stations_most_used_title);
             } else {
                 titleView.setText(R.string.frag_favorite_stations_title);
             }
 
             final MqttManager mqttManager = Coordinator.get(getContext()).getMqttManager();
-            SharedPreferences sharedPref = getContext().getSharedPreferences("settings", MODE_PRIVATE);
-            if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-                String[] topics = new String[items.size()];
-                for (int i = 0; i < items.size(); i++) {
-                    topics[i] = mqttManager.getVehicleETAsTopicForStation(items.get(i).networkId, items.get(i).id);
-                }
-                if (mqttPartyID >= 0) {
-                    if (prevTopics != null) {
-                        if (prevTopics.length == topics.length) {
-                            boolean containsAll = true;
-                            List<String> pt = Arrays.asList(prevTopics);
-                            for (String topic : topics) {
-                                if (!pt.contains(topic)) {
-                                    containsAll = false;
-                                    break;
-                                }
-                            }
-                            if (containsAll) {
-                                // no changes since last subscription
-                                return;
+            String[] topics = new String[items.size()];
+            for (int i = 0; i < items.size(); i++) {
+                topics[i] = mqttManager.getVehicleETAsTopicForStation(items.get(i).networkId, items.get(i).id);
+            }
+            if (mqttPartyID >= 0) {
+                if (prevTopics != null) {
+                    if (prevTopics.length == topics.length) {
+                        boolean containsAll = true;
+                        List<String> pt = Arrays.asList(prevTopics);
+                        for (String topic : topics) {
+                            if (!pt.contains(topic)) {
+                                containsAll = false;
+                                break;
                             }
                         }
+                        if (containsAll) {
+                            // no changes since last subscription
+                            return;
+                        }
                     }
-                    mqttManager.subscribe(mqttPartyID, topics);
-                } else if (!fragmentPaused) { // since this AsyncTask started, the fragment may have paused
-                    mqttPartyID = mqttManager.connect(topics);
                 }
-                prevTopics = topics;
+                mqttManager.subscribe(mqttPartyID, topics);
+            } else if (!fragmentPaused) { // since this AsyncTask started, the fragment may have paused
+                mqttPartyID = mqttManager.connect(topics);
             }
+            prevTopics = topics;
         }
     }
 

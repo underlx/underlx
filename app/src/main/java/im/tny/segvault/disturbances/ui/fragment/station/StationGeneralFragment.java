@@ -6,13 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +13,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Date;
 import java.util.Formatter;
@@ -31,13 +30,12 @@ import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ExtraContentCache;
-import im.tny.segvault.disturbances.MqttManager;
-import im.tny.segvault.disturbances.PreferenceNames;
-import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
 import im.tny.segvault.disturbances.MainService;
+import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
+import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import io.realm.Realm;
@@ -143,9 +141,7 @@ public class StationGeneralFragment extends Fragment {
         final MqttManager mqttManager = Coordinator.get(context).getMqttManager();
 
         SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
-        if (sharedPref.getBoolean(PreferenceNames.LocationEnable, true)) {
-            mqttPartyID = mqttManager.connect(mqttManager.getAllVehicleETAsTopicForStation(networkId, stationId));
-        }
+        mqttPartyID = mqttManager.connect(mqttManager.getAllVehicleETAsTopicForStation(networkId, stationId));
     }
 
     @Override
