@@ -60,7 +60,12 @@ public class S2LSChangeListener implements S2LS.EventListener {
         boolean locationEnabled = sharedPref.getBoolean(PreferenceNames.LocationEnable, true);
 
         if (loc.getState() instanceof InNetworkState) {
-            wfc.setScanInterval(TimeUnit.SECONDS.toMillis(10));
+            int interval = 10;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // "Each foreground app can scan four times in a 2-minute period."
+                interval = 30;
+            }
+            wfc.setScanInterval(TimeUnit.SECONDS.toMillis(interval));
             if (locationEnabled) {
                 wfc.startScanning();
             }
