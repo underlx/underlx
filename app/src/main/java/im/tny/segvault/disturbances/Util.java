@@ -381,6 +381,8 @@ public class Util {
 
     public static String getStringForStationTag(Context context, String tag) {
         switch (tag) {
+            case "a_baby":
+                return context.getString(R.string.frag_station_baby_care);
             case "a_store":
                 return context.getString(R.string.frag_station_stores);
             case "a_wc":
@@ -413,8 +415,14 @@ public class Util {
                 return context.getString(R.string.frag_station_wheelchair_platform);
             case "m_stepfree":
                 return context.getString(R.string.frag_station_reduced_mobility);
+            case "s_client":
+                return context.getString(R.string.frag_station_client_space);
+            case "s_info":
+                return context.getString(R.string.frag_station_info_space);
             case "s_lostfound":
                 return context.getString(R.string.frag_station_lostfound);
+            case "s_navegante":
+                return context.getString(R.string.frag_station_navegante_space);
             case "s_ticket1":
             case "s_ticket2":
             case "s_ticket3":

@@ -116,6 +116,7 @@ public class MapFragment extends TopFragment {
 
     public MapFragment() {
         // Required empty public constructor
+        optionTagSets.add(Arrays.asList("a_baby"));
         optionTagSets.add(Arrays.asList("a_store"));
         optionTagSets.add(Arrays.asList("a_wc"));
         optionTagSets.add(Arrays.asList("a_wifi"));
@@ -133,8 +134,9 @@ public class MapFragment extends TopFragment {
         optionTagSets.add(Arrays.asList("m_platform"));
         optionTagSets.add(Arrays.asList("m_stepfree"));
         optionTagSets.add(Arrays.asList("s_lostfound"));
-        optionTagSets.add(Arrays.asList("s_ticket1", "s_ticket2", "s_ticket3"));
+        optionTagSets.add(Arrays.asList("s_ticket1", "s_ticket2", "s_ticket3", "s_navegante"));
         optionTagSets.add(Arrays.asList("s_urgent_pass"));
+        optionTagSets.add(Arrays.asList("s_info", "s_client"));
     }
 
     @Override
