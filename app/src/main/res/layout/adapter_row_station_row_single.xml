@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
         android:id="@+id/destination1_view"
@@ -19,5 +20,29 @@
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <LinearLayout
+        android:id="@+id/on_platform1_layout"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="start"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:tint="#808080"
+            app:srcCompat="@drawable/ic_directions_run_black_24dp" />
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:tint="#808080"
+            app:srcCompat="@drawable/ic_subway_black_24dp" />
+    </LinearLayout>
 
 </TableRow>

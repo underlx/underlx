@@ -133,14 +133,25 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
                 TextView destinationView = row.findViewById(R.id.destination1_view);
                 destinationView.setText(rows.get(i).direction.getName(isSingle ? 25 : 9));
                 destinationView.setTextColor(rows.get(i).directionStop.getLine().getColor());
+
                 TextView etaView = row.findViewById(R.id.eta1_view);
-                etaView.setText(rows.get(i).eta);
+                if(rows.get(i).onPlatform) {
+                    etaView.setVisibility(View.GONE);
+                    row.findViewById(R.id.on_platform1_layout).setVisibility(View.VISIBLE);
+                } else {
+                    etaView.setText(rows.get(i).eta);
+                }
                 if (!isSingle) {
                     destinationView = row.findViewById(R.id.destination2_view);
                     destinationView.setText(rows.get(i + 1).direction.getName(9));
                     destinationView.setTextColor(rows.get(i + 1).directionStop.getLine().getColor());
                     etaView = row.findViewById(R.id.eta2_view);
-                    etaView.setText(rows.get(i + 1).eta);
+                    if(rows.get(i + 1).onPlatform) {
+                        etaView.setVisibility(View.GONE);
+                        row.findViewById(R.id.on_platform2_layout).setVisibility(View.VISIBLE);
+                    } else {
+                        etaView.setText(rows.get(i + 1).eta);
+                    }
                 }
                 etasLayout.addView(row);
             }

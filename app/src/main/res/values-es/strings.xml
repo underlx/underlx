@@ -458,6 +458,7 @@
     <string name="vehicle_eta_exact_formatted">dentro de %s</string>
     <string name="vehicle_eta_exact_seconds">dentro de %d segundos</string>
     <string name="vehicle_eta_exact_minutes">dentro de %d minutos</string>
+    <string name="vehicle_eta_exact_at_the_platform">en el andén</string>
     <string name="vehicle_eta_lessthan_seconds">en menos de %d segundos</string>
     <string name="vehicle_eta_lessthan_minutes">en menos de %d minutos</string>
     <string name="vehicle_eta_morethan_seconds">en más de %d segundos</string>

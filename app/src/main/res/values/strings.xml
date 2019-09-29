@@ -476,6 +476,7 @@
     <string name="vehicle_eta_exact_formatted">in %s</string>
     <string name="vehicle_eta_exact_seconds">in %d seconds</string>
     <string name="vehicle_eta_exact_minutes">in %d minutes</string>
+    <string name="vehicle_eta_exact_at_the_platform">at the platform</string>
     <string name="vehicle_eta_lessthan_seconds">in less than %d seconds</string>
     <string name="vehicle_eta_lessthan_minutes">in less than %d minutes</string>
     <string name="vehicle_eta_morethan_seconds">in more than %d seconds</string>

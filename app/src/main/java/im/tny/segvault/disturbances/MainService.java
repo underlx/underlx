@@ -409,6 +409,7 @@ public class MainService extends Service {
         public Stop directionStop;
         public String eta;
         public boolean available;
+        public boolean onPlatform;
     }
 
     public static List<ETArow> getETArows(Context context, Map<String, List<API.MQTTvehicleETA>> etas, Station curStation, @Nullable Stop curDirection, boolean withUnavailable, boolean shortText) {
@@ -454,6 +455,9 @@ public class MainService extends Service {
             r.eta = "";
             int i = 0;
             for (API.MQTTvehicleETA eta : lETAs) {
+                if (i == 0) {
+                    r.onPlatform = vehicleETAonPlatform(eta);
+                }
                 if (shortText || i != 0) {
                     if (i == 1) {
                         r.eta += String.format("\n\t\t%s ", context.getString(R.string.vehicle_eta_after_next));
@@ -494,6 +498,11 @@ public class MainService extends Service {
         return statusLines;
     }
 
+    private static boolean vehicleETAonPlatform(API.MQTTvehicleETA eta) {
+        return eta.type.equals("e") && eta instanceof API.MQTTvehicleETAsingleValue &&
+                ((API.MQTTvehicleETAsingleValue) eta).value == 0;
+    }
+
     private static String vehicleETAtoString(Context context, API.MQTTvehicleETA eta) {
         if (eta == null) {
             return context.getString(R.string.vehicle_eta_unavailable);
@@ -515,6 +524,8 @@ public class MainService extends Service {
                             if (((API.MQTTvehicleETAsingleValue) eta).value > 60) {
                                 return String.format(context.getString(R.string.vehicle_eta_exact_formatted),
                                         DateUtils.formatElapsedTime(((API.MQTTvehicleETAsingleValue) eta).value));
+                            } else if (((API.MQTTvehicleETAsingleValue) eta).value == 0) {
+                                return context.getString(R.string.vehicle_eta_exact_at_the_platform);
                             }
                             return String.format(context.getString(R.string.vehicle_eta_exact_seconds), ((API.MQTTvehicleETAsingleValue) eta).value);
                         case "m":
