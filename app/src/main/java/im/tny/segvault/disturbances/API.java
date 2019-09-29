@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -143,6 +144,7 @@ public class API {
         public List<String> stations;
         public List<Schedule> schedule;
         public List<WorldPath> worldPaths;
+        public String externalID;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -473,6 +475,34 @@ public class API {
         public int lower;
         public int upper;
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class MQTTvehiclePosition {
+        @JsonProperty("v")
+        public String vehicle;
+
+        @JsonProperty("p")
+        public String prevStation;
+
+        @JsonProperty("n")
+        public String nextStation;
+
+        @JsonProperty("d")
+        public String direction;
+
+        @JsonProperty("t")
+        public String platform;
+
+        @JsonProperty("c")
+        public int percent;
+
+        @JsonProperty("m")
+        public long made;
+
+        @JsonProperty("f")
+        public int validFor;
+    }
+
     //endregion
 
     private int timeoutMs;

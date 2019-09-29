@@ -541,6 +541,7 @@ public class MapManager {
             API.Line l = t.lines.get(lineid);
             Line line = new Line(net, l.mainLocale, l.names, new HashSet<Stop>(), l.id, l.typCars, l.order);
             line.setColor(Color.parseColor("#" + l.color));
+            line.setExternalID(l.externalID);
             boolean isFirstStationInLine = true;
             for (String sid : l.stations) {
                 API.Station s = t.stations.get(sid);

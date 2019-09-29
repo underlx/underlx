@@ -169,7 +169,7 @@ public class Station extends Zone implements IIDable, Comparable<Station> {
 
         final HashMap<Station, Double> stationCost = new HashMap<>();
         for (Station station : getNetwork().getStations()) {
-            if(!qualifier.acceptable(station)) {
+            if (!qualifier.acceptable(station)) {
                 continue;
             }
             double minDistance = Double.MAX_VALUE;
@@ -338,7 +338,16 @@ public class Station extends Zone implements IIDable, Comparable<Station> {
         this.connURLs = connURLs;
     }
 
+    private float[] worldCoords = null;
+
     public float[] getWorldCoordinates() {
+        if (worldCoords == null) {
+            worldCoords = computeWorldCoordinates();
+        }
+        return worldCoords;
+    }
+
+    private float[] computeWorldCoordinates() {
         // return the center of the coordinates for all the exits...
         // they are close enough together so we can treat Earth as a flat plane
         List<Double> xs = new ArrayList<>();

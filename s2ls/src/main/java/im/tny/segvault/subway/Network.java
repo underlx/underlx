@@ -123,6 +123,7 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
     }
 
     private Map<String, Line> lines = new HashMap<>();
+    private Map<String, Line> linesByExtID = new HashMap<>();
 
     public Collection<Line> getLines() {
         return lines.values();
@@ -132,8 +133,13 @@ public class Network extends SimpleDirectedWeightedGraph<Stop, Connection> imple
         return lines.get(id);
     }
 
+    public Line getLineByExternalID(String id) {
+        return linesByExtID.get(id);
+    }
+
     public void addLine(Line line) {
         lines.put(line.getId(), line);
+        linesByExtID.put(line.getExternalID(), line);
     }
 
     private Map<String, Station> stations = new HashMap<>();

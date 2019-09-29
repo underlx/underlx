@@ -87,6 +87,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.hivemq:hivemq-mqtt-client:1.1.2'
+    implementation 'com.github.googlemaps:android-maps-utils:59a78b57dde9a727a4fe822c4dfca9ae4596615d'
     testImplementation 'junit:junit:4.12'
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
     debugImplementation 'com.uphyca:stetho_realm:2.2.1'

@@ -47,6 +47,7 @@ public class MqttManager {
     private Map<Integer, HashSet<String>> mqttSubscriptionsByParty = new HashMap<>();
     private Map<String, HashSet<Integer>> mqttSubscriptionsByTopic = new HashMap<>();
     private Set<Integer> parties = new HashSet<>();
+    private OnVehiclePositionsReceivedListener onVehiclePositionsReceivedListener = null;
     private final static int SPECIAL_RECONNECT_PARTY_ID = -999;
     private final static int INITIAL_RECONNECT_DELAY_S = 5;
     private final static int MAX_RECONNECT_DELAY_S = 60;
@@ -517,6 +518,8 @@ public class MqttManager {
                         intent.putExtra(EXTRA_VEHICLE_ETAS_NETWORK, network.getId());
                         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(parent.context);
                         bm.sendBroadcast(intent);
+                    } else if ("msgpack/vehiclepos".equals(topicName) || "dev-msgpack/vehiclepos".equals(topicName)) {
+                        parent.processVehiclePositionsMessage(publish.getPayloadAsBytes());
                     }
                 } catch (Exception e) {
                     if (!client.getState().isConnected()) {
@@ -722,6 +725,42 @@ public class MqttManager {
         }
     }
 
+    public interface OnVehiclePositionsReceivedListener {
+        void onVehiclePositionsReceived(List<API.MQTTvehiclePosition> positions);
+    }
+
+    public void setOnVehiclePositionsReceivedListener(OnVehiclePositionsReceivedListener onVehiclePositionsReceivedListener) {
+        this.onVehiclePositionsReceivedListener = onVehiclePositionsReceivedListener;
+    }
+
+    public String getVehiclePositionsTopic() {
+        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean devMode = sharedPref.getBoolean(PreferenceNames.DeveloperMode, false);
+
+        if (devMode) {
+            return "dev-msgpack/vehiclepos";
+        } else {
+            return "msgpack/vehiclepos";
+        }
+    }
+
+    private void processVehiclePositionsMessage(byte[] payload) {
+        ObjectMapper mapper = API.getInstance().getMapper();
+
+        List<API.MQTTvehiclePosition> positions;
+        try {
+            positions = mapper.readValue(payload, new TypeReference<List<API.MQTTvehiclePosition>>() {
+            });
+
+        } catch (IOException e) {
+            // oh well
+            e.printStackTrace();
+            return;
+        }
+        if (onVehiclePositionsReceivedListener != null) {
+            onVehiclePositionsReceivedListener.onVehiclePositionsReceived(positions);
+        }
+    }
 
     public static final String ACTION_VEHICLE_ETAS_UPDATED = "im.tny.segvault.disturbances.action.vehicleeta.updated";
     public static final String EXTRA_VEHICLE_ETAS_NETWORK = "im.tny.segvault.disturbances.extra.vehicleeta.network";

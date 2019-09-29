@@ -237,4 +237,15 @@ public class Line extends Zone implements IColorable, IIDable, Comparable<Line> 
     public WorldPath getPath(String id) {
         return worldPaths.get(id);
     }
+
+    private String externalID;
+
+    public String getExternalID() {
+        return externalID;
+    }
+
+    public void setExternalID(String externalID) {
+        this.externalID = externalID;
+    }
+
 }
