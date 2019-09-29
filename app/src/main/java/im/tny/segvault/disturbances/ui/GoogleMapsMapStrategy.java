@@ -375,6 +375,7 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
             existing = googleMap.addMarker(new MarkerOptions()
                     .position(setMarkerPositionAndHeading(null, points, vehiclePos))
                     .zIndex(100)
+                    .flat(true)
                     .visible(googleMap.getCameraPosition().zoom >= VEHICLE_MARKERS_ZOOM_THRESHOLD));
             iconFactory.setRotation(180);
             iconFactory.setContentRotation(90);
