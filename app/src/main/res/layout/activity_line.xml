@@ -126,7 +126,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <im.tny.segvault.disturbances.ui.util.CustomFAB
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

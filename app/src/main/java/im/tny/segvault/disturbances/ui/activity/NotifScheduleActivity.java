@@ -2,7 +2,6 @@ package im.tny.segvault.disturbances.ui.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
@@ -18,6 +17,7 @@ import java.util.Map;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.model.NotificationRule;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -54,7 +54,7 @@ public class NotifScheduleActivity extends TopActivity {
                 new int[]{android.R.id.text1});
         listView.setAdapter(adapter);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        CustomFAB fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(NotifScheduleActivity.this, EditNotifScheduleActivity.class);
             startActivity(intent);

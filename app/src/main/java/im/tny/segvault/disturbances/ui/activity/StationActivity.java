@@ -13,7 +13,6 @@ import android.os.Bundle;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -45,6 +44,7 @@ import im.tny.segvault.disturbances.ui.fragment.station.StationPOIFragment;
 import im.tny.segvault.disturbances.ui.fragment.station.StationTriviaFragment;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -84,7 +84,7 @@ public class StationActivity extends TopActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final FloatingActionButton fab = findViewById(R.id.fab);
+        final CustomFAB fab = findViewById(R.id.fab);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

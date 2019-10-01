@@ -10,7 +10,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.preference.Preference;
@@ -45,6 +44,7 @@ import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.subway.Line;
 
 public class NotifPreferenceFragment extends XpPreferenceFragment implements
@@ -69,7 +69,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
         if (mListener != null) {
             mListener.checkNavigationDrawerItem(R.id.nav_notif);
         }
-        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        CustomFAB fab = getActivity().findViewById(R.id.fab);
         fab.hide();
         SwipeRefreshLayout srl = getActivity().findViewById(R.id.swipe_container);
         srl.setEnabled(false);

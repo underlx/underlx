@@ -2,7 +2,6 @@ package im.tny.segvault.disturbances.ui.fragment;
 
 import android.content.Context;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.view.Gravity;
@@ -10,6 +9,7 @@ import android.view.ViewGroup;
 
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 
 /**
  * Created by gabriel on 5/6/17.
@@ -23,7 +23,7 @@ public abstract class TopFragment extends Fragment implements MainAddableFragmen
         if (mListener != null) {
             mListener.checkNavigationDrawerItem(getNavDrawerId());
         }
-        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        CustomFAB fab = getActivity().findViewById(R.id.fab);
         if (withFab) {
             fab.show();
 
@@ -46,8 +46,8 @@ public abstract class TopFragment extends Fragment implements MainAddableFragmen
         srl.setOnRefreshListener(null);
     }
 
-    protected FloatingActionButton getFloatingActionButton() {
-        return (FloatingActionButton) getActivity().findViewById(R.id.fab);
+    protected CustomFAB getFloatingActionButton() {
+        return (CustomFAB) getActivity().findViewById(R.id.fab);
     }
 
     protected SwipeRefreshLayout getSwipeRefreshLayout() {

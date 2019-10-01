@@ -37,7 +37,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +57,7 @@ import im.tny.segvault.disturbances.ui.MapStrategy;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.disturbances.ui.util.CustomWebView;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -178,7 +178,7 @@ public class MapFragment extends TopFragment {
 
         this.savedInstanceState = savedInstanceState;
 
-        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        CustomFAB fab = getActivity().findViewById(R.id.fab);
         fab.setImageResource(R.drawable.ic_swap_horiz_white_24dp);
         CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

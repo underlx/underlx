@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.appcompat.widget.Toolbar;
@@ -36,6 +35,7 @@ import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.disturbances.ui.util.ScrollFixMapView;
 import im.tny.segvault.subway.POI;
 import im.tny.segvault.subway.Station;
@@ -61,7 +61,7 @@ public class POIActivity extends TopActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        CustomFAB fab = findViewById(R.id.fab);
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

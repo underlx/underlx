@@ -9,12 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
-import androidx.appcompat.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -27,6 +21,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+
 import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
@@ -36,8 +37,9 @@ import java.util.Map;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.LineStatusCache;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
 import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -68,7 +70,7 @@ public class LineActivity extends TopActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        CustomFAB fab = findViewById(R.id.fab);
         fab.hide();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

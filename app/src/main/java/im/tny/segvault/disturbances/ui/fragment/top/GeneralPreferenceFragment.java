@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.preference.XpPreferenceFragment;
@@ -26,6 +25,7 @@ import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.util.CustomFAB;
 
 public class GeneralPreferenceFragment extends XpPreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {
@@ -49,7 +49,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements
         if (mListener != null) {
             mListener.checkNavigationDrawerItem(R.id.nav_settings);
         }
-        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
+        CustomFAB fab = getActivity().findViewById(R.id.fab);
         fab.hide();
         SwipeRefreshLayout srl = getActivity().findViewById(R.id.swipe_container);
         srl.setEnabled(false);
