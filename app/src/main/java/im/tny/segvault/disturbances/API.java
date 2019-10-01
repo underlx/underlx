@@ -73,9 +73,12 @@ public class API {
     private Context context;
     private long timeSkew;
     private boolean checkedTimeSkew = false;
+    private final Object timeSkewLock = new Object();
 
     public boolean isClockOutOfSync() {
-        return Math.abs(timeSkew) > TimeUnit.MINUTES.toMillis(3) && checkedTimeSkew;
+        synchronized (timeSkewLock) {
+            return Math.abs(timeSkew) > TimeUnit.MINUTES.toMillis(3) && checkedTimeSkew;
+        }
     }
 
     public void setPairManager(PairManager manager) {
@@ -554,8 +557,10 @@ public class API {
             long serverTime = h.getDate();
             if(serverTime != 0) {
                 long requestDuration = new Date().getTime() - requestStart.getTime();
-                timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
-                checkedTimeSkew = true;
+                synchronized (timeSkewLock) {
+                    timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
+                    checkedTimeSkew = true;
+                }
             }
 
             if ("gzip".equals(h.getContentEncoding())) {
@@ -641,8 +646,10 @@ public class API {
             long serverTime = h.getDate();
             if(serverTime != 0) {
                 long requestDuration = new Date().getTime() - requestStart.getTime();
-                timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
-                checkedTimeSkew = true;
+                synchronized (timeSkewLock) {
+                    timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
+                    checkedTimeSkew = true;
+                }
             }
 
             if ("gzip".equals(h.getContentEncoding())) {
