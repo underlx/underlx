@@ -3,8 +3,10 @@ package im.tny.segvault.disturbances;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.text.Spannable;
 import android.util.Base64;
 
@@ -70,7 +72,7 @@ public class API {
     private final Object lock = new Object();
     private Context context;
     private long timeSkew;
-    private boolean checkedTimeSkew;
+    private boolean checkedTimeSkew = false;
 
     public boolean isClockOutOfSync() {
         return Math.abs(timeSkew) > TimeUnit.MINUTES.toMillis(3) && checkedTimeSkew;
@@ -524,9 +526,10 @@ public class API {
     }
 
     private InputStream getRequest(URI uri, boolean authenticate) throws APIException {
+        Date requestStart = new Date();
         try {
             HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
-
+            h.setUseCaches(false);
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
             setCommonRequestProperties(h, authenticate);
@@ -548,15 +551,11 @@ public class API {
                 is = h.getErrorStream();
             }
 
-            Map<String, List<String>> headers = h.getHeaderFields();
-            if (headers.get("Date") != null && headers.get("Date").size() > 0) {
-                try {
-                    Date serverTime = httpDateFormat.parse(headers.get("Date").get(0));
-                    timeSkew = new Date().getTime() - serverTime.getTime();
-                    checkedTimeSkew = true;
-                } catch (ParseException e) {
-                    // oh well
-                }
+            long serverTime = h.getDate();
+            if(serverTime != 0) {
+                long requestDuration = new Date().getTime() - requestStart.getTime();
+                timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
+                checkedTimeSkew = true;
             }
 
             if ("gzip".equals(h.getContentEncoding())) {
@@ -573,7 +572,7 @@ public class API {
     private Map<String, List<String>> headRequest(URI uri, boolean authenticate) throws APIException {
         try {
             HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
-
+            h.setUseCaches(false);
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
             setCommonRequestProperties(h, authenticate);
@@ -606,9 +605,10 @@ public class API {
     }
 
     private InputStream doInputRequest(URI uri, byte[] content, boolean authenticate, String method) throws APIException {
+        Date requestStart = new Date();
         try {
             HttpURLConnection h = (HttpURLConnection) uri.toURL().openConnection();
-
+            h.setUseCaches(false);
             h.setConnectTimeout(timeoutMs);
             h.setReadTimeout(timeoutMs);
             h.setRequestProperty("Content-Type", "application/msgpack");
@@ -638,15 +638,11 @@ public class API {
                 is = h.getErrorStream();
             }
 
-            Map<String, List<String>> headers = h.getHeaderFields();
-            if (headers.get("Date") != null && headers.get("Date").size() > 0) {
-                try {
-                    Date serverTime = httpDateFormat.parse(headers.get("Date").get(0));
-                    timeSkew = new Date().getTime() - serverTime.getTime();
-                    checkedTimeSkew = true;
-                } catch (ParseException e) {
-                    // oh well
-                }
+            long serverTime = h.getDate();
+            if(serverTime != 0) {
+                long requestDuration = new Date().getTime() - requestStart.getTime();
+                timeSkew = requestStart.getTime() + requestDuration / 2 - serverTime;
+                checkedTimeSkew = true;
             }
 
             if ("gzip".equals(h.getContentEncoding())) {
