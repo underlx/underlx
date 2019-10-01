@@ -3,6 +3,8 @@ package im.tny.segvault.disturbances.ui;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import java.util.Collection;
 
 import javax.annotation.Nullable;
@@ -41,6 +43,9 @@ public abstract class MapStrategy {
     }
 
     public void onLowMemory() {
+    }
+
+    public void onSaveInstanceState(@NonNull Bundle outState) {
     }
 
     public void setFilteredStations(Collection<Station> stations) {

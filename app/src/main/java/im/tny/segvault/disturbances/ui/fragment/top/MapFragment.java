@@ -194,12 +194,12 @@ public class MapFragment extends TopFragment {
             }
         });
 
-        tryLoad();
+        tryLoad(true);
         return view;
     }
 
-    private void tryLoad() {
-        if (network != null) {
+    private void tryLoad(boolean initial) {
+        if (network != null && !initial) {
             return;
         }
         network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
@@ -255,7 +255,7 @@ public class MapFragment extends TopFragment {
         if (strategy == null) {
             return;
         }
-        if (currentMapStrategy instanceof WebViewMapStrategy && strategy instanceof WebViewMapStrategy) {
+        if (next && currentMapStrategy instanceof WebViewMapStrategy && strategy instanceof WebViewMapStrategy) {
             // faster map switching when switching between HtmlDiagrams
             ((WebViewMapStrategy) currentMapStrategy).switchMap((Network.HtmlDiagram) selectedMap);
         } else {
@@ -267,6 +267,7 @@ public class MapFragment extends TopFragment {
             currentMapStrategy = strategy;
             currentMapStrategy.setMockLocation(mockLocationMode);
             currentMapStrategy.initialize(container, selectedMap, savedInstanceState);
+            currentMapStrategy.onResume();
         }
         if (filterItem != null) {
             filterItem.setVisible(strategy.isFilterable());
@@ -418,6 +419,18 @@ public class MapFragment extends TopFragment {
         }
 
         @Override
+        public void onResume() {
+            super.onResume();
+            webview.onResume();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            webview.onPause();
+        }
+
+        @Override
         public boolean isFilterable() {
             return false;
         }
@@ -532,6 +545,14 @@ public class MapFragment extends TopFragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (currentMapStrategy != null) {
+            currentMapStrategy.onSaveInstanceState(outState);
+        }
+    }
+
     private void showTargetPrompt() {
         Context context = getContext();
         boolean isFirstOpen = false;
@@ -623,7 +644,7 @@ public class MapFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    tryLoad();
+                    tryLoad(false);
                     break;
             }
         }

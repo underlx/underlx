@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -95,6 +97,8 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
     private Map<String, Marker> vehicleMarkers = new HashMap<>();
     private boolean mapLayoutReady = false;
     private boolean mapReady = false;
+    private boolean mapReadyWaitingOnLayout = false;
+    private Bundle savedInstanceState;
 
     private int mqttPartyID = -1;
 
@@ -118,6 +122,7 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
 
     @Override
     public void initialize(FrameLayout parent, Network.Plan map, @Nullable Bundle savedInstanceState) {
+        this.savedInstanceState = savedInstanceState;
         iconFactory = new TrainIconGenerator(context);
         mapView = new ScrollFixMapView(context);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -129,7 +134,7 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
             vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 public void onGlobalLayout() {
                     mapLayoutReady = true;
-                    if (mapReady) {
+                    if (mapReady || mapReadyWaitingOnLayout) {
                         onMapReady(googleMap);
                     }
                     // remove the listener... or we'll be doing this a lot.
@@ -140,9 +145,6 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
         }
 
         mapView.onCreate(savedInstanceState);
-
-        mapView.onResume(); // needed to get the map to display immediately
-
         mapView.getMapAsync(this);
     }
 
@@ -169,6 +171,7 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
         if (!mapLayoutReady) {
+            mapReadyWaitingOnLayout = true;
             return;
         }
         googleMap.getUiSettings().setZoomControlsEnabled(false);
@@ -188,9 +191,15 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
         putPolylines();
         putMarkers(network.getStations(), builder);
 
-        LatLngBounds bounds = builder.build();
-        int padding = 64; // offset from edges of the map in pixels
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        CameraUpdate cu;
+        if (savedInstanceState == null) {
+            LatLngBounds bounds = builder.build();
+            int padding = 64; // offset from edges of the map in pixels
+            cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        } else {
+            cu = CameraUpdateFactory.newCameraPosition(
+                    savedInstanceState.getParcelable(STATE_CAMERA_POSITION));
+        }
         googleMap.moveCamera(cu);
 
         // we can now begin adding train markers
@@ -562,6 +571,17 @@ public class GoogleMapsMapStrategy extends MapStrategy implements
     public void onLowMemory() {
         if (mapView != null) {
             mapView.onLowMemory();
+        }
+    }
+
+    public static final String STATE_CAMERA_POSITION = "cameraPosition";
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (googleMap != null && mapReady) {
+            outState.putParcelable(STATE_CAMERA_POSITION, googleMap.getCameraPosition());
         }
     }
 
