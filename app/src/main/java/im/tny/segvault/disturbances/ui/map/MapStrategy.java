@@ -1,4 +1,4 @@
-package im.tny.segvault.disturbances.ui;
+package im.tny.segvault.disturbances.ui.map;
 
 import android.os.Bundle;
 import android.widget.FrameLayout;

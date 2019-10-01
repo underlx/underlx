@@ -20,9 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -36,14 +33,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import im.tny.segvault.disturbances.BuildConfig;
 import im.tny.segvault.disturbances.Coordinator;
@@ -52,13 +45,12 @@ import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.ui.GoogleMapsMapStrategy;
-import im.tny.segvault.disturbances.ui.MapStrategy;
+import im.tny.segvault.disturbances.ui.map.GoogleMapsMapStrategy;
+import im.tny.segvault.disturbances.ui.map.MapStrategy;
+import im.tny.segvault.disturbances.ui.map.WebViewMapStrategy;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
-import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.disturbances.ui.util.CustomFAB;
-import im.tny.segvault.disturbances.ui.util.CustomWebView;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
@@ -231,7 +223,7 @@ public class MapFragment extends TopFragment {
 
         MapStrategy strategy = null;
         if (selectedMap instanceof Network.HtmlDiagram) {
-            strategy = new WebViewMapStrategy();
+            strategy = new WebViewMapStrategy(getContext(), networkId);
         } else if (selectedMap instanceof Network.WorldMap) {
             strategy = new GoogleMapsMapStrategy(getContext(), getLayoutInflater(), network,
                     () -> {
@@ -394,63 +386,6 @@ public class MapFragment extends TopFragment {
 
     public enum MapFilterType {UNION, INTERSECTION}
 
-    private class WebViewMapStrategy extends MapStrategy {
-        private WebView webview;
-
-        @Override
-        public void initialize(FrameLayout parent, Network.Plan map, @Nullable Bundle savedInstanceState) {
-            webview = new CustomWebView(getContext());
-            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            webview.setLayoutParams(lp);
-            parent.addView(webview);
-
-            WebSettings webSettings = webview.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-            webview.addJavascriptInterface(new MapWebInterface(getContext()), "android");
-
-            webview.getSettings().setLoadWithOverviewMode(true);
-            webview.getSettings().setSupportZoom(true);
-            webview.getSettings().setBuiltInZoomControls(true);
-            webview.getSettings().setDisplayZoomControls(false);
-
-            Network.HtmlDiagram m = (Network.HtmlDiagram) map;
-            webview.getSettings().setUseWideViewPort(m.needsWideViewport());
-            webview.loadUrl(m.getUrl());
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            webview.onResume();
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-            webview.onPause();
-        }
-
-        @Override
-        public boolean isFilterable() {
-            return false;
-        }
-
-        @Override
-        public void zoomIn() {
-            webview.zoomIn();
-        }
-
-        @Override
-        public void zoomOut() {
-            webview.zoomOut();
-        }
-
-        public void switchMap(Network.HtmlDiagram map) {
-            webview.getSettings().setUseWideViewPort(map.needsWideViewport());
-            webview.loadUrl(map.getUrl());
-        }
-    }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -592,33 +527,6 @@ public class MapFragment extends TopFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public class MapWebInterface {
-        Context mContext;
-        ObjectMapper mapper = new ObjectMapper();
-
-        /**
-         * Instantiate the interface and set the context
-         */
-        MapWebInterface(Context c) {
-            mContext = c;
-        }
-
-        @JavascriptInterface
-        public void onStationClicked(String id) {
-            if (currentMapStrategy.getMockLocation()) {
-                Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
-                if (net != null) {
-                    Coordinator.get(getContext()).mockLocation(net.getStation(id));
-                }
-            } else {
-                Intent intent = new Intent(getContext(), StationActivity.class);
-                intent.putExtra(StationActivity.EXTRA_STATION_ID, id);
-                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, networkId);
-                startActivity(intent);
-            }
-        }
     }
 
     /**
