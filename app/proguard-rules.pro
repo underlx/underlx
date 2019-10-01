@@ -51,6 +51,19 @@
 -keep public class com.google.android.gms.* { public *; }
  -dontwarn com.google.android.gms.**
 
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keepnames class * implements android.os.Parcelable {
+ public static final ** CREATOR;
+}
+
 -keep class android.support.v7.widget.SearchView { *; }
 
 # okhttp (used by picasso) rules follow
