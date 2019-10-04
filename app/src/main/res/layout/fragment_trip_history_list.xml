@@ -127,7 +127,6 @@
             android:layout_marginBottom="8dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
-            android:gravity="center"
             android:visibility="gone">
 
             <LinearLayout
