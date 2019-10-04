@@ -37,6 +37,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
     private Button button;
 
     private int lastKnownPercentage = 0;
+    private boolean lastKnownIsFailure = false;
     private boolean canLeave = false;
 
     public static FinishIntroSlide newInstance() {
@@ -84,7 +85,7 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
 
         if(m.getNetworks().size() == 0) {
             title.setText(R.string.intro_finish_wait_title);
-            if(!Connectivity.isConnected(getContext())) {
+            if(!Connectivity.isConnected(getContext()) || lastKnownIsFailure) {
                 image.setImageResource(R.drawable.ic_frowning_intro);
                 description.setText(R.string.intro_finish_connect_desc);
                 button.setText(R.string.intro_finish_try_again);
@@ -158,10 +159,17 @@ public class FinishIntroSlide extends Fragment implements ISlideSelectionListene
             switch (intent.getAction()) {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_PROGRESS:
                     lastKnownPercentage = intent.getIntExtra(MapManager.EXTRA_UPDATE_TOPOLOGY_PROGRESS, 0);
+                    lastKnownIsFailure = false;
                     refresh();
                     break;
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                    lastKnownPercentage = 100;
+                    if (intent.getBooleanExtra(MapManager.EXTRA_UPDATE_TOPOLOGY_FINISHED, false)) {
+                        lastKnownPercentage = 100;
+                        lastKnownIsFailure = false;
+                    } else {
+                        lastKnownPercentage = 0;
+                        lastKnownIsFailure = true;
+                    }
                     refresh();
                     break;
             }
