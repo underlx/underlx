@@ -242,6 +242,7 @@ public class API {
         public String status;
         public String source;
         public String msgType;
+        public boolean officialSource;
 
         @JsonIgnore
         public Spannable enrichStatus(Context context, String networkID, String lineID) {
@@ -250,8 +251,7 @@ public class API {
 
         @JsonIgnore
         public boolean isOfficial() {
-            // TODO this is a stub
-            return source.equals("mlxscraper-pt-ml");
+            return officialSource;
         }
     }
 
