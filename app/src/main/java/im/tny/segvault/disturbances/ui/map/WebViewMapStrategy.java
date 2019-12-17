@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances.ui.map;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -30,7 +31,13 @@ public class WebViewMapStrategy extends MapStrategy {
 
     @Override
     public void initialize(FrameLayout parent, Network.Plan map, @Nullable Bundle savedInstanceState) {
-        webview = new CustomWebView(context);
+        try {
+            webview = new CustomWebView(context);
+        } catch (Resources.NotFoundException e) {
+            // Some older devices can crash when instantiating a WebView, due to a Resources$NotFoundException
+            // Creating with the application Context fixes this, but is not generally recommended for view creation
+            webview = new CustomWebView(context.getApplicationContext());
+        }
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         webview.setLayoutParams(lp);
         parent.addView(webview);
