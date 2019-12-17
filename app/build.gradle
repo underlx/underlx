@@ -59,6 +59,8 @@ android {
 }
 
 dependencies {
+    def work_version = "2.2.0"
+
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
@@ -67,7 +69,7 @@ dependencies {
     implementation project(':s2ls')
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     implementation 'org.msgpack:jackson-dataformat-msgpack:0.8.16'
-    implementation 'com.evernote:android-job:1.2.6'
+    implementation 'com.evernote:android-job:1.4.2'
     implementation 'info.debatty:java-string-similarity:1.1.0'
     implementation 'org.sufficientlysecure:html-textview:3.6'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
@@ -76,11 +78,13 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0'
-    implementation 'com.google.firebase:firebase-core:17.2.0'
-    implementation 'com.google.firebase:firebase-messaging:20.0.0'
+    implementation 'androidx.exifinterface:exifinterface:1.1.0'
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-gcm:$work_version"
+    implementation 'com.google.firebase:firebase-core:17.2.1'
+    implementation 'com.google.firebase:firebase-messaging:20.1.0'
     implementation 'net.xpece.android:support-preference:2.3.2'
     implementation 'com.code-troopers.betterpickers:library:3.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
