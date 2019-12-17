@@ -30,13 +30,19 @@
         tools:context="im.tny.segvault.disturbances.ui.activity.MainActivity">
 
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/main_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true"
-            android:scrollbars="vertical"
             android:descendantFocusability="beforeDescendants"
-            android:focusableInTouchMode="true"/>
+            android:fillViewport="true"
+            android:focusableInTouchMode="true"
+            android:scrollbars="vertical">
+            <!-- this hopefully fixes a IllegalStateException crash on onBackPressed -->
+            <!-- https://stackoverflow.com/a/50759264 -->
+            <FrameLayout
+                android:id="@+id/main_fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.core.widget.NestedScrollView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <FrameLayout
