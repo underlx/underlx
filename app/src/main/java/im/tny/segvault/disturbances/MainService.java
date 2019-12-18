@@ -15,8 +15,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.text.Spannable;
@@ -37,8 +43,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Feedback;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.Feedback;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
@@ -61,13 +68,20 @@ import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_BACKGROUND_
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_HIGH_ID;
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_ID;
 
-public class MainService extends Service {
+public class MainService extends Service implements LifecycleOwner {
     private Date creationDate = null;
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
     private Realm realmForListeners;
+
+    private final ServiceLifecycleDispatcher mDispatcher = new ServiceLifecycleDispatcher(this);
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mDispatcher.getLifecycle();
+    }
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -91,6 +105,9 @@ public class MainService extends Service {
 
     @Override
     public void onCreate() {
+        mDispatcher.onServicePreSuperOnCreate();
+        super.onCreate();
+
         LocaleUtil.updateResources(this);
         creationDate = new Date();
         API.getInstance().setContext(getApplicationContext());
@@ -108,10 +125,18 @@ public class MainService extends Service {
         realmForListeners = Application.getDefaultRealmInstance(this);
         tripRealmResults = realmForListeners.where(Trip.class).findAll();
         tripRealmResults.addChangeListener(tripRealmChangeListener);
-        feedbackRealmResults = realmForListeners.where(Feedback.class).findAll();
-        feedbackRealmResults.addChangeListener(feedbackRealmChangeListener);
         favStationsRealmResults = realmForListeners.where(RStation.class).equalTo("favorite", true).findAll();
         favStationsRealmResults.addChangeListener(favStationsRealmChangeListener);
+
+        AppDatabase db = Coordinator.get(this).getDB();
+        db.feedbackDao().getUnsyncedObservable().observe(this, new Observer<List<Feedback>>() {
+            @Override
+            public void onChanged(List<Feedback> feedbacks) {
+                Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
+                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+                bm.sendBroadcast(intent);
+            }
+        });
 
         Coordinator.get(this).registerMainService(this);
         Coordinator.get(this).reloadFCMsubscriptions();
@@ -129,9 +154,18 @@ public class MainService extends Service {
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
         tripRealmResults.removeChangeListener(tripRealmChangeListener);
-        feedbackRealmResults.removeChangeListener(feedbackRealmChangeListener);
         favStationsRealmResults.removeChangeListener(favStationsRealmChangeListener);
         realmForListeners.close();
+        mDispatcher.onServicePreSuperOnDestroy();
+        super.onDestroy();
+    }
+
+    @SuppressWarnings("deprecation")
+    @CallSuper
+    @Override
+    public void onStart(Intent intent, int startId) {
+        mDispatcher.onServicePreSuperOnStart();
+        super.onStart(intent, startId);
     }
 
     @Override
@@ -221,6 +255,7 @@ public class MainService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mDispatcher.onServicePreSuperOnBind();
         return mBinder;
     }
 
@@ -706,13 +741,6 @@ public class MainService extends Service {
     };
 
     public static final String ACTION_FEEDBACK_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.feedback.updated";
-
-    private RealmResults<Feedback> feedbackRealmResults;
-    private final RealmChangeListener<RealmResults<Feedback>> feedbackRealmChangeListener = element -> {
-        Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-        bm.sendBroadcast(intent);
-    };
 
     public static final String ACTION_FAVORITE_STATIONS_UPDATED = "im.tny.segvault.disturbances.action.realm.station.favorite.updated";
 

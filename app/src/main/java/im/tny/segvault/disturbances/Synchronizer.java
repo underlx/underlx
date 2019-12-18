@@ -10,8 +10,11 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Feedback;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.disturbances.model.Trip;
@@ -83,19 +86,22 @@ public class Synchronizer {
                         }
                     }
                 }
+            });
+            realm.close();
 
-                RealmResults<im.tny.segvault.disturbances.model.Feedback> unsyncedFeedback = realm1.where(im.tny.segvault.disturbances.model.Feedback.class).equalTo("synced", false).findAll();
-                for (im.tny.segvault.disturbances.model.Feedback f : unsyncedFeedback) {
+            AppDatabase db = Coordinator.get(context).getDB();
+            db.runInTransaction(() -> {
+                for (Feedback f : db.feedbackDao().getUnsynced()) {
                     API.Feedback request = feedbackToAPIRequest(f);
                     try {
                         API.getInstance().postFeedback(request);
-                        f.setSynced(true);
+                        f.synced = true;
+                        db.feedbackDao().updateAll(f);
                     } catch (APIException e) {
                         e.printStackTrace();
                     }
                 }
             });
-            realm.close();
             lastSync = new Date();
             Log.d("sync", "Sync done");
         }
@@ -126,12 +132,12 @@ public class Synchronizer {
         return apiUse;
     }
 
-    private API.Feedback feedbackToAPIRequest(im.tny.segvault.disturbances.model.Feedback f) {
+    private API.Feedback feedbackToAPIRequest(Feedback f) {
         API.Feedback request = new API.Feedback();
-        request.id = f.getId();
-        request.timestamp = new long[]{f.getTimestamp().getTime() / 1000, (f.getTimestamp().getTime() % 1000) * 1000000};
-        request.type = f.getType();
-        request.contents = f.getContents();
+        request.id = f.id;
+        request.timestamp = new long[]{f.timestamp.getTime() / 1000, (f.timestamp.getTime() % 1000) * 1000000};
+        request.type = f.type;
+        request.contents = f.contents;
         return request;
     }
 
@@ -150,7 +156,7 @@ public class Synchronizer {
             switch (intent.getAction()) {
                 case MainService.ACTION_TRIP_REALM_UPDATED:
                 case MainService.ACTION_FEEDBACK_REALM_UPDATED:
-                    // TODO. this may cause cycles (we change the realm ourselves)
+                    // TODO. this may cause cycles (we change the database ourselves)
                     new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
             }

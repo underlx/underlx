@@ -11,6 +11,7 @@ import android.net.wifi.ScanResult;
 import android.os.Build;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.room.Room;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -23,6 +24,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -53,6 +55,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     private MainService mainService;
     private final Object lock = new Object();
 
+    private AppDatabase db;
     private PairManager pairManager;
     private Synchronizer synchronizer;
     private MapManager mapManager;
@@ -65,6 +68,10 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     private Coordinator(Context context) {
         this.context = context.getApplicationContext();
+
+        db = Room.databaseBuilder(context, AppDatabase.class, "underlx")
+                .fallbackToDestructiveMigration()
+                .build();
 
         pairManager = new PairManager(this.context);
         //pairManager.unpair();
@@ -92,6 +99,10 @@ public class Coordinator implements MapManager.OnLoadListener {
         reloadFCMsubscriptions();
 
         OurJobCreator.scheduleAllJobs();
+    }
+
+    public AppDatabase getDB() {
+        return db;
     }
 
     public PairManager getPairManager() {

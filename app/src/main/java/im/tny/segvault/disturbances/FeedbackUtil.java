@@ -3,25 +3,29 @@ package im.tny.segvault.disturbances;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
+
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
+
+import android.os.AsyncTask;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import im.tny.segvault.disturbances.model.Feedback;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Feedback;
 import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.subway.Station;
-import io.realm.Realm;
 
 /**
  * Created by gabriel on 9/19/17.
@@ -57,7 +61,9 @@ public class FeedbackUtil {
                     .setTitle(R.string.feedback_location_title)
                     .setMessage(R.string.feedback_location_where_are_you)
                     .setPositiveButton(R.string.feedback_location_in_subway, (dialog, whichButton) -> askCurrentStation())
-                    .setNegativeButton(R.string.feedback_location_outside, (dialog, whichButton) -> sendReport(null)).show();
+                    .setNegativeButton(R.string.feedback_location_outside,
+                            (dialog, whichButton) ->
+                                    new StoreFeedbackTask(context, incorrectStation, null).execute()).show();
         }
 
         private void askCurrentStation() {
@@ -80,7 +86,7 @@ public class FeedbackUtil {
                             .setMessage(R.string.feedback_location_select_station)
                             .setPositiveButton(R.string.feedback_location_action_select, (dialog, which) -> {
                                 if (spv.getSelection() != null) {
-                                    sendReport(spv.getSelection());
+                                    new StoreFeedbackTask(context, incorrectStation, spv.getSelection()).execute();
                                 } else {
                                     askCurrentStation();
                                 }
@@ -95,42 +101,69 @@ public class FeedbackUtil {
             dialog.show();
         }
 
-        private void sendReport(@Nullable Station correctStation) {
-            // build report
-            Map<String, Object> map = new HashMap<>();
-            if (incorrectStation == null) {
-                map.put("incorrectStation", "none");
-            } else {
-                map.put("incorrectStation", incorrectStation.getId());
-            }
-            if (correctStation == null) {
-                map.put("correctStation", "none");
-            } else {
-                map.put("correctStation", correctStation.getId());
-            }
-            map.put("wiFiScanResults", scanResults);
+        private static class StoreFeedbackTask extends AsyncTask<Void, Void, Void> {
+            private WeakReference<Context> contextRef;
 
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                String jsonResult = mapper.writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(map);
-                Realm realm = Application.getDefaultRealmInstance(context);
-                realm.beginTransaction();
-                Feedback feedback = realm.createObject(Feedback.class, UUID.randomUUID().toString());
-                feedback.setSynced(false);
-                feedback.setTimestamp(new Date());
-                feedback.setType("s2ls-incorrect-detection");
-                feedback.setContents(jsonResult);
-                realm.copyToRealm(feedback);
-                realm.commitTransaction();
-                realm.close();
+            @Nullable
+            private Station incorrectStation = null;
 
-                Intent intent = new Intent(ACTION_FEEDBACK_PROVIDED);
-                intent.putExtra(EXTRA_FEEDBACK_PROVIDED_DELAYED, !Connectivity.isConnected(context));
-                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
-                bm.sendBroadcast(intent);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
+            @Nullable
+            private Station correctStation = null;
+
+            StoreFeedbackTask(Context context,
+                              @Nullable Station incorrectStation,
+                              @Nullable Station correctStation) {
+                this.contextRef = new WeakReference<>(context);
+                this.incorrectStation = incorrectStation;
+                this.correctStation = correctStation;
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Context context = contextRef.get();
+                if (context == null) {
+                    return null;
+                }
+
+                // build report
+                Map<String, Object> map = new HashMap<>();
+                if (incorrectStation == null) {
+                    map.put("incorrectStation", "none");
+                } else {
+                    map.put("incorrectStation", incorrectStation.getId());
+                }
+                if (correctStation == null) {
+                    map.put("correctStation", "none");
+                } else {
+                    map.put("correctStation", correctStation.getId());
+                }
+                map.put("wiFiScanResults", Coordinator.get(context).getLastWiFiScanResults());
+
+                ObjectMapper mapper = new ObjectMapper();
+                AppDatabase db = Coordinator.get(context).getDB();
+
+                try {
+                    String jsonResult = mapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(map);
+                    db.runInTransaction(() -> {
+                        Feedback feedback = new Feedback();
+                        feedback.id = UUID.randomUUID().toString();
+                        feedback.synced = false;
+                        feedback.timestamp = new Date();
+                        feedback.type = "s2ls-incorrect-detection";
+                        feedback.contents = jsonResult;
+                        db.feedbackDao().insertAll(feedback);
+                    });
+
+                    Intent intent = new Intent(ACTION_FEEDBACK_PROVIDED);
+                    intent.putExtra(EXTRA_FEEDBACK_PROVIDED_DELAYED, !Connectivity.isConnected(context));
+                    LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
+                    bm.sendBroadcast(intent);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+
+                return null;
             }
         }
     }

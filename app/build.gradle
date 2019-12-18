@@ -60,6 +60,7 @@ android {
 
 dependencies {
     def work_version = "2.2.0"
+    def room_version = "2.2.3"
 
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -81,8 +82,14 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.1.0'
+
     implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.work:work-gcm:$work_version"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
+
     implementation 'com.google.firebase:firebase-core:17.2.1'
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
     implementation 'net.xpece.android:support-preference:2.3.2'
