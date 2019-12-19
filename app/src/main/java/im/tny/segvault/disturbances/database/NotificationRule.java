@@ -27,7 +27,7 @@ public class NotificationRule {
     @NonNull
     public String name = "";
 
-    public boolean enabled;
+    public boolean enabled = true;
 
     public long startTime;
 

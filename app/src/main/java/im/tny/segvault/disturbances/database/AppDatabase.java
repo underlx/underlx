@@ -14,4 +14,5 @@ import androidx.room.TypeConverters;
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract FeedbackDao feedbackDao();
+    public abstract NotificationRuleDao notificationRuleDao();
 }

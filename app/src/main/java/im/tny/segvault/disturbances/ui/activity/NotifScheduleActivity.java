@@ -1,30 +1,26 @@
 package im.tny.segvault.disturbances.ui.activity;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import im.tny.segvault.disturbances.Application;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.model.NotificationRule;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.NotificationRule;
 import im.tny.segvault.disturbances.ui.util.CustomFAB;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 
 public class NotifScheduleActivity extends TopActivity {
-    private Realm realmForListeners;
-    private RealmResults<NotificationRule> results;
     private ListView listView;
     private SimpleAdapter adapter;
     private List<Map<String, String>> data = new ArrayList<>();
@@ -60,31 +56,16 @@ public class NotifScheduleActivity extends TopActivity {
             startActivity(intent);
         });
 
-        realmForListeners = Application.getDefaultRealmInstance(this);
-        results = realmForListeners.where(NotificationRule.class).findAll();
-        results.addChangeListener(realmListener);
-        new UpdateDataTask().execute();
-    }
+        AppDatabase db = Coordinator.get(this).getDB();
+        db.notificationRuleDao().getAllLive().observe(this, notificationRules -> {
+            data.clear();
+            for (NotificationRule rule : notificationRules) {
+                Map<String, String> item = new HashMap<>(2);
+                item.put("desc", rule.getDescription(NotifScheduleActivity.this));
+                item.put("id", rule.id);
+                data.add(item);
+            }
 
-    private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            Realm realm = Application.getDefaultRealmInstance(NotifScheduleActivity.this);
-            realm.executeTransaction(realm1 -> {
-                data.clear();
-                for (NotificationRule rule : realm1.where(NotificationRule.class).findAll()) {
-                    Map<String, String> item = new HashMap<>(2);
-                    item.put("desc", rule.getDescription(NotifScheduleActivity.this));
-                    item.put("id", rule.getId());
-                    data.add(item);
-                }
-            });
-            realm.close();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
             if(data.size() == 0) {
                 listView.setVisibility(View.GONE);
                 findViewById(R.id.empty_view).setVisibility(View.VISIBLE);
@@ -93,7 +74,7 @@ public class NotifScheduleActivity extends TopActivity {
                 listView.setVisibility(View.VISIBLE);
             }
             adapter.notifyDataSetChanged();
-        }
+        });
     }
 
     @Override
@@ -109,9 +90,5 @@ public class NotifScheduleActivity extends TopActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        results.removeChangeListener(realmListener);
-        realmForListeners.close();
     }
-
-    private RealmChangeListener realmListener = o -> new UpdateDataTask().execute();
 }

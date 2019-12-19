@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import im.tny.segvault.disturbances.model.NotificationRule;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.NotificationRule;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
@@ -139,14 +140,12 @@ public class FCMService extends FirebaseMessagingService {
             return;
         }
 
-        Realm realm = Application.getDefaultRealmInstance(this);
-        for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
-            if (rule.isEnabled() && rule.applies(new Date(remoteMessage.getSentTime()))) {
-                realm.close();
+        AppDatabase db = Coordinator.get(this).getDB();
+        for (NotificationRule rule : db.notificationRuleDao().getAll()) {
+            if (rule.enabled && rule.applies(new Date(remoteMessage.getSentTime()))) {
                 return;
             }
         }
-        realm.close();
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_INITIAL_FRAGMENT, "nav_disturbances");

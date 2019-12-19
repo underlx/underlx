@@ -18,7 +18,7 @@ public interface FeedbackDao {
     List<Feedback> getUnsynced();
 
     @Query("SELECT * FROM feedback WHERE synced = 0")
-    LiveData<List<Feedback>> getUnsyncedObservable();
+    LiveData<List<Feedback>> getUnsyncedLive();
 
     @Insert
     void insertAll(Feedback... feedbacks);

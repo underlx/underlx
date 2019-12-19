@@ -59,7 +59,6 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import im.tny.segvault.subway.Transfer;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -129,7 +128,7 @@ public class MainService extends Service implements LifecycleOwner {
         favStationsRealmResults.addChangeListener(favStationsRealmChangeListener);
 
         AppDatabase db = Coordinator.get(this).getDB();
-        db.feedbackDao().getUnsyncedObservable().observe(this, new Observer<List<Feedback>>() {
+        db.feedbackDao().getUnsyncedLive().observe(this, new Observer<List<Feedback>>() {
             @Override
             public void onChanged(List<Feedback> feedbacks) {
                 Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);

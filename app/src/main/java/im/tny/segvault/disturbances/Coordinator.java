@@ -8,13 +8,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,12 +28,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.model.NotificationRule;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
+import io.realm.Realm;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -99,6 +104,13 @@ public class Coordinator implements MapManager.OnLoadListener {
         reloadFCMsubscriptions();
 
         OurJobCreator.scheduleAllJobs();
+
+        SharedPreferences sharedPref = this.context.getSharedPreferences("settings", MODE_PRIVATE);
+        boolean migratedRealmToRoom = sharedPref.getBoolean("fuse_migrated_realm_to_room", false);
+
+        if (!migratedRealmToRoom) {
+            new RealmToRoomTask(this.context).execute();
+        }
     }
 
     public AppDatabase getDB() {
@@ -379,4 +391,53 @@ public class Coordinator implements MapManager.OnLoadListener {
         return navImageCredits[lastSelectedNavImageOffset];
     }
     //endregion
+
+    private static class RealmToRoomTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<Context> contextRef;
+
+        RealmToRoomTask(Context context) {
+            this.contextRef = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            Context context = contextRef.get();
+            if (context == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(context).getDB();
+
+            Realm realm = Application.getDefaultRealmInstance(context);
+            try {
+                db.runInTransaction(() -> {
+                    for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
+                        im.tny.segvault.disturbances.database.NotificationRule newRule = new im.tny.segvault.disturbances.database.NotificationRule();
+                        newRule.id = rule.getId();
+                        newRule.enabled = rule.isEnabled();
+                        newRule.name = rule.getName();
+                        newRule.weekDays = new int[rule.getWeekDays().size()];
+                        for (int i = 0; i < rule.getWeekDays().size(); i++)
+                            newRule.weekDays[i] = rule.getWeekDays().get(i);
+                        newRule.startTime = rule.getStartTime();
+                        newRule.endTime = rule.getEndTime();
+                        db.notificationRuleDao().insertOrUpdateAll(newRule);
+                    }
+                });
+
+                // TODO uncomment when we're done writing migration code
+                /*SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+                SharedPreferences.Editor e = sharedPref.edit();
+                e.putBoolean("fuse_migrated_realm_to_room", true);
+                e.apply();*/
+            } catch (Exception e) {
+                Log.w("RealmToRoom", "Migration failed: " + e);
+                e.printStackTrace();
+                return false;
+            } finally {
+                realm.close();
+            }
+            return true;
+        }
+    }
 }
