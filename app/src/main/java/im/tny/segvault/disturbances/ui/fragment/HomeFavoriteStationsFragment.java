@@ -29,7 +29,7 @@ import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
-import im.tny.segvault.disturbances.database.StationPreferences;
+import im.tny.segvault.disturbances.database.StationPreference;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.adapter.StationRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
@@ -179,8 +179,8 @@ public class HomeFavoriteStationsFragment extends Fragment {
             } else {
                 // show true favorites
                 AppDatabase db = Coordinator.get(getContext()).getDB();
-                List<StationPreferences> favorite = db.stationPreferencesDao().getFavorite();
-                for(StationPreferences f : favorite) {
+                List<StationPreference> favorite = db.stationPreferenceDao().getFavorite();
+                for(StationPreference f : favorite) {
                     items.add(new StationRecyclerViewAdapter.StationItem(f.stationID, f.networkID, getContext()));
                 }
             }

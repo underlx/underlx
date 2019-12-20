@@ -11,24 +11,25 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.core.view.ViewCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.tabs.TabLayout;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -37,21 +38,19 @@ import java.util.List;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.Coordinator;
-import im.tny.segvault.disturbances.database.AppDatabase;
-import im.tny.segvault.disturbances.ui.util.AppBarStateChangeListener;
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationPreference;
 import im.tny.segvault.disturbances.ui.fragment.station.StationGeneralFragment;
 import im.tny.segvault.disturbances.ui.fragment.station.StationLobbyFragment;
 import im.tny.segvault.disturbances.ui.fragment.station.StationPOIFragment;
 import im.tny.segvault.disturbances.ui.fragment.station.StationTriviaFragment;
-import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.ui.util.AppBarStateChangeListener;
 import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
-import io.realm.Realm;
 
 public class StationActivity extends TopActivity
         implements StationGeneralFragment.OnFragmentInteractionListener,
@@ -97,7 +96,7 @@ public class StationActivity extends TopActivity
         ViewPager pager = findViewById(R.id.pager);
         pager.setAdapter(new StationPagerAdapter(getSupportFragmentManager(), this, networkId, stationId, lobbyId));
         tabLayout.setupWithViewPager(pager);
-        if(lobbyId != null && !lobbyId.isEmpty()) {
+        if (lobbyId != null && !lobbyId.isEmpty()) {
             pager.setCurrentItem(1);
         }
 
@@ -210,21 +209,7 @@ public class StationActivity extends TopActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.station, menu);
 
-        Realm realm = Application.getDefaultRealmInstance(this);
-        RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
-        boolean isFavorite = false;
-        if (rstation != null) {
-            isFavorite = rstation.isFavorite();
-        }
-        realm.close();
-        MenuItem favItem = menu.findItem(R.id.menu_favorite);
-        if (isFavorite) {
-            favItem.setTitle(R.string.act_station_favorite);
-            favItem.setIcon(R.drawable.ic_star_white_24dp);
-        } else {
-            favItem.setTitle(R.string.act_station_unfavorite);
-            favItem.setIcon(R.drawable.ic_star_border_white_24dp);
-        }
+        new LoadFavoriteTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         return true;
     }
 
@@ -261,25 +246,21 @@ public class StationActivity extends TopActivity
                 }
                 return true;
             case R.id.menu_favorite:
-                Realm realm = Application.getDefaultRealmInstance(this);
-                realm.beginTransaction();
-                RStation rstation = realm.where(RStation.class).equalTo("id", stationId).findFirst();
-                boolean isFavorite = rstation.isFavorite();
-                isFavorite = !isFavorite;
-                rstation.setFavorite(isFavorite);
-                realm.copyToRealm(rstation);
-                realm.commitTransaction();
-                realm.close();
-                if (isFavorite) {
-                    item.setTitle(R.string.act_station_favorite);
-                    item.setIcon(R.drawable.ic_star_white_24dp);
-                } else {
-                    item.setTitle(R.string.act_station_unfavorite);
-                    item.setIcon(R.drawable.ic_star_border_white_24dp);
-                }
+                new FlipFavoriteTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setFavoriteMenuItem(boolean isFavorite) {
+        MenuItem favItem = optionsMenu.findItem(R.id.menu_favorite);
+        if (isFavorite) {
+            favItem.setTitle(R.string.act_station_unfavorite);
+            favItem.setIcon(R.drawable.ic_star_white_24dp);
+        } else {
+            favItem.setTitle(R.string.act_station_favorite);
+            favItem.setIcon(R.drawable.ic_star_border_white_24dp);
+        }
     }
 
     private static class LoadFavoriteTask extends AsyncTask<Void, Void, Boolean> {
@@ -298,20 +279,60 @@ public class StationActivity extends TopActivity
 
             AppDatabase db = Coordinator.get(parent).getDB();
 
-            return db.stationPreferencesDao().isFavorite(parent.stationId);
+            return db.stationPreferenceDao().isFavorite(parent.stationId);
         }
 
         @Override
         protected void onPostExecute(Boolean isFavorite) {
             super.onPostExecute(isFavorite);
-            if (isFavorite) {
-                StationActivity parent = parentRef.get();
-                if (parent == null) {
-                    return;
-                }
-
-
+            StationActivity parent = parentRef.get();
+            if (parent == null) {
+                return;
             }
+
+            parent.setFavoriteMenuItem(isFavorite);
+        }
+    }
+
+    private static class FlipFavoriteTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<StationActivity> parentRef;
+
+        FlipFavoriteTask(StationActivity activity) {
+            this.parentRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            StationActivity parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent).getDB();
+
+            StationPreference sp = db.stationPreferenceDao().getForStation(parent.stationId);
+            if (sp == null) {
+                sp = new StationPreference();
+                sp.stationID = parent.stationId;
+                sp.networkID = parent.networkId;
+                sp.favorite = true;
+                db.stationPreferenceDao().insertAll(sp);
+            } else {
+                sp.favorite = !sp.favorite;
+                db.stationPreferenceDao().updateAll(sp);
+            }
+            return sp.favorite;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isFavorite) {
+            super.onPostExecute(isFavorite);
+            StationActivity parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+
+            parent.setFavoriteMenuItem(isFavorite);
         }
     }
 

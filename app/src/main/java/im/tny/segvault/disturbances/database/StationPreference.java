@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "station_preferences")
-public class StationPreferences {
+@Entity(tableName = "station_preference")
+public class StationPreference {
     @PrimaryKey
     @NonNull
     public String stationID = "";

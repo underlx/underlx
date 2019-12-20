@@ -28,7 +28,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationPreference;
 import im.tny.segvault.disturbances.model.NotificationRule;
+import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -109,7 +111,7 @@ public class Coordinator implements MapManager.OnLoadListener {
         boolean migratedRealmToRoom = sharedPref.getBoolean("fuse_migrated_realm_to_room", false);
 
         if (!migratedRealmToRoom) {
-            new RealmToRoomTask(this.context).execute();
+            new RealmToRoomTask(this.context).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -422,6 +424,14 @@ public class Coordinator implements MapManager.OnLoadListener {
                         newRule.startTime = rule.getStartTime();
                         newRule.endTime = rule.getEndTime();
                         db.notificationRuleDao().insertOrUpdateAll(newRule);
+                    }
+
+                    for(RStation station : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
+                        StationPreference sp = new StationPreference();
+                        sp.networkID = station.getNetwork();
+                        sp.stationID = station.getId();
+                        sp.favorite = true;
+                        db.stationPreferenceDao().insertOrUpdateAll(sp);
                     }
                 });
 

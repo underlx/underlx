@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.NotificationRule;
 
@@ -99,7 +100,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
                     rule.weekDays = new int[days.size()];
                     for (int i = 0; i < rule.weekDays.length; i++)
                         rule.weekDays[i] = days.get(i);
-                    new StoreRuleTask(this, rule, true).execute();
+                    new StoreRuleTask(this, rule, true).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                 });
 
                 builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
@@ -132,7 +133,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
                 new int[]{android.R.id.text1, android.R.id.text2});
         listView.setAdapter(adapter);
 
-        new LoadRuleTask(this).execute();
+        new LoadRuleTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -167,7 +168,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
     @Override
     protected void onPause() {
         if (!deleted) {
-            new StoreRuleTask(this, rule, false).execute();
+            new StoreRuleTask(this, rule, false).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         }
         super.onPause();
     }
@@ -185,7 +186,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
                 return true;
             case R.id.menu_delete:
                 deleted = true;
-                new DeleteRuleTask(this, rule).execute();
+                new DeleteRuleTask(this, rule).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -222,7 +223,7 @@ public class EditNotifScheduleActivity extends TopActivity implements RadialTime
                 break;
         }
 
-        new StoreRuleTask(this, rule, true).execute();
+        new StoreRuleTask(this, rule, true).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     private static class LoadRuleTask extends AsyncTask<Void, Void, Boolean> {
