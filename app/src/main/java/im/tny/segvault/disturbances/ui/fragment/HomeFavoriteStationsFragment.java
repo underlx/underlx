@@ -22,19 +22,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationPreferences;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.adapter.StationRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
 import im.tny.segvault.subway.Station;
-import io.realm.Realm;
 
 /**
  * A fragment representing a list of Items.
@@ -179,11 +178,11 @@ public class HomeFavoriteStationsFragment extends Fragment {
                 }
             } else {
                 // show true favorites
-                Realm realm = Application.getDefaultRealmInstance(getContext());
-                for (RStation s : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
-                    items.add(new StationRecyclerViewAdapter.StationItem(s.getId(), s.getNetwork(), getContext()));
+                AppDatabase db = Coordinator.get(getContext()).getDB();
+                List<StationPreferences> favorite = db.stationPreferencesDao().getFavorite();
+                for(StationPreferences f : favorite) {
+                    items.add(new StationRecyclerViewAdapter.StationItem(f.stationID, f.networkID, getContext()));
                 }
-                realm.close();
             }
 
 

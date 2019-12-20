@@ -7,7 +7,8 @@ import androidx.room.TypeConverters;
 @Database(
         entities = {
                 Feedback.class,
-                NotificationRule.class
+                NotificationRule.class,
+                StationPreferences.class
         },
         exportSchema = false,
         version = 1)
@@ -15,4 +16,5 @@ import androidx.room.TypeConverters;
 public abstract class AppDatabase extends RoomDatabase {
     public abstract FeedbackDao feedbackDao();
     public abstract NotificationRuleDao notificationRuleDao();
+    public abstract StationPreferencesDao stationPreferencesDao();
 }

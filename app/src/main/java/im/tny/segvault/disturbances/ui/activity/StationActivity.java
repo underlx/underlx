@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -29,12 +30,14 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.ui.util.AppBarStateChangeListener;
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.R;
@@ -199,8 +202,11 @@ public class StationActivity extends TopActivity
         });
     }
 
+    private Menu optionsMenu;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        optionsMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.station, menu);
 
@@ -274,6 +280,39 @@ public class StationActivity extends TopActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private static class LoadFavoriteTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<StationActivity> parentRef;
+
+        LoadFavoriteTask(StationActivity activity) {
+            this.parentRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            StationActivity parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent).getDB();
+
+            return db.stationPreferencesDao().isFavorite(parent.stationId);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isFavorite) {
+            super.onPostExecute(isFavorite);
+            if (isFavorite) {
+                StationActivity parent = parentRef.get();
+                if (parent == null) {
+                    return;
+                }
+
+
+            }
+        }
     }
 
     public static class StationPagerAdapter extends FragmentPagerAdapter {
