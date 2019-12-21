@@ -219,7 +219,7 @@ public class TripCorrectionActivity extends TopActivity {
     }
 
     private void saveChanges() {
-        new SaveChangesTask().execute();
+        new SaveChangesTask().executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     private static class LoadTripTask extends AsyncTask<Void, Void, Boolean> {

@@ -78,7 +78,7 @@ public class MqttManager {
                 return;
             }
 
-            new MQTTReconnectTask(parent).execute();
+            new MQTTReconnectTask(parent).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
         }
     }
 

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.StationUse;
 import im.tny.segvault.disturbances.database.Trip;
@@ -64,7 +65,7 @@ public class StatsActivity extends TopActivity {
         stats.add(new AverageSpeedStatistic(30));
         stats.add(new AverageStationsStatistic(30));
 
-        new UpdateStatsTask(this, stats, findViewById(R.id.table_layout), getLayoutInflater()).execute();
+        new UpdateStatsTask(this, stats, findViewById(R.id.table_layout), getLayoutInflater()).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     @Override

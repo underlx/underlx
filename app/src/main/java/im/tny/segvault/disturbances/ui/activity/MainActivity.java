@@ -451,7 +451,7 @@ public class MainActivity extends TopActivity
                             newFragment.show(getSupportFragmentManager(), "debugtext");
                         }
                     }
-                }.execute();
+                }.executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                 return true;
         }
 

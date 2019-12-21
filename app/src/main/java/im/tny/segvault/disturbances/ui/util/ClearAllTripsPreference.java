@@ -11,6 +11,7 @@ import net.xpece.android.support.preference.DialogPreference;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
 
 public class ClearAllTripsPreference extends DialogPreference
@@ -28,7 +29,7 @@ public class ClearAllTripsPreference extends DialogPreference
         dialog.setTitle(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_title));
         dialog.setMessage(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_desc));
         dialog.setCancelable(true);
-        dialog.setPositiveButton(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_delete), (dialog1, which) -> new ClearAllTripsTask().execute());
+        dialog.setPositiveButton(getContext().getString(R.string.frag_settings_all_trips_delete_confirmation_delete), (dialog1, which) -> new ClearAllTripsTask().executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR));
 
         dialog.setNegativeButton(android.R.string.cancel, (dlg, which) -> dlg.cancel());
 

@@ -63,7 +63,7 @@ public class FeedbackUtil {
                     .setPositiveButton(R.string.feedback_location_in_subway, (dialog, whichButton) -> askCurrentStation())
                     .setNegativeButton(R.string.feedback_location_outside,
                             (dialog, whichButton) ->
-                                    new StoreFeedbackTask(context, incorrectStation, null).execute()).show();
+                                    new StoreFeedbackTask(context, incorrectStation, null).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR)).show();
         }
 
         private void askCurrentStation() {
@@ -86,7 +86,7 @@ public class FeedbackUtil {
                             .setMessage(R.string.feedback_location_select_station)
                             .setPositiveButton(R.string.feedback_location_action_select, (dialog, which) -> {
                                 if (spv.getSelection() != null) {
-                                    new StoreFeedbackTask(context, incorrectStation, spv.getSelection()).execute();
+                                    new StoreFeedbackTask(context, incorrectStation, spv.getSelection()).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                                 } else {
                                     askCurrentStation();
                                 }

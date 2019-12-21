@@ -507,7 +507,7 @@ public class TripHistoryFragment extends TopFragment {
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_TRIP_TABLE_UPDATED:
                     if (getActivity() != null) {
-                        new UpdateDataTask().execute();
+                        new UpdateDataTask().executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                     }
                     break;
             }

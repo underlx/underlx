@@ -159,7 +159,7 @@ public class HomeBackersFragment extends Fragment {
                     + " must implement OnListFragmentInteractionListener");
         }
 
-        new RetrieveBackersTask(this, Util.getCurrentLanguage(getContext())).execute();
+        new RetrieveBackersTask(this, Util.getCurrentLanguage(getContext())).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     @Override

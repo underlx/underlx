@@ -76,7 +76,7 @@ public class ReportActivity extends TopActivity {
 
         linesLayout = findViewById(R.id.lines_layout);
         sendButton = findViewById(R.id.send_button);
-        sendButton.setOnClickListener(view -> new SubmitReportTask().execute());
+        sendButton.setOnClickListener(view -> new SubmitReportTask().executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR));
 
         populateLineList(false);
     }
