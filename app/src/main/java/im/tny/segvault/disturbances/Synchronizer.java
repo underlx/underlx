@@ -83,6 +83,7 @@ public class Synchronizer {
                             t.synced = true;
                         }
                     }
+                    db.tripDao().updateAll(t);
                 }
 
                 for (Feedback f : db.feedbackDao().getUnsynced()) {
