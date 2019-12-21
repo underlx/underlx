@@ -3,13 +3,13 @@ package im.tny.segvault.disturbances.ui.activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.Toolbar;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -18,17 +18,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.model.StationUse;
-import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
-import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 
 public class StatsActivity extends TopActivity {
 
@@ -108,10 +105,10 @@ public class StatsActivity extends TopActivity {
             if (context == null) {
                 return false;
             }
-            Realm realm = Application.getDefaultRealmInstance(context);
-            realm.executeTransaction(realm1 -> {
+            AppDatabase db = Coordinator.get(context).getDB();
+            db.runInTransaction(() -> {
                 for (Statistic stat : stats) {
-                    stat.compute(realm1, Coordinator.get(context).getMapManager().getNetworks());
+                    stat.compute(db, Coordinator.get(context).getMapManager().getNetworks());
                 }
             });
             return true;
@@ -131,7 +128,7 @@ public class StatsActivity extends TopActivity {
     }
 
     private abstract static class Statistic {
-        abstract public void compute(Realm realm, Collection<Network> networks);
+        abstract public void compute(AppDatabase db, Collection<Network> networks);
 
         abstract public int getNameStringId();
 
@@ -161,7 +158,7 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
+        public void compute(AppDatabase db, Collection<Network> networks) {
             // nothing to do here
         }
 
@@ -198,8 +195,8 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            value = getTripsFor(realm, days).count();
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            value = getTripsFor(db, days).size();
         }
 
         @Override
@@ -222,16 +219,16 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            for (Trip trip : getTripsFor(realm, days).findAll()) {
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            for (Trip trip : getTripsFor(db, days)) {
                 Network network = null;
                 for (Network n : networks) {
-                    if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                    if (n.getStation(db.stationUseDao().getOfTrip(trip.id).get(0).stationID) != null) {
                         network = n;
                         break;
                     }
                 }
-                Path path = trip.toConnectionPath(network);
+                Path path = trip.toConnectionPath(db, network);
                 if (path == null) {
                     return;
                 }
@@ -263,16 +260,16 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            for (Trip trip : getTripsFor(realm, days).findAll()) {
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            for (Trip trip : getTripsFor(db, days)) {
                 Network network = null;
                 for (Network n : networks) {
-                    if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                    if (n.getStation(db.stationUseDao().getOfTrip(trip.id).get(0).stationID) != null) {
                         network = n;
                         break;
                     }
                 }
-                Path path = trip.toConnectionPath(network);
+                Path path = trip.toConnectionPath(db, network);
                 if (path == null) {
                     continue;
                 }
@@ -303,18 +300,19 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            for (Trip trip : getTripsFor(realm, days).findAll()) {
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            for (Trip trip : getTripsFor(db, days)) {
+                List<StationUse> uses = db.stationUseDao().getOfTrip(trip.id);
                 Network network = null;
                 for (Network n : networks) {
-                    if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                    if (n.getStation(uses.get(0).stationID) != null) {
                         network = n;
                         break;
                     }
                 }
-                Path path = trip.toConnectionPath(network);
+                Path path = trip.toConnectionPath(db, network);
                 if (path != null) {
-                    value += trip.getPath().get(trip.getPath().size() - 1).getLeaveDate().getTime() - trip.getPath().get(0).getEntryDate().getTime();
+                    value += uses.get(uses.size() - 1).leaveDate.getTime() - uses.get(0).entryDate.getTime();
                 }
             }
         }
@@ -337,31 +335,11 @@ public class StatsActivity extends TopActivity {
         }
     }
 
-    private static RealmQuery<Trip> getTripsFor(Realm realm, int days) {
+    private static List<Trip> getTripsFor(AppDatabase db, int days) {
         if (days == 0) {
-            return realm.where(Trip.class);
+            return db.tripDao().getAll();
         } else {
-            RealmResults<StationUse> uses = realm.where(StationUse.class)
-                    .greaterThan("entryDate", new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(days))).findAll().where()
-                    .equalTo("type", "NETWORK_ENTRY").or().equalTo("type", "VISIT").findAll();
-
-            // now we have all station uses that **might** be part of editable trips
-            // get all trips that contain these uses and which are yet to be confirmed
-            RealmQuery<Trip> tripsQuery = realm.where(Trip.class);
-            if (uses.size() > 0) {
-                // first item detached from the others because otherwise "Missing left-hand side of OR" might happen
-                // https://github.com/realm/realm-java/issues/1014#issuecomment-107235374
-                tripsQuery = tripsQuery.equalTo("path.station.id", uses.get(0).getStation().getId()).equalTo("path.entryDate", uses.get(0).getEntryDate());
-                for (int i = 1; i < uses.size(); i++) {
-                    tripsQuery = tripsQuery.or().equalTo("path.station.id", uses.get(i).getStation().getId()).equalTo("path.entryDate", uses.get(i).getEntryDate());
-                }
-                return tripsQuery;
-            }
-            // realm is just terrible. not only is it hard to do a proper WHERE ... IN ... query, it's also hard to generate an empty result set.
-            // https://github.com/realm/realm-java/issues/1862
-            // https://github.com/realm/realm-java/issues/1575
-            // https://github.com/realm/realm-java/issues/4011
-            return tripsQuery.equalTo("id", "NEVER_BE_TRUE");
+            return db.tripDao().getRecent(new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(days)));
         }
     }
 
@@ -375,16 +353,16 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            for (Trip trip : getTripsFor(realm, days).findAll()) {
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            for (Trip trip : getTripsFor(db, days)) {
                 Network network = null;
                 for (Network n : networks) {
-                    if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                    if (n.getStation(db.stationUseDao().getOfTrip(trip.id).get(0).stationID) != null) {
                         network = n;
                         break;
                     }
                 }
-                Path path = trip.toConnectionPath(network);
+                Path path = trip.toConnectionPath(db, network);
                 if (path != null) {
                     timeableLength += path.getTimeablePhysicalLength();
                     movementMilliseconds += path.getMovementMilliseconds();
@@ -417,12 +395,12 @@ public class StatsActivity extends TopActivity {
         }
 
         @Override
-        public void compute(Realm realm, Collection<Network> networks) {
-            RealmQuery<Trip> q = getTripsFor(realm, days);
-            for (Trip trip : q.findAll()) {
-                stations += trip.getPath().size();
+        public void compute(AppDatabase db, Collection<Network> networks) {
+            List<Trip> q = getTripsFor(db, days);
+            for (Trip trip : q) {
+                stations += db.stationUseDao().getOfTrip(trip.id).size();
             }
-            trips = q.count();
+            trips = q.size();
         }
 
         @Override

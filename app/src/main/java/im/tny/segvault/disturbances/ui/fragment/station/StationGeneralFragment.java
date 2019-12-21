@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -27,18 +29,18 @@ import java.util.List;
 import java.util.Map;
 
 import im.tny.segvault.disturbances.API;
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ExtraContentCache;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MqttManager;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
-import io.realm.Realm;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -57,6 +59,8 @@ public class StationGeneralFragment extends Fragment {
 
     private String stationId;
     private String networkId;
+
+    private Station station;
 
     private OnFragmentInteractionListener mListener;
     private int mqttPartyID = -1;
@@ -170,7 +174,7 @@ public class StationGeneralFragment extends Fragment {
         Network net = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
         if (net == null)
             return;
-        final Station station = net.getStation(stationId);
+        station = net.getStation(stationId);
         if (station == null)
             return;
 
@@ -311,29 +315,62 @@ public class StationGeneralFragment extends Fragment {
             servicesTitleView.setVisibility(View.VISIBLE);
         }
 
-        // Statistics
-        Realm realm = Application.getDefaultRealmInstance(getContext());
-        TextView statsEntryCountView = view.findViewById(R.id.station_entry_count_view);
-        long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-        statsEntryCountView.setText(String.format(getString(R.string.frag_station_stats_entry), entryCount));
+        new LoadStatsTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+    }
 
-        TextView statsExitCountView = view.findViewById(R.id.station_exit_count_view);
-        long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
-        statsExitCountView.setText(String.format(getString(R.string.frag_station_stats_exit), exitCount));
+    private static class LoadStatsTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<StationGeneralFragment> parentRef;
+        private long entryCount;
+        private long exitCount;
+        private long goneThroughCount;
+        private long transferCount;
 
-        TextView statsGoneThroughCountView = view.findViewById(R.id.station_gone_through_count_view);
-        long goneThroughCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.GONE_THROUGH.name()).count();
-        statsGoneThroughCountView.setText(String.format(getString(R.string.frag_station_stats_gone_through), goneThroughCount));
-
-        TextView statsTransferCountView = view.findViewById(R.id.station_transfer_count_view);
-        if (station.getLines().size() > 1) {
-            long transferCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-            statsTransferCountView.setText(String.format(getString(R.string.frag_station_stats_transfer), transferCount));
-            statsTransferCountView.setVisibility(View.VISIBLE);
-        } else {
-            statsTransferCountView.setVisibility(View.GONE);
+        LoadStatsTask(StationGeneralFragment parent) {
+            this.parentRef = new WeakReference<>(parent);
         }
-        realm.close();
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            StationGeneralFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+
+            entryCount = db.stationUseDao().countStationUsesOfType(parent.stationId, StationUse.UseType.NETWORK_ENTRY);
+            exitCount = db.stationUseDao().countStationUsesOfType(parent.stationId, StationUse.UseType.NETWORK_EXIT);
+            goneThroughCount = db.stationUseDao().countStationUsesOfType(parent.stationId, StationUse.UseType.GONE_THROUGH);
+            transferCount = db.stationUseDao().countStationUsesOfType(parent.stationId, StationUse.UseType.INTERCHANGE);
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            StationGeneralFragment parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+
+            TextView statsEntryCountView = parent.view.findViewById(R.id.station_entry_count_view);
+            statsEntryCountView.setText(String.format(parent.getString(R.string.frag_station_stats_entry), entryCount));
+
+            TextView statsExitCountView = parent.view.findViewById(R.id.station_exit_count_view);
+            statsExitCountView.setText(String.format(parent.getString(R.string.frag_station_stats_exit), exitCount));
+
+            TextView statsGoneThroughCountView = parent.view.findViewById(R.id.station_gone_through_count_view);
+            statsGoneThroughCountView.setText(String.format(parent.getString(R.string.frag_station_stats_gone_through), goneThroughCount));
+
+            TextView statsTransferCountView = parent.view.findViewById(R.id.station_transfer_count_view);
+            if (parent.station.getLines().size() > 1) {
+                statsTransferCountView.setText(String.format(parent.getString(R.string.frag_station_stats_transfer), transferCount));
+                statsTransferCountView.setVisibility(View.VISIBLE);
+            } else {
+                statsTransferCountView.setVisibility(View.GONE);
+            }
+        }
     }
 
     public interface OnFragmentInteractionListener {

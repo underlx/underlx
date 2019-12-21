@@ -16,65 +16,62 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Locale;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
+import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.InternalLinkHandler;
-import im.tny.segvault.disturbances.LocaleUtil;
+import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
+import im.tny.segvault.disturbances.PreferenceNames;
+import im.tny.segvault.disturbances.R;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.ui.adapter.AnnouncementRecyclerViewAdapter;
+import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
+import im.tny.segvault.disturbances.ui.adapter.LineRecyclerViewAdapter;
+import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeFavoriteStationsFragment;
-import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
-import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
-import im.tny.segvault.disturbances.ui.adapter.DisturbanceRecyclerViewAdapter;
-import im.tny.segvault.disturbances.FeedbackUtil;
-import im.tny.segvault.disturbances.ui.fragment.top.ErrorFragment;
-import im.tny.segvault.disturbances.ui.fragment.top.GeneralPreferenceFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeLinesFragment;
 import im.tny.segvault.disturbances.ui.fragment.HomeStatsFragment;
 import im.tny.segvault.disturbances.ui.fragment.HtmlDialogFragment;
-import im.tny.segvault.disturbances.ui.adapter.LineRecyclerViewAdapter;
-import im.tny.segvault.disturbances.MainService;
-import im.tny.segvault.disturbances.ui.fragment.top.MapFragment;
-import im.tny.segvault.disturbances.ui.fragment.top.NotifPreferenceFragment;
-import im.tny.segvault.disturbances.PreferenceNames;
-import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
+import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TripFragment;
-import im.tny.segvault.disturbances.ui.fragment.top.TripHistoryFragment;
-import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
 import im.tny.segvault.disturbances.ui.fragment.UnconfirmedTripsFragment;
-import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.Trip;
-import im.tny.segvault.disturbances.ui.intro.IntroActivity;
 import im.tny.segvault.disturbances.ui.fragment.top.AboutFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.AnnouncementFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.DisturbanceFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.ErrorFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.GeneralPreferenceFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.HelpFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.HomeFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.MapFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.NotifPreferenceFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.TripHistoryFragment;
+import im.tny.segvault.disturbances.ui.intro.IntroActivity;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
@@ -759,10 +756,10 @@ public class MainActivity extends TopActivity
         (new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                Trip.confirm(item.id);
+                Trip.confirm(Coordinator.get(MainActivity.this).getDB(), item.id);
                 return null;
             }
-        }).execute();
+        }).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     @Override

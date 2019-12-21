@@ -4,9 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
@@ -39,7 +40,6 @@ import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
-import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -53,7 +53,6 @@ import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import im.tny.segvault.subway.Transfer;
 import im.tny.segvault.subway.WorldPath;
-import io.realm.Realm;
 
 public class MapManager {
     public static final String PRIMARY_NETWORK_ID = "pt-ml";
@@ -683,21 +682,6 @@ public class MapManager {
 
         synchronized (lock) {
             networks.put(net.getId(), net);
-
-            // create Realm stations for the network if they don't exist already
-            Realm realm = Application.getDefaultRealmInstance(context);
-
-            realm.executeTransaction(realm1 -> {
-                for (Station s : net.getStations()) {
-                    if (realm1.where(RStation.class).equalTo("id", s.getId()).count() == 0) {
-                        RStation rs = new RStation();
-                        rs.setStop(s);
-                        rs.setNetwork(net.getId());
-                        realm1.copyToRealm(rs);
-                    }
-                }
-            });
-            realm.close();
         }
 
         if (loadListener != null) {

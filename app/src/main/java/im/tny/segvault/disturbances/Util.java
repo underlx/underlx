@@ -55,6 +55,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.model.RStation;
 import im.tny.segvault.disturbances.model.StationUse;
 import im.tny.segvault.subway.Line;
@@ -878,64 +879,21 @@ public class Util {
 
     @SuppressLint("NewApi") // retrofix takes care of removeIf
     public static List<Station> getMostUsedStations(Context context, int limit) {
-        Realm realm = Application.getDefaultRealmInstance(context);
-
-
-        Map<String, Long> totalsPerStation = new HashMap<>();
-        Map<String, Long> mostRecentUse = new HashMap<>();
-        for (RStation s : realm.where(RStation.class).findAll()) {
-            RealmQuery<StationUse> q = realm.where(StationUse.class).
-                    equalTo("station.id", s.getId()).
-                    beginGroup().
-                    equalTo("type", "NETWORK_ENTRY").
-                    or().
-                    equalTo("type", "NETWORK_EXIT").
-                    or().
-                    equalTo("type", "INTERCHANGE").
-                    endGroup();
-            totalsPerStation.put(s.getId(), q.count());
-
-            Date m = q.maximumDate("leaveDate");
-            mostRecentUse.put(s.getId(), m == null ? Long.MIN_VALUE : m.getTime());
-        }
-
-        realm.close();
         List<Station> stations = new ArrayList<>(Coordinator.get(context).getMapManager().getAllStations());
-        Collections.sort(stations, (s1, s2) -> {
-            Long s1total = totalsPerStation.get(s1.getId());
-            if (s1total == null) {
-                s1total = 0L;
-            }
-            Long s2total = totalsPerStation.get(s2.getId());
-            if (s2total == null) {
-                s2total = 0L;
-            }
-            // sort by descending
-            int c = Long.compare(s2total, s1total);
-            if (c != 0) {
-                return c;
-            }
-            // resolve ties by putting most recently used first
 
-            Long s1lastUse = mostRecentUse.get(s1.getId());
-            if (s1lastUse == null) {
-                s1lastUse = 0L;
-            }
-            Long s2lastUse = mostRecentUse.get(s2.getId());
-            if (s2lastUse == null) {
-                s2lastUse = 0L;
-            }
+        AppDatabase db = Coordinator.get(context).getDB();
 
-            return Long.compare(s2lastUse, s1lastUse);
-        });
-        stations.removeIf(s -> {
-            Long total = totalsPerStation.get(s.getId());
-            return total == null || total == 0;
-        });
-        if (limit > 0) {
-            stations = stations.subList(0, Integer.min(stations.size(), limit));
+        List<String> mostUsed = db.stationUseDao().getMostUsedStations(limit);
+
+        // this is not efficient, must be improved
+        List<Station> mostUsedStations = new ArrayList<>();
+        for(Station station : stations) {
+            if (mostUsed.contains(station.getId())) {
+                mostUsedStations.add(station);
+            }
         }
-        return stations;
+
+        return mostUsedStations;
     }
 
     // large stack thread pool executor

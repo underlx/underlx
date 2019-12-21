@@ -88,6 +88,16 @@ public class Converters {
     }
 
     @TypeConverter
+    public static String useTypeEnumToString(StationUse.UseType useType) {
+        return useType.name();
+    }
+
+    @TypeConverter
+    public static StationUse.UseType useTypeEnumFromString(String value) {
+        return StationUse.UseType.valueOf(value.toUpperCase());
+    }
+
+    @TypeConverter
     public static Date fromTimestamp(Long value) {
         return value == null ? null : new Date(value);
     }

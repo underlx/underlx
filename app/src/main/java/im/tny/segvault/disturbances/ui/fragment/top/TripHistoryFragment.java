@@ -14,10 +14,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -34,6 +30,11 @@ import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
@@ -47,7 +48,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.CacheManager;
 import im.tny.segvault.disturbances.Connectivity;
 import im.tny.segvault.disturbances.Coordinator;
@@ -55,15 +55,15 @@ import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
+import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StatsActivity;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
-import im.tny.segvault.disturbances.model.Trip;
-import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
+import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
 import im.tny.segvault.subway.Network;
-import io.realm.Realm;
 
 /**
  * A fragment representing a list of Items.
@@ -97,8 +97,6 @@ public class TripHistoryFragment extends TopFragment {
 
     private boolean showVisits = false;
     private Menu menu;
-
-    private Realm realm = Application.getDefaultRealmInstance(getContext());
 
     /**
      * Mandatory constructor for the fragment manager to instantiate the
@@ -196,7 +194,7 @@ public class TripHistoryFragment extends TopFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_TRIP_TABLE_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
 
@@ -249,7 +247,6 @@ public class TripHistoryFragment extends TopFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        realm.close();
         mListener = null;
     }
 
@@ -275,10 +272,10 @@ public class TripHistoryFragment extends TopFragment {
                 }
             }
             Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
-            Realm realm = Application.getDefaultRealmInstance(getContext());
-            for (Trip t : realm.where(Trip.class).findAll()) {
+            AppDatabase db = Coordinator.get(getContext()).getDB();
+            for (Trip t : db.tripDao().getAll()) {
                 try {
-                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
+                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(db, t, networks);
                     if (!item.isVisit) {
                         tripCount++;
                         tripTotalLength += item.length;
@@ -293,7 +290,6 @@ public class TripHistoryFragment extends TopFragment {
                     e.printStackTrace();
                 }
             }
-            realm.close();
             if (items.size() == 0) {
                 return false;
             }
@@ -509,7 +505,7 @@ public class TripHistoryFragment extends TopFragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                case MainService.ACTION_TRIP_REALM_UPDATED:
+                case MainService.ACTION_TRIP_TABLE_UPDATED:
                     if (getActivity() != null) {
                         new UpdateDataTask().execute();
                     }

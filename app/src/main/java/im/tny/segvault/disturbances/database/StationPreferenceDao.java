@@ -15,7 +15,7 @@ public interface StationPreferenceDao {
     @Query("SELECT * FROM station_preference")
     List<StationPreference> getAll();
 
-    @Query("SELECT * FROM station_preference WHERE stationID = :stationID")
+    @Query("SELECT * FROM station_preference WHERE station_id = :stationID")
     StationPreference getForStation(String stationID);
 
     @Query("SELECT * FROM station_preference WHERE favorite = 1")
@@ -24,7 +24,7 @@ public interface StationPreferenceDao {
     @Query("SELECT * FROM station_preference WHERE favorite = 1")
     LiveData<List<StationPreference>> getFavoriteLive();
 
-    @Query("SELECT COUNT(*) > 0 FROM station_preference WHERE favorite = 1 AND stationID = :stationID")
+    @Query("SELECT COUNT(*) > 0 FROM station_preference WHERE favorite = 1 AND station_id = :stationID")
     boolean isFavorite(String stationID);
 
     @Insert

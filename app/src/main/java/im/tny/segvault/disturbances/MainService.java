@@ -45,9 +45,9 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.Feedback;
+import im.tny.segvault.disturbances.database.StationPreference;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;
 import im.tny.segvault.s2ls.InNetworkState;
@@ -59,9 +59,6 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_BACKGROUND_ID;
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_REALTIME_HIGH_ID;
@@ -73,9 +70,8 @@ public class MainService extends Service implements LifecycleOwner {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
-    private Realm realmForListeners;
-
     private final ServiceLifecycleDispatcher mDispatcher = new ServiceLifecycleDispatcher(this);
+
     @NonNull
     @Override
     public Lifecycle getLifecycle() {
@@ -121,20 +117,21 @@ public class MainService extends Service implements LifecycleOwner {
             Coordinator.get(this).getMapManager().checkForTopologyUpdates();
         }
 
-        realmForListeners = Application.getDefaultRealmInstance(this);
-        tripRealmResults = realmForListeners.where(Trip.class).findAll();
-        tripRealmResults.addChangeListener(tripRealmChangeListener);
-        favStationsRealmResults = realmForListeners.where(RStation.class).equalTo("favorite", true).findAll();
-        favStationsRealmResults.addChangeListener(favStationsRealmChangeListener);
-
         AppDatabase db = Coordinator.get(this).getDB();
-        db.feedbackDao().getUnsyncedLive().observe(this, new Observer<List<Feedback>>() {
-            @Override
-            public void onChanged(List<Feedback> feedbacks) {
-                Intent intent = new Intent(ACTION_FEEDBACK_REALM_UPDATED);
-                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-                bm.sendBroadcast(intent);
-            }
+        db.tripDao().getUnsyncedLive().observe(this, trips -> {
+            Intent intent = new Intent(ACTION_TRIP_TABLE_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        });
+        db.feedbackDao().getUnsyncedLive().observe(this, feedbacks -> {
+            Intent intent = new Intent(ACTION_FEEDBACK_TABLE_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
+        });
+        db.stationPreferenceDao().getFavoriteLive().observe(this, stationPreferences -> {
+            Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
+            LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
+            bm.sendBroadcast(intent);
         });
 
         Coordinator.get(this).registerMainService(this);
@@ -152,9 +149,6 @@ public class MainService extends Service implements LifecycleOwner {
         Coordinator.get(this).getWiFiChecker().stopScanning();
         SharedPreferences sharedPref = getSharedPreferences("settings", MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(generalPrefsListener);
-        tripRealmResults.removeChangeListener(tripRealmChangeListener);
-        favStationsRealmResults.removeChangeListener(favStationsRealmChangeListener);
-        realmForListeners.close();
         mDispatcher.onServicePreSuperOnDestroy();
         super.onDestroy();
     }
@@ -730,25 +724,11 @@ public class MainService extends Service implements LifecycleOwner {
         }
     };
 
-    public static final String ACTION_TRIP_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.trip.updated";
+    public static final String ACTION_TRIP_TABLE_UPDATED = "im.tny.segvault.disturbances.action.table.trip.updated";
 
-    private RealmResults<Trip> tripRealmResults;
-    private final RealmChangeListener<RealmResults<Trip>> tripRealmChangeListener = element -> {
-        Intent intent = new Intent(ACTION_TRIP_REALM_UPDATED);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-        bm.sendBroadcast(intent);
-    };
+    public static final String ACTION_FEEDBACK_TABLE_UPDATED = "im.tny.segvault.disturbances.action.table.feedback.updated";
 
-    public static final String ACTION_FEEDBACK_REALM_UPDATED = "im.tny.segvault.disturbances.action.realm.feedback.updated";
-
-    public static final String ACTION_FAVORITE_STATIONS_UPDATED = "im.tny.segvault.disturbances.action.realm.station.favorite.updated";
-
-    private RealmResults<RStation> favStationsRealmResults;
-    private final RealmChangeListener<RealmResults<RStation>> favStationsRealmChangeListener = element -> {
-        Intent intent = new Intent(ACTION_FAVORITE_STATIONS_UPDATED);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(MainService.this);
-        bm.sendBroadcast(intent);
-    };
+    public static final String ACTION_FAVORITE_STATIONS_UPDATED = "im.tny.segvault.disturbances.action.table.station.favorite.updated";
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override

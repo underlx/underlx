@@ -17,11 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.Nullable;
-import androidx.annotation.WorkerThread;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -37,6 +32,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.jgrapht.alg.BellmanFordShortestPath;
 
 import java.text.Normalizer;
@@ -51,7 +53,8 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;
@@ -59,7 +62,6 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import info.debatty.java.stringsimilarity.experimental.Sift4;
-import io.realm.Realm;
 
 public class StationPickerView extends LinearLayout implements LocationListener {
     private LocationManager locationManager;
@@ -293,7 +295,7 @@ public class StationPickerView extends LinearLayout implements LocationListener 
             return;
         }
         for (Station station : adapter.stations) {
-            if(station.isAlwaysClosed()) {
+            if (station.isAlwaysClosed()) {
                 continue;
             }
             for (Lobby lobby : station.getLobbies()) {
@@ -518,14 +520,14 @@ public class StationPickerView extends LinearLayout implements LocationListener 
 
     @Override
     public boolean isFocused() {
-        if(textView == null) {
+        if (textView == null) {
             return false;
         }
         return textView.isFocused();
     }
 
     public boolean focusOnEntry() {
-        if(textView == null) {
+        if (textView == null) {
             return false;
         }
         textView.setFocusableInTouchMode(true);
@@ -638,14 +640,16 @@ public class StationPickerView extends LinearLayout implements LocationListener 
         }
     }
 
-    private static abstract class RealmBasedSortStrategy implements AllStationsSortStrategy {
-        protected Realm realm = null;
+    private static abstract class DatabaseBasedSortStrategy implements AllStationsSortStrategy {
+        protected AppDatabase db = null;
         protected Map<String, Double> scores = new HashMap<>();
+
+        protected DatabaseBasedSortStrategy(AppDatabase db) {
+            this.db = db;
+        }
 
         @Override
         public void sortStations(List<Station> stations) {
-            // ensure this is created in the right thread
-            realm = Realm.getDefaultInstance();
             Collections.sort(stations, (station, t1) -> {
                 // order by decreasing score, then A-Z
                 int result = Double.compare(getScore(t1), getScore(station));
@@ -654,30 +658,37 @@ public class StationPickerView extends LinearLayout implements LocationListener 
                 }
                 return result;
             });
-            realm.close();
         }
 
         abstract protected double getScore(Station station);
     }
 
-    public static class EnterFrequencySortStrategy extends RealmBasedSortStrategy {
+    public static class EnterFrequencySortStrategy extends DatabaseBasedSortStrategy {
+        public EnterFrequencySortStrategy(AppDatabase db) {
+            super(db);
+        }
+
         protected double getScore(Station station) {
             Double score = scores.get(station.getId());
             if (score == null) {
-                long entryCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-                score = new Double(entryCount);
+                int entryCount = db.stationUseDao().countStationUsesOfType(station.getId(), StationUse.UseType.NETWORK_ENTRY);
+                score = (double) entryCount;
                 scores.put(station.getId(), score);
             }
             return score;
         }
     }
 
-    public static class ExitFrequencySortStrategy extends RealmBasedSortStrategy {
+    public static class ExitFrequencySortStrategy extends DatabaseBasedSortStrategy {
+        public ExitFrequencySortStrategy(AppDatabase db) {
+            super(db);
+        }
+
         protected double getScore(Station station) {
             Double score = scores.get(station.getId());
             if (score == null) {
-                long exitCount = realm.where(StationUse.class).equalTo("station.id", station.getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
-                score = new Double(exitCount);
+                int exitCount = db.stationUseDao().countStationUsesOfType(station.getId(), StationUse.UseType.NETWORK_EXIT);
+                score = (double) exitCount;
                 scores.put(station.getId(), score);
             }
             return score;

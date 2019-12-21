@@ -44,6 +44,7 @@ import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.PreferenceNames;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
@@ -209,8 +210,10 @@ public class RouteFragment extends TopFragment {
     private void populatePickers() {
         List<Station> stations = new ArrayList<>(network.getStations());
 
+        AppDatabase db = Coordinator.get(getContext()).getDB();
+
         originPicker.setStations(stations);
-        originPicker.setAllStationsSortStrategy(new StationPickerView.EnterFrequencySortStrategy());
+        originPicker.setAllStationsSortStrategy(new StationPickerView.EnterFrequencySortStrategy(db));
         originPicker.setOnStationSelectedListener(station -> {
             destinationPicker.focusOnEntry();
             tryPlanRoute();
@@ -225,7 +228,7 @@ public class RouteFragment extends TopFragment {
         }
 
         destinationPicker.setStations(stations);
-        destinationPicker.setAllStationsSortStrategy(new StationPickerView.ExitFrequencySortStrategy());
+        destinationPicker.setAllStationsSortStrategy(new StationPickerView.ExitFrequencySortStrategy(db));
         destinationPicker.setOnStationSelectedListener(station -> {
             tryPlanRoute();
             destinationPicker.clearFocus();

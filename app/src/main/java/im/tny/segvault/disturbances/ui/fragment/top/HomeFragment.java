@@ -10,12 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.cardview.widget.CardView;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.format.DateUtils;
@@ -33,6 +27,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.lang.ref.WeakReference;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.FeedbackUtil;
 import im.tny.segvault.disturbances.InternalLinkHandler;
@@ -60,9 +60,9 @@ import im.tny.segvault.disturbances.RouteUtil;
 import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.RStation;
-import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
@@ -79,7 +79,6 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import io.realm.Realm;
 
 
 /**
@@ -249,7 +248,7 @@ public class HomeFragment extends TopFragment {
         filter.addAction(S2LSChangeListener.ACTION_CURRENT_TRIP_ENDED);
         filter.addAction(S2LSChangeListener.ACTION_S2LS_STATUS_CHANGED);
         filter.addAction(S2LSChangeListener.ACTION_NAVIGATION_ENDED);
-        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_TRIP_TABLE_UPDATED);
         filter.addAction(MainService.ACTION_FAVORITE_STATIONS_UPDATED);
         filter.addAction(MqttManager.ACTION_VEHICLE_ETAS_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(getContext());
@@ -358,44 +357,8 @@ public class HomeFragment extends TopFragment {
         if (mListener == null)
             return;
 
-        Realm realm = Application.getDefaultRealmInstance(getContext());
-        boolean hasTripsToConfirm = Trip.getMissingConfirmTrips(realm).size() > 0;
-        boolean hasFavoriteStations = realm.where(RStation.class).equalTo("favorite", true).count() > 0;
-        realm.close();
-
-        if (hasTripsToConfirm) {
-            if (unconfirmedTripsCard.getVisibility() == View.GONE) {
-                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
-                transaction.replace(R.id.unconfirmed_trips_card, newFragment);
-                transaction.commitAllowingStateLoss();
-                unconfirmedTripsCard.setVisibility(View.VISIBLE);
-            }
-        } else {
-            unconfirmedTripsCard.setVisibility(View.GONE);
-        }
-
-        if (hasFavoriteStations) {
-            if (favoriteStationsCard.getVisibility() == View.GONE || favoritesInMostUsedMode) {
-                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, false);
-                transaction.replace(R.id.favorite_stations_card, newFragment);
-                transaction.commitAllowingStateLoss();
-                favoriteStationsCard.setVisibility(View.VISIBLE);
-                favoritesInMostUsedMode = false;
-            }
-        } else if (Util.getMostUsedStations(getContext(), 1).size() > 0) {
-            if (favoriteStationsCard.getVisibility() == View.GONE || !favoritesInMostUsedMode) {
-                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, true);
-                transaction.replace(R.id.favorite_stations_card, newFragment);
-                transaction.commitAllowingStateLoss();
-                favoriteStationsCard.setVisibility(View.VISIBLE);
-                favoritesInMostUsedMode = true;
-            }
-        } else {
-            favoriteStationsCard.setVisibility(View.GONE);
-        }
+        new LoadUnconfirmedTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+        new LoadFavoriteTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
 
         MapManager mapm = Coordinator.get(getContext()).getMapManager();
         if (requestOnlineUpdate) {
@@ -425,6 +388,99 @@ public class HomeFragment extends TopFragment {
 
         if (requestOnlineUpdate) {
             refreshedOnlineSinceOpening = true;
+        }
+    }
+
+    private static class LoadUnconfirmedTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<HomeFragment> parentRef;
+
+        LoadUnconfirmedTask(HomeFragment fragment) {
+            this.parentRef = new WeakReference<>(fragment);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            HomeFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+
+            return db.tripDao().getUnconfirmedCount(Trip.getConfirmCutoff()) > 0;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean hasTripsToConfirm) {
+            super.onPostExecute(hasTripsToConfirm);
+            HomeFragment parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+            if (hasTripsToConfirm) {
+                if (parent.unconfirmedTripsCard.getVisibility() == View.GONE) {
+                    FragmentTransaction transaction = parent.getChildFragmentManager().beginTransaction();
+                    Fragment newFragment = UnconfirmedTripsFragment.newInstance(1);
+                    transaction.replace(R.id.unconfirmed_trips_card, newFragment);
+                    transaction.commitAllowingStateLoss();
+                    parent.unconfirmedTripsCard.setVisibility(View.VISIBLE);
+                }
+            } else {
+                parent.unconfirmedTripsCard.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private static class LoadFavoriteTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<HomeFragment> parentRef;
+        private boolean hasMostUsedStations = false;
+
+        LoadFavoriteTask(HomeFragment fragment) {
+            this.parentRef = new WeakReference<>(fragment);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            HomeFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+
+            hasMostUsedStations = Util.getMostUsedStations(parent.getContext(), 1).size() > 0;
+
+            return db.stationPreferenceDao().getFavorite().size() > 0;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean hasFavoriteStations) {
+            super.onPostExecute(hasFavoriteStations);
+            HomeFragment parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+            if (hasFavoriteStations) {
+                if (parent.favoriteStationsCard.getVisibility() == View.GONE || parent.favoritesInMostUsedMode) {
+                    FragmentTransaction transaction = parent.getChildFragmentManager().beginTransaction();
+                    Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, false);
+                    transaction.replace(R.id.favorite_stations_card, newFragment);
+                    transaction.commitAllowingStateLoss();
+                    parent.favoriteStationsCard.setVisibility(View.VISIBLE);
+                    parent.favoritesInMostUsedMode = false;
+                }
+            } else if (hasMostUsedStations) {
+                if (parent.favoriteStationsCard.getVisibility() == View.GONE || !parent.favoritesInMostUsedMode) {
+                    FragmentTransaction transaction = parent.getChildFragmentManager().beginTransaction();
+                    Fragment newFragment = HomeFavoriteStationsFragment.newInstance(1, true);
+                    transaction.replace(R.id.favorite_stations_card, newFragment);
+                    transaction.commitAllowingStateLoss();
+                    parent.favoriteStationsCard.setVisibility(View.VISIBLE);
+                    parent.favoritesInMostUsedMode = true;
+                }
+            } else {
+                parent.favoriteStationsCard.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -564,11 +620,7 @@ public class HomeFragment extends TopFragment {
             int marginTop = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
             params.setMargins(0, marginTop, margin, 0);
             iconFrame.setLayoutParams(params);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                iconFrame.setBackgroundDrawable(drawable);
-            } else {
-                iconFrame.setBackground(drawable);
-            }
+            iconFrame.setBackground(drawable);
             curStationIconsLayout.addView(iconFrame);
         }
     }
@@ -672,7 +724,7 @@ public class HomeFragment extends TopFragment {
             }
             switch (intent.getAction()) {
                 case LineStatusCache.ACTION_LINE_STATUS_UPDATE_SUCCESS:
-                case MainService.ACTION_TRIP_REALM_UPDATED:
+                case MainService.ACTION_TRIP_TABLE_UPDATED:
                 case MainService.ACTION_FAVORITE_STATIONS_UPDATED:
                     refresh(false, false);
                     break;

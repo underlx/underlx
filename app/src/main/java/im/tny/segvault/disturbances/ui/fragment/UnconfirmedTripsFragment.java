@@ -6,32 +6,34 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.io.InvalidObjectException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.MainService;
 import im.tny.segvault.disturbances.MapManager;
 import im.tny.segvault.disturbances.R;
-import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
-import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.Util;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.adapter.TripRecyclerViewAdapter;
+import im.tny.segvault.disturbances.ui.util.SimpleDividerItemDecoration;
 import im.tny.segvault.subway.Network;
-import io.realm.Realm;
 
 /**
  * A fragment representing a list of Items.
@@ -91,11 +93,63 @@ public class UnconfirmedTripsFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainActivity.ACTION_MAIN_SERVICE_BOUND);
         filter.addAction(MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED);
-        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_TRIP_TABLE_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
-        bm.registerReceiver(mBroadcastReceiver, filter);
+
+        AppDatabase db = Coordinator.get(getContext()).getDB();
+        db.tripDao().getUnconfirmedLive(Trip.getConfirmCutoff()).observe(this, this::update);
 
         return view;
+    }
+
+    private void update(List<Trip> trips) {
+        if (mListener == null) {
+            return;
+        }
+        AppDatabase db = Coordinator.get(getContext()).getDB();
+        Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
+        List<TripRecyclerViewAdapter.TripItem> items = new ArrayList<>();
+        for (Trip t : trips) {
+            try {
+                TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(db, t, networks);
+                items.add(item);
+            } catch (InvalidObjectException e) {
+                e.printStackTrace();
+            }
+        }
+        if (items.size() == 0) {
+            return;
+        }
+        Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder((tripItem, t1) -> Long.compare(tripItem.originTime.getTime(), t1.originTime.getTime())));
+
+        if (!isAdded()) {
+            // prevent onPostExecute from doing anything if no longer attached to an activity
+            return;
+        }
+        if (recyclerView != null && mListener != null) {
+            recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener, true));
+            recyclerView.invalidate();
+        }
+    }
+
+    private static class UpdateTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<UnconfirmedTripsFragment> parentRef;
+
+        UpdateTask(UnconfirmedTripsFragment fragment) {
+            this.parentRef = new WeakReference<>(fragment);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            UnconfirmedTripsFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+            parent.update(db.tripDao().getUnconfirmed(Trip.getConfirmCutoff()));
+            return true;
+        }
     }
 
 
@@ -108,59 +162,12 @@ public class UnconfirmedTripsFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-        new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    private class UpdateDataTask extends AsyncTask<Void, Integer, Boolean> {
-        private List<TripRecyclerViewAdapter.TripItem> items = new ArrayList<>();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        protected Boolean doInBackground(Void... v) {
-            if (mListener == null) {
-                return false;
-            }
-            Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
-            Realm realm = Application.getDefaultRealmInstance(getContext());
-            for (Trip t : Trip.getMissingConfirmTrips(realm)) {
-                try {
-                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(t, networks);
-                    items.add(item);
-                } catch (InvalidObjectException e) {
-                    e.printStackTrace();
-                }
-            }
-            realm.close();
-            if (items.size() == 0) {
-                return true;
-            }
-            Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder((tripItem, t1) -> Long.valueOf(tripItem.originTime.getTime()).compareTo(Long.valueOf(t1.originTime.getTime()))));
-            return true;
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(Boolean result) {
-            if (!isAdded()) {
-                // prevent onPostExecute from doing anything if no longer attached to an activity
-                return;
-            }
-            if (result && recyclerView != null && mListener != null) {
-                recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener, true));
-                recyclerView.invalidate();
-            }
-        }
     }
 
     /**
@@ -185,8 +192,7 @@ public class UnconfirmedTripsFragment extends Fragment {
             switch (intent.getAction()) {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
-                case MainService.ACTION_TRIP_REALM_UPDATED:
-                    new UpdateDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new UpdateTask(UnconfirmedTripsFragment.this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                     break;
             }
         }

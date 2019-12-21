@@ -4,7 +4,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +26,9 @@ import java.util.List;
 
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
@@ -127,7 +131,7 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                 holder.topLineLayout.setBackgroundDrawable(background);
             }
 
-            background = Util.getColoredDrawableResource(holder.originView.getContext(), R.drawable.station_line_bottom, colors[colors.length-1]);
+            background = Util.getColoredDrawableResource(holder.originView.getContext(), R.drawable.station_line_bottom, colors[colors.length - 1]);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 holder.bottomLineLayout.setBackground(background);
             } else {
@@ -221,12 +225,14 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
         public final int timeableLength;
         public final long movementMilliseconds;
 
-        public TripItem(Trip trip, Collection<Network> networks) throws InvalidObjectException {
-            this.id = trip.getId();
+        public TripItem(AppDatabase db, Trip trip, Collection<Network> networks) throws InvalidObjectException {
+            this.id = trip.id;
+
+            List<StationUse> path = db.stationUseDao().getOfTrip(trip.id);
 
             Network network = null;
             for (Network n : networks) {
-                if (n.getId().equals(trip.getPath().get(0).getStation().getNetwork())) {
+                if (n.getStation(path.get(0).stationID) != null) {
                     network = n;
                     break;
                 }
@@ -251,21 +257,23 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
                 return;
             }
             this.networkId = network.getId();
-            this.originId = network.getStation(trip.getPath().get(0).getStation().getId()).getId();
-            this.originName = network.getStation(trip.getPath().get(0).getStation().getId()).getName();
-            this.originTime = trip.getPath().get(0).getEntryDate();
+            this.originId = network.getStation(path.get(0).stationID).getId();
+            this.originName = network.getStation(path.get(0).stationID).getName();
+            this.originTime = path.get(0).entryDate;
             this.originColor = Color.BLACK;
 
-            this.destName = network.getStation(trip.getPath().get(trip.getPath().size() - 1).getStation().getId()).getName();
-            this.destTime = trip.getPath().get(trip.getPath().size() - 1).getLeaveDate();
+            this.destName = network.getStation(path.get(path.size() - 1).stationID).getName();
+            this.destTime = path.get(path.size() - 1).leaveDate;
             this.destColor = Color.BLACK;
 
             this.lineColors = new ArrayList<>();
-            Path path = trip.toConnectionPath(network);
-            if(path == null) {
+
+            Path connectionPath = trip.toConnectionPath(db, network);
+            if (connectionPath == null) {
                 throw new InvalidObjectException("Corrupt trip in DB");
             }
-            List<Connection> edges = path.getEdgeList();
+
+            List<Connection> edges = connectionPath.getEdgeList();
             if (edges.size() > 0) {
                 lineColors.add(edges.get(0).getSource().getLine().getColor());
                 for (Connection c : edges) {
@@ -279,9 +287,9 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
             } else {
                 isVisit = true;
             }
-            this.length = path.getPhysicalLength();
-            this.timeableLength = path.getTimeablePhysicalLength();
-            this.movementMilliseconds = path.getMovementMilliseconds();
+            this.length = connectionPath.getPhysicalLength();
+            this.timeableLength = connectionPath.getTimeablePhysicalLength();
+            this.movementMilliseconds = connectionPath.getMovementMilliseconds();
         }
 
         @Override

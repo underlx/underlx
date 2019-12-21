@@ -12,7 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.s2ls.routing.ChangeLineStep;
 import im.tny.segvault.s2ls.routing.EnterStep;
@@ -22,7 +23,6 @@ import im.tny.segvault.s2ls.routing.Step;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Stop;
-import io.realm.Realm;
 
 public class RouteUtil {
     public static Stop getLikelyNextExit(Context context, List<Connection> path, double threshold) {
@@ -81,12 +81,11 @@ public class RouteUtil {
     }
 
     public static double getLeaveTrainFactorForStop(Context context, Stop stop) {
-        Realm realm = Application.getDefaultRealmInstance(context);
-        long entryCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_ENTRY.name()).count();
-        long exitCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("type", StationUse.UseType.NETWORK_EXIT.name()).count();
+        AppDatabase db = Coordinator.get(context).getDB();
+        long entryCount = db.stationUseDao().countStationUsesOfType(stop.getStation().getId(), StationUse.UseType.NETWORK_ENTRY);
+        long exitCount = db.stationUseDao().countStationUsesOfType(stop.getStation().getId(), StationUse.UseType.NETWORK_EXIT);
         // number of times user left at this stop to transfer to another line
-        long transferCount = realm.where(StationUse.class).equalTo("station.id", stop.getStation().getId()).equalTo("sourceLine", stop.getLine().getId()).equalTo("type", StationUse.UseType.INTERCHANGE.name()).count();
-        realm.close();
+        long transferCount = db.stationUseDao().countStationInterchangesToLine(stop.getStation().getId(), stop.getLine().getId());
         return entryCount * 0.3 + exitCount + transferCount;
     }
 

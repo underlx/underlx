@@ -15,11 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.Feedback;
+import im.tny.segvault.disturbances.database.StationUse;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.StationUse;
-import im.tny.segvault.disturbances.model.Trip;
-import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by Gabriel on 26/07/2017.
@@ -36,8 +34,8 @@ public class Synchronizer {
         context = applicationContext;
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MainService.ACTION_TRIP_REALM_UPDATED);
-        filter.addAction(MainService.ACTION_FEEDBACK_REALM_UPDATED);
+        filter.addAction(MainService.ACTION_TRIP_TABLE_UPDATED);
+        filter.addAction(MainService.ACTION_FEEDBACK_TABLE_UPDATED);
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
         bm.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -56,41 +54,37 @@ public class Synchronizer {
             }
             if(lastSync != null && new Date().getTime() - lastSync.getTime() < TimeUnit.SECONDS.toMillis(2)) {
                 Log.d("sync", "Last sync was right now, abort");
-                // avoid looping on ACTION_TRIP_REALM_UPDATED broadcasts
+                // avoid looping on ACTION_TRIP_TABLE_UPDATED broadcasts
                 return;
             }
-            Realm realm = Application.getDefaultRealmInstance(context);
-            realm.executeTransaction(realm1 -> {
-                RealmResults<Trip> unsyncedTrips = realm1.where(Trip.class).equalTo("synced", false).findAll();
-                for (Trip t : unsyncedTrips) {
-                    API.TripRequest request = tripToAPIRequest(t);
+
+            AppDatabase db = Coordinator.get(context).getDB();
+            db.runInTransaction(() -> {
+                for(Trip t : db.tripDao().getUnsynced()) {
+                    API.TripRequest request = tripToAPIRequest(db, t);
                     try {
-                        if (t.isSubmitted()) {
+                        if (t.submitted) {
                             // submit update, if possible
-                            if (t.canBeCorrected()) {
+                            if (t.canBeCorrected(db)) {
                                 API.getInstance().putTrip(request);
-                                t.setSynced(true);
-                                t.setSubmitted(true);
+                                t.synced = true;
+                                t.submitted = true;
                             }
                         } else {
                             // submit new
                             API.getInstance().postTrip(request);
-                            t.setSynced(true);
-                            t.setSubmitted(true);
+                            t.synced = true;
+                            t.submitted = true;
                         }
                     } catch (APIException e) {
-                        t.registerSyncFailure();
-                        if(t.isFailedToSync()) {
+                        t.syncFailures++;
+                        if(t.syncFailures >= 5) {
                             // give up on this one
-                            t.setSynced(true);
+                            t.synced = true;
                         }
                     }
                 }
-            });
-            realm.close();
 
-            AppDatabase db = Coordinator.get(context).getDB();
-            db.runInTransaction(() -> {
                 for (Feedback f : db.feedbackDao().getUnsynced()) {
                     API.Feedback request = feedbackToAPIRequest(f);
                     try {
@@ -107,12 +101,13 @@ public class Synchronizer {
         }
     }
 
-    private API.TripRequest tripToAPIRequest(Trip t) {
+    private API.TripRequest tripToAPIRequest(AppDatabase db, Trip t) {
         API.TripRequest request = new API.TripRequest();
-        request.id = t.getId();
-        request.userConfirmed = t.isUserConfirmed();
-        request.uses = new ArrayList<>(t.getPath().size());
-        for (StationUse use : t.getPath()) {
+        request.id = t.id;
+        request.userConfirmed = t.userConfirmed;
+        List<StationUse> path = db.stationUseDao().getOfTrip(t.id);
+        request.uses = new ArrayList<>(path.size());
+        for (StationUse use : path) {
             request.uses.add(stationUseToAPI(use));
         }
         return request;
@@ -120,14 +115,14 @@ public class Synchronizer {
 
     private API.StationUse stationUseToAPI(StationUse use) {
         API.StationUse apiUse = new API.StationUse();
-        apiUse.station = use.getStation().getId();
-        apiUse.entryTime = new long[]{use.getEntryDate().getTime() / 1000, (use.getEntryDate().getTime() % 1000) * 1000000};
-        apiUse.leaveTime = new long[]{use.getLeaveDate().getTime() / 1000, (use.getLeaveDate().getTime() % 1000) * 1000000};
-        apiUse.type = use.getType().name();
-        apiUse.manual = use.isManualEntry();
-        if (use.getType() == StationUse.UseType.INTERCHANGE) {
-            apiUse.sourceLine = use.getSourceLine();
-            apiUse.targetLine = use.getTargetLine();
+        apiUse.station = use.stationID;
+        apiUse.entryTime = new long[]{use.entryDate.getTime() / 1000, (use.entryDate.getTime() % 1000) * 1000000};
+        apiUse.leaveTime = new long[]{use.leaveDate.getTime() / 1000, (use.leaveDate.getTime() % 1000) * 1000000};
+        apiUse.type = use.type.name();
+        apiUse.manual = use.manualEntry;
+        if (use.type == StationUse.UseType.INTERCHANGE) {
+            apiUse.sourceLine = use.sourceLine;
+            apiUse.targetLine = use.targetLine;
         }
         return apiUse;
     }
@@ -154,8 +149,8 @@ public class Synchronizer {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case MainService.ACTION_TRIP_REALM_UPDATED:
-                case MainService.ACTION_FEEDBACK_REALM_UPDATED:
+                case MainService.ACTION_TRIP_TABLE_UPDATED:
+                case MainService.ACTION_FEEDBACK_TABLE_UPDATED:
                     // TODO. this may cause cycles (we change the database ourselves)
                     new SyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;

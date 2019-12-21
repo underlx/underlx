@@ -24,7 +24,6 @@ public class Application extends androidx.multidex.MultiDexApplication {
         super.onCreate();
         LocaleUtil.updateResources(this);
         StethoUtils.install(this);
-        initRealm(this);
         JobManager.create(this).addJobCreator(new OurJobCreator());
     }
 
@@ -42,31 +41,6 @@ public class Application extends androidx.multidex.MultiDexApplication {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         LocaleUtil.updateResources(this);
-    }
-
-    public static void initRealm(Context context) {
-        // Initialize Realm. Should only be done once when the application starts.
-        Realm.init(context);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(8) // Must be bumped when the schema changes
-                .migration(new MyMigration())
-                .build();
-        Realm.setDefaultConfiguration(config);
-    }
-
-    public static Realm getDefaultRealmInstance(Context context) {
-        Realm realm;
-        try {
-            realm = Realm.getDefaultInstance();
-        } catch (IllegalStateException e) {
-            Application.initRealm(context);
-            realm = Realm.getDefaultInstance();
-        } catch (RealmFileException e) {
-            // happens when the DB is corrupted
-            Application.initRealm(context);
-            realm = Realm.getDefaultInstance();
-        }
-        return realm;
     }
 
     static class MyMigration implements RealmMigration {

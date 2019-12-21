@@ -2,8 +2,6 @@ package im.tny.segvault.disturbances.ui.activity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,23 +11,25 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.widget.Toolbar;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.ui.widget.StationPickerView;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.StationUse;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.ui.fragment.TripFragment;
-import im.tny.segvault.disturbances.model.StationUse;
-import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.ui.widget.StationPickerView;
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
-import io.realm.Realm;
 
 public class TripCorrectionActivity extends TopActivity {
 
@@ -47,6 +47,7 @@ public class TripCorrectionActivity extends TopActivity {
     private MenuItem saveMenuItem;
 
     private Trip trip;
+    private List<StationUse> uses;
     private Path originalPath;
     private Path newPath;
     private boolean partsDeleted = false;
@@ -90,7 +91,7 @@ public class TripCorrectionActivity extends TopActivity {
 
         network = Coordinator.get(this).getMapManager().getNetwork(networkId);
 
-        populateUI();
+        new LoadTripTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -112,47 +113,6 @@ public class TripCorrectionActivity extends TopActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void populateUI() {
-        Realm realm = Application.getDefaultRealmInstance(this);
-        trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-        if (trip == null) {
-            finish();
-            return;
-        }
-        trip = realm.copyFromRealm(trip);
-        realm.close();
-
-        originalPath = trip.toConnectionPath(network);
-
-        if (originalPath == null || !trip.canBeCorrected()) {
-            finish();
-            return;
-        }
-
-        List<Station> stations = new ArrayList<>(network.getStations());
-
-        startPicker.setStations(stations);
-        endPicker.setStations(stations);
-
-        startPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(network, originalPath.getStartVertex()));
-        endPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(network, originalPath.getEndVertex()));
-
-        startPicker.setWeakSelection(originalPath.getStartVertex().getStation());
-        endPicker.setWeakSelection(originalPath.getEndVertex().getStation());
-
-        StationPickerView.OnStationSelectedListener onStationSelectedListener = station -> redrawPath();
-        startPicker.setOnStationSelectedListener(onStationSelectedListener);
-        endPicker.setOnStationSelectedListener(onStationSelectedListener);
-
-        StationPickerView.OnSelectionLostListener onSelectionLostListener = () -> redrawPath();
-        startPicker.setOnSelectionLostListener(onSelectionLostListener);
-        endPicker.setOnSelectionLostListener(onSelectionLostListener);
-
-        redrawPath();
-
-        saveButton.setOnClickListener(v -> saveChanges());
     }
 
     private void redrawPath() {
@@ -179,7 +139,7 @@ public class TripCorrectionActivity extends TopActivity {
                     for (int i = 0; i < pathLayout.getChildCount(); i++) {
                         View stepview = getLayoutInflater().inflate(R.layout.path_button, buttonsLayout, false);
 
-                        if(newPath.getManualEntry(i)) {
+                        if (newPath.getManualEntry(i)) {
                             manualOffset++;
                         } else {
                             final int idxOnTrip = i - manualOffset;
@@ -208,34 +168,32 @@ public class TripCorrectionActivity extends TopActivity {
     }
 
     private boolean canRemoveVertex(int indexToRemove) {
-        List<StationUse> uses = trip.getPath();
         if (indexToRemove <= 0 || indexToRemove >= uses.size() - 1) {
             return false;
         }
-        return uses.get(indexToRemove - 1).getStation().getId().equals(uses.get(indexToRemove + 1).getStation().getId())
-                && uses.get(indexToRemove).getType() == StationUse.UseType.GONE_THROUGH;
+        return uses.get(indexToRemove - 1).stationID.equals(uses.get(indexToRemove + 1).stationID)
+                && uses.get(indexToRemove).type == StationUse.UseType.GONE_THROUGH;
     }
 
     private void removeVertex(int i) {
         if (!canRemoveVertex(i)) {
             return;
         }
-        List<StationUse> uses = trip.getPath();
-        uses.get(i - 1).setLeaveDate(trip.getPath().get(i + 1).getLeaveDate());
+        uses.get(i - 1).leaveDate = uses.get(i + 1).leaveDate;
         uses.remove(i);
         // the next one to remove might be an interchange, if yes, save its src/dest line as it may be needed later
-        String srcLineId = uses.get(i).getSourceLine();
-        String dstLineId = uses.get(i).getTargetLine();
+        String srcLineId = uses.get(i).sourceLine;
+        String dstLineId = uses.get(i).targetLine;
         uses.remove(i);
         if (uses.size() == 1) {
-            uses.get(0).setType(StationUse.UseType.VISIT);
+            uses.get(0).type = StationUse.UseType.VISIT;
         } else {
-            uses.get(0).setType(StationUse.UseType.NETWORK_ENTRY);
-            uses.get(trip.getPath().size() - 1).setType(StationUse.UseType.NETWORK_EXIT);
+            uses.get(0).type = StationUse.UseType.NETWORK_ENTRY;
+            uses.get(uses.size() - 1).type = StationUse.UseType.NETWORK_EXIT;
 
             if (i < uses.size() && i > 1) {
-                Station src = network.getStation(uses.get(i - 2).getStation().getId());
-                Station dst = network.getStation(uses.get(i).getStation().getId());
+                Station src = network.getStation(uses.get(i - 2).stationID);
+                Station dst = network.getStation(uses.get(i).stationID);
 
                 boolean foundSameLine = false;
                 for (Stop srcStop : src.getStops()) {
@@ -246,23 +204,91 @@ public class TripCorrectionActivity extends TopActivity {
                     }
                 }
                 if (!foundSameLine) {
-                    if (uses.get(i - 1).getType() != StationUse.UseType.INTERCHANGE) {
-                        uses.get(i - 1).setType(StationUse.UseType.INTERCHANGE);
-                        uses.get(i - 1).setSourceLine(srcLineId);
-                        uses.get(i - 1).setTargetLine(dstLineId);
+                    if (uses.get(i - 1).type != StationUse.UseType.INTERCHANGE) {
+                        uses.get(i - 1).type = StationUse.UseType.INTERCHANGE;
+                        uses.get(i - 1).sourceLine = srcLineId;
+                        uses.get(i - 1).targetLine = dstLineId;
                     }
                 } else {
-                    uses.get(i - 1).setType(StationUse.UseType.GONE_THROUGH);
+                    uses.get(i - 1).type = StationUse.UseType.GONE_THROUGH;
                 }
             }
         }
-        originalPath = trip.toConnectionPath(network);
         partsDeleted = true;
         redrawPath();
     }
 
     private void saveChanges() {
         new SaveChangesTask().execute();
+    }
+
+    private static class LoadTripTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<TripCorrectionActivity> parentRef;
+
+        LoadTripTask(TripCorrectionActivity activity) {
+            this.parentRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            TripCorrectionActivity parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent).getDB();
+
+            parent.trip = db.tripDao().get(parent.tripId);
+            if (parent.trip == null) {
+                return false;
+            }
+
+            parent.uses = db.stationUseDao().getOfTrip(parent.tripId);
+
+            parent.originalPath = parent.trip.toConnectionPath(db, parent.network);
+
+            if (parent.originalPath == null || !parent.trip.canBeCorrected(db)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            TripCorrectionActivity parent = parentRef.get();
+            if (parent == null) {
+                return;
+            }
+            if (!result) {
+                parent.finish();
+                return;
+            }
+
+            List<Station> stations = new ArrayList<>(parent.network.getStations());
+
+            parent.startPicker.setStations(stations);
+            parent.endPicker.setStations(stations);
+
+            parent.startPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(parent.network, parent.originalPath.getStartVertex()));
+            parent.endPicker.setAllStationsSortStrategy(new StationPickerView.DistanceSortStrategy(parent.network, parent.originalPath.getEndVertex()));
+
+            parent.startPicker.setWeakSelection(parent.originalPath.getStartVertex().getStation());
+            parent.endPicker.setWeakSelection(parent.originalPath.getEndVertex().getStation());
+
+            StationPickerView.OnStationSelectedListener onStationSelectedListener = station -> parent.redrawPath();
+            parent.startPicker.setOnStationSelectedListener(onStationSelectedListener);
+            parent.endPicker.setOnStationSelectedListener(onStationSelectedListener);
+
+            StationPickerView.OnSelectionLostListener onSelectionLostListener = () -> parent.redrawPath();
+            parent.startPicker.setOnSelectionLostListener(onSelectionLostListener);
+            parent.endPicker.setOnSelectionLostListener(onSelectionLostListener);
+
+            parent.redrawPath();
+
+            parent.saveButton.setOnClickListener(v -> parent.saveChanges());
+        }
     }
 
     private class SaveChangesTask extends AsyncTask<Void, Void, Void> {
@@ -278,7 +304,7 @@ public class TripCorrectionActivity extends TopActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Trip.persistConnectionPath(newPath, tripId);
+            Trip.persistConnectionPath(Coordinator.get(TripCorrectionActivity.this).getDB(), newPath, tripId);
             return null;
         }
 

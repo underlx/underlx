@@ -15,8 +15,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.s2ls.InNetworkState;
 import im.tny.segvault.s2ls.NearNetworkState;
@@ -140,7 +140,7 @@ public class S2LSChangeListener implements S2LS.EventListener {
 
     @Override
     public void onTripEnded(S2LS s2ls, Path path) {
-        String tripId = Trip.persistConnectionPath(path);
+        String tripId = Trip.persistConnectionPath(Coordinator.get(context).getDB(), path);
         if (tripId == null) {
             // trip was not saved for some reason (maybe it overlaps with an existing trip)
             return;

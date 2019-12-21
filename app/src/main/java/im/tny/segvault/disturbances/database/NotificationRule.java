@@ -6,6 +6,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -22,18 +23,24 @@ import im.tny.segvault.disturbances.R;
 public class NotificationRule {
     @PrimaryKey
     @NonNull
+    @ColumnInfo(name = "id")
     public String id = "";
 
     @NonNull
+    @ColumnInfo(name = "name")
     public String name = "";
 
+    @ColumnInfo(name = "enabled")
     public boolean enabled = true;
 
+    @ColumnInfo(name = "start_time")
     public long startTime;
 
+    @ColumnInfo(name = "end_time")
     public long endTime;
 
     @NonNull
+    @ColumnInfo(name = "week_days")
     public int[] weekDays = new int[0];
 
     public String getDescription(Context context) {
@@ -61,19 +68,19 @@ public class NotificationRule {
 
     public boolean applies(Date at) {
         long now = at.getTime();
-        for(int day : weekDays) {
+        for (int day : weekDays) {
             Calendar c = Calendar.getInstance();
             c.setTimeInMillis(now);
             c.set(Calendar.HOUR_OF_DAY, 0);
             c.set(Calendar.MINUTE, 0);
             c.set(Calendar.SECOND, 0);
             c.set(Calendar.MILLISECOND, 0);
-            while(c.get(Calendar.DAY_OF_WEEK) != day) {
+            while (c.get(Calendar.DAY_OF_WEEK) != day) {
                 c.add(Calendar.DAY_OF_YEAR, -1);
             }
             long todayPassed = now - c.getTimeInMillis();
             // todayPassed might actually be longer than 24 hours, which is what we want
-            if(todayPassed >= startTime && todayPassed < endTime) {
+            if (todayPassed >= startTime && todayPassed < endTime) {
                 return true;
             }
         }

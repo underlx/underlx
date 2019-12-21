@@ -4,10 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
 import androidx.appcompat.app.AlertDialog;
+
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
@@ -20,13 +24,15 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;
-import im.tny.segvault.disturbances.model.Trip;
+import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
@@ -36,7 +42,6 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Transfer;
-import io.realm.Realm;
 
 /**
  * Created by gabriel on 5/10/17.
@@ -52,6 +57,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     private String networkId;
 
     private Network network;
+    private Trip trip;
 
     private TextView stationNamesView;
     private TextView dateView;
@@ -121,14 +127,14 @@ public class TripFragment extends BottomSheetDialogFragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle(R.string.frag_trip_delete_confirm_title)
                     .setMessage(R.string.frag_trip_delete_confirm_desc)
-                    .setPositiveButton(R.string.frag_trip_delete, (dialog, which) -> deleteTrip())
+                    .setPositiveButton(R.string.frag_trip_delete, (dialog, which) -> new DeleteTripTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR))
                     .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                         // do nothing
                     })
                     .show();
         });
         this.inflater = inflater;
-        refreshUI();
+        new LoadTripTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
 
         return view;
     }
@@ -137,67 +143,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     public void onResume() {
         super.onResume();
 
-        refreshUI();
-    }
-
-    private void refreshUI() {
-        Network network = this.network;
-        if (network == null) {
-            return;
-        }
-        Realm realm = Application.getDefaultRealmInstance(getContext());
-        Trip trip = realm.where(Trip.class).equalTo("id", tripId).findFirst();
-
-        if(trip == null) {
-            return;
-        }
-
-        Path path = trip.toConnectionPath(network);
-        if(path == null) {
-            return;
-        }
-
-        Station origin = path.getStartVertex().getStation();
-        Station dest = path.getEndVertex().getStation();
-
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        if (path.getEdgeList().size() == 0) {
-            builder.append("#");
-            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_beenhere_black_24dp),
-                    builder.length() - 1, builder.length(), 0);
-            builder.append(" " + origin.getName());
-        } else {
-            builder.append(origin.getName() + " ").append("#");
-            builder.setSpan(new ImageSpan(getActivity(), R.drawable.ic_arrow_forward_black_24dp),
-                    builder.length() - 1, builder.length(), 0);
-            builder.append(" " + dest.getName());
-
-        }
-        stationNamesView.setText(builder);
-
-        dateView.setText(
-                DateUtils.formatDateTime(getContext(),
-                        path.getEntryTime(0).getTime(),
-                        DateUtils.FORMAT_SHOW_DATE));
-
-        int length = path.getTimeablePhysicalLength();
-        long time = path.getMovementMilliseconds();
-        if (length == 0 || time == 0) {
-            statsLayout.setVisibility(View.GONE);
-        } else {
-            statsView.setText(String.format(getString(R.string.frag_trip_stats),
-                    length,
-                    DateUtils.formatElapsedTime(time / 1000),
-                    (((double) length / (double) (time / 1000)) * 3.6)));
-        }
-
-        populatePathView(getContext(), inflater, path, layoutRoute, true);
-
-        if (!trip.canBeCorrected()) {
-            correctButton.setVisibility(View.GONE);
-        }
-
-        realm.close();
+        new LoadTripTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
     }
 
     public static void populatePathView(final Context context, final LayoutInflater inflater, final Path path, ViewGroup root, boolean showInfoIcons) {
@@ -303,11 +249,7 @@ public class TripFragment extends BottomSheetDialogFragment {
                         new int[]{prevLineColor, nextLineColor});
                 gd.setCornerRadius(0f);
 
-                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    centerLineStripeLayout.setBackgroundDrawable(gd);
-                } else {
-                    centerLineStripeLayout.setBackground(gd);
-                }
+                centerLineStripeLayout.setBackground(gd);
                 centerLineStripeLayout.setVisibility(View.VISIBLE);
 
                 TextView timeView = stepview.findViewById(R.id.time_view);
@@ -397,17 +339,117 @@ public class TripFragment extends BottomSheetDialogFragment {
         mListener = null;
     }
 
-    private void deleteTrip() {
-        Realm realm = Application.getDefaultRealmInstance(getContext());
-        realm.executeTransaction(realm1 -> {
-            Trip trip = realm1.where(Trip.class).equalTo("id", tripId).findFirst();
-            if (trip != null) {
-                trip.getPath().deleteAllFromRealm();
-                trip.deleteFromRealm();
+    private static class LoadTripTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<TripFragment> parentRef;
+        private Path path;
+        private boolean canBeCorrected;
+
+        LoadTripTask(TripFragment parent) {
+            this.parentRef = new WeakReference<>(parent);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            TripFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
             }
-        });
-        realm.close();
-        dismiss();
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+            parent.trip = db.tripDao().get(parent.tripId);
+
+            if (parent.trip == null) {
+                return false;
+            }
+
+            canBeCorrected = parent.trip.canBeCorrected(db);
+
+            path = parent.trip.toConnectionPath(db, parent.network);
+            return path != null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            if (result) {
+                TripFragment parent = parentRef.get();
+                if (parent == null) {
+                    return;
+                }
+
+                Station origin = path.getStartVertex().getStation();
+                Station dest = path.getEndVertex().getStation();
+
+                SpannableStringBuilder builder = new SpannableStringBuilder();
+                if (path.getEdgeList().size() == 0) {
+                    builder.append("#");
+                    builder.setSpan(new ImageSpan(parent.getActivity(), R.drawable.ic_beenhere_black_24dp),
+                            builder.length() - 1, builder.length(), 0);
+                    builder.append(" " + origin.getName());
+                } else {
+                    builder.append(origin.getName() + " ").append("#");
+                    builder.setSpan(new ImageSpan(parent.getActivity(), R.drawable.ic_arrow_forward_black_24dp),
+                            builder.length() - 1, builder.length(), 0);
+                    builder.append(" " + dest.getName());
+
+                }
+                parent.stationNamesView.setText(builder);
+
+                parent.dateView.setText(
+                        DateUtils.formatDateTime(parent.getContext(),
+                                path.getEntryTime(0).getTime(),
+                                DateUtils.FORMAT_SHOW_DATE));
+
+                int length = path.getTimeablePhysicalLength();
+                long time = path.getMovementMilliseconds();
+                if (length == 0 || time == 0) {
+                    parent.statsLayout.setVisibility(View.GONE);
+                } else {
+                    parent.statsView.setText(String.format(parent.getString(R.string.frag_trip_stats),
+                            length,
+                            DateUtils.formatElapsedTime(time / 1000),
+                            (((double) length / (double) (time / 1000)) * 3.6)));
+                }
+
+                populatePathView(parent.getContext(), parent.inflater, path, parent.layoutRoute, true);
+
+                if (!canBeCorrected) {
+                    parent.correctButton.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    private static class DeleteTripTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<TripFragment> parentRef;
+
+        DeleteTripTask(TripFragment parent) {
+            this.parentRef = new WeakReference<>(parent);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            TripFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.getContext()).getDB();
+            db.tripDao().delete(parent.trip);
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            if (result) {
+                TripFragment parent = parentRef.get();
+                if (parent != null) {
+                    parent.dismiss();
+                }
+            }
+        }
     }
 
     /**

@@ -31,6 +31,8 @@ import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.StationPreference;
 import im.tny.segvault.disturbances.model.NotificationRule;
 import im.tny.segvault.disturbances.model.RStation;
+import im.tny.segvault.disturbances.model.StationUse;
+import im.tny.segvault.disturbances.model.Trip;
 import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -38,6 +40,8 @@ import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;
 import im.tny.segvault.subway.Stop;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmFileException;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -401,6 +405,31 @@ public class Coordinator implements MapManager.OnLoadListener {
             this.contextRef = new WeakReference<>(context);
         }
 
+        private static void initRealm(Context context) {
+            // Initialize Realm. Should only be done once when the application starts.
+            Realm.init(context);
+            RealmConfiguration config = new RealmConfiguration.Builder()
+                    .schemaVersion(8) // Must be bumped when the schema changes
+                    .migration(new Application.MyMigration())
+                    .build();
+            Realm.setDefaultConfiguration(config);
+        }
+
+        private static Realm getDefaultRealmInstance(Context context) {
+            Realm realm;
+            try {
+                realm = Realm.getDefaultInstance();
+            } catch (IllegalStateException e) {
+                initRealm(context);
+                realm = Realm.getDefaultInstance();
+            } catch (RealmFileException e) {
+                // happens when the DB is corrupted
+                initRealm(context);
+                realm = Realm.getDefaultInstance();
+            }
+            return realm;
+        }
+
         @Override
         protected Boolean doInBackground(Void... voids) {
             Context context = contextRef.get();
@@ -410,9 +439,52 @@ public class Coordinator implements MapManager.OnLoadListener {
 
             AppDatabase db = Coordinator.get(context).getDB();
 
-            Realm realm = Application.getDefaultRealmInstance(context);
+            boolean successful = false;
+            Realm realm = getDefaultRealmInstance(context);
             try {
                 db.runInTransaction(() -> {
+                    for (Trip trip : realm.where(Trip.class).findAll()) {
+                        im.tny.segvault.disturbances.database.Trip newTrip = new im.tny.segvault.disturbances.database.Trip();
+                        newTrip.id = trip.getId();
+                        newTrip.syncFailures = trip.isFailedToSync() ? 5 : 0;
+                        newTrip.synced = trip.isSynced();
+                        newTrip.userConfirmed = trip.isUserConfirmed();
+
+                        db.tripDao().insertAll(newTrip);
+
+                        int order = 0;
+                        for (StationUse use : trip.getPath()) {
+                            im.tny.segvault.disturbances.database.StationUse newUse = new im.tny.segvault.disturbances.database.StationUse();
+                            newUse.stationID = use.getStation().getId();
+                            newUse.entryDate = use.getEntryDate();
+                            newUse.leaveDate = use.getLeaveDate();
+                            newUse.sourceLine = use.getSourceLine();
+                            newUse.targetLine = use.getTargetLine();
+                            switch (use.getType()) {
+                                case NETWORK_ENTRY:
+                                    newUse.type = im.tny.segvault.disturbances.database.StationUse.UseType.NETWORK_ENTRY;
+                                    break;
+                                case NETWORK_EXIT:
+                                    newUse.type = im.tny.segvault.disturbances.database.StationUse.UseType.NETWORK_EXIT;
+                                    break;
+                                case INTERCHANGE:
+                                    newUse.type = im.tny.segvault.disturbances.database.StationUse.UseType.INTERCHANGE;
+                                    break;
+                                case GONE_THROUGH:
+                                    newUse.type = im.tny.segvault.disturbances.database.StationUse.UseType.GONE_THROUGH;
+                                    break;
+                                case VISIT:
+                                    newUse.type = im.tny.segvault.disturbances.database.StationUse.UseType.VISIT;
+                                    break;
+                            }
+                            newUse.manualEntry = use.isManualEntry();
+                            newUse.order = order++;
+                            newUse.tripID = newTrip.id;
+
+                            db.stationUseDao().insertAll(newUse);
+                        }
+                    }
+
                     for (NotificationRule rule : realm.where(NotificationRule.class).findAll()) {
                         im.tny.segvault.disturbances.database.NotificationRule newRule = new im.tny.segvault.disturbances.database.NotificationRule();
                         newRule.id = rule.getId();
@@ -426,7 +498,7 @@ public class Coordinator implements MapManager.OnLoadListener {
                         db.notificationRuleDao().insertOrUpdateAll(newRule);
                     }
 
-                    for(RStation station : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
+                    for (RStation station : realm.where(RStation.class).equalTo("favorite", true).findAll()) {
                         StationPreference sp = new StationPreference();
                         sp.networkID = station.getNetwork();
                         sp.stationID = station.getId();
@@ -435,17 +507,27 @@ public class Coordinator implements MapManager.OnLoadListener {
                     }
                 });
 
-                // TODO uncomment when we're done writing migration code
-                /*SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
+                SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
                 SharedPreferences.Editor e = sharedPref.edit();
                 e.putBoolean("fuse_migrated_realm_to_room", true);
-                e.apply();*/
-            } catch (Exception e) {
+                e.apply();
+                successful = true;
+                Log.i("RealmToRoom", "Going to close and delete realm");
+            } catch (Throwable e) {
                 Log.w("RealmToRoom", "Migration failed: " + e);
                 e.printStackTrace();
                 return false;
             } finally {
                 realm.close();
+                if(successful) {
+                    try {
+                        Realm.deleteRealm(Realm.getDefaultConfiguration());
+                        Log.i("RealmToRoom", "Migrated successfully");
+                    } catch(Throwable e) {
+                        Log.w("RealmToRoom", "Migrated successfully but couldn't delete realm: " + e);
+                    }
+
+                }
             }
             return true;
         }
