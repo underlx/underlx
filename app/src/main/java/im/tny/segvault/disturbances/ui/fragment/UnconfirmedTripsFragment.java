@@ -103,38 +103,9 @@ public class UnconfirmedTripsFragment extends Fragment {
         return view;
     }
 
-    private void update(List<Trip> trips) {
-        if (mListener == null) {
-            return;
-        }
-        AppDatabase db = Coordinator.get(getContext()).getDB();
-        Collection<Network> networks = Coordinator.get(getContext()).getMapManager().getNetworks();
-        List<TripRecyclerViewAdapter.TripItem> items = new ArrayList<>();
-        for (Trip t : trips) {
-            try {
-                TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(db, t, networks);
-                items.add(item);
-            } catch (InvalidObjectException e) {
-                e.printStackTrace();
-            }
-        }
-        if (items.size() == 0) {
-            return;
-        }
-        Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder((tripItem, t1) -> Long.compare(tripItem.originTime.getTime(), t1.originTime.getTime())));
-
-        if (!isAdded()) {
-            // prevent onPostExecute from doing anything if no longer attached to an activity
-            return;
-        }
-        if (recyclerView != null && mListener != null) {
-            recyclerView.setAdapter(new TripRecyclerViewAdapter(items, mListener, true));
-            recyclerView.invalidate();
-        }
-    }
-
     private static class UpdateTask extends AsyncTask<Void, Void, Boolean> {
         private WeakReference<UnconfirmedTripsFragment> parentRef;
+        private List<TripRecyclerViewAdapter.TripItem> items = new ArrayList<>();
 
         UpdateTask(UnconfirmedTripsFragment fragment) {
             this.parentRef = new WeakReference<>(fragment);
@@ -148,8 +119,34 @@ public class UnconfirmedTripsFragment extends Fragment {
             }
 
             AppDatabase db = Coordinator.get(parent.getContext()).getDB();
-            parent.update(db.tripDao().getUnconfirmed(Trip.getConfirmCutoff()));
+
+            Collection<Network> networks = Coordinator.get(parent.getContext()).getMapManager().getNetworks();
+            for (Trip t : db.tripDao().getUnconfirmed(Trip.getConfirmCutoff())) {
+                try {
+                    TripRecyclerViewAdapter.TripItem item = new TripRecyclerViewAdapter.TripItem(db, t, networks);
+                    items.add(item);
+                } catch (InvalidObjectException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (items.size() == 0) {
+                return parent.isAdded();
+            }
+            Collections.sort(items, Collections.<TripRecyclerViewAdapter.TripItem>reverseOrder((tripItem, t1) -> Long.compare(tripItem.originTime.getTime(), t1.originTime.getTime())));
+
             return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            UnconfirmedTripsFragment parent = parentRef.get();
+            if (aBoolean && parent != null && parent.isAdded()) {
+                if (parent.recyclerView != null && parent.mListener != null) {
+                    parent.recyclerView.setAdapter(new TripRecyclerViewAdapter(items, parent.mListener, true));
+                    parent.recyclerView.invalidate();
+                }
+            }
         }
     }
 
