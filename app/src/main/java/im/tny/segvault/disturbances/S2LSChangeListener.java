@@ -7,7 +7,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
+import im.tny.segvault.disturbances.database.AppDatabase;
 import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.ui.activity.TripCorrectionActivity;
@@ -140,30 +143,60 @@ public class S2LSChangeListener implements S2LS.EventListener {
 
     @Override
     public void onTripEnded(S2LS s2ls, Path path) {
-        String tripId = Trip.persistConnectionPath(Coordinator.get(context).getDB(), path);
-        if (tripId == null) {
-            // trip was not saved for some reason (maybe it overlaps with an existing trip)
-            return;
-        }
-        Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
-        bm.sendBroadcast(intent);
+        new SaveTripTask(this, s2ls, path).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+    }
 
-        Coordinator.get(context).getMqttManager().disconnect(mqttPartyID);
-        if (!checkStopForeground(s2ls)) {
-            updateRouteNotification(s2ls);
+    private static class SaveTripTask extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<S2LSChangeListener> parentRef;
+        private S2LS s2ls;
+        private Path path;
+        private String tripId;
+
+        SaveTripTask(S2LSChangeListener parent, S2LS s2ls, Path path) {
+            this.parentRef = new WeakReference<>(parent);
+            this.s2ls = s2ls;
+            this.path = path;
         }
 
-        SharedPreferences sharedPref = context.getSharedPreferences("settings", MODE_PRIVATE);
-        boolean openTripCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenTripCorrection, false);
-        boolean openVisitCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenVisitCorrection, false);
-        if (openTripCorrection && (path.getEdgeList().size() > 0 || openVisitCorrection)) {
-            intent = new Intent(context, TripCorrectionActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, s2ls.getNetwork().getId());
-            intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
-            intent.putExtra(TripCorrectionActivity.EXTRA_IS_STANDALONE, true);
-            context.startActivity(intent);
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            S2LSChangeListener parent = parentRef.get();
+            if (parent == null) {
+                return false;
+            }
+
+            AppDatabase db = Coordinator.get(parent.context).getDB();
+
+            tripId = Trip.persistConnectionPath(db, path);
+            return tripId != null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            S2LSChangeListener parent = parentRef.get();
+            if (result && parent != null) {
+                Intent intent = new Intent(ACTION_CURRENT_TRIP_ENDED);
+                LocalBroadcastManager bm = LocalBroadcastManager.getInstance(parent.context);
+                bm.sendBroadcast(intent);
+
+                Coordinator.get(parent.context).getMqttManager().disconnect(parent.mqttPartyID);
+                if (!parent.checkStopForeground(s2ls)) {
+                    parent.updateRouteNotification(s2ls);
+                }
+
+                SharedPreferences sharedPref = parent.context.getSharedPreferences("settings", MODE_PRIVATE);
+                boolean openTripCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenTripCorrection, false);
+                boolean openVisitCorrection = sharedPref.getBoolean(PreferenceNames.AutoOpenVisitCorrection, false);
+                if (openTripCorrection && (path.getEdgeList().size() > 0 || openVisitCorrection)) {
+                    intent = new Intent(parent.context, TripCorrectionActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(TripCorrectionActivity.EXTRA_NETWORK_ID, s2ls.getNetwork().getId());
+                    intent.putExtra(TripCorrectionActivity.EXTRA_TRIP_ID, tripId);
+                    intent.putExtra(TripCorrectionActivity.EXTRA_IS_STANDALONE, true);
+                    parent.context.startActivity(intent);
+                }
+            }
         }
     }
 

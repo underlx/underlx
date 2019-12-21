@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import im.tny.segvault.s2ls.Path;
 import im.tny.segvault.subway.Connection;
@@ -221,36 +222,42 @@ public class Trip {
             uses.add(endUse);
         }
 
-        Trip trip;
-        if (replaceTrip != null) {
-            trip = db.tripDao().get(replaceTrip);
-            db.stationUseDao().deleteOfTrip(replaceTrip);
-            trip.userConfirmed = true;
-            trip.synced = false;
-            db.tripDao().updateAll(trip);
-        } else {
-            // intervals overlap if (StartA <= EndB) and (EndA >= StartB)
-            // our A is the station use in the DB we want to check
-            // our B is this whole trip
-            Date startB = uses.get(0).entryDate;
-            Date endB = uses.get(uses.size() - 1).leaveDate;
-            boolean hasOverlap = db.stationUseDao().countOverlapping(startB, endB) > 0;
-            if (hasOverlap) {
-                // this trip overlaps with a previous trip. this should never happen, but if it does, we'll prevent shenanigans here
-                return null;
+        AtomicReference<String> tripId = new AtomicReference<>();
+        tripId.set(null);
+        db.runInTransaction(() -> {
+            Trip trip;
+            if (replaceTrip != null) {
+                trip = db.tripDao().get(replaceTrip);
+                db.stationUseDao().deleteOfTrip(replaceTrip);
+                trip.userConfirmed = true;
+                trip.synced = false;
+                db.tripDao().updateAll(trip);
+            } else {
+                // intervals overlap if (StartA <= EndB) and (EndA >= StartB)
+                // our A is the station use in the DB we want to check
+                // our B is this whole trip
+                Date startB = uses.get(0).entryDate;
+                Date endB = uses.get(uses.size() - 1).leaveDate;
+                boolean hasOverlap = db.stationUseDao().countOverlapping(startB, endB) > 0;
+                if (hasOverlap) {
+                    // this trip overlaps with a previous trip. this should never happen, but if it does, we'll prevent shenanigans here
+                    return;
+                }
+                trip = new Trip();
+                trip.id = UUID.randomUUID().toString();
+                trip.userConfirmed = false;
+                trip.synced = false;
+                db.tripDao().insertAll(trip);
             }
-            trip = new Trip();
-            trip.id = UUID.randomUUID().toString();
-            trip.userConfirmed = false;
-            trip.synced = false;
-            db.tripDao().insertAll(trip);
-        }
 
-        // insert uses after trip, as uses have a FK to trip
-        for (StationUse use : uses) {
-            db.stationUseDao().insertAll(use);
-        }
-        return trip.id;
+            // insert uses after trip, as uses have a FK to trip
+            for (StationUse use : uses) {
+                use.tripID = trip.id;
+                db.stationUseDao().insertAll(use);
+            }
+            tripId.set(trip.id);
+        });
+        return tripId.get();
     }
 
     public static void confirm(AppDatabase db, final String id) {

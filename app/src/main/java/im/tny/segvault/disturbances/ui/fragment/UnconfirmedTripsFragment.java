@@ -97,7 +97,8 @@ public class UnconfirmedTripsFragment extends Fragment {
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(context);
 
         AppDatabase db = Coordinator.get(getContext()).getDB();
-        db.tripDao().getUnconfirmedLive(Trip.getConfirmCutoff()).observe(this, this::update);
+        db.tripDao().getUnconfirmedLive(Trip.getConfirmCutoff()).observe(this,
+                trips -> new UpdateTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR));
 
         return view;
     }
