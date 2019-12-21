@@ -135,17 +135,14 @@ public class TripCorrectionActivity extends TopActivity {
                 public void onGlobalLayout() {
                     buttonsLayout.removeAllViews();
 
-                    int manualOffset = 0;
                     for (int i = 0; i < pathLayout.getChildCount(); i++) {
                         View stepview = getLayoutInflater().inflate(R.layout.path_button, buttonsLayout, false);
 
-                        if (newPath.getManualEntry(i)) {
-                            manualOffset++;
-                        } else {
-                            final int idxOnTrip = i - manualOffset;
-                            if (canRemoveVertex(idxOnTrip)) {
+                        if (!newPath.getManualEntry(i)) {
+                            if (canRemoveVertex(i)) {
+                                final int idx = i;
                                 stepview.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
-                                stepview.findViewById(R.id.delete_button).setOnClickListener(v -> removeVertex(idxOnTrip));
+                                stepview.findViewById(R.id.delete_button).setOnClickListener(v -> removeVertex(idx));
                             }
                         }
 
@@ -215,6 +212,7 @@ public class TripCorrectionActivity extends TopActivity {
             }
         }
         partsDeleted = true;
+        originalPath = trip.toConnectionPath(uses, network);
         redrawPath();
     }
 

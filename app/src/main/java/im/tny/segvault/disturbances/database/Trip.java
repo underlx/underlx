@@ -46,13 +46,17 @@ public class Trip {
     }
 
     public Path toConnectionPath(AppDatabase db, Network network) {
+        List<StationUse> path = db.stationUseDao().getOfTrip(id);
+        return toConnectionPath(path, network);
+    }
+
+    public Path toConnectionPath(List<StationUse> path, Network network) {
         List<Connection> edges = new LinkedList<>();
         List<Pair<Date, Date>> times = new ArrayList<>();
         List<Boolean> manualEntry = new ArrayList<>();
         Stop startVertex = null;
 
         List<Stop> previous = new ArrayList<>();
-        List<StationUse> path = db.stationUseDao().getOfTrip(id);
         for (StationUse use : path) {
             switch (use.type) {
                 case INTERCHANGE:
