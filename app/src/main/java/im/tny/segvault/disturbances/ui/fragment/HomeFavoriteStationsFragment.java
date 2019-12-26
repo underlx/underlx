@@ -161,7 +161,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
             super.onPreExecute();
         }
 
-        protected Boolean doInBackground(Void... v) {
+        protected synchronized Boolean doInBackground(Void... v) {
             if (mListener == null) {
                 return false;
             }
@@ -201,7 +201,7 @@ public class HomeFavoriteStationsFragment extends Fragment {
 
         }
 
-        protected void onPostExecute(Boolean result) {
+        protected synchronized void onPostExecute(Boolean result) {
             if (!isAdded()) {
                 // prevent onPostExecute from doing anything if no longer attached to an activity
                 return;
