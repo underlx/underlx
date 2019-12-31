@@ -26,7 +26,7 @@
     <string name="status_loading">Loading…</string>
     <string name="frag_about_title">About</string>
     <string name="frag_about_header" translatable="false">@string/app_name</string>
-    <string name="frag_about_copyright">Copyright © 2017–2019 The UnderLX Team\nIn association with the Segvault group</string>
+    <string name="frag_about_copyright">Copyright © 2017–2020 The UnderLX Team\nIn association with the Segvault group</string>
     <string name="frag_about_datasets">Network maps</string>
     <string name="frag_about_version">Version %s</string>
     <string name="frag_about_disclaimer">This app and associated service have no affiliation with Metropolitano de Lisboa, E.P.E.\nWe cannot guarantee the correctness of the displayed information.</string>
