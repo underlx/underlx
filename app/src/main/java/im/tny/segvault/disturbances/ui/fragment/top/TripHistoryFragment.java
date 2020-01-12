@@ -261,7 +261,9 @@ public class TripHistoryFragment extends TopFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            getSwipeRefreshLayout().setRefreshing(true);
+            if (isAdded()) {
+                getSwipeRefreshLayout().setRefreshing(true);
+            }
         }
 
         protected Boolean doInBackground(Void... v) {
@@ -506,7 +508,7 @@ public class TripHistoryFragment extends TopFragment {
                 case MainActivity.ACTION_MAIN_SERVICE_BOUND:
                 case MapManager.ACTION_UPDATE_TOPOLOGY_FINISHED:
                 case MainService.ACTION_TRIP_TABLE_UPDATED:
-                    if (getActivity() != null) {
+                    if (getActivity() != null && isAdded()) {
                         new UpdateDataTask().executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
                     }
                     break;
