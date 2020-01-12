@@ -6,6 +6,8 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
+import androidx.annotation.WorkerThread;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Stop;
 
 public class RouteUtil {
+    @WorkerThread
     public static Stop getLikelyNextExit(Context context, List<Connection> path, double threshold) {
         if (path.size() == 0) {
             return null;

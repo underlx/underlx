@@ -44,6 +44,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
@@ -61,8 +62,10 @@ import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
+import im.tny.segvault.disturbances.database.NotificationRule;
 import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
+import im.tny.segvault.disturbances.ui.activity.EditNotifScheduleActivity;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;
@@ -491,113 +494,162 @@ public class HomeFragment extends TopFragment {
         if (!isAdded())
             return;
 
-        final S2LS loc = Coordinator.get(getContext()).getS2LS(networkId);
+        new RefreshCurrentTrip(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
+    }
 
-        if (loc == null) {
-            ongoingTripCard.setVisibility(View.GONE);
-            navigationCard.setVisibility(View.GONE);
-            return;
+    private static class RefreshCurrentTrip extends AsyncTask<Void, Void, Boolean> {
+        private WeakReference<HomeFragment> parentRef;
+
+        private S2LS loc;
+        private Path currentPath;
+        private Route currentRoute;
+        private Stop direction;
+        private Stop next;
+        private Stop likelyExit = null;
+
+        RefreshCurrentTrip(HomeFragment parent) {
+            this.parentRef = new WeakReference<>(parent);
         }
-        final Path currentPath = loc.getCurrentTrip();
-        final Route currentRoute = loc.getCurrentTargetRoute();
-        if (currentPath == null) {
-            ongoingTripCard.setVisibility(View.GONE);
-        } else {
-            final Station station = currentPath.getCurrentStop().getStation();
-            curStationNameView.setText(station.getName());
 
-            Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(getContext()).getMqttManager().getVehicleETAsForStation(station, 1);
-
-            Stop direction = currentPath.getDirection();
-            Stop next = currentPath.getNextStop();
-            boolean showETAs = (direction == null || station.getLines().size() > 0) && etas.size() > 0;
-            if (direction != null && next != null) {
-                directionView.setText(String.format(getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
-                nextStationView.setText(String.format(getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
-
-                Stop likelyExit = RouteUtil.getLikelyNextExit(getContext(), currentPath.getEdgeList(), 1);
-                int resId = R.style.TextAppearance_AppCompat_Small;
-                if (next == likelyExit && currentRoute == null) {
-                    resId = R.style.TextAppearance_AppCompat_Medium;
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    nextStationView.setTextAppearance(resId);
-                } else {
-                    nextStationView.setTextAppearance(getContext(), resId);
-                }
-
-                directionView.setVisibility(View.VISIBLE);
-                nextStationView.setVisibility(View.VISIBLE);
-            } else {
-                directionView.setVisibility(View.GONE);
-                nextStationView.setVisibility(View.GONE);
-                showETAs = etas.size() > 0;
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            HomeFragment parent = parentRef.get();
+            if (parent == null) {
+                return false;
             }
-            redrawCurrentStationLineIcons(station);
-            curStationLayout.setVisibility(View.VISIBLE);
-            curStationLayout.setOnClickListener(view -> {
-                Intent intent = new Intent(getContext(), StationActivity.class);
-                intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
-                intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
-                startActivity(intent);
-            });
 
-            if (showETAs) {
-                List<CharSequence> etaLines = new ArrayList<>();
+            loc = Coordinator.get(parent.getContext()).getS2LS(parent.networkId);
+            if (loc == null) {
+                return false;
+            }
 
-                MainService.addETAlines(getContext(), etas, etaLines, currentPath.getCurrentStop(), direction);
-                nextTrainsView.setText("");
-                for (int i = 0; i < etaLines.size(); i++) {
-                    nextTrainsView.append(etaLines.get(i));
-                    if (i < etaLines.size() - 1) {
-                        nextTrainsView.append("\n");
+            currentPath = loc.getCurrentTrip();
+            currentRoute = loc.getCurrentTargetRoute();
+
+            if (currentPath != null) {
+                direction = currentPath.getDirection();
+                next = currentPath.getNextStop();
+
+
+                if (direction != null && next != null) {
+                    likelyExit = RouteUtil.getLikelyNextExit(parent.getContext(), currentPath.getEdgeList(), 1);
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            HomeFragment parent = parentRef.get();
+            if (parent == null || !parent.isAdded()) {
+                return;
+            }
+
+            if (!result || loc == null) {
+                parent.ongoingTripCard.setVisibility(View.GONE);
+                parent.navigationCard.setVisibility(View.GONE);
+                return;
+            }
+
+            if (currentPath == null) {
+                parent.ongoingTripCard.setVisibility(View.GONE);
+            } else {
+                final Station station = currentPath.getCurrentStop().getStation();
+                parent.curStationNameView.setText(station.getName());
+
+                Map<String, List<API.MQTTvehicleETA>> etas = Coordinator.get(parent.getContext()).getMqttManager().getVehicleETAsForStation(station, 1);
+
+                boolean showETAs = (direction == null || station.getLines().size() > 0) && etas.size() > 0;
+                if (direction != null && next != null) {
+                    parent.directionView.setText(String.format(parent.getString(R.string.frag_home_trip_direction), direction.getStation().getName()));
+                    parent.nextStationView.setText(String.format(parent.getString(R.string.frag_home_trip_next_station), next.getStation().getName()));
+
+
+                    int resId = R.style.TextAppearance_AppCompat_Small;
+                    if (next == likelyExit && currentRoute == null) {
+                        resId = R.style.TextAppearance_AppCompat_Medium;
                     }
-                }
-                nextTrainsView.setVisibility(View.VISIBLE);
-            } else {
-                nextTrainsView.setVisibility(View.GONE);
-            }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        parent.nextStationView.setTextAppearance(resId);
+                    } else {
+                        parent.nextStationView.setTextAppearance(parent.getContext(), resId);
+                    }
 
-            curTripIncorrectLocationButton.setOnClickListener(view -> new FeedbackUtil.IncorrectLocation(getContext(), station).showReportWizard());
-
-            if (loc.canRequestEndOfTrip()) {
-                curTripEndButton.setVisibility(View.VISIBLE);
-                curTripIncorrectLocationButton.setVisibility(View.GONE);
-            } else {
-                curTripEndButton.setVisibility(View.GONE);
-                curTripIncorrectLocationButton.setVisibility(View.VISIBLE);
-            }
-            ongoingTripCard.setVisibility(View.VISIBLE);
-        }
-
-        if (currentRoute == null) {
-            navigationCard.setVisibility(View.GONE);
-        } else {
-            RouteUtil.RouteStepInfo info = RouteUtil.buildRouteStepInfo(getContext(), currentRoute, currentPath);
-            routeTitleView.setText(info.title);
-            routeSummaryView.setText(info.summary);
-            routeSummaryView.setVisibility(View.VISIBLE);
-
-            routeBodyLayout.removeAllViews();
-            for (CharSequence s : info.bodyLines) {
-                TextView tv = new TextView(getContext());
-                if (Build.VERSION.SDK_INT < 23) {
-                    tv.setTextAppearance(getContext(), R.style.TextAppearance_AppCompat_Small);
+                    parent.directionView.setVisibility(View.VISIBLE);
+                    parent.nextStationView.setVisibility(View.VISIBLE);
                 } else {
-                    tv.setTextAppearance(R.style.TextAppearance_AppCompat_Small);
+                    parent.directionView.setVisibility(View.GONE);
+                    parent.nextStationView.setVisibility(View.GONE);
+                    showETAs = etas.size() > 0;
                 }
-                tv.setText(s);
-                routeBodyLayout.addView(tv);
+                parent.redrawCurrentStationLineIcons(station);
+                parent.curStationLayout.setVisibility(View.VISIBLE);
+                parent.curStationLayout.setOnClickListener(view -> {
+                    Intent intent = new Intent(parent.getContext(), StationActivity.class);
+                    intent.putExtra(StationActivity.EXTRA_STATION_ID, station.getId());
+                    intent.putExtra(StationActivity.EXTRA_NETWORK_ID, station.getNetwork().getId());
+                    parent.startActivity(intent);
+                });
+
+                if (showETAs) {
+                    List<CharSequence> etaLines = new ArrayList<>();
+
+                    MainService.addETAlines(parent.getContext(), etas, etaLines, currentPath.getCurrentStop(), direction);
+                    parent.nextTrainsView.setText("");
+                    for (int i = 0; i < etaLines.size(); i++) {
+                        parent.nextTrainsView.append(etaLines.get(i));
+                        if (i < etaLines.size() - 1) {
+                            parent.nextTrainsView.append("\n");
+                        }
+                    }
+                    parent.nextTrainsView.setVisibility(View.VISIBLE);
+                } else {
+                    parent.nextTrainsView.setVisibility(View.GONE);
+                }
+
+                parent.curTripIncorrectLocationButton.setOnClickListener(view -> new FeedbackUtil.IncorrectLocation(parent.getContext(), station).showReportWizard());
+
+                if (loc.canRequestEndOfTrip()) {
+                    parent.curTripEndButton.setVisibility(View.VISIBLE);
+                    parent.curTripIncorrectLocationButton.setVisibility(View.GONE);
+                } else {
+                    parent.curTripEndButton.setVisibility(View.GONE);
+                    parent.curTripIncorrectLocationButton.setVisibility(View.VISIBLE);
+                }
+                parent.ongoingTripCard.setVisibility(View.VISIBLE);
             }
 
-            navEndButton.setOnClickListener(view -> {
-                Intent stopIntent = new Intent(getContext(), MainService.class);
-                stopIntent.setAction(MainService.ACTION_END_NAVIGATION);
-                stopIntent.putExtra(MainService.EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
-                getContext().startService(stopIntent);
-            });
-            routeInstructionsLayout.setVisibility(View.VISIBLE);
-            navigationCard.setVisibility(View.VISIBLE);
+            if (currentRoute == null) {
+                parent.navigationCard.setVisibility(View.GONE);
+            } else {
+                RouteUtil.RouteStepInfo info = RouteUtil.buildRouteStepInfo(parent.getContext(), currentRoute, currentPath);
+                parent.routeTitleView.setText(info.title);
+                parent.routeSummaryView.setText(info.summary);
+                parent.routeSummaryView.setVisibility(View.VISIBLE);
+
+                parent.routeBodyLayout.removeAllViews();
+                for (CharSequence s : info.bodyLines) {
+                    TextView tv = new TextView(parent.getContext());
+                    if (Build.VERSION.SDK_INT < 23) {
+                        tv.setTextAppearance(parent.getContext(), R.style.TextAppearance_AppCompat_Small);
+                    } else {
+                        tv.setTextAppearance(R.style.TextAppearance_AppCompat_Small);
+                    }
+                    tv.setText(s);
+                    parent.routeBodyLayout.addView(tv);
+                }
+
+                parent.navEndButton.setOnClickListener(view -> {
+                    Intent stopIntent = new Intent(parent.getContext(), MainService.class);
+                    stopIntent.setAction(MainService.ACTION_END_NAVIGATION);
+                    stopIntent.putExtra(MainService.EXTRA_NAVIGATION_NETWORK, loc.getNetwork().getId());
+                    parent.getContext().startService(stopIntent);
+                });
+                parent.routeInstructionsLayout.setVisibility(View.VISIBLE);
+                parent.navigationCard.setVisibility(View.VISIBLE);
+            }
         }
     }
 
