@@ -19,6 +19,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
@@ -435,7 +436,7 @@ public class MainService extends Service implements LifecycleOwner {
     public static class ETArow {
         public Station direction;
         public Stop directionStop;
-        public String eta;
+        public SpannableString eta;
         public boolean available;
         public boolean onPlatform;
     }
@@ -474,30 +475,56 @@ public class MainService extends Service implements LifecycleOwner {
             }
             return lineComp;
         });
+        Map<String, LineStatusCache.Status> statuses = Coordinator.get(context).getLineStatusCache().getLineStatus();
+
         for (Stop direction : directions) {
             ETArow r = new ETArow();
             r.direction = direction.getStation();
             r.directionStop = direction;
             List<API.MQTTvehicleETA> lETAs = etas.get(r.direction.getId());
             r.available = lETAs != null;
-            r.eta = "";
+            StringBuilder etaBuilder = new StringBuilder();
             int i = 0;
+            List<Integer> redColorStartIdx = new ArrayList<>();
+            List<Integer> redColorEndIdx = new ArrayList<>();
             for (API.MQTTvehicleETA eta : lETAs) {
-                if (i == 0) {
+                boolean isDelayed = false;
+                if (eta.order == 1) {
                     r.onPlatform = vehicleETAonPlatform(eta);
+                    LineStatusCache.Status lineStatus = statuses.get(r.directionStop.getLine().getId());
+                    isDelayed = lineStatus != null &&
+                            eta.type.equals("e") &&
+                            eta instanceof API.MQTTvehicleETAsingleValue &&
+                            new Date().getTime() - lineStatus.updated.getTime() < java.util.concurrent.TimeUnit.MINUTES.toMillis(5) &&
+                            lineStatus.condition.trainFrequency > 0 &&
+                            ((API.MQTTvehicleETAsingleValue) eta).value > lineStatus.condition.trainFrequency / 1000;
                 }
+                String etaString;
                 if (shortText || i != 0) {
                     if (i == 1) {
-                        r.eta += String.format("\n\t\t%s ", context.getString(R.string.vehicle_eta_after_next));
+                        etaBuilder.append(String.format("\n\t\t%s ", context.getString(R.string.vehicle_eta_after_next)));
                     } else if (i > 1) {
-                        r.eta += ", ";
+                        etaBuilder.append(", ");
                     }
-                    r.eta += vehicleETAtoShortString(context, eta);
+                    etaString = vehicleETAtoShortString(context, eta);
                 } else {
-                    r.eta += vehicleETAtoString(context, eta);
+                    etaString = vehicleETAtoString(context, eta);
+                }
+                int startIdx = etaBuilder.length();
+                etaBuilder.append(etaString);
+                if (isDelayed) {
+                    redColorStartIdx.add(startIdx);
+                    redColorEndIdx.add(startIdx + etaString.length());
                 }
                 i++;
             }
+            SpannableString spannable = new SpannableString(etaBuilder);
+            for(i = 0; i < redColorStartIdx.size(); i++) {
+                spannable.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorError)),
+                        redColorStartIdx.get(i), redColorEndIdx.get(i), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            }
+            r.eta = spannable;
             if (r.available || withUnavailable) {
                 statusRows.add(r);
             }
@@ -509,14 +536,14 @@ public class MainService extends Service implements LifecycleOwner {
         List<CharSequence> statusLines = new ArrayList<>();
         List<ETArow> rows = getETArows(context, etas, curStation, curDirection, true, false);
         for (ETArow r : rows) {
-            String line = String.format("%s %s", r.direction.getName(), r.eta);
-            int lStart = line.indexOf(r.direction.getName());
+            CharSequence line = TextUtils.concat(r.direction.getName(), " ", r.eta);
+            int lStart = line.toString().indexOf(r.direction.getName());
             int lEnd = lStart + r.direction.getName().length();
             SpannableString lineSpannable = new SpannableString(line);
             lineSpannable.setSpan(new StyleSpan(Typeface.BOLD), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             lineSpannable.setSpan(new ForegroundColorSpan(r.directionStop.getLine().getColor()), lStart, lEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            int extraVehiclesStart = line.indexOf("\n");
+            int extraVehiclesStart = line.toString().indexOf("\n");
             if (extraVehiclesStart > -1) {
                 lineSpannable.setSpan(new RelativeSizeSpan(0.8f), extraVehiclesStart, line.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }

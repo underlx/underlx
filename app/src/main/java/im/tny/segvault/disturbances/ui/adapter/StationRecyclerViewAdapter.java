@@ -4,9 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +11,9 @@ import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.Serializable;
 import java.util.List;
@@ -135,7 +135,7 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
                 destinationView.setTextColor(rows.get(i).directionStop.getLine().getColor());
 
                 TextView etaView = row.findViewById(R.id.eta1_view);
-                if(rows.get(i).onPlatform) {
+                if (rows.get(i).onPlatform) {
                     etaView.setVisibility(View.GONE);
                     row.findViewById(R.id.on_platform1_layout).setVisibility(View.VISIBLE);
                 } else {
@@ -146,7 +146,7 @@ public class StationRecyclerViewAdapter extends RecyclerView.Adapter<StationRecy
                     destinationView.setText(rows.get(i + 1).direction.getName(9));
                     destinationView.setTextColor(rows.get(i + 1).directionStop.getLine().getColor());
                     etaView = row.findViewById(R.id.eta2_view);
-                    if(rows.get(i + 1).onPlatform) {
+                    if (rows.get(i + 1).onPlatform) {
                         etaView.setVisibility(View.GONE);
                         row.findViewById(R.id.on_platform2_layout).setVisibility(View.VISIBLE);
                     } else {
