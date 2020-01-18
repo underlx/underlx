@@ -159,7 +159,7 @@ public class MainActivity extends TopActivity
             if (newFragment == null) {
                 newFragment = HomeFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
             }
-            replaceFragment(newFragment, false, false);
+            replaceFragment(newFragment, false);
         }
 
         IntentFilter filter = new IntentFilter();
@@ -214,7 +214,7 @@ public class MainActivity extends TopActivity
             if (id != null) {
                 Fragment newFragment = getNewFragment(pageStringToResourceId(id));
                 planRouteTo = intent.getStringExtra(EXTRA_PLAN_ROUTE_TO_STATION);
-                replaceFragment(newFragment, true, false);
+                replaceFragment(newFragment, true);
             }
 
             if (intent.getBooleanExtra(EXTRA_FROM_INTRO, false)) {
@@ -387,7 +387,7 @@ public class MainActivity extends TopActivity
         return currentFragment;
     }
 
-    private void replaceFragment(Fragment newFragment, boolean addToBackStack, boolean specialBackStackManipulation) {
+    private void replaceFragment(Fragment newFragment, boolean addToBackStack) {
         if (!(newFragment instanceof MainAddableFragment)) {
             throw new IllegalArgumentException("Fragment must implement MainAddableFragment");
         }
@@ -418,14 +418,9 @@ public class MainActivity extends TopActivity
         transaction.replace(destContainer, newFragment);
         if (addToBackStack) {
             transaction.addToBackStack(null);
-        } else if (specialBackStackManipulation) {
-            // TODO remove specialBackStackManipulation
-            // same effect as not adding to the back stack,
-            // but doesn't make it crash when user goes back from this fragment
-            /*getSupportFragmentManager().popBackStack();
-            transaction.addToBackStack(null);*/
         }
         transaction.commitAllowingStateLoss();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     @Override
@@ -464,7 +459,7 @@ public class MainActivity extends TopActivity
         Fragment newFragment = getNewFragment(item.getItemId());
 
         if (newFragment != null) {
-            replaceFragment(newFragment, true, false);
+            replaceFragment(newFragment, true);
         } else {
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
@@ -664,7 +659,7 @@ public class MainActivity extends TopActivity
                                     ((MainAddableFragment) currentFragment).getNavDrawerIdAsString());
                         }
                         if (newFragment != null) {
-                            replaceFragment(newFragment, false, true);
+                            replaceFragment(newFragment, false);
                         }
                     }
                     break;
@@ -691,7 +686,7 @@ public class MainActivity extends TopActivity
         Fragment newFragment = getNewFragment(pageStringToResourceId(pageString));
 
         if (newFragment != null) {
-            replaceFragment(newFragment, addToBackStack, true);
+            replaceFragment(newFragment, addToBackStack);
         } else {
             Snackbar.make(findViewById(R.id.fab), R.string.status_not_yet_implemented, Snackbar.LENGTH_LONG).show();
         }
