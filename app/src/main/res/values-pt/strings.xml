@@ -394,7 +394,7 @@
     <string name="disturbance_status_report_reconfirm">Vários utilizadores confirmaram mais problemas na circulação</string>
     <string name="disturbance_status_report_solved">Já não existem relatos de problemas na circulação</string>
 
-    <string name="disturbance_status_pt_ml_generic">existem perturbações na circulação. O tempo de espera pode ser superior ao normal. Pedimos desculpa pelo incómodo causado</string>
+    <string name="disturbance_status_pt_ml_generic">existem perturbações na circulação. O tempo de espera pode ser superior ao normal. Agradecemos a sua compreensão</string>
     <string name="disturbance_status_pt_ml_solved">Circulação normal</string>
     <string name="disturbance_status_pt_ml_closed">Serviço encerrado</string>
     <string name="disturbance_status_pt_ml_special">Serviço especial</string>
@@ -412,11 +412,11 @@
     <string name="disturbance_status_pt_ml_part_between">\u0020está interrompida a circulação na linha entre as estações %1$s e %2$s.</string>
     <string name="disturbance_status_pt_ml_part_delayed">, a circulação encontra-se com perturbações.</string>
 
-    <string name="disturbance_status_pt_ml_part_longhalt">Não é possível prever a duração da interrupção, que poderá ser prolongada. Pedimos desculpa pelo incómodo causado</string>
-    <string name="disturbance_status_pt_ml_part_longwait">O tempo de espera pode ser superior ao normal. Pedimos desculpa pelo incómodo</string>
+    <string name="disturbance_status_pt_ml_part_longhalt">Não é possível prever a duração da interrupção, que poderá ser prolongada. Agradecemos a sua compreensão</string>
+    <string name="disturbance_status_pt_ml_part_longwait">O tempo de espera pode ser superior ao normal. Agradecemos a sua compreensão</string>
     <string name="disturbance_status_pt_ml_part_soon">Esperamos retomar a circulação dentro de instantes</string>
-    <string name="disturbance_status_pt_ml_part_under15">Esperamos retomar a circulação num período inferior a 15 minutos. Pedimos desculpa pelo incómodo</string>
-    <string name="disturbance_status_pt_ml_part_over15">O tempo de reposição poderá ser superior a 15 minutos. Pedimos desculpa pelo incómodo</string>
+    <string name="disturbance_status_pt_ml_part_under15">Esperamos retomar a circulação num período inferior a 15 minutos. Agradecemos a sua compreensão</string>
+    <string name="disturbance_status_pt_ml_part_over15">O tempo de reposição poderá ser superior a 15 minutos. Agradecemos a sua compreensão</string>
 
     <string name="poi_type_dinning">Restauração</string>
     <string name="poi_type_police">Esquadra de polícia</string>

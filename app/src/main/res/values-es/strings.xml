@@ -394,7 +394,7 @@
     <string name="disturbance_status_report_reconfirm">Varios usuarios confirmaron más problemas en la circulación</string>
     <string name="disturbance_status_report_solved">No hay ya informes de problemas en la circulación</string>
 
-    <string name="disturbance_status_pt_ml_generic">circulación lenta. El tiempo de espera puede ser superior al normal. Disculpen las molestias</string>
+    <string name="disturbance_status_pt_ml_generic">circulación lenta. El tiempo de espera puede ser superior al normal. Muchas gracias por su comprensión</string>
     <string name="disturbance_status_pt_ml_solved">Circulación normal</string>
     <string name="disturbance_status_pt_ml_closed">Servicio cerrado</string>
     <string name="disturbance_status_pt_ml_special">Servicio especial</string>
@@ -412,11 +412,11 @@
     <string name="disturbance_status_pt_ml_part_between">\u0020está interrumpida la circulación en la línea entre las estaciones %1$s y %2$s.</string>
     <string name="disturbance_status_pt_ml_part_delayed">, hay incidencias en la circulación.</string>
 
-    <string name="disturbance_status_pt_ml_part_longhalt">No hay previsión de duración para la interrupción, que puede prolongarse. Disculpen las molestias</string>
-    <string name="disturbance_status_pt_ml_part_longwait">El tiempo de espera puede ser superior al normal. Disculpen las molestias</string>
+    <string name="disturbance_status_pt_ml_part_longhalt">No hay previsión de duración para la interrupción, que puede prolongarse. Muchas gracias por su comprensión</string>
+    <string name="disturbance_status_pt_ml_part_longwait">El tiempo de espera puede ser superior al normal. Muchas gracias por su comprensión</string>
     <string name="disturbance_status_pt_ml_part_soon">Esperamos restablecer el servicio dentro de instantes</string>
-    <string name="disturbance_status_pt_ml_part_under15">Tiempo estimado de solución menos de 15 minutos. Disculpen las molestias</string>
-    <string name="disturbance_status_pt_ml_part_over15">El tiempo de reposición puede ser superior a 15 minutos. Pedimos disculpas por la molestia</string>
+    <string name="disturbance_status_pt_ml_part_under15">Tiempo estimado de solución menos de 15 minutos. Muchas gracias por su comprensión</string>
+    <string name="disturbance_status_pt_ml_part_over15">El tiempo de reposición puede ser superior a 15 minutos. Muchas gracias por su comprensión</string>
 
     <string name="poi_type_dinning">Restauración</string>
     <string name="poi_type_police">Estación de policía</string>

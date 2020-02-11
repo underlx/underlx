@@ -412,7 +412,7 @@
     <string name="disturbance_status_report_reconfirm">Several users confirmed more service disruptions</string>
     <string name="disturbance_status_report_solved">There are no more reports of service disruptions</string>
 
-    <string name="disturbance_status_pt_ml_generic">the service is currently experiencing disruptions. The waiting time may be longer than usual. We apologize for the inconvenience</string>
+    <string name="disturbance_status_pt_ml_generic">the service is currently experiencing disruptions. The waiting time may be longer than usual. Thank you for your understanding</string>
     <string name="disturbance_status_pt_ml_solved">Regular service</string>
     <string name="disturbance_status_pt_ml_closed">Service closed</string>
     <string name="disturbance_status_pt_ml_special">Special service</string>
@@ -430,11 +430,11 @@
     <string name="disturbance_status_pt_ml_part_between">\u0020the service is halted between the stations %1$s and %2$s.</string>
     <string name="disturbance_status_pt_ml_part_delayed">, the service is experiencing disruptions.</string>
 
-    <string name="disturbance_status_pt_ml_part_longhalt">The duration of the disruption can\'t be predicted and may be long. We apologize for the inconvenience</string>
-    <string name="disturbance_status_pt_ml_part_longwait">The waiting time may be longer than usual. We apologize for the inconvenience</string>
+    <string name="disturbance_status_pt_ml_part_longhalt">The duration of the disruption can\'t be predicted and may be long. Thank you for your understanding</string>
+    <string name="disturbance_status_pt_ml_part_longwait">The waiting time may be longer than usual. Thank you for your understanding</string>
     <string name="disturbance_status_pt_ml_part_soon">Regular service is expected to resume in a moment</string>
-    <string name="disturbance_status_pt_ml_part_under15">Regular service is expected to resume within 15 minutes. We apologize for the inconvenience</string>
-    <string name="disturbance_status_pt_ml_part_over15">Service resumption may take longer than 15 minutes. We apologize for the inconvenience</string>
+    <string name="disturbance_status_pt_ml_part_under15">Regular service is expected to resume within 15 minutes. Thank you for your understanding</string>
+    <string name="disturbance_status_pt_ml_part_over15">Service resumption may take longer than 15 minutes. Thank you for your understanding</string>
 
     <string name="poi_type_dinning">Dinning</string>
     <string name="poi_type_police">Police station</string>

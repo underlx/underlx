@@ -394,7 +394,7 @@
     <string name="disturbance_status_report_reconfirm">Plusieurs utilisateurs ont confirmé de plus problèmes en la circulation</string>
     <string name="disturbance_status_report_solved">N\'existent plus rapports des problèmes en la circulation</string>
 
-    <string name="disturbance_status_pt_ml_generic">il y a des perturbations actuellement en cours. Le temps d\'attente peut être plus long qu\'à l\'habitude. Nous nous excusons pour toute gêne occasionnéee</string>
+    <string name="disturbance_status_pt_ml_generic">il y a des perturbations actuellement en cours. Le temps d\'attente peut être plus long qu\'à l\'habitude. Merci pour votre compréhension</string>
     <string name="disturbance_status_pt_ml_solved">Trafic normal</string>
     <string name="disturbance_status_pt_ml_closed">Service fermé</string>
     <string name="disturbance_status_pt_ml_special">Service spécial</string>
@@ -412,11 +412,11 @@
     <string name="disturbance_status_pt_ml_part_between">\u0020le trafic sur la ligne est interrompu entre les stations %1$s et %2$s.</string>
     <string name="disturbance_status_pt_ml_part_delayed">, il y a des perturbations actuellement en cours.</string>
 
-    <string name="disturbance_status_pt_ml_part_longhalt">Ce n\'est pas possible de prévoir la durée de l\'interruption, quit peut être prolongée. Nous nous excusons pour toute gêne occasionnée</string>
-    <string name="disturbance_status_pt_ml_part_longwait">Le temps d\'attente peut être plus long qu\'à l\'habitude. Nous nous excusons pour toute gêne occasionnée</string>
+    <string name="disturbance_status_pt_ml_part_longhalt">Ce n\'est pas possible de prévoir la durée de l\'interruption, quit peut être prolongée. Merci pour votre compréhension</string>
+    <string name="disturbance_status_pt_ml_part_longwait">Le temps d\'attente peut être plus long qu\'à l\'habitude. Merci pour votre compréhension</string>
     <string name="disturbance_status_pt_ml_part_soon">La circulation devrait reprendre bientôt</string>
-    <string name="disturbance_status_pt_ml_part_under15">La circulation devrait reprendre en moins de 15 minutes. Nous nous excusons pour toute gêne occasionnée</string>
-    <string name="disturbance_status_pt_ml_part_over15">La circulation devrait reprendre en plus de 15 minutes. Nous nous excusons pour toute gêne occasionnée</string>
+    <string name="disturbance_status_pt_ml_part_under15">La circulation devrait reprendre en moins de 15 minutes. Merci pour votre compréhension</string>
+    <string name="disturbance_status_pt_ml_part_over15">La circulation devrait reprendre en plus de 15 minutes. Merci pour votre compréhension</string>
 
     <string name="poi_type_dinning">Restauration</string>
     <string name="poi_type_police">Commissariat de police</string>
