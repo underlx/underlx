@@ -350,7 +350,7 @@ public class StationGeneralFragment extends Fragment {
         protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
             StationGeneralFragment parent = parentRef.get();
-            if (parent == null || !parent.isAdded()) {
+            if (parent == null || parent.getContext() == null || !parent.isAdded()) {
                 return;
             }
 

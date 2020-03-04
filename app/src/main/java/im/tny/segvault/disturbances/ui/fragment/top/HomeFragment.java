@@ -417,7 +417,7 @@ public class HomeFragment extends TopFragment {
         protected void onPostExecute(Boolean hasTripsToConfirm) {
             super.onPostExecute(hasTripsToConfirm);
             HomeFragment parent = parentRef.get();
-            if (parent == null || !parent.isAdded()) {
+            if (parent == null || parent.getContext() == null || !parent.isAdded()) {
                 return;
             }
             if (hasTripsToConfirm) {
@@ -460,7 +460,7 @@ public class HomeFragment extends TopFragment {
         protected void onPostExecute(Boolean hasFavoriteStations) {
             super.onPostExecute(hasFavoriteStations);
             HomeFragment parent = parentRef.get();
-            if (parent == null || !parent.isAdded()) {
+            if (parent == null || parent.getContext() == null || !parent.isAdded()) {
                 return;
             }
             if (hasFavoriteStations) {
