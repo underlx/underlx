@@ -4,4 +4,5 @@
         <attr name="hint" format="string" />
     </declare-styleable>
     <attr name="viewMapButtonStyle" format="reference" />
+    <attr name="ringtonePreferenceStyle" format="reference" />
 </resources>

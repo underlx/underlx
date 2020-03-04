@@ -94,4 +94,8 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="PreferenceThemeOverlay.Asp.Material">
+        <item name="ringtonePreferenceStyle">@style/Preference.Asp.Material.DialogPreference.RingtonePreference</item>
+    </style>
+
 </resources>
