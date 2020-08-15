@@ -130,9 +130,9 @@ public class AboutFragment extends TopFragment {
         data.add(ajob);
 
         Map<String, String> mpref = new HashMap<>(3);
-        mpref.put("name", "Material Preference");
-        mpref.put("license", "© consp1racy\nApache License 2.0");
-        mpref.put("url", "https://github.com/consp1racy/android-support-preference");
+        mpref.put("name", "AndroidX Preference eXtended");
+        mpref.put("license", "© Gergely Kőrössy\nApache License 2.0");
+        mpref.put("url", "https://github.com/takisoft/preferencex-android");
         data.add(mpref);
 
         Map<String, String> jss = new HashMap<>(3);

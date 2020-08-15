@@ -8,15 +8,15 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.preference.ListPreference;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.preference.XpPreferenceFragment;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import net.xpece.android.support.preference.ListPreference;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 import im.tny.segvault.disturbances.LocaleUtil;
 import im.tny.segvault.disturbances.MainService;
@@ -27,7 +27,7 @@ import im.tny.segvault.disturbances.ui.fragment.MainAddableFragment;
 import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.disturbances.ui.util.CustomFAB;
 
-public class GeneralPreferenceFragment extends XpPreferenceFragment implements
+public class GeneralPreferenceFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {
     private OnFragmentInteractionListener mListener;
 
@@ -56,7 +56,7 @@ public class GeneralPreferenceFragment extends XpPreferenceFragment implements
         return view;
     }
 
-    public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
+    public void onCreatePreferencesFix(@Nullable Bundle savedInstanceState, String rootKey) {
         LocaleUtil.updateResources(getContext());
         getPreferenceManager().setSharedPreferencesName("settings");
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);

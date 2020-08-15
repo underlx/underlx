@@ -6,8 +6,7 @@ import android.os.AsyncTask;
 import android.util.AttributeSet;
 
 import androidx.appcompat.app.AlertDialog;
-
-import net.xpece.android.support.preference.DialogPreference;
+import androidx.preference.DialogPreference;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;

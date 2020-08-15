@@ -2,13 +2,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/frag_notif_disturbance_title">
+    <PreferenceCategory
+        android:title="@string/frag_notif_disturbance_title"
+        app:iconSpaceReserved="false">
         <MultiSelectListPreference
             android:defaultValue="@array/default_notif_lines"
             android:key="pref_notifs_lines"
-            android:title="@string/frag_notif_lines" />
+            android:title="@string/frag_notif_lines"
+            app:iconSpaceReserved="false" />
 
-        <PreferenceScreen android:title="@string/frag_notif_schedule">
+        <PreferenceScreen
+            android:title="@string/frag_notif_schedule"
+            app:iconSpaceReserved="false">
             <intent
                 android:action="android.intent.action.MAIN"
                 android:targetClass="im.tny.segvault.disturbances.ui.activity.NotifScheduleActivity"
@@ -21,20 +26,21 @@
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="@string/frag_notif_ringtone">
-
-        </RingtonePreference>
+            android:title="@string/frag_notif_ringtone"
+            app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_notifs_vibrate"
-            android:title="@string/frag_notif_vibrate" />
+            android:title="@string/frag_notif_vibrate"
+            app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_notifs_service_resumed"
             android:summary="@string/frag_notif_show_regularization_summary"
-            android:title="@string/frag_notif_show_regularization" />
+            android:title="@string/frag_notif_show_regularization"
+            app:iconSpaceReserved="false" />
 
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
@@ -43,27 +49,33 @@
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="@string/frag_notif_regularization_ringtone"></RingtonePreference>
+            android:title="@string/frag_notif_regularization_ringtone"
+            app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:dependency="pref_notifs_service_resumed"
             android:key="pref_notifs_regularization_vibrate"
-            android:title="@string/frag_notif_regularization_vibrate" />
+            android:title="@string/frag_notif_regularization_vibrate"
+            app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_notifs_community"
             android:summary="@string/frag_notif_show_community_reported_summary"
-            android:title="@string/frag_notif_show_community_reported" />
+            android:title="@string/frag_notif_show_community_reported"
+            app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/frag_notif_announcement_title">
+    <PreferenceCategory
+        android:title="@string/frag_notif_announcement_title"
+        app:iconSpaceReserved="false">
         <MultiSelectListPreference
             android:defaultValue="@array/default_announcement_sources"
             android:key="pref_notifs_announcement_sources"
-            android:title="@string/frag_notif_sources" />
+            android:title="@string/frag_notif_sources"
+            app:iconSpaceReserved="false" />
 
         <RingtonePreference
             android:defaultValue="content://settings/system/notification_sound"
@@ -71,14 +83,14 @@
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="@string/frag_notif_ringtone">
-
-        </RingtonePreference>
+            android:title="@string/frag_notif_ringtone"
+            app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_notifs_announcement_vibrate"
-            android:title="@string/frag_notif_vibrate" />
+            android:title="@string/frag_notif_vibrate"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

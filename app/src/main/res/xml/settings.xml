@@ -2,58 +2,75 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/frag_settings_location_title">
+    <PreferenceCategory
+        android:title="@string/frag_settings_location_title"
+        app:iconSpaceReserved="false">
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_location_enable"
             android:summary="@string/frag_settings_background_location_summary"
-            android:title="@string/frag_settings_background_location" />
+            android:title="@string/frag_settings_background_location"
+            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_permanent_foreground"
             android:summary="@string/frag_settings_permanent_foreground_summary"
-            android:title="@string/frag_settings_permanent_foreground" />
+            android:title="@string/frag_settings_permanent_foreground"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/frag_settings_trip_logging_title">
+    <PreferenceCategory
+        android:title="@string/frag_settings_trip_logging_title"
+        app:iconSpaceReserved="false">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_auto_open_trip_correction"
             android:summary="@string/frag_settings_auto_open_trip_correction_summary"
-            android:title="@string/frag_settings_auto_open_trip_correction" />
+            android:title="@string/frag_settings_auto_open_trip_correction"
+            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:dependency="pref_auto_open_trip_correction"
             android:key="pref_auto_open_visit_correction"
             android:summary="@string/frag_settings_auto_open_visit_correction_summary"
-            android:title="@string/frag_settings_auto_open_visit_correction" />
+            android:title="@string/frag_settings_auto_open_visit_correction"
+            app:iconSpaceReserved="false" />
         <im.tny.segvault.disturbances.ui.util.ClearAllTripsPreference
             android:summary="@string/frag_settings_all_trips_delete_summary"
-            android:title="@string/frag_settings_all_trips_delete" />
+            android:title="@string/frag_settings_all_trips_delete"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/frag_settings_locale_title">
+    <PreferenceCategory
+        android:title="@string/frag_settings_locale_title"
+        app:iconSpaceReserved="false">
         <ListPreference
             android:defaultValue="auto"
             android:entries="@array/frag_settings_languages"
             android:entryValues="@array/frag_settings_language_values"
             android:key="pref_locale"
-            android:title="@string/frag_settings_app_language" />
+            android:title="@string/frag_settings_app_language"
+            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_prefer_main_names"
             android:summary="@string/frag_settings_prefer_main_names_summary"
-            android:title="@string/frag_settings_prefer_main_names" />
+            android:title="@string/frag_settings_prefer_main_names"
+            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="pref_translate_all_status"
             android:summary="@string/frag_settings_translate_all_status_summary"
-            android:title="@string/frag_settings_translate_all_status" />
+            android:title="@string/frag_settings_translate_all_status"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/frag_settings_other_title">
+    <PreferenceCategory
+        android:title="@string/frag_settings_other_title"
+        app:iconSpaceReserved="false">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_developer_mode"
             android:summary="@string/frag_settings_developer_mode_summary"
-            android:title="@string/frag_settings_developer_mode" />
+            android:title="@string/frag_settings_developer_mode"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </PreferenceScreen>

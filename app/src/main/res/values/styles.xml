@@ -7,12 +7,6 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <!-- Used to theme preference list and items. -->
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Material</item>
-        <!-- Default icon tint for preferences. -->
-        <item name="asp_preferenceIconTint">?colorAccent</item>
-        <item name="asp_preferenceDialogIconTint">?asp_preferenceIconTint</item>
-
         <item name="viewMapButtonStyle">@style/AppTheme.ViewMapButton</item>
         <item name="android:navigationBarColor" tools:targetApi="21">@color/colorPrimary</item>
 
@@ -92,10 +86,6 @@
         <item name="android:textColor">#ffeeeeee</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="PreferenceThemeOverlay.Asp.Material">
-        <item name="ringtonePreferenceStyle">@style/Preference.Asp.Material.DialogPreference.RingtonePreference</item>
     </style>
 
 </resources>

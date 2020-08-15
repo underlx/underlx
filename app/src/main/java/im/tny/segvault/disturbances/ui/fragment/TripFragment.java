@@ -7,11 +7,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
-import androidx.appcompat.app.AlertDialog;
-
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.ImageSpan;
@@ -24,10 +19,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import im.tny.segvault.disturbances.Application;
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.Util;

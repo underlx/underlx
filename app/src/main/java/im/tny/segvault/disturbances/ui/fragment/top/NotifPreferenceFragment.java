@@ -11,22 +11,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.ListPreference;
+import androidx.preference.MultiSelectListPreference;
+import androidx.preference.SeekBarPreference;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
-import androidx.preference.XpPreferenceFragment;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
+import com.takisoft.preferencex.RingtonePreference;
+
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import net.xpece.android.support.preference.ListPreference;
-import net.xpece.android.support.preference.MultiSelectListPreference;
-import net.xpece.android.support.preference.RingtonePreference;
-import net.xpece.android.support.preference.SeekBarPreference;
-import net.xpece.android.support.preference.SharedPreferencesCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,12 +46,26 @@ import im.tny.segvault.disturbances.ui.fragment.TopFragment;
 import im.tny.segvault.disturbances.ui.util.CustomFAB;
 import im.tny.segvault.subway.Line;
 
-public class NotifPreferenceFragment extends XpPreferenceFragment implements
+public class NotifPreferenceFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener, MainAddableFragment {
     private OnFragmentInteractionListener mListener;
 
     public NotifPreferenceFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreatePreferencesFix(@Nullable Bundle savedInstanceState, String rootKey) {
+        LocaleUtil.updateResources(getContext());
+        getPreferenceManager().setSharedPreferencesName("notifsettings");
+        getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
+
+        setPreferencesFromResource(R.xml.notif_settings, null);
+
+        updatePreferences();
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRingtone));
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRegularizationRingtone));
+        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsAnnouncementRingtone));
     }
 
     public static NotifPreferenceFragment newInstance() {
@@ -83,20 +96,6 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
     }
 
     @Override
-    public void onCreatePreferences2(final Bundle savedInstanceState, final String rootKey) {
-        LocaleUtil.updateResources(getContext());
-        getPreferenceManager().setSharedPreferencesName("notifsettings");
-        getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
-
-        setPreferencesFromResource(R.xml.notif_settings, null);
-
-        updatePreferences();
-        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRingtone));
-        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsRegularizationRingtone));
-        bindPreferenceSummaryToValue(findPreference(PreferenceNames.NotifsAnnouncementRingtone));
-    }
-
-    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // this solves the "preference screen background is a darker gray" problem:
         // https://github.com/consp1racy/android-support-preference/issues/22
@@ -115,7 +114,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
 
     private void updateLinesPreference() {
         MultiSelectListPreference linesPreference;
-        linesPreference = (MultiSelectListPreference) findPreference(PreferenceNames.NotifsLines);
+        linesPreference = findPreference(PreferenceNames.NotifsLines);
 
         List<CharSequence> lineNames = new ArrayList<>();
         List<CharSequence> lineIDs = new ArrayList<>();
@@ -296,11 +295,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
         String stringValue = value.toString();
 
-        if (preference instanceof SeekBarPreference) {
-            SeekBarPreference pref = (SeekBarPreference) preference;
-            int progress = (int) value;
-            pref.setInfo(progress + "%");
-        } else if (preference instanceof ListPreference) {
+        if (preference instanceof ListPreference) {
             // For list preferences, look up the correct display value in
             // the preference's 'entries' list.
             ListPreference listPreference = (ListPreference) preference;
@@ -357,9 +352,7 @@ public class NotifPreferenceFragment extends XpPreferenceFragment implements
         // current value.
         final String key = preference.getKey();
         if (preference instanceof MultiSelectListPreference) {
-            Set<String> summary = SharedPreferencesCompat.getStringSet(
-                    PreferenceManager.getDefaultSharedPreferences(preference.getContext()),
-                    key, new HashSet<String>());
+            Set<String> summary = ((MultiSelectListPreference) preference).getValues();
             sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, summary);
         } else if (preference instanceof SeekBarPreference) {
             sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, ((SeekBarPreference) preference).getValue());
