@@ -8,11 +8,8 @@ import com.evernote.android.job.JobManager;
 import java.util.Date;
 
 import io.realm.DynamicRealm;
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmMigration;
 import io.realm.RealmSchema;
-import io.realm.exceptions.RealmFileException;
 
 /**
  * Created by gabriel on 4/14/17.
