@@ -4,8 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.widget.NestedScrollView;
@@ -160,7 +162,7 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        if(mapView != null) {
+        if (mapView != null) {
             mapView.onResume();
         }
     }
@@ -168,7 +170,7 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        if(mapView != null) {
+        if (mapView != null) {
             mapView.onPause();
         }
     }
@@ -176,7 +178,7 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mapView != null) {
+        if (mapView != null) {
             mapView.onDestroy();
         }
     }
@@ -184,7 +186,7 @@ public class StationPOIFragment extends Fragment
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        if(mapView != null) {
+        if (mapView != null) {
             mapView.onLowMemory();
         }
     }
@@ -218,7 +220,9 @@ public class StationPOIFragment extends Fragment
                 if (marker != null) {
                     marker.showInfoWindow();
                 }
-                poiScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                    poiScrollView.fullScroll(NestedScrollView.FOCUS_UP);
+                }
                 googleMap.animateCamera(
                         CameraUpdateFactory.newCameraPosition(
                                 CameraPosition.fromLatLngZoom(marker.getPosition(), googleMap.getCameraPosition().zoom)));
@@ -310,8 +314,8 @@ public class StationPOIFragment extends Fragment
         // make sure we don't zoom in too close (if the points are too close together/there's a single point)
         LatLngBounds bounds = builder.build();
         LatLng center = bounds.getCenter();
-        builder.include(new LatLng(center.latitude-0.00025f,center.longitude-0.00025f));
-        builder.include(new LatLng(center.latitude+0.00025f,center.longitude+0.00025f));
+        builder.include(new LatLng(center.latitude - 0.00025f, center.longitude - 0.00025f));
+        builder.include(new LatLng(center.latitude + 0.00025f, center.longitude + 0.00025f));
         bounds = builder.build();
 
         int padding = 64; // offset from edges of the map in pixels

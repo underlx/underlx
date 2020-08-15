@@ -65,7 +65,7 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"></androidx.viewpager.widget.ViewPager>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <im.tny.segvault.disturbances.ui.util.CustomFAB
         android:id="@+id/fab"

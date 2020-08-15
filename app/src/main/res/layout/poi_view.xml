@@ -17,14 +17,15 @@
     <im.tny.segvault.disturbances.ui.util.FlowLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/poi_on_map_button"
             style="@style/AppTheme.ViewMapButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="left|center_vertical"
             android:text="@string/poi_view_on_map" />
 
         <Button
@@ -32,6 +33,7 @@
             style="@style/AppTheme.ViewMapButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="left|center_vertical"
             android:text="@string/poi_view_map" />
 
         <Button
@@ -39,6 +41,7 @@
             style="@style/AppTheme.ViewMapButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="left|center_vertical"
             android:text="@string/poi_view_website" />
     </im.tny.segvault.disturbances.ui.util.FlowLayout>
 </merge>
