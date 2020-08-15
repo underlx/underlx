@@ -13,7 +13,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
         classpath 'com.google.gms:google-services:4.3.2'
-        classpath 'io.realm:realm-gradle-plugin:6.0.0'
         classpath 'io.fabric.tools:gradle:1.31.0'
         classpath 'gradle.plugin.com.github.sgtsilvio.gradle:android-retrofix:0.2.1'
 

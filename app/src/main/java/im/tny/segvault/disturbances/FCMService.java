@@ -24,7 +24,6 @@ import im.tny.segvault.disturbances.database.NotificationRule;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Network;
-import io.realm.Realm;
 
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_ANNOUNCEMENTS_ID;
 import static im.tny.segvault.disturbances.Coordinator.NOTIF_CHANNEL_DISTURBANCES_ID;

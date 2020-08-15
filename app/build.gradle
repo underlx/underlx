@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'realm-android'
 apply plugin: 'com.github.sgtsilvio.gradle.android-retrofix' // should be applied after com.android.application
 
 repositories {
@@ -8,9 +7,6 @@ repositories {
     jcenter()
     maven {
         url "https://jitpack.io"
-    }
-    maven {
-        url 'https://github.com/WickeDev/stetho-realm/raw/master/maven-repo'
     }
 }
 
@@ -108,7 +104,6 @@ dependencies {
     implementation 'com.github.googlemaps:android-maps-utils:59a78b57dde9a727a4fe822c4dfca9ae4596615d'
     testImplementation 'junit:junit:4.12'
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
-    debugImplementation 'com.uphyca:stetho_realm:2.2.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     implementation 'net.sourceforge.streamsupport:android-retrostreams:1.7.1'
     implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.1'
