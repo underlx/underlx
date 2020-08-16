@@ -67,6 +67,7 @@ import im.tny.segvault.disturbances.ui.fragment.top.ErrorFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.GeneralPreferenceFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.HelpFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.HomeFragment;
+import im.tny.segvault.disturbances.ui.fragment.top.InfraFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.MapFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.NotifPreferenceFragment;
 import im.tny.segvault.disturbances.ui.fragment.top.RouteFragment;
@@ -84,6 +85,7 @@ public class MainActivity extends TopActivity
         RouteFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener,
         HelpFragment.OnFragmentInteractionListener,
+        InfraFragment.OnFragmentInteractionListener,
         AboutFragment.OnFragmentInteractionListener,
         HomeLinesFragment.OnListFragmentInteractionListener,
         HomeStatsFragment.OnFragmentInteractionListener,
@@ -335,6 +337,8 @@ public class MainActivity extends TopActivity
                     return AnnouncementFragment.newInstance(1);
                 case R.id.nav_disturbances:
                     return DisturbanceFragment.newInstance(1);
+                case R.id.nav_infrastructure:
+                    return InfraFragment.newInstance();
                 case R.id.nav_notif:
                     return NotifPreferenceFragment.newInstance();
                 case R.id.nav_settings:
@@ -366,6 +370,8 @@ public class MainActivity extends TopActivity
                 return R.id.nav_announcements;
             case "nav_disturbances":
                 return R.id.nav_disturbances;
+            case "nav_infrastructure":
+                return R.id.nav_infrastructure;
             case "nav_notif":
                 return R.id.nav_notif;
             case "nav_settings":
@@ -474,6 +480,11 @@ public class MainActivity extends TopActivity
         if (url.startsWith("help:")) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.main_fragment_container, HelpFragment.newInstance(url.substring(5)));
+            transaction.addToBackStack(null);
+            transaction.commitAllowingStateLoss();
+        } else if (url.startsWith("infra:")) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.main_fragment_container, InfraFragment.newInstance(url.substring(6)));
             transaction.addToBackStack(null);
             transaction.commitAllowingStateLoss();
         } else if (url.startsWith("page:")) {

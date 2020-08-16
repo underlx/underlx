@@ -21,6 +21,7 @@
     <string name="nav_disturbances">Incidencias</string>
     <string name="nav_home">Inicio</string>
     <string name="nav_infrastructure">Infraestructura</string>
+    <string name="frag_infrastructure_title">Infraestructura</string>
     <string name="nav_map">Plano</string>
     <string name="nav_notif">Notificaciones</string>
     <string name="nav_plan_route">Planear trayecto</string>
@@ -140,6 +141,7 @@
     <string name="frag_station_services">Servicios</string>
     <string name="status_loading">Cargando…</string>
     <string name="frag_station_info_unavailable">Información indisponible.</string>
+    <string name="frag_infrastructure_unavailable">Información indisponible.</string>
     <string name="frag_trip_history_show_visits">Mostrar visitas a las estaciones</string>
     <string name="frag_trip_history_hide_visits">Ocultar visitas a las estaciones</string>
     <string name="act_station_favorite">Añadir a los favoritos</string>

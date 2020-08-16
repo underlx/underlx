@@ -240,6 +240,8 @@
     <string name="frag_station_shared_bikes">Shared bikes</string>
     <string name="frag_station_conn_info_loading">Loading…</string>
     <string name="frag_help_title"><![CDATA[Help & Feedback]]></string>
+    <string name="frag_infrastructure_title">Infrastructure</string>
+    <string name="frag_infrastructure_unavailable">Information not available.</string>
     <string name="frag_station_closed_extended">This station is closed for an extended period.</string>
     <string name="frag_station_closed_schedule">This station is currently closed. It will open at %s.</string>
     <string name="cache_extras_success">Extra content downloaded successfully</string>
