@@ -80,7 +80,15 @@ public class LineActivity extends TopActivity {
         lineLayout = findViewById(R.id.line_layout);
 
         Network net = Coordinator.get(this).getMapManager().getNetwork(networkId);
+        if (net == null) {
+            finish();
+            return;
+        }
         Line line = net.getLine(lineId);
+        if (line == null) {
+            finish();
+            return;
+        }
 
         String title = String.format(getString(R.string.act_line_title), Util.getLineNames(LineActivity.this, line)[0]);
         setTitle(title);
