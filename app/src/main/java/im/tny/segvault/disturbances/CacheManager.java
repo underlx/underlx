@@ -13,9 +13,15 @@ import java.util.Date;
 
 public class CacheManager {
     private Context context;
+    private StorageLocation storageLocation;
 
-    public CacheManager(Context applicationContext) {
+    public enum StorageLocation {
+        CACHE, DATA
+    }
+
+    public CacheManager(Context applicationContext, StorageLocation location) {
         this.context = applicationContext;
+        this.storageLocation = location;
     }
 
     private static class Item implements Serializable {
@@ -36,10 +42,24 @@ public class CacheManager {
         boolean doItem(String key, Date storeDate, T data);
     }
 
+    private File getBaseDir() {
+        switch (storageLocation) {
+            case DATA:
+                return context.getFilesDir();
+            case CACHE:
+            default:
+                return context.getCacheDir();
+        }
+    }
+
     private Item getItem(String key) {
+        return getItemRawFilename(buildItemFilename(key));
+    }
+
+    private Item getItemRawFilename(String filename) {
         Item item;
         try {
-            FileInputStream fis = new FileInputStream(new File(context.getCacheDir(), buildItemFilename(key)));
+            FileInputStream fis = new FileInputStream(new File(getBaseDir(), filename));
             ObjectInputStream is = new ObjectInputStream(fis);
             item = (Item) is.readObject();
             is.close();
@@ -149,7 +169,7 @@ public class CacheManager {
     private void putItem(Item item) {
         item.storeDate = new Date();
         try {
-            FileOutputStream fos = new FileOutputStream(new File(context.getCacheDir(), buildItemFilename(item)));
+            FileOutputStream fos = new FileOutputStream(new File(getBaseDir(), buildItemFilename(item)));
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(item);
             os.close();
@@ -170,16 +190,16 @@ public class CacheManager {
     }
 
     public boolean remove(String key) {
-        return new File(context.getCacheDir(), buildItemFilename(key)).delete();
+        return new File(getBaseDir(), buildItemFilename(key)).delete();
     }
 
     public <T> void range(ItemIterator<T> iterator, Class<T> valueType) {
-        File[] files = context.getCacheDir().listFiles(file -> file.getName().startsWith("cm-"));
+        File[] files = getBaseDir().listFiles(file -> file.getName().startsWith("cm-"));
         if (files == null) {
             return;
         }
         for (File file : files) {
-            Item item = getItem(file.getName().substring("cm-".length()));
+            Item item = getItemRawFilename(file.getName());
             if (item == null) {
                 continue;
             }

@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -886,6 +887,10 @@ public class Util {
         }
 
         return mostUsedStations;
+    }
+
+    public static class OverlaidFile implements Serializable {
+        public String contents;
     }
 
     // large stack thread pool executor

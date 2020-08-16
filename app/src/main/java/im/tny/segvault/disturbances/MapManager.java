@@ -40,6 +40,7 @@ import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
+import im.tny.segvault.disturbances.ui.fragment.top.HelpFragment;
 import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
@@ -170,7 +171,6 @@ public class MapManager {
                     publishProgress(5);
                     if (isCancelled()) break;
 
-                    float netPart = (float) (cur_net + 1) / (float) net_count;
                     Log.d("UpdateTopologyTask", "Updating network " + n.id);
 
                     HashMap<String, API.Station> apiStations = new HashMap<>();
@@ -180,7 +180,7 @@ public class MapManager {
                         }
                     }
 
-                    publishProgress(20);
+                    publishProgress(10);
                     if (isCancelled()) break;
 
                     HashMap<String, API.Lobby> apiLobbies = new HashMap<>();
@@ -190,7 +190,7 @@ public class MapManager {
                         }
                     }
 
-                    publishProgress(30);
+                    publishProgress(20);
                     if (isCancelled()) break;
 
                     int line_count = n.lines.size();
@@ -200,7 +200,7 @@ public class MapManager {
                         API.Line l = api.getLine(lineid);
                         apiLines.put(lineid, l);
                         cur_line++;
-                        publishProgress(30 + (int) (((cur_line / (float) (line_count)) * netPart) * 20));
+                        publishProgress(20 + (int) ((cur_line / (float) (line_count)) * 20f));
                         if (cur_line < line_count) {
                             cur_line++;
                         }
@@ -210,22 +210,22 @@ public class MapManager {
 
                     List<API.Connection> connections = api.getConnections();
 
-                    publishProgress(70);
+                    publishProgress(50);
                     if (isCancelled()) break;
 
                     List<API.Transfer> transfers = api.getTransfers();
 
-                    publishProgress(80);
+                    publishProgress(55);
                     if (isCancelled()) break;
 
                     List<API.POI> pois = api.getPOIs();
 
-                    publishProgress(90);
+                    publishProgress(60);
                     if (isCancelled()) break;
 
                     List<API.Diagram> maps = api.getDiagrams();
 
-                    publishProgress(95);
+                    publishProgress(70);
                     if (isCancelled()) break;
 
                     clearAllCachedDiagrams(mapManager.context);
@@ -235,14 +235,46 @@ public class MapManager {
                         }
                     }
 
-                    publishProgress(100);
+                    publishProgress(80);
                     if (isCancelled()) break;
 
                     API.DatasetInfo info = api.getDatasetInfo(n.id);
 
-
                     Network network = mapManager.saveNetwork(n, apiStations, apiLobbies, apiLines, connections, transfers, pois, maps, info);
                     Coordinator.get(mapManager.context).getLineStatusCache().clear();
+
+                    publishProgress(90);
+                    if (isCancelled()) break;
+
+                    // update help overlays and infra contents
+                    CacheManager dm = Coordinator.get(mapManager.context).getDataManager();
+                    // remove all overlayfs files
+                    dm.range((key, storeDate, data) -> {
+                        if(key.startsWith("overlayfs/")) {
+                            dm.remove(key);
+                        }
+                        return true;
+                    }, Util.OverlaidFile.class);
+                    API.AndroidClientConfigs clientConfigs = api.getAndroidClientConfigs();
+                    for(String name : clientConfigs.helpOverlays.keySet()) {
+                        String path = clientConfigs.helpOverlays.get(name);
+                        Util.OverlaidFile f = new Util.OverlaidFile();
+                        f.contents = api.getFileRelativeToEndpoint(path);
+                        dm.put(String.format("overlayfs/help/%s", name), f);
+                    }
+
+                    publishProgress(95);
+                    if (isCancelled()) break;
+
+                    for(String name : clientConfigs.infra.keySet()) {
+                        String path = clientConfigs.infra.get(name);
+                        Util.OverlaidFile f = new Util.OverlaidFile();
+                        f.contents = api.getFileRelativeToEndpoint(path);
+                        dm.put(String.format("overlayfs/infra/%s", name), f);
+                    }
+
+                    publishProgress(100);
+                    if (isCancelled()) break;
 
                     if (mapManager.updateListener != null) {
                         mapManager.updateListener.onNetworkUpdated(network);

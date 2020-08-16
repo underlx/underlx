@@ -445,6 +445,12 @@ public class API {
         public int rankThisWeek;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static public class AndroidClientConfigs implements Serializable {
+        public Map<String, String> helpOverlays;
+        public Map<String, String> infra;
+    }
+
     //region MQTT payloads
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
@@ -1217,10 +1223,14 @@ public class API {
     }
 
     public String getBackers(String locale) throws APIException {
+        return getFileRelativeToEndpoint("meta/backers/?locale=" + locale);
+    }
+
+    public String getFileRelativeToEndpoint(String relativePath) throws APIException {
         throwIfRequirementsNotMet();
         BufferedReader r = null;
         try {
-            InputStream is = getRequest(endpoint.resolve("meta/backers/?locale=" + locale), false);
+            InputStream is = getRequest(endpoint.resolve(relativePath), false);
             r = new BufferedReader(new InputStreamReader(is));
             StringBuilder total = new StringBuilder(is.available());
             String line;
@@ -1275,6 +1285,19 @@ public class API {
         try {
             return mapper.readValue(getRequest(endpoint.resolve("maps"), false), new TypeReference<List<Diagram>>() {
             });
+        } catch (JsonParseException e) {
+            throw new APIException(e).addInfo("Parse exception");
+        } catch (JsonMappingException e) {
+            throw new APIException(e).addInfo("Mapping exception");
+        } catch (IOException e) {
+            throw new APIException(e).addInfo("IOException");
+        }
+    }
+
+    public AndroidClientConfigs getAndroidClientConfigs() throws APIException {
+        throwIfRequirementsNotMet();
+        try {
+            return mapper.readValue(getRequest(endpoint.resolve("clientconfigs/android"), false), AndroidClientConfigs.class);
         } catch (JsonParseException e) {
             throw new APIException(e).addInfo("Parse exception");
         } catch (JsonMappingException e) {

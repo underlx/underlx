@@ -34,8 +34,8 @@ android {
             buildConfigField 'String', 'UNDERLX_API_ENDPOINT', '"https://api.underlx.com/v1/"'
         }
         debug {
-            buildConfigField 'String', 'UNDERLX_API_ENDPOINT', '"https://api.underlx.com/v1/"'
-            //buildConfigField 'String', 'UNDERLX_API_ENDPOINT', '"http://10.0.3.2:12000/v1/"'
+            //buildConfigField 'String', 'UNDERLX_API_ENDPOINT', '"https://api.underlx.com/v1/"'
+            buildConfigField 'String', 'UNDERLX_API_ENDPOINT', '"http://10.0.3.2:12000/v1/"'
         }
     }
     packagingOptions {

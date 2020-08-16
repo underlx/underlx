@@ -17,8 +17,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.Locale;
 
+import im.tny.segvault.disturbances.CacheManager;
+import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.InternalLinkHandler;
 import im.tny.segvault.disturbances.R;
 import im.tny.segvault.disturbances.ui.util.RichTextUtils;
@@ -141,8 +144,7 @@ public class HelpFragment extends TopFragment {
     }
 
     private String getPathForHelpFile(String file) {
-        Locale l = Util.getCurrentLocale(getContext());
-        String path = String.format("help/%s/%s.html", l.getLanguage(), file);
+        String path = getOriginalPathForHelpFile(file);
         InputStream is = null;
         try {
             is = getContext().getAssets().open(path);
@@ -160,7 +162,17 @@ public class HelpFragment extends TopFragment {
         }
     }
 
+    private String getOriginalPathForHelpFile(String file) {
+        Locale l = Util.getCurrentLocale(getContext());
+        return String.format("help/%s/%s.html", l.getLanguage(), file);
+    }
+
     private String getHelpFileContents(String file) {
+        CacheManager dm = Coordinator.get(getContext()).getDataManager();
+        Util.OverlaidFile overlaid = dm.get(String.format("overlayfs/%s", getOriginalPathForHelpFile(file)), Util.OverlaidFile.class);
+        if (overlaid != null) {
+            return overlaid.contents;
+        }
         StringBuilder buf = new StringBuilder();
         try {
             InputStream is = getContext().getAssets().open(getPathForHelpFile(file));

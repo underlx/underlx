@@ -8,16 +8,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.room.Room;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,6 +63,7 @@ public class Coordinator implements MapManager.OnLoadListener {
     private WiFiChecker wiFiChecker;
     private LineStatusCache lineStatusCache;
     private CacheManager cacheManager;
+    private CacheManager dataManager;
     private MqttManager mqttManager;
     private Random random = new Random();
 
@@ -92,7 +90,8 @@ public class Coordinator implements MapManager.OnLoadListener {
         });
 
         lineStatusCache = new LineStatusCache(this.context);
-        cacheManager = new CacheManager(this.context);
+        cacheManager = new CacheManager(this.context, CacheManager.StorageLocation.CACHE);
+        dataManager = new CacheManager(this.context, CacheManager.StorageLocation.DATA);
         mqttManager = new MqttManager(this.context);
 
         wiFiChecker = new WiFiChecker(this.context);
@@ -126,6 +125,9 @@ public class Coordinator implements MapManager.OnLoadListener {
 
     public CacheManager getCacheManager() {
         return cacheManager;
+    }
+    public CacheManager getDataManager() {
+        return dataManager;
     }
 
     public MqttManager getMqttManager() {
