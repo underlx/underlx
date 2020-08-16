@@ -2,6 +2,7 @@ package im.tny.segvault.disturbances.ui.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
@@ -21,6 +22,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.lang.ref.WeakReference;
@@ -57,6 +60,7 @@ public class TripFragment extends BottomSheetDialogFragment {
     private Network network;
     private Trip trip;
 
+    private View rootView;
     private TextView stationNamesView;
     private TextView dateView;
     private Button correctButton;
@@ -101,16 +105,16 @@ public class TripFragment extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_trip, container, false);
+        rootView = inflater.inflate(R.layout.fragment_trip, container, false);
 
-        layoutRoute = view.findViewById(R.id.layout_route);
+        layoutRoute = rootView.findViewById(R.id.layout_route);
 
-        stationNamesView = view.findViewById(R.id.station_names_view);
-        dateView = view.findViewById(R.id.date_view);
-        correctButton = view.findViewById(R.id.correct_button);
-        deleteButton = view.findViewById(R.id.delete_button);
-        statsLayout = view.findViewById(R.id.layout_stats);
-        statsView = view.findViewById(R.id.stats_view);
+        stationNamesView = rootView.findViewById(R.id.station_names_view);
+        dateView = rootView.findViewById(R.id.date_view);
+        correctButton = rootView.findViewById(R.id.correct_button);
+        deleteButton = rootView.findViewById(R.id.delete_button);
+        statsLayout = rootView.findViewById(R.id.layout_stats);
+        statsView = rootView.findViewById(R.id.stats_view);
 
         network = Coordinator.get(getContext()).getMapManager().getNetwork(networkId);
 
@@ -134,7 +138,17 @@ public class TripFragment extends BottomSheetDialogFragment {
         this.inflater = inflater;
         new LoadTripTask(this).executeOnExecutor(Util.LARGE_STACK_THREAD_POOL_EXECUTOR);
 
-        return view;
+        return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // always expand sheet on landscape as otherwise it only shows the title and it's awkward
+            BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) rootView.getParent());
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
     }
 
     @Override
