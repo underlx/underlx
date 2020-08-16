@@ -259,7 +259,7 @@ public class HomeFragment extends TopFragment {
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
 
-        Fragment newFragment = HomeLinesFragment.newInstance(1);
+        Fragment newFragment = HomeLinesFragment.newInstance();
         transaction.replace(R.id.line_status_card, newFragment);
 
         statsFragment = HomeStatsFragment.newInstance(networkId);
