@@ -334,7 +334,7 @@ public class MainActivity extends TopActivity
                 case R.id.nav_map:
                     return MapFragment.newInstance(MapManager.PRIMARY_NETWORK_ID);
                 case R.id.nav_announcements:
-                    return AnnouncementFragment.newInstance(1);
+                    return AnnouncementFragment.newInstance();
                 case R.id.nav_disturbances:
                     return DisturbanceFragment.newInstance(1);
                 case R.id.nav_infrastructure:

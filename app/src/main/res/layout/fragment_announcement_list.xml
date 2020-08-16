@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingTop="8dp"
+        android:paddingRight="8dp"
         app:layoutManager="LinearLayoutManager"
         tools:context="im.tny.segvault.disturbances.ui.fragment.top.AnnouncementFragment"
         tools:listitem="@layout/fragment_announcement" />

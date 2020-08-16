@@ -1,6 +1,7 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
@@ -76,12 +77,23 @@ public class AnnouncementFragment extends TopFragment {
         return fragment;
     }
 
+    public static AnnouncementFragment newInstance() {
+        return newInstance(0);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            if (mColumnCount <= 0) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    mColumnCount = 2;
+                } else {
+                    mColumnCount = 1;
+                }
+            }
         }
     }
 
