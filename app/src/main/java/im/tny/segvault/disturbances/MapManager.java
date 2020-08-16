@@ -40,7 +40,6 @@ import java.util.zip.GZIPInputStream;
 
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.exception.CacheException;
-import im.tny.segvault.disturbances.ui.fragment.top.HelpFragment;
 import im.tny.segvault.s2ls.routing.ConnectionWeighter;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;

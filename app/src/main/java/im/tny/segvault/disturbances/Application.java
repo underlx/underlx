@@ -5,8 +5,6 @@ import android.content.res.Configuration;
 
 import com.evernote.android.job.JobManager;
 
-import java.util.Date;
-
 /**
  * Created by gabriel on 4/14/17.
  */

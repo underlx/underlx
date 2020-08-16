@@ -22,7 +22,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -45,9 +44,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.database.AppDatabase;
-import im.tny.segvault.disturbances.database.Feedback;
-import im.tny.segvault.disturbances.database.StationPreference;
-import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.ReportActivity;

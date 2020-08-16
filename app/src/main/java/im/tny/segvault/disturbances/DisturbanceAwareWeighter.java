@@ -4,7 +4,6 @@ import android.content.Context;
 
 import java.util.Date;
 
-import im.tny.segvault.s2ls.routing.NeutralWeighter;
 import im.tny.segvault.subway.Connection;
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Transfer;

@@ -1,11 +1,8 @@
 package im.tny.segvault.disturbances.ui.activity;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;

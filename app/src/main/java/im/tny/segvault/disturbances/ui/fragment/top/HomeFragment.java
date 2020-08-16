@@ -44,7 +44,6 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import im.tny.segvault.disturbances.API;
@@ -62,10 +61,8 @@ import im.tny.segvault.disturbances.S2LSChangeListener;
 import im.tny.segvault.disturbances.ServiceConnectUtil;
 import im.tny.segvault.disturbances.Util;
 import im.tny.segvault.disturbances.database.AppDatabase;
-import im.tny.segvault.disturbances.database.NotificationRule;
 import im.tny.segvault.disturbances.database.Trip;
 import im.tny.segvault.disturbances.exception.APIException;
-import im.tny.segvault.disturbances.ui.activity.EditNotifScheduleActivity;
 import im.tny.segvault.disturbances.ui.activity.MainActivity;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;
 import im.tny.segvault.disturbances.ui.fragment.HomeBackersFragment;

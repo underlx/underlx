@@ -10,7 +10,6 @@ import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;

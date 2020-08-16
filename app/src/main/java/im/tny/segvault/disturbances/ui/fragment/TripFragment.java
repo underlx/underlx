@@ -23,7 +23,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.lang.ref.WeakReference;

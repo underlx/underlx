@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Html.ImageGetter;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 

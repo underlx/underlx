@@ -1,25 +1,18 @@
 package im.tny.segvault.disturbances;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.transform.Result;
 
 import im.tny.segvault.subway.Line;
 import im.tny.segvault.subway.Lobby;

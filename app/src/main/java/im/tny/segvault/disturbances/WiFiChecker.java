@@ -15,7 +15,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import im.tny.segvault.s2ls.S2LS;
 import im.tny.segvault.s2ls.wifi.BSSID;
 import im.tny.segvault.s2ls.wifi.WiFiLocator;
 import im.tny.segvault.subway.Network;
-import im.tny.segvault.subway.Stop;
 
 import static android.content.Context.MODE_PRIVATE;
 

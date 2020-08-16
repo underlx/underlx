@@ -3,14 +3,11 @@ package im.tny.segvault.subway;
 import android.text.TextUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Created by gabriel on 4/5/17.

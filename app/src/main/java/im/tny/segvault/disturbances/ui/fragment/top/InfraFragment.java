@@ -1,8 +1,6 @@
 package im.tny.segvault.disturbances.ui.fragment.top;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spanned;
 import android.text.style.URLSpan;
@@ -13,10 +11,6 @@ import android.widget.LinearLayout;
 
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Locale;
 
 import im.tny.segvault.disturbances.CacheManager;
