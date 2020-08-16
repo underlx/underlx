@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import im.tny.segvault.subway.Network;
 import im.tny.segvault.subway.Station;

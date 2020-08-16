@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "im.tny.segvault.disturbances",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 104,
+      "versionName": "0.45",
+      "enabled": true,
+      "outputFile": "app-release.apk"
+    }
+  ]
+}

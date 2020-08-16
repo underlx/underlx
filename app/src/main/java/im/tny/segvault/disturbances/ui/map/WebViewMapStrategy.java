@@ -12,7 +12,7 @@ import android.widget.FrameLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import im.tny.segvault.disturbances.Coordinator;
 import im.tny.segvault.disturbances.ui.activity.StationActivity;

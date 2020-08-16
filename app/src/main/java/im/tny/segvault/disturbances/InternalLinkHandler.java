@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import im.tny.segvault.disturbances.ui.activity.LineActivity;
 import im.tny.segvault.disturbances.ui.activity.POIActivity;

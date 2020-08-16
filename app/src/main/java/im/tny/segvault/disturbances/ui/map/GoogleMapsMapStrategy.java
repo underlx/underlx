@@ -51,7 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import im.tny.segvault.disturbances.API;
 import im.tny.segvault.disturbances.Coordinator;
