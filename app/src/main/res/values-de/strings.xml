@@ -81,7 +81,7 @@
     <string name="developer_website" translatable="false">https://segvault.tny.im</string>
     <string name="posplay_website" translatable="false">https://posplay.underlx.com</string>
     <string name="notif_disturbance_title">%s Linie</string>
-    <string name="frag_route_short_cars_now_warning">">Auf dieser Linie sind die Züge derzeit kürzer als üblich (%1$d Wagen statt %2$d). Suchen Sie nach den CCTV-Bildschirmen an einem Ende des Bahnsteigs und warten Sie auf den Zug in diesem Bereich.</string>
+    <string name="frag_route_short_cars_now_warning">Auf dieser Linie sind die Züge derzeit kürzer als üblich (%1$d Wagen statt %2$d). Suchen Sie nach den CCTV-Bildschirmen an einem Ende des Bahnsteigs und warten Sie auf den Zug in diesem Bereich.</string>
     <string name="frag_route_short_cars_warning">Auf dieser Linie sind die Züge kürzer. Suchen Sie nach den CCTV-Bildschirmen an einem Ende des Bahnsteigs und warten Sie auf den Zug in diesem Bereich.</string>
     <string name="frag_route_disturbances_warning">Derzeit gibt es Verzögerungen im Betriebsablauf. Die Wartezeit wird möglicherweise länger als üblich.</string>
     <string name="frag_route_station_short_cars_warning">In diesem Bahnhof fahren einige Linien kürzere Züge. Suchen Sie nach den CCTV-Bildschirmen an einem Ende des Bahnsteigs und bleiben Sie in diesem Bereich.</string>
