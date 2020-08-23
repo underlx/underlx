@@ -482,6 +482,7 @@
 
     <string-array name="frag_settings_languages">
         <item>Defecto del sistema</item>
+        <item>Deutsch</item>
         <item>English</item>
         <item>Español</item>
         <item>Français</item>

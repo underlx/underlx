@@ -500,6 +500,7 @@
 
     <string-array name="frag_settings_languages">
         <item>System default</item>
+        <item>Deutsch</item>
         <item>English</item>
         <item>Español</item>
         <item>Français</item>
@@ -508,6 +509,7 @@
 
     <string-array name="frag_settings_language_values" translatable="false">
         <item>auto</item>
+        <item>de-DE</item>
         <item>en-US</item>
         <item>es-ES</item>
         <item>fr-FR</item>

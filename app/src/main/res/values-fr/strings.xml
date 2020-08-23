@@ -483,6 +483,7 @@
 
     <string-array name="frag_settings_languages">
         <item>Défaut du système</item>
+        <item>Deutsch</item>
         <item>English</item>
         <item>Español</item>
         <item>Français</item>

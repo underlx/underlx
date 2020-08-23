@@ -482,6 +482,7 @@
 
     <string-array name="frag_settings_languages">
         <item>Padrão do sistema</item>
+        <item>Deutsch</item>
         <item>English</item>
         <item>Español</item>
         <item>Français</item>
