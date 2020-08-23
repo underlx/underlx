@@ -350,9 +350,9 @@
     <string name="act_stats_total_time">Gesamtzeit im Netzwerk</string>
     <string name="act_stats_total_time_value_no_days">%1$dh %2$dm</string>
     <string name="act_stats_total_time_value_with_days">%1$dd %2$dh %3$dm</string>
-    <string name="act_stats_avg_speed">durchschnittliche Geschwindigkeit</string>
+    <string name="act_stats_avg_speed">Durchschnittliche Geschwindigkeit</string>
     <string name="act_stats_avg_speed_value">%.01f km/h</string>
-    <string name="act_stats_avg_stations">durchschnittliche Anzahl von Bahnhöfen</string>
+    <string name="act_stats_avg_stations">Durchschnittliche Anzahl von Bahnhöfen</string>
     <string name="frag_trip_history_more_statistics">Mehr Statistiken</string>
     <string name="act_main_search_hint">Bahnhöfe, Straßen, Sehenswürdigkeiten suchen…</string>
     <string name="act_main_search">Suchen</string>

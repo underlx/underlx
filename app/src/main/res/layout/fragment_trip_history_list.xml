@@ -35,12 +35,16 @@
                     android:id="@+id/trip_count_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/frag_trip_history_stats_count"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
             </LinearLayout>
 
@@ -55,12 +59,16 @@
                     android:id="@+id/trip_total_length_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/frag_trip_history_stats_length"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
             </LinearLayout>
         </TableRow>
@@ -81,12 +89,16 @@
                     android:id="@+id/trip_total_time_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/frag_trip_history_stats_time"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
             </LinearLayout>
 
@@ -101,12 +113,16 @@
                     android:id="@+id/trip_average_speed_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:text="@string/frag_trip_history_stats_speed"
+                    android:textAlignment="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
             </LinearLayout>
         </TableRow>
